@@ -1,79 +1,154 @@
-import { Stethoscope, Mail, Phone, MapPin } from 'lucide-react';
-import { useRouter } from '@/lib/router';
-import { useI18n } from '@/lib/i18n';
+import { HeartPulse, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Send } from 'lucide-react';
+import { useApp } from '@/i18n/AppContext';
 
-export default function Footer() {
-  const { navigate } = useRouter();
-  const { t } = useI18n();
+export function Footer() {
+  const { t } = useApp();
 
-  const links = [
-    { label: t('nav.home'), path: '/' },
-    { label: t('nav.doctors'), path: '/doctors' },
-    { label: t('nav.questions'), path: '/questions' },
-    { label: t('nav.articles'), path: '/articles' },
-    { label: t('nav.videos'), path: '/videos' },
-    { label: t('nav.audio'), path: '/audio' },
-    { label: t('nav.courses'), path: '/courses' },
-    { label: t('nav.sessions'), path: '/sessions' },
-    { label: t('nav.ask'), path: '/ask' },
+  const patientLinks = [
+    { label: t.footer.findDoctor, href: '#' },
+    { label: t.footer.bookAppointment, href: '#' },
+    { label: t.footer.pricing, href: '#' },
+    { label: t.footer.faq, href: '#' },
+  ];
+
+  const doctorLinks = [
+    { label: t.footer.joinAsDoctor, href: '#' },
+    { label: t.footer.doctorGuide, href: '#' },
+    { label: t.footer.about, href: '#' },
+    { label: t.footer.blog, href: '#' },
+  ];
+
+  const socialLinks = [
+    { icon: Facebook, href: '#' },
+    { icon: Twitter, href: '#' },
+    { icon: Instagram, href: '#' },
+    { icon: Linkedin, href: '#' },
   ];
 
   return (
-    <footer className="bg-gray-900 text-gray-300 mt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-neutral-900 text-neutral-300">
+      <div className="container-x py-16">
+        <div className="grid gap-10 lg:grid-cols-12">
           {/* Brand */}
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center">
-                <Stethoscope className="w-6 h-6 text-white" />
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 text-white">
+                <HeartPulse className="h-5 w-5" />
               </div>
-              <span className="text-xl font-bold text-white">سهله وبسيطه</span>
+              <div>
+                <span className="block text-lg font-bold leading-tight text-white">Tabibi</span>
+                <span className="block text-[10px] font-medium leading-tight text-primary-400">Online</span>
+              </div>
             </div>
-            <p className="text-gray-400 leading-relaxed max-w-md">
-              {t('footer.about')}
-            </p>
+            <p className="mt-4 text-sm leading-relaxed text-neutral-400 max-w-sm">{t.footer.aboutDesc}</p>
+
+            {/* Newsletter */}
+            <div className="mt-6">
+              <p className="text-sm font-semibold text-white">{t.footer.newsletter}</p>
+              <p className="mt-1 text-xs text-neutral-400">{t.footer.newsletterDesc}</p>
+              <div className="mt-3 flex gap-2">
+                <input
+                  type="email"
+                  placeholder={t.footer.emailPlaceholder}
+                  className="flex-1 rounded-xl border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm text-white placeholder:text-neutral-500 focus:border-primary-500 focus:outline-none"
+                />
+                <button
+                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary-600 text-white transition-all hover:bg-primary-700 active:scale-95"
+                  onClick={(e) => e.preventDefault()}
+                  aria-label={t.footer.subscribe}
+                >
+                  <Send className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Links */}
-          <div>
-            <h3 className="text-white font-bold mb-4">{t('footer.quick_links')}</h3>
-            <ul className="space-y-2">
-              {links.map((link) => (
-                <li key={link.path}>
-                  <button
-                    onClick={() => navigate(link.path)}
-                    className="text-gray-400 hover:text-teal-400 transition-colors text-sm"
+          {/* Quick links */}
+          <div className="lg:col-span-2">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wide">{t.footer.quickLinks}</h3>
+            <ul className="mt-4 space-y-2.5">
+              {patientLinks.map((link, i) => (
+                <li key={i}>
+                  <a
+                    href={link.href}
+                    onClick={(e) => e.preventDefault()}
+                    className="text-sm text-neutral-400 transition-colors hover:text-primary-400"
                   >
                     {link.label}
-                  </button>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* For doctors */}
+          <div className="lg:col-span-2">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wide">{t.footer.forDoctors}</h3>
+            <ul className="mt-4 space-y-2.5">
+              {doctorLinks.map((link, i) => (
+                <li key={i}>
+                  <a
+                    href={link.href}
+                    onClick={(e) => e.preventDefault()}
+                    className="text-sm text-neutral-400 transition-colors hover:text-primary-400"
+                  >
+                    {link.label}
+                  </a>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Contact */}
-          <div>
-            <h3 className="text-white font-bold mb-4">{t('footer.contact')}</h3>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-teal-400" />
-                <span className="text-gray-400">gamytvgamytv@gmail.com</span>
+          <div className="lg:col-span-4">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wide">{t.footer.contactUs}</h3>
+            <ul className="mt-4 space-y-3">
+              <li className="flex items-center gap-3 text-sm text-neutral-400">
+                <Mail className="h-4 w-4 text-primary-400 flex-shrink-0" />
+                support@tabibionline.com
               </li>
-              <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-teal-400" />
-                <span className="text-gray-400">+963 11 123 4567</span>
+              <li className="flex items-center gap-3 text-sm text-neutral-400">
+                <Phone className="h-4 w-4 text-primary-400 flex-shrink-0" />
+                +966 11 234 5678
               </li>
-              <li className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-teal-400" />
-                <span className="text-gray-400">دمشق، سوريا</span>
+              <li className="flex items-start gap-3 text-sm text-neutral-400">
+                <MapPin className="h-4 w-4 text-primary-400 flex-shrink-0 mt-0.5" />
+                <span>Riyadh, Saudi Arabia</span>
               </li>
             </ul>
+
+            {/* Social */}
+            <div className="mt-6">
+              <p className="text-sm font-semibold text-white">{t.footer.followUs}</p>
+              <div className="mt-3 flex gap-2">
+                {socialLinks.map((social, i) => (
+                  <a
+                    key={i}
+                    href={social.href}
+                    onClick={(e) => e.preventDefault()}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-800 text-neutral-400 transition-all hover:bg-primary-600 hover:text-white"
+                    aria-label={t.footer.followUs}
+                  >
+                    <social.icon className="h-4.5 w-4.5" />
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-10 pt-6 text-center text-sm text-gray-500">
-          <p>{t('footer.rights')}</p>
+        {/* Bottom bar */}
+        <div className="mt-12 border-t border-neutral-800 pt-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-neutral-500">
+              © {new Date().getFullYear()} {t.footer.about}. {t.footer.rights}.
+            </p>
+            <div className="flex gap-5">
+              <a href="#" onClick={(e) => e.preventDefault()} className="text-xs text-neutral-500 hover:text-primary-400 transition-colors">{t.footer.privacy}</a>
+              <a href="#" onClick={(e) => e.preventDefault()} className="text-xs text-neutral-500 hover:text-primary-400 transition-colors">{t.footer.terms}</a>
+              <a href="#" onClick={(e) => e.preventDefault()} className="text-xs text-neutral-500 hover:text-primary-400 transition-colors">{t.footer.cookies}</a>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

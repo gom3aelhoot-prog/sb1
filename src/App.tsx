@@ -1,120 +1,88 @@
-import { RouterProvider, useRouter, getPathOnly } from '@/lib/router';
-import { I18nProvider } from '@/lib/i18n';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import AIChatWidget from '@/components/AIChatWidget';
-import HomePage from '@/pages/HomePage';
-import DoctorsPage from '@/pages/DoctorsPage';
-import DoctorProfilePage from '@/pages/DoctorProfilePage';
-import QuestionsPage from '@/pages/QuestionsPage';
-import QuestionDetailPage from '@/pages/QuestionDetailPage';
-import AskPage from '@/pages/AskPage';
-import ArticlesPage from '@/pages/ArticlesPage';
-import ArticleDetailPage from '@/pages/ArticleDetailPage';
-import VideosPage from '@/pages/VideosPage';
-import AudioPage from '@/pages/AudioPage';
-import CoursesPage from '@/pages/CoursesPage';
-import SessionsPage from '@/pages/SessionsPage';
-import AdminPage from '@/pages/AdminPage';
-import RegisterPage from '@/pages/RegisterPage';
-import SubscriptionsPage from '@/pages/SubscriptionsPage';
-import ChatRoomsPage from '@/pages/ChatRoomsPage';
-import LibraryPage from '@/pages/LibraryPage';
-import PlannerPage from '@/pages/PlannerPage';
-import ClinicsPage from '@/pages/ClinicsPage';
-import RadiologyPage from '@/pages/RadiologyPage';
-import LabsPage from '@/pages/LabsPage';
-import PolicyPage from '@/pages/PolicyPage';
-import TestsPage from '@/pages/TestsPage';
-import FacilitiesPage from '@/pages/FacilitiesPage';
-import JobsPage from '@/pages/JobsPage';
-import ReferralPage from '@/pages/ReferralPage';
-import AIReaderPage from '@/pages/AIReaderPage';
-import FavoritesPage from '@/pages/FavoritesPage';
+import { useState, useEffect } from 'react';
+import { AppProvider } from '@/i18n/AppContext';
+import { Header } from '@/components/Header';
+import { Hero } from '@/components/Hero';
+import { Features } from '@/components/Features';
+import { HowItWorks } from '@/components/HowItWorks';
+import { BottomActionCards } from '@/components/BottomActionCards';
+import { CTASection } from '@/components/CTASection';
+import { Footer } from '@/components/Footer';
+import { DiscountBanner } from '@/components/DiscountBanner';
+import { SpecialistsPage } from '@/components/SpecialistsPage';
+import { DoctorVerificationPage } from '@/components/DoctorVerificationPage';
+import { FacilitiesPage } from '@/components/FacilitiesPage';
+import { FacilityRegistrationPage } from '@/components/FacilityRegistrationPage';
+import { PharmacyStorePage } from '@/components/PharmacyStorePage';
+import { TrackingPage } from '@/components/TrackingPage';
+import { HealthLibraryPage } from '@/components/HealthLibraryPage';
+import { CompounderPage } from '@/components/CompounderPage';
+import { MedicalDictionaryPage } from '@/components/MedicalDictionaryPage';
+import { MediaReelsPage } from '@/components/MediaReelsPage';
+
+type View = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
+
+function getHashView(): { view: View; pharmacyId: string } {
+  const h = window.location.hash.replace('#', '');
+  if (h === 'specialists' || h === 'verification' || h === 'facilities' || h === 'facility-registration' || h === 'tracking' || h === 'library' || h === 'compounder' || h === 'dictionary' || h === 'reels') {
+    return { view: h, pharmacyId: '' };
+  }
+  if (h.startsWith('pharmacy-store')) {
+    const params = new URLSearchParams(h.split('?')[1] || '');
+    return { view: 'pharmacy-store', pharmacyId: params.get('id') || 'p1' };
+  }
+  return { view: 'home', pharmacyId: '' };
+}
 
 function AppContent() {
-  const { path } = useRouter();
-  const route = getPathOnly(path);
+  const [state, setState] = useState(getHashView);
 
-  let page;
-  if (route === '/') {
-    page = <HomePage />;
-  } else if (route === '/doctors') {
-    page = <DoctorsPage />;
-  } else if (route.startsWith('/doctors/')) {
-    page = <DoctorProfilePage id={route.split('/')[2]} />;
-  } else if (route === '/questions') {
-    page = <QuestionsPage />;
-  } else if (route.startsWith('/questions/')) {
-    page = <QuestionDetailPage id={route.split('/')[2]} />;
-  } else if (route === '/ask') {
-    page = <AskPage />;
-  } else if (route === '/articles') {
-    page = <ArticlesPage />;
-  } else if (route.startsWith('/articles/')) {
-    page = <ArticleDetailPage id={route.split('/')[2]} />;
-  } else if (route === '/videos') {
-    page = <VideosPage />;
-  } else if (route === '/audio') {
-    page = <AudioPage />;
-  } else if (route === '/courses') {
-    page = <CoursesPage />;
-  } else if (route === '/sessions') {
-    page = <SessionsPage />;
-  } else if (route === '/register') {
-    page = <RegisterPage />;
-  } else if (route === '/subscriptions') {
-    page = <SubscriptionsPage />;
-  } else if (route === '/chat') {
-    page = <ChatRoomsPage />;
-  } else if (route === '/library') {
-    page = <LibraryPage />;
-  } else if (route === '/planner') {
-    page = <PlannerPage />;
-  } else if (route === '/clinics') {
-    page = <ClinicsPage />;
-  } else if (route === '/radiology') {
-    page = <RadiologyPage />;
-  } else if (route === '/labs') {
-    page = <LabsPage />;
-  } else if (route === '/policy') {
-    page = <PolicyPage />;
-  } else if (route === '/tests') {
-    page = <TestsPage />;
-  } else if (route === '/facilities') {
-    page = <FacilitiesPage />;
-  } else if (route === '/jobs') {
-    page = <JobsPage />;
-  } else if (route === '/referral') {
-    page = <ReferralPage />;
-  } else if (route === '/ai-reader') {
-    page = <AIReaderPage />;
-  } else if (route === '/favorites') {
-    page = <FavoritesPage />;
-  } else if (route === '/admin') {
-    page = <AdminPage />;
-  } else {
-    page = <HomePage />;
-  }
+  useEffect(() => {
+    const onHash = () => {
+      setState(getHashView());
+      window.scrollTo(0, 0);
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  const navigate = (v: string) => {
+    window.location.hash = v;
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1">{page}</main>
+    <div className="min-h-screen bg-white">
+      <Header />
+      <main>
+        {state.view === 'home' && (
+          <>
+            <Hero />
+            <Features />
+            <HowItWorks />
+            <BottomActionCards />
+            <CTASection />
+          </>
+        )}
+        {state.view === 'specialists' && <SpecialistsPage onNavigate={navigate} />}
+        {state.view === 'verification' && <DoctorVerificationPage onNavigate={navigate} />}
+        {state.view === 'facilities' && <FacilitiesPage onNavigate={navigate} />}
+        {state.view === 'facility-registration' && <FacilityRegistrationPage onNavigate={navigate} />}
+        {state.view === 'pharmacy-store' && <PharmacyStorePage pharmacyId={state.pharmacyId} onNavigate={navigate} />}
+        {state.view === 'tracking' && <TrackingPage onNavigate={navigate} />}
+        {state.view === 'library' && <HealthLibraryPage onNavigate={navigate} />}
+        {state.view === 'compounder' && <CompounderPage onNavigate={navigate} />}
+        {state.view === 'dictionary' && <MedicalDictionaryPage onNavigate={navigate} />}
+        {state.view === 'reels' && <MediaReelsPage onNavigate={navigate} />}
+      </main>
       <Footer />
-      <AIChatWidget />
+      <DiscountBanner />
     </div>
   );
 }
 
-function App() {
+export default function App() {
   return (
-    <I18nProvider>
-      <RouterProvider>
-        <AppContent />
-      </RouterProvider>
-    </I18nProvider>
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
   );
 }
-
-export default App;
