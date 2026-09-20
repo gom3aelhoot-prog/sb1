@@ -86,6 +86,195 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
+            {/* Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-primary-50 via-white to-white">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -end-40 h-96 w-96 rounded-full bg-primary-100/60 blur-3xl" />
+          <div className="absolute top-24 -start-40 h-80 w-80 rounded-full bg-teal-100/50 blur-3xl" />
+        </div>
+
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24 lg:px-8">
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+
+            <div className="text-center lg:text-right">
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-medium text-primary-700">
+                <HeartPulse className="h-4 w-4" />
+                {lang === 'ar'
+                  ? 'منصة طبية موثوقة'
+                  : lang === 'de'
+                    ? 'Vertrauenswürdige medizinische Plattform'
+                    : lang === 'ru'
+                      ? 'Надёжная медицинская платформа'
+                      : 'Trusted Medical Platform'}
+              </span>
+
+              <h1 className="mt-6 text-4xl font-extrabold leading-tight text-gray-800 sm:text-5xl lg:text-6xl">
+                {t('hero.title')}
+              </h1>
+
+              <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-gray-600 lg:mx-0">
+                {t('hero.subtitle')}
+              </p>
+
+              <form
+                onSubmit={handleSearch}
+                className="mx-auto mt-8 max-w-xl lg:mx-0"
+              >
+                <div className="relative">
+                  <Search className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t('hero.search_placeholder')}
+                    className="w-full rounded-2xl border border-gray-200 bg-white py-4 pr-12 pl-28 text-sm shadow-lg outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-100"
+                  />
+
+                  <button
+                    type="submit"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-700"
+                  >
+                    {t('common.search')}
+                  </button>
+                </div>
+              </form>
+
+              <div className="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
+                <button
+                  type="button"
+                  onClick={() => navigate('/doctors')}
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow-sm hover:border-primary-300 hover:bg-primary-50"
+                >
+                  <Brain className="h-4 w-4 text-primary-500" />
+                  {lang === 'ar' ? 'الصحة النفسية' : 'Mental Health'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigate('/doctors')}
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow-sm hover:border-primary-300 hover:bg-primary-50"
+                >
+                  <Baby className="h-4 w-4 text-primary-500" />
+                  {lang === 'ar' ? 'طب الأطفال' : 'Pediatrics'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigate('/doctors?specialty=cardiology')}
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow-sm hover:border-primary-300 hover:bg-primary-50"
+                >
+                  <HeartPulse className="h-4 w-4 text-primary-500" />
+                  {lang === 'ar' ? 'أمراض القلب' : 'Cardiology'}
+                </button>
+              </div>
+
+              <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
+                <button
+                  type="button"
+                  onClick={() => navigate('/ask')}
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  {t('hero.ask_now')}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigate('/doctors')}
+                  className="btn-secondary flex items-center gap-2"
+                >
+                  {t('hero.browse_doctors')}
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="relative hidden lg:flex justify-center">
+              <div className="relative w-full max-w-md">
+                <div className="absolute -top-8 -right-8 h-56 w-56 rounded-full bg-primary-200/40 blur-3xl" />
+
+                <div className="relative rounded-3xl bg-gradient-to-br from-primary-500 to-teal-700 p-2 shadow-2xl">
+                  <div className="rounded-[1.4rem] bg-white p-7">
+
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-50">
+                        <Stethoscope className="h-8 w-8 text-primary-600" />
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-800">
+                          {lang === 'ar'
+                            ? 'استشارة طبية'
+                            : 'Medical Consultation'}
+                        </h3>
+
+                        <p className="text-sm text-gray-500">
+                          {lang === 'ar'
+                            ? 'أخصائيون موثوقون'
+                            : 'Verified specialists'}
+                        </p>
+
+                        <div className="mt-2 flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className="h-4 w-4 fill-amber-400 text-amber-400"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 space-y-3">
+                      {[
+                        { icon: HeartPulse, text: lang === 'ar' ? 'أمراض القلب' : 'Cardiology' },
+                        { icon: Baby, text: lang === 'ar' ? 'طب الأطفال' : 'Pediatrics' },
+                        { icon: Brain, text: lang === 'ar' ? 'الصحة النفسية' : 'Mental Health' },
+                      ].map((item, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => navigate('/doctors')}
+                          className="flex w-full items-center gap-3 rounded-2xl bg-gray-50 p-3 text-right hover:bg-primary-50"
+                        >
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50">
+                            <item.icon className="h-5 w-5 text-primary-600" />
+                          </div>
+
+                          <span className="flex-1 text-sm font-medium text-gray-700">
+                            {item.text}
+                          </span>
+
+                          <ArrowLeft className="h-4 w-4 text-gray-300" />
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => navigate('/sessions')}
+                      className="mt-5 flex w-full items-center justify-between rounded-2xl bg-primary-50 px-4 py-3"
+                    >
+                      <span className="flex items-center gap-2 text-sm font-semibold text-primary-700">
+                        <Video className="h-4 w-4" />
+                        {lang === 'ar'
+                          ? 'استشارة فيديو'
+                          : 'Video consultation'}
+                      </span>
+
+                      <span className="text-lg font-bold text-primary-700">
+                        $49
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
       {/* Stats */}
 
       {/* Stats */}
