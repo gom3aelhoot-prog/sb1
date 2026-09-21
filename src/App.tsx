@@ -31,90 +31,56 @@ import JobsPage from '@/pages/JobsPage';
 import ReferralPage from '@/pages/ReferralPage';
 import AIReaderPage from '@/pages/AIReaderPage';
 import FavoritesPage from '@/pages/FavoritesPage';
+import CommunityPage from '@/pages/CommunityPage';
+import ProfilePage from '@/pages/ProfilePage';
+import AcademyPage from '@/pages/AcademyPage';
+import ExamsPage from '@/pages/ExamsPage';
+import AssistantsPage from '@/pages/AssistantsPage';
+import PaymentsPage from '@/pages/PaymentsPage';
+import SpecialtiesPage from '@/pages/SpecialtiesPage';
 
 function AppContent() {
   const { path } = useRouter();
   const route = getPathOnly(path);
-
   let page;
-  if (route === '/') {
-    page = <HomePage />;
-  } else if (route === '/doctors') {
-    page = <DoctorsPage />;
-  } else if (route.startsWith('/doctors/')) {
-    page = <DoctorProfilePage id={route.split('/')[2]} />;
-  } else if (route === '/questions') {
-    page = <QuestionsPage />;
-  } else if (route.startsWith('/questions/')) {
-    page = <QuestionDetailPage id={route.split('/')[2]} />;
-  } else if (route === '/ask') {
-    page = <AskPage />;
-  } else if (route === '/articles') {
-    page = <ArticlesPage />;
-  } else if (route.startsWith('/articles/')) {
-    page = <ArticleDetailPage id={route.split('/')[2]} />;
-  } else if (route === '/videos') {
-    page = <VideosPage />;
-  } else if (route === '/audio') {
-    page = <AudioPage />;
-  } else if (route === '/courses') {
-    page = <CoursesPage />;
-  } else if (route === '/sessions') {
-    page = <SessionsPage />;
-  } else if (route === '/register') {
-    page = <RegisterPage />;
-  } else if (route === '/subscriptions') {
-    page = <SubscriptionsPage />;
-  } else if (route === '/chat') {
-    page = <ChatRoomsPage />;
-  } else if (route === '/library') {
-    page = <LibraryPage />;
-  } else if (route === '/planner') {
-    page = <PlannerPage />;
-  } else if (route === '/clinics') {
-    page = <ClinicsPage />;
-  } else if (route === '/radiology') {
-    page = <RadiologyPage />;
-  } else if (route === '/labs') {
-    page = <LabsPage />;
-  } else if (route === '/policy') {
-    page = <PolicyPage />;
-  } else if (route === '/tests') {
-    page = <TestsPage />;
-  } else if (route === '/facilities') {
-    page = <FacilitiesPage />;
-  } else if (route === '/jobs') {
-    page = <JobsPage />;
-  } else if (route === '/referral') {
-    page = <ReferralPage />;
-  } else if (route === '/ai-reader') {
-    page = <AIReaderPage />;
-  } else if (route === '/favorites') {
-    page = <FavoritesPage />;
-  } else if (route === '/admin') {
-    page = <AdminPage />;
-  } else {
-    page = <HomePage />;
-  }
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1">{page}</main>
-      <Footer />
-      <AIChatWidget />
-    </div>
-  );
+  if (route === '/') page = <HomePage />;
+  else if (route === '/doctors') page = <DoctorsPage />;
+  else if (route.startsWith('/doctors/')) page = <DoctorProfilePage id={route.split('/')[2]} />;
+  else if (route === '/questions') page = <QuestionsPage />;
+  else if (route.startsWith('/questions/')) page = <QuestionDetailPage id={route.split('/')[2]} />;
+  else if (route === '/ask') page = <AskPage />;
+  else if (route === '/articles') page = <ArticlesPage />;
+  else if (route.startsWith('/articles/')) page = <ArticleDetailPage id={route.split('/')[2]} />;
+  else if (route === '/videos') page = <VideosPage />;
+  else if (route === '/audio') page = <AudioPage />;
+  else if (route === '/courses') page = <CoursesPage />;
+  else if (route === '/sessions') page = <SessionsPage />;
+  else if (route === '/register') page = <RegisterPage />;
+  else if (route === '/subscriptions') page = <SubscriptionsPage />;
+  else if (route === '/chat') page = <ChatRoomsPage />;
+  else if (route === '/library') page = <LibraryPage />;
+  else if (route === '/planner') page = <PlannerPage />;
+  else if (route === '/clinics') page = <ClinicsPage />;
+  else if (route === '/radiology') page = <RadiologyPage />;
+  else if (route === '/labs') page = <LabsPage />;
+  else if (route === '/policy') page = <PolicyPage />;
+  else if (route === '/tests') page = <TestsPage />;
+  else if (route === '/facilities') page = <FacilitiesPage />;
+  else if (route === '/jobs') page = <JobsPage />;
+  else if (route === '/referral') page = <ReferralPage />;
+  else if (route === '/ai-reader') page = <AIReaderPage />;
+  else if (route === '/favorites') page = <FavoritesPage />;
+  else if (route === '/community') page = <CommunityPage />;
+  else if (route === '/profile') page = <ProfilePage />;
+  else if (route === '/academy') page = <AcademyPage />;
+  else if (route === '/exams') page = <ExamsPage />;
+  else if (route === '/assistants') page = <AssistantsPage />;
+  else if (route === '/payments') page = <PaymentsPage />;
+  else if (route === '/specialties') page = <SpecialtiesPage />;
+  else if (route === '/admin') page = <AdminPage />;
+  else page = <HomePage />;
+  return <div className="min-h-screen flex flex-col"><Navbar /><main className="flex-1">{page}</main><Footer /><AIChatWidget /></div>;
 }
 
-function App() {
-  return (
-    <I18nProvider>
-      <RouterProvider>
-        <AppContent />
-      </RouterProvider>
-    </I18nProvider>
-  );
-}
-
+function App(){ return <I18nProvider><RouterProvider><AppContent /></RouterProvider></I18nProvider>; }
 export default App;
