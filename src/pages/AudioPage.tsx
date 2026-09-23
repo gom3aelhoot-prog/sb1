@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Headphones, Play, Pause, Eye } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type DoctorAudio, type Specialty } from '@/lib/supabase';
+import { demoAudio, demoSpecialties } from '@/lib/demoData';
 
 export default function AudioPage() {
   const { t, specialtyName } = useI18n();
@@ -15,7 +16,7 @@ export default function AudioPage() {
   useEffect(() => {
     (async () => {
       const { data: specs } = await supabase.from('specialties').select('*').order('name');
-      setSpecialties(specs || []);
+      setSpecialties((specs && specs.length ? specs : demoSpecialties) as Specialty[]);
     })();
   }, []);
 
@@ -28,7 +29,7 @@ export default function AudioPage() {
         if (spec) dbQuery = dbQuery.eq('specialty_id', spec.id);
       }
       const { data } = await dbQuery.order('created_at', { ascending: false });
-      setAudios(data || []);
+      setAudios((data && data.length ? data : demoAudio) as DoctorAudio[]);
       setLoading(false);
     })();
   }, [selectedSpecialty]);
