@@ -15,6 +15,9 @@ export default function LabsPage() {
     supabase.from('lab_centers').select('*').eq('is_active', true).order('created_at', { ascending: false }).then(({ data }) => {
       setCenters(data || []);
       setLoading(false);
+    }).catch(() => {
+      setCenters([]);
+      setLoading(false);
     });
   }, []);
 
@@ -65,7 +68,7 @@ export default function LabsPage() {
                 </div>
               </div>
             ))}
-            {centers.length === 0 && <p className="text-center text-gray-400 py-8 col-span-full">{t('common.loading')}</p>}
+            {centers.length === 0 && <p className="text-center text-gray-400 py-8 col-span-full">{t('labs.subtitle')}</p>}
           </div>
         )}
       </div>
