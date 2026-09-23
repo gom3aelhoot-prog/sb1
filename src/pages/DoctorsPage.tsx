@@ -1,171 +1,30 @@
-import { useEffect, useState } from 'react';
-import { Search, MapPin, X } from 'lucide-react';
-import { useRouter, parseQuery } from '@/lib/router';
+import { useEffect,useMemo,useState } from 'react';
+import { Search,MapPin } from 'lucide-react';
+import { useRouter,parseQuery } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
-import { supabase, type Doctor, type Specialty } from '@/lib/supabase';
+import { supabase,type Doctor } from '@/lib/supabase';
 import DoctorCard from '@/components/DoctorCard';
-import { demoDoctors, demoSpecialties } from '@/lib/demoData';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
-
-const virtualDoctorsFor = (slug: string): Doctor[] => {
-  const spec = comprehensiveSpecialties.find(s => s.slug === slug);
-  if (!spec) return [];
-  const specialty = {
-    id: 'virtual-'+slug, slug: spec.slug, name: spec.ar, name_en: spec.en, name_de: spec.de, name_ru: spec.ru,
-    icon: 'Stethoscope', description: '', description_en: '', description_de: '', description_ru: '', created_at: new Date().toISOString()
-  } as Specialty;
-  return [1,2,3].map((n) => ({
-    id: 'virtual-'+slug+'-'+n, name: 'أخصائي SB1 افتراضي '+n, specialty_id: specialty.id, bio: 'ملف افتراضي تعليمي لهذا التخصص. غير متاح لجلسة مباشرة، ويقترح SB1 مختصين حقيقيين عند طلب الاستشارة.', education: 'SB1 Virtual Profile',
-    experience_years: 8+n, photo_url: '', city: ['دمشق','الرياض','موسكو'][n-1], rating: 4.7, consultation_count: 120+n*37,
-    native_language: n===2?'ru':'ar', is_online: false, is_verified: false, is_virtual: true, phone_number: null, follower_count: 900+n*120, nationality: n===2?'Russian':'Arab', created_at: new Date().toISOString(), specialty
-  })) as Doctor[];
-};
-
-const cityNames: Record<string, Record<string, string>> = {
-  دمشق: { ar: 'دمشق', en: 'Damascus', de: 'Damaskus', ru: 'Дамаск' },
-  حلب: { ar: 'حلب', en: 'Aleppo', de: 'Aleppo', ru: 'Алеппо' },
-  حمص: { ar: 'حمص', en: 'Homs', de: 'Homs', ru: 'Хомс' },
-  اللاذقية: { ar: 'اللاذقية', en: 'Latakia', de: 'Latakia', ru: 'Латакия' },
-};
-
-export default function DoctorsPage() {
-  const { path, navigate } = useRouter();
-  const { t, specialtyName, lang, dir } = useI18n();
-  const query = parseQuery(path);
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [specialties, setSpecialties] = useState<Specialty[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState(query.q || '');
-  const [selectedSpecialty, setSelectedSpecialty] = useState(query.specialty || '');
-  const [selectedCity, setSelectedCity] = useState('');
-
-  useEffect(() => {
-    (async () => {
-      const { data: specs } = await supabase.from('specialties').select('*').order('name');
-      const comprehensive = comprehensiveSpecialties.map((s) => ({ id: `comp-${s.slug}`, slug: s.slug, name: s.ar, name_en: s.en, name_de: s.de, name_ru: s.ru, icon: 'Stethoscope', description: '', description_en: '', description_de: '', description_ru: '', created_at: new Date().toISOString() }));
-      setSpecialties((specs && specs.length ? specs : comprehensive) as Specialty[]);
-    })();
-  }, []);
-
-  useEffect(() => {
-    setSearch(query.q || '');
-    setSelectedSpecialty(query.specialty || '');
-  }, [query.q, query.specialty]);
-
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      let dbQuery = supabase.from('doctors').select('*, specialty(*)');
-      if (search.trim()) dbQuery = dbQuery.ilike('name', `%${search.trim()}%`);
-      if (selectedSpecialty) {
-        const { data: spec } = await supabase.from('specialties').select('id').eq('slug', selectedSpecialty).maybeSingle();
-        if (spec) dbQuery = dbQuery.eq('specialty_id', spec.id);
-      }
-      if (selectedCity) dbQuery = dbQuery.eq('city', selectedCity);
-      const { data } = await dbQuery.order('rating', { ascending: false });
-      const realFallback = selectedSpecialty ? demoDoctors.filter((doctor) => doctor.specialty?.slug === selectedSpecialty) : demoDoctors;
-      const fallback = selectedSpecialty && realFallback.length === 0 ? virtualDoctorsFor(selectedSpecialty) : realFallback;
-      setDoctors((data && data.length ? data : fallback) as Doctor[]);
-      setLoading(false);
-    })().catch(() => { setDoctors(selectedSpecialty ? (demoDoctors.filter((doctor) => doctor.specialty?.slug === selectedSpecialty).length ? demoDoctors.filter((doctor) => doctor.specialty?.slug === selectedSpecialty) : virtualDoctorsFor(selectedSpecialty)) : demoDoctors); setLoading(false); });
-  }, [search, selectedSpecialty, selectedCity]);
-
-  const cities = ['دمشق', 'حلب', 'حمص', 'اللاذقية'];
-  const cityLabel = (city: string) => cityNames[city]?.[lang] || cityNames[city]?.en || city;
-
-  const clearFilters = () => {
-    setSearch('');
-    setSelectedSpecialty('');
-    setSelectedCity('');
-    navigate('/doctors');
-  };
-
-  const hasFilters = Boolean(search || selectedSpecialty || selectedCity);
-
-  return (
-    <div className="min-h-screen pt-24 pb-16" dir={dir}>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 rounded-3xl border border-gray-100 bg-gradient-to-br from-teal-50 via-white to-white p-7 shadow-sm">
-          <h1 className="mb-2 text-3xl font-bold text-gray-800">{t('doctors.title')}</h1>
-          <p className="text-gray-500">{t('doctors.subtitle')}</p>
-        </div>
-
-        <div className="card mb-8 p-5">
-          <div className="flex flex-col gap-4">
-            <div className="relative">
-              <Search className="absolute end-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t('doctors.search_placeholder')}
-                className="w-full rounded-xl border border-gray-200 py-3 pe-12 ps-4 outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
-              />
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <button onClick={() => setSelectedSpecialty('')} className={`badge ${!selectedSpecialty ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-                {t('doctors.all_specialties')}
-              </button>
-              {specialties.map((spec) => (
-                <button key={spec.id} onClick={() => setSelectedSpecialty(spec.slug)} className={`badge ${selectedSpecialty === spec.slug ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-                  {specialtyName(spec)}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="flex items-center gap-1 text-sm text-gray-500">
-                <MapPin className="h-4 w-4" />
-                {t('doctors.city')}
-              </span>
-              <button onClick={() => setSelectedCity('')} className={`badge ${!selectedCity ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-                {t('common.all')}
-              </button>
-              {cities.map((city) => (
-                <button key={city} onClick={() => setSelectedCity(city)} className={`badge ${selectedCity === city ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-                  {cityLabel(city)}
-                </button>
-              ))}
-            </div>
-
-            {hasFilters && (
-              <button onClick={clearFilters} className="flex items-center gap-1 text-sm text-red-500 hover:text-red-600">
-                <X className="h-4 w-4" />
-                {t('doctors.clear_filters')}
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="mb-6 flex items-center justify-between">
-          <p className="text-sm text-gray-500">
-            {loading ? t('doctors.searching') : `${doctors.length} ${t('doctors.results')}`}
-          </p>
-        </div>
-
-        {loading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="card p-5 animate-pulse">
-                <div className="mx-auto mb-4 h-24 w-24 rounded-2xl bg-gray-100" />
-                <div className="mx-auto mb-2 h-5 w-32 rounded bg-gray-100" />
-                <div className="mx-auto h-4 w-24 rounded bg-gray-100" />
-              </div>
-            ))}
-          </div>
-        ) : doctors.length === 0 ? (
-          <div className="card py-20 text-center">
-            <Search className="mx-auto mb-4 h-12 w-12 text-gray-200" />
-            <p className="text-lg text-gray-400">{t('doctors.no_results')}</p>
-            <button onClick={clearFilters} className="btn-secondary mt-4">{t('doctors.clear_filters')}</button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {doctors.map((doc) => <DoctorCard key={doc.id} doctor={doc} />)}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+import { demoDoctors } from '@/lib/demoData';
+import { specialtyCatalog,virtualDoctorsForSpecialty,languageCountry } from '@/lib/catalog';
+export default function DoctorsPage(){
+ const {path}=useRouter();const {navigate}=useRouter();const {t,lang,dir}=useI18n();const q=parseQuery(path);const [specialty,setSpecialty]=useState(q.specialty||'');const [search,setSearch]=useState(q.q||'');const [city,setCity]=useState('');const [dbDoctors,setDbDoctors]=useState<Doctor[]>([]);
+ const specs=useMemo(()=>specialtyCatalog(lang),[lang]);const profile=languageCountry(lang);
+ useEffect(()=>{setSpecialty(q.specialty||'');setSearch(q.q||'')},[q.specialty,q.q]);
+ useEffect(()=>{(async()=>{const {data}=await supabase.from('doctors').select('*, specialty(*)').eq('is_virtual',false);setDbDoctors((data||[]) as Doctor[])})().catch(()=>setDbDoctors([]))},[]);
+ const doctors=useMemo(()=>{
+   if(!specialty) return dbDoctors.filter(d=>d.native_language===lang).slice(0,24);
+   const real=dbDoctors.filter(d=>d.native_language===lang && d.specialty?.slug===specialty);
+   return (real.length?real:virtualDoctorsForSpecialty(specialty,lang,8)).filter(d=>!search||d.name.toLowerCase().includes(search.toLowerCase())).filter(d=>!city||d.city===city);
+ },[dbDoctors,specialty,lang,search,city]);
+ return <div className="min-h-screen pt-24 pb-16 bg-gray-50" dir={dir}><div className="mx-auto max-w-7xl px-4">
+  <div className="mb-6 rounded-3xl bg-gradient-to-br from-teal-700 to-cyan-600 p-7 text-white"><h1 className="text-3xl font-extrabold">الأخصائيون والأطباء</h1><p className="mt-2">اللغة الحالية: {profile.native}. تظهر الملفات الخاصة باللغة المختارة فقط.</p></div>
+  <div className="rounded-2xl bg-white border p-5 mb-6 grid gap-3 md:grid-cols-3">
+   <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="ابحث باسم الأخصائي" className="rounded-xl border px-4 py-3"/>
+   <select value={specialty} onChange={e=>{setSpecialty(e.target.value);navigate('/doctors?specialty='+e.target.value)}} className="rounded-xl border px-4 py-3"><option value="">اختر التخصص</option>{specs.map(s=><option key={s.slug} value={s.slug}>{s.name}</option>)}</select>
+   <input value={city} onChange={e=>setCity(e.target.value)} placeholder={profile.city} className="rounded-xl border px-4 py-3"/>
+  </div>
+  {specialty&&<div className="mb-5 rounded-2xl bg-teal-50 border border-teal-100 p-4 text-sm text-teal-800">يوجد 5 إلى 25 ملفاً افتراضياً لكل تخصص في كل لغة. الملفات الافتراضية تعليمية وليست أشخاصاً حقيقيين.</div>}
+  {!specialty?<div className="rounded-2xl bg-white border p-8 text-center"><Search className="mx-auto h-10 w-10 text-gray-300"/><p className="mt-3 text-gray-500">اختر التخصص لعرض الأخصائيين والأطباء.</p></div>:<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">{doctors.map(d=><DoctorCard key={d.id} doctor={d}/>)}</div>}
+ </div></div>;
 }
