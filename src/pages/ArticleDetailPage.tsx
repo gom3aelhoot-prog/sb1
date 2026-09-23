@@ -28,7 +28,7 @@ export default function ArticleDetailPage({ id }: { id: string }) {
       }
       setLoading(false);
     })();
-  }, [id]);
+  }, [id,lang]);
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('ar', { year: 'numeric', month: 'long', day: 'numeric' });
