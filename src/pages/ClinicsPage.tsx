@@ -20,7 +20,7 @@ export default function ClinicsPage() {
       setClinics((data && data.length ? data : virtualFacilities(lang).filter(x=>x.facility_type==='clinic')) as any);
       setLoading(false);
     }).catch(() => {
-      setClinics([]);
+      setClinics(virtualFacilities(lang).filter(x=>x.facility_type==='clinic') as any);
       setLoading(false);
     });
   }, [lang]);
