@@ -76,3 +76,28 @@ export const demoAnswers: Answer[] = [
  {id:'ans-demo-1',question_id:'q-demo-1',doctor_id:'doc-3',body:'تختلف الفحوصات حسب العمر وعوامل الخطورة والتاريخ المرضي. من الأفضل تحديد خطة متابعة مع طبيبك بعد تقييم هذه العوامل.',helpful_count:42,created_at:now,doctor:demoDoctors[2]},
  {id:'ans-demo-2',question_id:'q-demo-2',doctor_id:'doc-2',body:'تنظيم النوم والنشاط البدني وتمارين التنفس قد تساعد، وإذا استمر التوتر أو أثّر على الحياة اليومية فاستشارة مختص مناسبة.',helpful_count:37,created_at:now,doctor:demoDoctors[1]},
 ];
+
+
+const globalProfiles = [
+ ['SY','سوريا','ar','دمشق'],['SA','السعودية','ar','الرياض'],['AE','الإمارات','ar','دبي'],['EG','مصر','ar','القاهرة'],['JO','الأردن','ar','عمّان'],['LB','لبنان','ar','بيروت'],
+ ['DE','ألمانيا','de','برلين'],['AT','النمسا','de','فيينا'],['CH','سويسرا','de','زيورخ'],['RU','روسيا','ru','موسكو'],['UA','أوكرانيا','uk','كييف'],['UZ','أوزبكستان','uz','طشقند'],
+ ['AM','أرمينيا','hy','يريفان'],['TJ','طاجيكستان','tg','دوشنبه'],['AZ','أذربيجان','az','باكو'],['GE','جورجيا','ka','تبليسي'],['ET','إثيوبيا','am','أديس أبابا'],
+ ['US','الولايات المتحدة','en','نيويورك'],['GB','بريطانيا','en','لندن'],['CA','كندا','en','تورنتو']
+] as const;
+
+const generatedVirtualDoctors: Doctor[] = [];
+comprehensiveSpecialties.forEach((s, si) => {
+  const sp = demoSpecialties.find(x => x.slug === s.slug)!;
+  [0,1].forEach((variant) => {
+    const p = globalProfiles[(si * 2 + variant) % globalProfiles.length];
+    generatedVirtualDoctors.push({
+      id:`virtual-${s.slug}-${variant+1}`, name:`SB1 ${s.en} ${variant+1}`, specialty_id:sp.id,
+      bio:`ملف أخصائي افتراضي تعليمي في ${s.ar}. هذا الملف غير مرتبط بشخص حقيقي ولا يتوفر للحجز المباشر.`,
+      education:'SB1 Virtual Specialist Profile', experience_years:5 + ((si + variant) % 16), photo_url:'',
+      city:`${p[3]} - ${p[1]}`, rating:4.6 + ((si+variant)%4)/10, consultation_count:100 + si*11 + variant*37,
+      native_language:p[2], is_online:false, is_verified:false, is_virtual:true, phone_number:null,
+      follower_count:500 + si*19, nationality:p[1], created_at:now, specialty:sp
+    } as Doctor);
+  });
+});
+demoDoctors.push(...generatedVirtualDoctors);
