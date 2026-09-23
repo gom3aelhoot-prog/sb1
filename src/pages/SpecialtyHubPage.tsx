@@ -39,8 +39,8 @@ export default function SpecialtyHubPage() {
   }, [slug]);
 
   const title = specialty ? localizedSpecialty(specialty, lang) : 'التخصص';
-  const relatedDoctors = useMemo(() => loadedDoctors.length ? loadedDoctors : virtualDoctorsForSpecialty(slug, lang, 8), [loadedDoctors, slug, lang]);
-  const relatedQuestions = useMemo(() => loadedQuestions.length ? loadedQuestions : virtualQuestionsForSpecialty(slug, lang, 50), [loadedQuestions, slug, lang]);
+  const relatedDoctors = useMemo(() => { const db=loadedDoctors.filter(d=>d.native_language===lang); const virtual=virtualDoctorsForSpecialty(slug,lang,10); const ids=new Set(db.map(d=>d.id)); return [...db,...virtual.filter(d=>!ids.has(d.id))].slice(0,10); }, [loadedDoctors,slug,lang]);
+  const relatedQuestions = useMemo(() => { const generated=virtualQuestionsForSpecialty(slug,lang,50); const local=loadedQuestions.filter(q=>(q as any).language===lang || !(q as any).language); return [...local,...generated].slice(0,50); }, [loadedQuestions,slug,lang]);
 
   if (!specialty) {
     return <div className="min-h-screen pt-28 pb-16 text-center" dir={dir}><h1 className="text-2xl font-bold">التخصص غير موجود</h1><button onClick={() => navigate('/specialties')} className="btn-primary mt-5">العودة للتخصصات</button></div>;
