@@ -1,18 +1,20 @@
 type Body = { amount: number; currency?: string; description?: string; reference_id?: string; customer_email?: string; success_url?: string; cancel_url?: string };
 
-function response(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+function send(res:any, body:unknown, status=200) {
+  res.statusCode=status;
+  res.setHeader('content-type','application/json');
+  res.end(JSON.stringify(body));
 }
 
-export default async function handler(req: Request) {
-  if (req.method !== 'POST') return response({ error: 'Method not allowed' }, 405);
+export default async function handler(req:any, res:any) {
+  if (req.method !== 'POST') return send(res, { error: 'Method not allowed' }, 405);
   const secret = process.env.STRIPE_SECRET_KEY;
-  if (!secret) return response({ error: 'Stripe is not configured. Add STRIPE_SECRET_KEY in Vercel.' }, 503);
+  if (!secret) return send(res, { error: 'Stripe is not configured. Add STRIPE_SECRET_KEY in Vercel.' }, 503);
   try {
-    const body = (await req.json()) as Body;
-    if (!body.amount || body.amount <= 0) return response({ error: 'Invalid amount' }, 400);
+    const body = (typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {})) as Body;
+    if (!body.amount || body.amount <= 0) return send(res, { error: 'Invalid amount' }, 400);
     const currency = (body.currency || 'usd').toLowerCase();
-    const origin = req.headers.get('origin') || process.env.SB1_PUBLIC_URL || 'https://sb1.vercel.app';
+    const origin = req.headers?.origin || process.env.SB1_PUBLIC_URL || 'https://sb1.vercel.app';
     const successUrl = body.success_url || `${origin}/payments?success=1&reference=${encodeURIComponent(body.reference_id || '')}`;
     const cancelUrl = body.cancel_url || `${origin}/payments?cancelled=1&reference=${encodeURIComponent(body.reference_id || '')}`;
     const cents = Math.round(body.amount * 100);
@@ -39,9 +41,9 @@ export default async function handler(req: Request) {
       body: params.toString(),
     });
     const data = await stripeResponse.json();
-    if (!stripeResponse.ok) return response({ error: data?.error?.message || 'Stripe checkout failed' }, stripeResponse.status);
-    return response({ url: data.url, id: data.id, platform_fee_percent: destination ? feePercent : 0 });
+    if (!stripeResponse.ok) return send(res, { error: data?.error?.message || 'Stripe checkout failed' }, stripeResponse.status);
+    return send(res, { url: data.url, id: data.id, platform_fee_percent: destination ? feePercent : 0 });
   } catch (error) {
-    return response({ error: error instanceof Error ? error.message : 'Checkout failed' }, 500);
+    return send(res, { error: error instanceof Error ? error.message : 'Checkout failed' }, 500);
   }
 }
