@@ -108,6 +108,7 @@ const ocdQuestions: Question[] = [
 const demoMedicalTests: MedicalTest[] = [
  {id:'demo-ocd',test_type:'ocd',title:'اختبار أعراض الوسواس القهري — فحص أولي',title_en:'OCD Symptom Screening',description:'فحص أولي تعليمي للأعراض وليس تشخيصاً.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
  {id:'demo-ocd2',test_type:'ocd_screening',title:'اختبار الوسواس والتكرار — نسخة ثانية',title_en:'OCD Repetition Screening',description:'اختبار إضافي لاستكشاف الأعراض العامة.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
+ ...Array.from({length:4},(_,i)=>({id:`demo-ocd-${i+3}`,test_type:'ocd',title:`اختبار الوسواس القهري — نموذج ${i+3}`,title_en:`OCD Screening — Form ${i+3}`,description:'فحص أولي تعليمي إضافي لأعراض الوسواس.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()} as MedicalTest)),
  {id:'demo-depression',test_type:'depression',title:'فحص أعراض الاكتئاب',title_en:'Depression Symptom Screening',description:'فحص أولي للأعراض النفسية.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
  {id:'demo-anxiety',test_type:'anxiety',title:'فحص أعراض القلق',title_en:'Anxiety Symptom Screening',description:'فحص أولي لأعراض القلق.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
 ];
