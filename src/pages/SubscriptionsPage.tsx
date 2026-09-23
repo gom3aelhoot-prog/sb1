@@ -2,15 +2,21 @@ import { useEffect, useState } from 'react';
 import { Check, Crown, Sparkles, TrendingUp } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type SubscriptionPlan } from '@/lib/supabase';
+import { useRouter } from '@/lib/router';
 
 export default function SubscriptionsPage() {
   const { t, lang } = useI18n();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const { navigate } = useRouter();
 
   useEffect(() => {
     supabase.from('subscription_plans').select('*').eq('is_active', true).order('duration_months').then(({ data }) => {
-      setPlans(data || []);
+      setPlans((data && data.length ? data : [
+        { id:'sub-free', name:'Free', name_ar:'مجاني', duration_months:1, price:0, daily_questions_limit:1, weekly_questions_limit:3, free_courses_limit:0, free_books_limit:1, features:'سؤال مجاني، مكتبة أساسية', is_active:true, created_at:new Date().toISOString() },
+        { id:'sub-plus', name:'Plus', name_ar:'بلس', duration_months:1, price:9.99, daily_questions_limit:3, weekly_questions_limit:10, free_courses_limit:1, free_books_limit:5, features:'أسئلة أكثر، كتب ودورات مخفضة', is_active:true, created_at:new Date().toISOString() },
+        { id:'sub-pro', name:'Pro', name_ar:'احترافي', duration_months:1, price:24.99, daily_questions_limit:10, weekly_questions_limit:30, free_courses_limit:3, free_books_limit:20, features:'أولوية، مكتبة كاملة، خصومات', is_active:true, created_at:new Date().toISOString() },
+      ]) as SubscriptionPlan[]);
       setLoading(false);
     });
   }, []);
@@ -64,7 +70,7 @@ export default function SubscriptionsPage() {
                       </li>
                     ))}
                   </ul>
-                  <button className={`btn-primary w-full ${i !== 1 ? 'btn-secondary' : ''}`}>
+                  <button onClick={() => navigate(plan.price === 0 ? '/register' : `/payments?type=subscription&plan=${plan.id}&amount=${plan.price}`)} className={`btn-primary w-full ${i !== 1 ? 'btn-secondary' : ''}`}>
                     {t('subs.choose')}
                   </button>
                 </div>
