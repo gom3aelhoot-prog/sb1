@@ -67,7 +67,7 @@ export function Header() {
   ];
   const navItems = [
     { label: t.nav.home, href: '/#home', icon: Home },
-    { label: t.specialists.title, href: '/#specialists', icon: Stethoscope },
+    { label: lang==='ar' ? 'الأخصائيون والأطباء' : lang==='ru' ? 'Специалисты и врачи' : lang==='de' ? 'Fachärzte & Ärzte' : 'Specialists & Doctors', href: '/doctors', icon: Stethoscope },
     { label: t.facilities.title, href: '/facilities', icon: Building2 },
     { label: t.nav.howItWorks, href: '/#how-it-works', icon: HelpCircle },
     { label: t.nav.about, href: '/#about', icon: Info },
