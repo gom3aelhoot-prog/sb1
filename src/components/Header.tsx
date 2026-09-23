@@ -50,21 +50,19 @@ export function Header() {
   }, [mobileOpen]);
 
   const platformSections = [
-    { label: platformT('nav.doctors'), href: '/doctors' },
+    { label: 'الأخصائيون والأطباء', href: '/doctors' },
     { label: platformT('nav.questions'), href: '/questions' },
-    { label: platformT('nav.ask'), href: '/consult' },
-    { label: platformT('nav.articles'), href: '/articles' },
-    { label: platformT('nav.videos'), href: '/videos' },
-    { label: platformT('nav.audio'), href: '/audio' },
+    { label: 'المحتوى الطبي والمكتبة', href: '/media' },
     { label: platformT('nav.courses'), href: '/courses' },
     { label: platformT('nav.sessions'), href: '/sessions' },
     { label: platformT('nav.clinics'), href: '/clinics' },
     { label: platformT('nav.labs'), href: '/labs' },
     { label: platformT('nav.radiology'), href: '/radiology' },
     { label: platformT('nav.facilities'), href: '/facilities' },
-    { label: platformT('nav.library'), href: '/library' },
+    { label: 'الاختبارات الطبية والنفسية', href: '/tests' },
+    { label: 'متجر الأخصائيين', href: '/store' },
+    { label: 'المكافآت', href: '/referral' },
   ];
-
   const navItems = [
     { label: t.nav.home, href: '/#home', icon: Home },
     { label: t.specialists.title, href: '/#specialists', icon: Stethoscope },
