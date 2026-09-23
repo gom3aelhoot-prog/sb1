@@ -1,4 +1,5 @@
 import type { Doctor, Specialty, Article, DoctorVideo, DoctorAudio, Course, SpecialtyLibraryItem, Clinic, LabCenter, RadiologyCenter, AdditionalFacility, PharmacyProduct, Question, Answer } from '@/lib/supabase';
+import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 
 const now = new Date().toISOString();
 const photo = (id: string) => 'https://images.unsplash.com/' + id + '?auto=format&fit=crop&w=600&q=80';
@@ -13,6 +14,12 @@ export const demoSpecialties: Specialty[] = [
  {id:'sp-neuro',slug:'neurology',name:'الأعصاب',icon:'Brain',description:'أمراض الجهاز العصبي',name_en:'Neurology',name_de:'Neurologie',name_ru:'Неврология',description_en:'Nervous system disorders',description_de:'Erkrankungen des Nervensystems',description_ru:'Заболевания нервensystems',created_at:now},
  {id:'sp-ortho',slug:'orthopedics',name:'العظام',icon:'Bone',description:'العظام والمفاصل وإعادة التأهيل',name_en:'Orthopedics',name_de:'Orthopädie',name_ru:'Ортопедия',description_en:'Bones, joints and rehabilitation',description_de:'Knochen, Gelenke und Rehabilitation',description_ru:'Кости, суставы и реабилитация',created_at:now},
 ];
+
+const missingSpecialties = comprehensiveSpecialties.filter(s => !demoSpecialties.some(d => d.slug === s.slug));
+missingSpecialties.forEach((s) => demoSpecialties.push({
+ id:'sp-'+s.slug, slug:s.slug, name:s.ar, icon:'Stethoscope', description:'محتوى تعريفي عام لهذا التخصص في SB1',
+ name_en:s.en,name_de:s.de,name_ru:s.ru,description_en:'General educational information',description_de:'Allgemeine Bildungsinformationen',description_ru:'Общая образовательная информация',created_at:now
+}));
 
 export const demoDoctors: Doctor[] = [
  {id:'doc-1',name:'د. أحمد حسن',specialty_id:'sp-internal',bio:'استشاري باطنة بخبرة واسعة في التشخيص والمتابعة.',education:'دكتوراه الطب الباطني',experience_years:15,photo_url:photo('photo-1612349317150-e413f6a5b16d'),city:'دمشق',rating:4.9,consultation_count:1240,native_language:'ar',is_online:true,is_verified:true,is_virtual:true,phone_number:null,follower_count:3200,nationality:'سوري',created_at:now,specialty:demoSpecialties[0]},
