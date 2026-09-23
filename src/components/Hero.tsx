@@ -77,8 +77,7 @@ export function Hero() {
               {quickSpecialties.map((spec, i) => (
                 <a
                   key={i}
-                  href="#"
-                  onClick={(e) => e.preventDefault()}
+                  href="/specialties"
                   className="inline-flex items-center gap-2 rounded-full bg-white border border-neutral-200 px-3.5 py-2 text-xs font-medium text-neutral-700 shadow-sm transition-all hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700"
                 >
                   <spec.icon className="h-3.5 w-3.5 text-primary-500" />
@@ -89,13 +88,13 @@ export function Hero() {
 
             {/* CTA buttons */}
             <div className="mt-8 flex flex-wrap justify-center lg:justify-start gap-3 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-              <button className="btn-primary" onClick={(e) => e.preventDefault()}>
+              <a href="/doctors" className="btn-primary">
                 {t.hero.ctaPrimary}
                 <ArrowIcon className="h-4 w-4" />
-              </button>
-              <button className="btn-secondary" onClick={(e) => e.preventDefault()}>
+              </a>
+              <a href="/sessions" className="btn-secondary">
                 {t.hero.ctaSecondary}
-              </button>
+              </a>
             </div>
           </div>
 
