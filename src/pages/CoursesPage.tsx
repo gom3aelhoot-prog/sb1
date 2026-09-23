@@ -140,10 +140,13 @@ export default function CoursesPage() {
                     </div>
                     <div className="flex items-center justify-between border-t border-gray-100 pt-4">
                       <span className="text-2xl font-bold text-teal-600">${course.price}</span>
-                      <button onClick={() => { setEnrollCourse(course); setEnrolled(false); }} className="btn-primary flex items-center gap-2 text-sm">
-                        <Check className="h-4 w-4" />
-                        {t('courses.enroll')}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => navigate('/courses/'+course.id)} className="btn-secondary text-sm">تفاصيل</button>
+                        <button onClick={() => { setEnrollCourse(course); setEnrolled(false); }} className="btn-primary flex items-center gap-2 text-sm">
+                          <Check className="h-4 w-4" />
+                          {t('courses.enroll')}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
