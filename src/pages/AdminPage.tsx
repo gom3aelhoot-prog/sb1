@@ -161,7 +161,14 @@ export default function AdminPage() {
   };
 
   const handleAdd = async (table: string) => {
-    const { error } = await supabase.from(table).insert(addForm);
+    const contentLanguage = addForm.content_language || 'ar';
+    const payload = { ...addForm } as Record<string,string>;
+    delete payload.content_language;
+    localStorage.setItem('sb1_content_language_last', contentLanguage);
+    const stored = JSON.parse(localStorage.getItem('sb1_content_language_catalog') || '{}');
+    stored[contentLanguage] = (stored[contentLanguage] || 0) + 1;
+    localStorage.setItem('sb1_content_language_catalog', JSON.stringify(stored));
+    const { error } = await supabase.from(table).insert(payload);
     if (!error) {
       setShowAdd(null);
       setAddForm({});
@@ -548,7 +555,9 @@ export default function AdminPage() {
               )}
               {showAdd === 'articles' && (
                 <>
-                  <input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
+                  <select value={addForm.content_language || 'ar'} className="input-field" onChange={(e) => setAddForm({ ...addForm, content_language: e.target.value })}>
+<option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option>
+</select><input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
                   <input placeholder="مقتطف" className="input-field" onChange={(e) => setAddForm({ ...addForm, excerpt: e.target.value })} />
                   <textarea placeholder="المحتوى" rows={5} className="input-field" onChange={(e) => setAddForm({ ...addForm, body: e.target.value })} />
                   <input placeholder="رابط الصورة" className="input-field" onChange={(e) => setAddForm({ ...addForm, image_url: e.target.value })} />
