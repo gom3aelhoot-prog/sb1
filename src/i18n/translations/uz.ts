@@ -123,7 +123,7 @@ const uz: TranslationData = {
     secondaryButton: "Shifokorlarni bilib oling",
   },
   footer: {
-    about: "Tabibi Online",
+    about: "SB1",
     aboutDesc: "Bemorlarni dunyodagi eng yaxshi shifokorlar va terapevtlar bilan oson va xavfsiz bogʻlaydigan integratsiyalashgan tibbiy va ruhiy salomatlik platformasi.",
     quickLinks: "Tezkor havolalar",
     forPatients: "Bemorlar uchun",
