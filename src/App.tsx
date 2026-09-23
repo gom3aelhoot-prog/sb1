@@ -92,6 +92,7 @@ function PlatformRoute() {
   if (route.startsWith('/courses/')) return <CourseDetailPage id={route.split('/')[2]} />;
   if (route === '/sessions') return <SessionsPage />;
   if (route === '/register') return <RegisterPage />;
+  if (route === '/verification') return <DoctorVerificationPage onNavigate={(view) => { window.location.hash = view.startsWith('#') ? view : `#${view}`; }} />;
   if (route === '/subscriptions') return <SubscriptionsPage />;
   if (route === '/chat') return <ChatRoomsPage />;
   if (route === '/library') return <LibraryPage />;
