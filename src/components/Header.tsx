@@ -87,7 +87,7 @@ export function Header() {
         <div className="container-x">
           <div className="flex h-16 items-center justify-between gap-4 lg:h-20">
             {/* Logo */}
-            <a href="#" className="flex items-center gap-2.5 flex-shrink-0" onClick={() => setMobileOpen(false)}>
+            <a href="/#home" className="flex items-center gap-2.5 flex-shrink-0" onClick={() => setMobileOpen(false)}>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 text-white shadow-lg shadow-primary-500/25">
                 <HeartPulse className="h-5 w-5" />
               </div>
@@ -234,13 +234,7 @@ export function Header() {
                     key={item.href}
                     href={item.href}
                     className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
-                    onClick={(e) => {
-                      if (item.href.startsWith('#') && !['#home', '#how-it-works', '#about', '#blog', '#contact'].includes(item.href)) {
-                        return;
-                      }
-                      e.preventDefault();
-                      setMobileOpen(false);
-                    }}
+                    onClick={() => setMobileOpen(false)}
                   >
                     <item.icon className="h-4.5 w-4.5 text-neutral-400" />
                     {item.label}
