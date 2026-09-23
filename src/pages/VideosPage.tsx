@@ -3,6 +3,7 @@ import { Play, Eye, Clock, Video } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type DoctorVideo, type Specialty, type Doctor } from '@/lib/supabase';
+import { demoVideos, demoSpecialties } from '@/lib/demoData';
 
 export default function VideosPage() {
   const { navigate } = useRouter();
@@ -16,7 +17,7 @@ export default function VideosPage() {
   useEffect(() => {
     (async () => {
       const { data: specs } = await supabase.from('specialties').select('*').order('name');
-      setSpecialties(specs || []);
+      setSpecialties((specs && specs.length ? specs : demoSpecialties) as Specialty[]);
     })();
   }, []);
 
@@ -29,7 +30,7 @@ export default function VideosPage() {
         if (spec) dbQuery = dbQuery.eq('specialty_id', spec.id);
       }
       const { data } = await dbQuery.order('created_at', { ascending: false });
-      setVideos(data || []);
+      setVideos((data && data.length ? data : demoVideos) as DoctorVideo[]);
       setLoading(false);
     })();
   }, [selectedSpecialty]);
