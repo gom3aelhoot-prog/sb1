@@ -4,6 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import { useRouter } from '@/lib/router';
 import { supabase, type RadiologyCenter } from '@/lib/supabase';
 import { demoRadiology } from '@/lib/demoData';
+import { virtualFacilities } from '@/lib/catalog';
 
 export default function RadiologyPage() {
   const { t,lang } = useI18n();
