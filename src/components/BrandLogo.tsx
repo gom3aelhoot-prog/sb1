@@ -1,0 +1,3 @@
+import { Stethoscope } from 'lucide-react';
+import { useRouter } from '@/lib/router';
+export default function BrandLogo(){const{navigate}=useRouter();return <button onClick={()=>navigate('/')} className="flex items-center gap-2 group"><div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform"><Stethoscope className="w-6 h-6 text-white"/></div><div className="text-right"><span className="block text-lg font-extrabold tracking-tight text-gray-800">SB1</span><span className="block text-[10px] text-teal-600 font-medium">Smart Bridge One</span></div></button>}

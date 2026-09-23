@@ -3,21 +3,21 @@ import { BookOpen, Newspaper, Wrench, ExternalLink } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useRouter, parseQuery } from '@/lib/router';
 import { supabase, type SpecialtyLibraryItem, type Specialty } from '@/lib/supabase';
+import { localizedField } from '@/lib/localizedContent';
 
 export default function LibraryPage() {
-  const { t, specialtyName } = useI18n();
+  const { t, specialtyName, lang, dir } = useI18n();
   const { path, navigate } = useRouter();
   const query = parseQuery(path);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [selectedSpec, setSelectedSpec] = useState<string>(query.specialty || '');
   const [items, setItems] = useState<SpecialtyLibraryItem[]>([]);
-  const [filter, setFilter] = useState<string>('all');
+  const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     supabase.from('specialties').select('*').order('name').then(({ data }) => setSpecialties(data || []));
   }, []);
-
   useEffect(() => {
     setLoading(true);
     let q = supabase.from('specialty_library_items').select('*, specialty(*)').order('created_at', { ascending: false }).limit(50);
@@ -30,19 +30,21 @@ export default function LibraryPage() {
   const typeColors: Record<string, string> = { news: 'blue', book: 'teal', service: 'amber', article: 'gray' };
 
   return (
-    <div className="min-h-screen pt-24 pb-16">
-      <div className="max-w-6xl mx-auto px-4">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">{t('library.title')}</h1>
-        <p className="text-gray-500 mb-6">{t('library.subtitle')}</p>
+    <div className="min-h-screen pt-24 pb-16" dir={dir}>
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="mb-6 rounded-3xl border border-gray-100 bg-gradient-to-br from-teal-50 via-white to-white p-7 shadow-sm">
+          <h1 className="mb-2 text-3xl font-bold text-gray-800">{t('library.title')}</h1>
+          <p className="text-gray-500">{t('library.subtitle')}</p>
+        </div>
 
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="mb-6 flex flex-wrap gap-3">
           <select value={selectedSpec} onChange={(e) => { setSelectedSpec(e.target.value); navigate(`/library?specialty=${e.target.value}`); }} className="input-field max-w-xs">
             <option value="">{t('doctors.all_specialties')}</option>
             {specialties.map((s) => <option key={s.id} value={s.id}>{specialtyName(s)}</option>)}
           </select>
           <div className="flex gap-2">
             {['all', 'news', 'book', 'service'].map((f) => (
-              <button key={f} onClick={() => setFilter(f)} className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${filter === f ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+              <button key={f} onClick={() => setFilter(f)} className={`rounded-xl px-4 py-2.5 text-sm font-medium transition ${filter === f ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
                 {f === 'all' ? t('common.all') : f === 'news' ? t('library.news') : f === 'book' ? t('library.books') : t('library.services')}
               </button>
             ))}
@@ -50,36 +52,33 @@ export default function LibraryPage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => <div key={i} className="card p-5 animate-pulse"><div className="h-4 bg-gray-100 rounded w-3/4 mb-2" /><div className="h-3 bg-gray-100 rounded w-full" /></div>)}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {[1,2,3,4,5,6].map((i) => <div key={i} className="card animate-pulse p-5"><div className="mb-2 h-4 w-3/4 rounded bg-gray-100" /><div className="h-3 w-full rounded bg-gray-100" /></div>)}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => {
               const Icon = typeIcons[item.item_type] || BookOpen;
               const color = typeColors[item.item_type] || 'gray';
+              const title = localizedField(item as unknown as Record<string, unknown>, 'title', lang, item.title);
+              const description = localizedField(item as unknown as Record<string, unknown>, 'description', lang, item.description || '');
+              const source = localizedField(item as unknown as Record<string, unknown>, 'source', lang, item.source || '');
               return (
-                <div key={item.id} className="card p-5 hover:shadow-lg transition-all">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className={`w-10 h-10 rounded-xl bg-${color}-100 flex items-center justify-center flex-shrink-0`}>
-                      <Icon className={`w-5 h-5 text-${color}-600`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-800 text-sm leading-snug">{item.title}</h3>
-                      {item.source && <p className="text-xs text-gray-400 mt-0.5">{item.source}</p>}
+                <div key={item.id} className="card p-5 transition hover:shadow-lg">
+                  <div className="mb-3 flex items-start gap-3">
+                    <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-${color}-100`}><Icon className={`h-5 w-5 text-${color}-600`} /></div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm font-semibold leading-snug text-gray-800">{title}</h3>
+                      {source && <p className="mt-0.5 text-xs text-gray-400">{source}</p>}
                     </div>
                   </div>
-                  {item.description && <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.description}</p>}
-                  {item.url && (
-                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-xs text-teal-600 hover:text-teal-700 flex items-center gap-1">
-                      {t('library.read')} <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                  {item.specialty && <p className="text-xs text-gray-300 mt-2">{specialtyName(item.specialty)}</p>}
+                  {description && <p className="mb-3 line-clamp-2 text-sm text-gray-600">{description}</p>}
+                  {item.url && <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700">{t('library.read')} <ExternalLink className="h-3 w-3" /></a>}
+                  {item.specialty && <p className="mt-2 text-xs text-gray-300">{specialtyName(item.specialty)}</p>}
                 </div>
               );
             })}
-            {items.length === 0 && <p className="text-center text-gray-400 py-8 col-span-full">{t('common.loading')}</p>}
+            {items.length === 0 && <p className="col-span-full py-8 text-center text-gray-400">{t('library.subtitle')}</p>}
           </div>
         )}
       </div>

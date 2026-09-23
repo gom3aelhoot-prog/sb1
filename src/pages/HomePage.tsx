@@ -87,87 +87,116 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="relative pt-28 pb-20 overflow-hidden bg-gradient-to-br from-teal-50 via-white to-teal-50/50">
-        <div className="absolute inset-0 opacity-5" style={{
-          backgroundImage: 'radial-gradient(circle at 20% 30%, #0d9488 1px, transparent 1px), radial-gradient(circle at 80% 70%, #0d9488 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
-        }} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="text-center lg:text-right animate-fade-in">
-              <span className="badge bg-teal-100 text-teal-700 mb-4">{lang === 'ar' ? 'منصة طبية موثوقة' : lang === 'en' ? 'Trusted Medical Platform' : lang === 'de' ? 'Vertrauenswürdige Plattform' : 'Надёжная платформа'}</span>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-800 leading-tight mb-6">
-                {t('hero.title').split(' ').slice(0, 3).join(' ')}
-                <span className="text-teal-600"> {t('hero.title').split(' ').slice(3).join(' ')}</span>
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary-50 via-white to-teal-50/40">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -top-32 -end-24 h-80 w-80 rounded-full bg-primary-200/40 blur-3xl" />
+          <div className="absolute -bottom-40 -start-24 h-96 w-96 rounded-full bg-teal-200/30 blur-3xl" />
+        </div>
+
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+            <div className={`text-center ${lang === 'ar' ? 'lg:text-right' : 'lg:text-left'} animate-fade-in-up`}>
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-700">
+                <MessageCircle className="h-4 w-4" />
+                {t('nav.ask')}
+              </span>
+
+              <h1 className="mt-6 text-4xl font-extrabold leading-tight text-gray-800 sm:text-5xl lg:text-6xl">
+                {t('hero.title')}
               </h1>
-              <p className="text-lg text-gray-600 leading-relaxed mb-8 max-w-xl mx-auto lg:mx-0">
+
+              <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-600 lg:mx-0">
                 {t('hero.subtitle')}
               </p>
 
-              <form onSubmit={handleSearch} className="flex gap-2 max-w-xl mx-auto lg:mx-0 mb-6">
-                <div className="flex-1 relative">
-                  <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <form onSubmit={handleSearch} className="mx-auto mt-8 max-w-2xl lg:mx-0">
+                <div className="relative">
+                  <Search className="pointer-events-none absolute start-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={t('hero.search_placeholder')}
-                    className="w-full pr-12 pl-4 py-4 rounded-xl border border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none transition-all bg-white shadow-sm"
+                    className="w-full rounded-2xl border border-gray-200 bg-white py-4 ps-12 pe-28 text-sm shadow-lg shadow-gray-900/5 outline-none transition focus:border-primary-500 focus:ring-4 focus:ring-primary-100"
                   />
+                  <button
+                    type="submit"
+                    className="absolute end-2 top-1/2 -translate-y-1/2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-700"
+                  >
+                    {t('common.search')}
+                  </button>
                 </div>
-                <button type="submit" className="btn-primary flex items-center gap-2">
-                  <Search className="w-5 h-5" />
-                  <span className="hidden sm:inline">{t('common.search')}</span>
-                </button>
               </form>
 
-              <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
+              <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
                 <button onClick={() => navigate('/ask')} className="btn-primary flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5" />
+                  <MessageCircle className="h-5 w-5" />
                   {t('hero.ask_now')}
                 </button>
                 <button onClick={() => navigate('/doctors')} className="btn-secondary flex items-center gap-2">
+                  <Stethoscope className="h-5 w-5" />
                   {t('hero.browse_doctors')}
-                  <ArrowLeft className="w-4 h-4" />
                 </button>
+              </div>
+
+              <div className="mt-8 flex flex-wrap justify-center gap-2 text-xs text-gray-500 lg:justify-start">
+                <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5">{t('common.free')}</span>
+                <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5">{t('sessions.video_paid')}</span>
+                <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5">{t('courses.title')}</span>
+                <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5">{t('nav.chat')}</span>
               </div>
             </div>
 
-            <div className="hidden lg:flex justify-center animate-scale-in">
-              <div className="relative">
-                <div className="w-80 h-80 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 opacity-10 absolute -top-8 -right-8" />
-                <div className="relative bg-white rounded-3xl shadow-2xl p-8 w-80">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-14 h-14 rounded-2xl bg-teal-100 flex items-center justify-center">
-                      <Stethoscope className="w-7 h-7 text-teal-600" />
+            <div className="relative hidden lg:block animate-scale-in">
+              <div className="absolute -top-10 -end-10 h-48 w-48 rounded-full bg-primary-200/50 blur-3xl" />
+              <div className="absolute -bottom-10 -start-10 h-44 w-44 rounded-full bg-teal-200/50 blur-3xl" />
+
+              <div className="relative rounded-3xl bg-gradient-to-br from-primary-500 to-teal-700 p-2 shadow-2xl shadow-primary-500/20">
+                <div className="rounded-[1.4rem] bg-white p-7">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-50">
+                      <Stethoscope className="h-8 w-8 text-primary-600" />
                     </div>
                     <div>
-                      <p className="font-bold text-gray-800">{lang === 'ar' ? 'استشارة فورية' : 'Instant Consultation'}</p>
-                      <p className="text-sm text-gray-500">{lang === 'ar' ? 'رد خلال ساعات' : 'Response within hours'}</p>
+                      <h3 className="text-lg font-bold text-gray-800">{t('sessions.title')}</h3>
+                      <p className="mt-1 text-sm text-gray-500">{t('sessions.subtitle')}</p>
                     </div>
                   </div>
-                  <div className="space-y-3">
-                    {[
-                      { icon: HeartPulse, text: lang === 'ar' ? 'أمراض القلب' : 'Cardiology' },
-                      { icon: Baby, text: lang === 'ar' ? 'طب الأطفال' : 'Pediatrics' },
-                      { icon: Brain, text: lang === 'ar' ? 'الطب النفسي' : 'Psychiatry' },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
-                        <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center">
-                          <item.icon className="w-5 h-5 text-teal-600" />
-                        </div>
-                        <span className="text-gray-700 font-medium text-sm">{item.text}</span>
-                        <ArrowLeft className="w-4 h-4 text-gray-300 mr-auto" />
+
+                  <div className="mt-6 grid gap-3">
+                    <button onClick={() => navigate('/doctors')} className="flex items-center gap-3 rounded-2xl bg-gray-50 p-3 text-start transition hover:bg-primary-50">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50"><HeartPulse className="h-5 w-5 text-primary-600" /></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-800">{t('doctors.title')}</p>
+                        <p className="text-xs text-gray-500">{t('doctors.subtitle')}</p>
                       </div>
-                    ))}
+                    </button>
+                    <button onClick={() => navigate('/courses')} className="flex items-center gap-3 rounded-2xl bg-gray-50 p-3 text-start transition hover:bg-amber-50">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50"><GraduationCap className="h-5 w-5 text-amber-600" /></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-800">{t('courses.title')}</p>
+                        <p className="text-xs text-gray-500">{t('courses.subtitle')}</p>
+                      </div>
+                    </button>
+                    <button onClick={() => navigate('/chat')} className="flex items-center gap-3 rounded-2xl bg-gray-50 p-3 text-start transition hover:bg-teal-50">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50"><MessageCircle className="h-5 w-5 text-teal-600" /></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-800">{t('chat.title')}</p>
+                        <p className="text-xs text-gray-500">{t('chat.subtitle')}</p>
+                      </div>
+                    </button>
                   </div>
+
+                  <button onClick={() => navigate('/sessions')} className="mt-5 flex w-full items-center justify-between rounded-2xl bg-primary-50 px-4 py-3 text-primary-700 transition hover:bg-primary-100">
+                    <span className="flex items-center gap-2 text-sm font-semibold"><Video className="h-4 w-4" />{t('sessions.video_paid')}</span>
+                    <span className="text-lg font-bold">$49</span>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-
       {/* Stats */}
       <section className="bg-white border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -200,6 +229,34 @@ export default function HomePage() {
                 </div>
                 <h3 className="font-bold text-gray-800 mb-1">{service.title}</h3>
                 <p className="text-sm text-gray-500">{service.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Access */}
+      <section className="border-y border-gray-100 bg-gray-50/60 py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className={`mb-8 ${'text-center'}`}>
+            <h2 className="section-title mb-2">{t('nav.more')}</h2>
+            <p className="text-gray-500">{t('hero.subtitle')}</p>
+          </div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { icon: MessageCircle, title: t('chat.title'), desc: t('chat.subtitle'), path: '/chat' },
+              { icon: BookOpen, title: t('library.title'), desc: t('library.subtitle'), path: '/library' },
+              { icon: FileText, title: t('tests.title'), desc: t('tests.subtitle'), path: '/tests' },
+              { icon: Clock, title: t('planner.title'), desc: t('planner.subtitle'), path: '/planner' },
+            ].map((item) => (
+              <button key={item.path} onClick={() => navigate(item.path)} className="card card-hover flex items-start gap-4 p-5 text-start group">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-50 transition-transform group-hover:scale-105">
+                  <item.icon className="h-6 w-6 text-primary-600" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-gray-800">{item.title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-gray-500">{item.desc}</p>
+                </div>
               </button>
             ))}
           </div>
