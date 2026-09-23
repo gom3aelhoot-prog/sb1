@@ -63,6 +63,7 @@ export function Header() {
     { label: 'الاختبارات الطبية والنفسية', href: '/tests' },
     { label: labels[2], href: '/store' },
     { label: labels[3], href: '/referral' },
+    { label: lang==='ar'?'الألعاب والتطبيقات':lang==='ru'?'Игры и приложения':lang==='de'?'Spiele & Apps':'Games & Apps', href: '/apps' },
   ];
   const navItems = [
     { label: t.nav.home, href: '/#home', icon: Home },
