@@ -5,6 +5,7 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABAS
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY;
 
 type DemoRow = Record<string, any>;
+const now = new Date().toISOString();
 const demoTables: Record<string, DemoRow[]> = {
   specialties: demoSpecialties, doctors: demoDoctors, articles: demoArticles, doctor_videos: demoVideos, doctor_audio: demoAudio,
   courses: demoCourses, clinics: demoClinics, lab_centers: demoLabs, radiology_centers: demoRadiology,
