@@ -16,14 +16,14 @@ export default function LibraryPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.from('specialties').select('*').order('name').then(({ data }) => setSpecialties(data || []));
+    supabase.from('specialties').select('*').order('name').then(({ data }) => setSpecialties(data || [])).catch(() => setSpecialties([]));
   }, []);
   useEffect(() => {
     setLoading(true);
     let q = supabase.from('specialty_library_items').select('*, specialty(*)').order('created_at', { ascending: false }).limit(50);
     if (selectedSpec) q = q.eq('specialty_id', selectedSpec);
     if (filter !== 'all') q = q.eq('item_type', filter);
-    q.then(({ data }) => { setItems(data || []); setLoading(false); });
+    q.then(({ data }) => { setItems(data || []); setLoading(false); }).catch(() => { setItems([]); setLoading(false); });
   }, [selectedSpec, filter]);
 
   const typeIcons: Record<string, typeof BookOpen> = { news: Newspaper, book: BookOpen, service: Wrench, article: BookOpen };
