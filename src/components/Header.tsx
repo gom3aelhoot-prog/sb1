@@ -254,16 +254,7 @@ export function Header() {
                 </div>
 
                 {/* Specialties */}
-                <button
-                  onClick={() => setMobileSection('specialties')}
-                  className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
-                >
-                  <span className="flex items-center gap-3">
-                    <Shield className="h-4.5 w-4.5 text-neutral-400" />
-                    {t.nav.specialties}
-                  </span>
-                  <ChevronDown className="h-4 w-4 rotate-[-90deg] text-neutral-400" />
-                </button>
+                <a href="/specialties" onClick={()=>setMobileOpen(false)} className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50"><span className="flex items-center gap-3"><Shield className="h-4.5 w-4.5 text-neutral-400"/>{t.nav.specialties}</span><ChevronDown className="h-4 w-4 text-neutral-400"/></a>
 
                 {/* Language */}
                 <button
