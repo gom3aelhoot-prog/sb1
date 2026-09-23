@@ -1,0 +1,66 @@
+import { useMemo, useState } from 'react';
+import { ArrowLeft, Calendar, CheckCircle2, Clock, MapPin, Phone, Star, ShoppingBag } from 'lucide-react';
+import { useRouter, getPathOnly } from '@/lib/router';
+import { demoClinics, demoFacilities, demoLabs, demoProducts, demoRadiology } from '@/lib/demoData';
+
+type Kind = 'clinic'|'lab'|'radiology'|'facility';
+
+export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
+  const { path, navigate } = useRouter();
+  const id = getPathOnly(path).split('/')[2] || '';
+  const [booked, setBooked] = useState(false);
+  const [date, setDate] = useState('');
+  const [service, setService] = useState('');
+
+  const data = useMemo(() => {
+    if (kind==='clinic') return demoClinics.find(x=>x.id===id);
+    if (kind==='lab') return demoLabs.find(x=>x.id===id);
+    if (kind==='radiology') return demoRadiology.find(x=>x.id===id);
+    return demoFacilities.find(x=>x.id===id);
+  }, [kind,id]);
+
+  if (!data) return <div className="min-h-screen pt-28 text-center" dir="rtl"><h1 className="text-2xl font-bold">المؤسسة غير موجودة</h1><button className="btn-primary mt-5" onClick={()=>navigate('/facilities')}>العودة للمرافق</button></div>;
+
+  const name = data.name;
+  const image = 'image_url' in data ? data.image_url : null;
+  const services = 'services' in data ? data.services : null;
+  const address = data.address || 'العنوان يحدد من المؤسسة';
+  const phone = data.phone || '';
+  const typeLabel = kind==='clinic'?'عيادة / مستشفى':kind==='lab'?'مختبر تحاليل':kind==='radiology'?'مركز أشعة':'مرفق صحي';
+
+  const priceRows = kind==='clinic'
+    ? ['كشف طبي أولي — 25 USD','استشارة متابعة — 18 USD','جلسة فيديو — يحددها الطبيب']
+    : kind==='lab'
+      ? ['تحاليل دم أساسية — 15 USD','تحاليل شاملة — 35 USD','فحوص متخصصة — يبدأ من 50 USD']
+      : kind==='radiology'
+        ? ['أشعة X-Ray — 20 USD','Ultrasound — 35 USD','CT / MRI — حسب الخدمة']
+        : ['تقييم أولي — 20 USD','جلسة تأهيل — 30 USD','برنامج شهري — حسب الخطة'];
+
+  const handleBook = (e: React.FormEvent) => { e.preventDefault(); if (!date) return; setBooked(true); };
+
+  return <div className="min-h-screen bg-gray-50 pt-24 pb-16" dir="rtl">
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <button onClick={()=>navigate(kind==='facility'?'/facilities':`/${kind}s`)} className="mb-5 flex items-center gap-2 text-sm text-gray-500"><ArrowLeft className="h-4 w-4"/>العودة</button>
+      <div className="overflow-hidden rounded-3xl bg-white shadow-sm border border-gray-100">
+        <div className="grid lg:grid-cols-[1.25fr_1fr]">
+          <div className="min-h-[280px] bg-gray-100">{image ? <img src={image} alt={name} className="h-full w-full object-cover"/> : <div className="flex h-full min-h-[280px] items-center justify-center text-gray-300 text-6xl">+</div>}</div>
+          <div className="p-7">
+            <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700">{typeLabel}</span>
+            <h1 className="mt-3 text-3xl font-extrabold text-gray-900">{name}</h1>
+            <div className="mt-3 flex items-center gap-1 text-amber-500"><Star className="h-4 w-4 fill-current"/><span className="font-bold">{'rating' in data ? Number(data.rating||4.7).toFixed(1) : '4.8'}</span><span className="text-xs text-gray-400">(مراجعات تجريبية)</span></div>
+            <p className="mt-4 leading-7 text-gray-600">{data.description || 'صفحة مؤسسة صحية متكاملة تعرض الخدمات والأسعار والمواعيد والحجز.'}</p>
+            <div className="mt-4 space-y-2 text-sm text-gray-600"><p className="flex gap-2"><MapPin className="h-4 w-4 text-teal-600"/>{address}</p>{phone && <p className="flex gap-2"><Phone className="h-4 w-4 text-teal-600"/>{phone}</p>}<p className="flex gap-2"><Clock className="h-4 w-4 text-teal-600"/>09:00 — 21:00 يومياً</p></div>
+          </div>
+        </div>
+
+        <div className="grid gap-6 border-t border-gray-100 p-7 lg:grid-cols-3">
+          <section className="rounded-2xl bg-gray-50 p-5"><h2 className="font-bold text-gray-800">الخدمات</h2><p className="mt-3 text-sm leading-7 text-gray-600">{services || 'خدمات المؤسسة تظهر هنا بالتفصيل ويمكن للمالك تعديلها من لوحة التحكم.'}</p></section>
+          <section className="rounded-2xl bg-gray-50 p-5"><h2 className="font-bold text-gray-800">الأسعار</h2><ul className="mt-3 space-y-3 text-sm text-gray-600">{priceRows.map(x=><li key={x} className="flex gap-2"><CheckCircle2 className="h-4 w-4 shrink-0 text-teal-600"/>{x}</li>)}</ul></section>
+          <section className="rounded-2xl bg-teal-50 p-5"><h2 className="font-bold text-gray-800">الحجز</h2>{booked ? <div className="mt-5 text-center"><CheckCircle2 className="mx-auto h-10 w-10 text-teal-600"/><p className="mt-2 font-bold text-gray-800">تم إرسال طلب الحجز</p><p className="mt-1 text-xs text-gray-500">ستصل التفاصيل للمؤسسة ويؤكد الموعد.</p></div> : <form onSubmit={handleBook} className="mt-3 space-y-3"><select required value={service} onChange={e=>setService(e.target.value)} className="input-field"><option value="">اختر الخدمة</option>{priceRows.map(x=><option key={x}>{x}</option>)}</select><input required type="datetime-local" value={date} onChange={e=>setDate(e.target.value)} className="input-field"/><input required placeholder="اسم العميل" className="input-field"/><input placeholder="رقم الهاتف" className="input-field"/><button className="btn-primary w-full flex items-center justify-center gap-2"><Calendar className="h-4 w-4"/>إرسال طلب الحجز</button></form>}</section>
+        </div>
+
+        {kind==='facility' && <div className="border-t border-gray-100 p-7"><h2 className="mb-4 flex items-center gap-2 text-xl font-bold"><ShoppingBag className="h-5 w-5 text-teal-600"/>منتجات / خدمات المؤسسة</h2><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{demoProducts.map(p=><div key={p.id} className="rounded-2xl border bg-white p-4"><div className="h-32 overflow-hidden rounded-xl bg-gray-100">{p.image_url&&<img src={p.image_url} alt={p.name} className="h-full w-full object-cover"/>}</div><h3 className="mt-3 font-semibold">{p.name}</h3><p className="mt-1 text-sm text-gray-500">{p.description}</p><p className="mt-2 font-bold text-teal-700">{p.price} {p.currency}</p></div>)}</div></div>}
+      </div>
+    </div>
+  </div>;
+}
