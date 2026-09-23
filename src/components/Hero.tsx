@@ -133,7 +133,7 @@ export function Hero() {
                     <span className="text-lg font-bold text-primary-700">$25</span>
                   </div>
 
-                  <button className="mt-4 w-full rounded-xl bg-primary-600 py-3 text-sm font-semibold text-white transition-all hover:bg-primary-700 active:scale-95">
+                  <a href="/consult" className="mt-4 block w-full rounded-xl bg-primary-600 py-3 text-center text-sm font-semibold text-white transition-all hover:bg-primary-700 active:scale-95">
                     {t.mega.bookConsultation}
                   </button>
                 </div>
