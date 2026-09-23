@@ -32,7 +32,7 @@ export default function VideosPage() {
       const { data } = await dbQuery.order('created_at', { ascending: false });
       setVideos((data && data.length ? data : demoVideos) as DoctorVideo[]);
       setLoading(false);
-    })();
+    })().catch(() => { setVideos(demoVideos); setLoading(false); });
   }, [selectedSpecialty]);
 
   const formatDuration = (seconds: number) => {
