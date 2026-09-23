@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { demoSpecialties, demoDoctors, demoArticles, demoVideos, demoAudio, demoCourses, demoClinics, demoLabs, demoRadiology, demoFacilities, demoProducts, demoLibrary } from '@/lib/demoData';
+import { demoSpecialties, demoDoctors, demoArticles, demoVideos, demoAudio, demoCourses, demoClinics, demoLabs, demoRadiology, demoFacilities, demoProducts, demoLibrary, demoQuestions, demoAnswers } from '@/lib/demoData';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY;
@@ -8,7 +8,8 @@ type DemoRow = Record<string, any>;
 const demoTables: Record<string, DemoRow[]> = {
   specialties: demoSpecialties, doctors: demoDoctors, articles: demoArticles, doctor_videos: demoVideos, doctor_audio: demoAudio,
   courses: demoCourses, clinics: demoClinics, lab_centers: demoLabs, radiology_centers: demoRadiology,
-  additional_facilities: demoFacilities, pharmacy_products: demoProducts, specialty_library_items: demoLibrary, questions: [],
+  questions: demoQuestions, answers: demoAnswers,
+  additional_facilities: demoFacilities, pharmacy_products: demoProducts, specialty_library_items: demoLibrary,
   question_pricing_rules: [{ id:'pricing-demo', country_code:null, currency_code:'USD', base_price:9, duration_days:7, notification_reach:10, min_answers:1, max_answers:3, response_speed:'standard', is_active:true }],
   signup_promotions: [{ id:'promo-demo', code:'SB1-FIRST-SIGNUP', discount_percent:10, is_active:true }],
 };
