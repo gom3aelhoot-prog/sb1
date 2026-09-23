@@ -17,7 +17,7 @@ export default function RadiologyPage() {
       setCenters((data && data.length ? data : demoRadiology) as RadiologyCenter[]);
       setLoading(false);
     }).catch(() => {
-      setCenters([]);
+      setCenters(demoRadiology);
       setLoading(false);
     });
   }, []);
