@@ -6,7 +6,7 @@ import { supabase, type RadiologyCenter } from '@/lib/supabase';
 import { demoRadiology } from '@/lib/demoData';
 
 export default function RadiologyPage() {
-  const { t } = useI18n();
+  const { t,lang } = useI18n();
   const { navigate } = useRouter();
   const [centers, setCenters] = useState<RadiologyCenter[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,13 +16,13 @@ export default function RadiologyPage() {
 
   useEffect(() => {
     supabase.from('radiology_centers').select('*').eq('is_active', true).order('created_at', { ascending: false }).then(({ data }) => {
-      setCenters((data && data.length ? data : demoRadiology) as RadiologyCenter[]);
+      setCenters((data && data.length ? data : virtualFacilities(lang).filter(x=>x.facility_type==='radiology')) as any);
       setLoading(false);
     }).catch(() => {
-      setCenters(demoRadiology);
+      setCenters(virtualFacilities(lang).filter(x=>x.facility_type==='radiology') as any);
       setLoading(false);
     });
-  }, []);
+  }, [lang]);
 
   const handleBook = async () => {
     if (!bookingCenter || !bookForm.patient_name || !bookForm.scheduled_at) return;
