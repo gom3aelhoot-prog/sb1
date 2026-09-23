@@ -17,7 +17,7 @@ export default function LibraryPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.from('specialties').select('*').order('name').then(({ data }) => setSpecialties((data && data.length ? data : demoSpecialties) as Specialty[])).catch(() => setSpecialties([]));
+    supabase.from('specialties').select('*').order('name').then(({ data }) => setSpecialties((data && data.length ? data : demoSpecialties) as Specialty[])).catch(() => setSpecialties(demoSpecialties));
   }, []);
   useEffect(() => {
     setLoading(true);
