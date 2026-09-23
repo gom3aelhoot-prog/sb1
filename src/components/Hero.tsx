@@ -135,7 +135,7 @@ export function Hero() {
 
                   <a href="/consult" className="mt-4 block w-full rounded-xl bg-primary-600 py-3 text-center text-sm font-semibold text-white transition-all hover:bg-primary-700 active:scale-95">
                     {t.mega.bookConsultation}
-                  </button>
+                  </a>
                 </div>
               </div>
 
