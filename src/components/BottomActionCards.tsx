@@ -90,9 +90,9 @@ export function BottomActionCards() {
           {cards.map((card, i) => {
             const Icon = card.icon;
             return (
-              <button
+              <a
                 key={i}
-                onClick={(e) => e.preventDefault()}
+                href={['/articles', '/clinics', '/doctors', '/subscriptions'][i]}
                 className={`group relative overflow-hidden rounded-2xl border ${card.border} ${card.cardBg} p-5 lg:p-6 text-start shadow-sm transition-all duration-300 ${card.hoverBorder} hover:shadow-xl hover:shadow-primary-500/5 hover:-translate-y-1`}
               >
                 {/* Icon */}
@@ -125,7 +125,7 @@ export function BottomActionCards() {
 
                 {/* Decorative corner glow */}
                 <div className="pointer-events-none absolute -top-12 -end-12 h-32 w-32 rounded-full bg-primary-100/20 blur-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              </button>
+              </a>
             );
           })}
         </div>
