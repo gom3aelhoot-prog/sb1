@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { MapPin, Phone, Calendar, X, Building2 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Clinic } from '@/lib/supabase';
+import { demoClinics } from '@/lib/demoData';
 
 export default function ClinicsPage() {
   const { t } = useI18n();
@@ -13,7 +14,7 @@ export default function ClinicsPage() {
 
   useEffect(() => {
     supabase.from('clinics').select('*, doctor(name)').eq('is_active', true).order('created_at', { ascending: false }).then(({ data }) => {
-      setClinics(data || []);
+      setClinics((data && data.length ? data : demoClinics) as Clinic[]);
       setLoading(false);
     }).catch(() => {
       setClinics([]);
