@@ -4,6 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import { useRouter, parseQuery, getPathOnly } from '@/lib/router';
 import { supabase, type SpecialtyChatRoom, type ChatRoomMessage, type Specialty } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
+import { specialtyCatalog } from '@/lib/catalog';
 
 export default function ChatRoomsPage() {
   const { t, specialtyName, lang, dir } = useI18n();
@@ -20,17 +21,25 @@ export default function ChatRoomsPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let done = false;
+    const fallback = specialtyCatalog(lang).slice(0, 12).map((s:any, i:number) => ({
+      id: `demo-room-${s.slug}`, name: lang==='ar' ? `غرفة ${s.name}` : `${s.name} Community Room`,
+      description: lang==='ar' ? `دردشة تجريبية لتخصص ${s.name}` : `Demo discussion room for ${s.name}`,
+      specialty_id: s.id, member_count: 25 + i * 7, is_active: true, created_at: new Date(2026,0,1+i).toISOString(), specialty: s
+    }));
     supabase.from('specialty_chat_rooms').select('*, specialty(*)').order('created_at').then(({ data }) => {
-      setRooms(data || []);
-      setLoading(false);
-    });
-  }, []);
+      if (done) return; setRooms(data && data.length ? data : fallback); setLoading(false);
+    }).catch(() => { if (!done) { setRooms(fallback as any); setLoading(false); } });
+    const timer=window.setTimeout(()=>{ if(!done){setRooms(fallback as any);setLoading(false)} },2000);
+    return ()=>{done=true;window.clearTimeout(timer)};
+  }, [lang]);
 
   useEffect(() => {
     if (activeRoomId) {
-      supabase.from('chat_room_messages').select('*').eq('room_id', activeRoomId).order('created_at').limit(50).then(({ data }) => setMessages(data || []));
+      const fallback=[{id:`demo-msg-${activeRoomId}-1`,room_id:activeRoomId,sender_name:'SB1 Specialist',sender_type:'specialist',body:lang==='ar'?'مرحباً بك في الغرفة التجريبية. اطرح سؤالك التعليمي هنا.':'Welcome to the demo room. Ask your educational question here.',is_flagged:false,created_at:new Date().toISOString()} as any];
+      supabase.from('chat_room_messages').select('*').eq('room_id', activeRoomId).order('created_at').limit(50).then(({ data }) => setMessages(data && data.length ? data : fallback)).catch(()=>setMessages(fallback));
     }
-  }, [activeRoomId]);
+  }, [activeRoomId,lang]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
