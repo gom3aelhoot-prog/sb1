@@ -68,6 +68,7 @@ export default function LabsPage() {
                     <Calendar className="w-4 h-4" />
                     {t('labs.book')}
                   </button>
+                  </div>
                 </div>
               </div>
             ))}
