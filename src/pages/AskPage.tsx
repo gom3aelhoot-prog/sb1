@@ -6,7 +6,7 @@ import { useApp } from '@/i18n/AppContext';
 import { CURRENCY_RATES } from '@/types/i18n';
 import { supabase, type Specialty, type Doctor } from '@/lib/supabase';
 import DoctorCard from '@/components/DoctorCard';
-import { demoDoctors, demoSpecialties } from '@/lib/demoData';
+import { demoSpecialties } from '@/lib/demoData';
 
 type PricingTier = {
   id: string;
