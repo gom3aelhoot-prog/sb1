@@ -11,17 +11,75 @@ const demoTables: Record<string, DemoRow[]> = {
   questions: demoQuestions, answers: demoAnswers,
   additional_facilities: demoFacilities, pharmacy_products: demoProducts, specialty_library_items: demoLibrary,
   question_pricing_rules: [{ id:'pricing-demo', country_code:null, currency_code:'USD', base_price:9, duration_days:7, notification_reach:10, min_answers:1, max_answers:3, response_speed:'standard', is_active:true }],
+  pricing_tiers: [
+    { id:'basic', name:'Basic', name_ar:'الأساسية', description:'Standard response', description_ar:'رد قياسي', duration_days:7, specialists_notified:10, min_answers:1, max_answers:3, response_speed:'standard', price_usd:9, is_featured:false, is_active:true, sort_order:1 },
+    { id:'plus', name:'Plus', name_ar:'المعززة', description:'Faster response', description_ar:'رد أسرع', duration_days:14, specialists_notified:25, min_answers:2, max_answers:5, response_speed:'fast', price_usd:19, is_featured:true, is_active:true, sort_order:2 },
+    { id:'premium', name:'Premium', name_ar:'المميزة', description:'Priority response', description_ar:'أولوية', duration_days:30, specialists_notified:50, min_answers:3, max_answers:10, response_speed:'instant', price_usd:39, is_featured:false, is_active:true, sort_order:3 },
+  ],
+  subscription_plans: [
+    { id:'sub-free', name:'Free', name_ar:'مجاني', duration_months:1, price:0, daily_questions_limit:1, weekly_questions_limit:3, free_courses_limit:0, free_books_limit:1, features:'سؤال مجاني، مكتبة أساسية', is_active:true, created_at:now },
+    { id:'sub-plus', name:'Plus', name_ar:'بلس', duration_months:1, price:9.99, daily_questions_limit:3, weekly_questions_limit:10, free_courses_limit:1, free_books_limit:5, features:'أسئلة أكثر، كتب ودورات مخفضة', is_active:true, created_at:now },
+    { id:'sub-pro', name:'Pro', name_ar:'احترافي', duration_months:1, price:24.99, daily_questions_limit:10, weekly_questions_limit:30, free_courses_limit:3, free_books_limit:20, features:'أولوية، مكتبة كاملة، خصومات', is_active:true, created_at:now },
+  ],
+  site_settings: [{ id:1, site_name:'SB1', default_language:'ar', free_session_messages:3, video_session_price:25, currency:'USD', ai_moderation_enabled:true, stripe_enabled:false, updated_at:now }],
+  admin_users: [],
+  payments: [], video_sessions: [], text_sessions: [], specialist_planner: [], planner_reminders: [], lab_bookings: [], radiology_bookings: [], clinic_bookings: [],
+  specialist_documents: [], specialist_posts: [], specialist_diary: [], post_comments: [], user_follows: [],
+  medical_tests: [], test_results: [], ai_report_analysis: [], favorites: [], advertisements: [], jobs: [], job_applications: [], referral_rewards: [],
+  country_pricing: [], institutions: [], delivery_workers: [], admin_chat_messages: [],
   signup_promotions: [{ id:'promo-demo', code:'SB1-FIRST-SIGNUP', discount_percent:10, is_active:true }],
 };
+
+const demoStorageKey = 'sb1_demo_db_v2';
+const readDemoTable = (table:string): DemoRow[] => {
+  if (typeof window === 'undefined') return [...(demoTables[table] || [])];
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(demoStorageKey) || '{}');
+    if (Array.isArray(saved[table])) return saved[table];
+  } catch {}
+  return [...(demoTables[table] || [])];
+};
+const writeDemoTable = (table:string, rows:DemoRow[]) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(demoStorageKey) || '{}');
+    saved[table] = rows;
+    window.localStorage.setItem(demoStorageKey, JSON.stringify(saved));
+  } catch {}
+};
+const makeId = (table:string) => `demo-${table}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+
 class DemoQuery implements PromiseLike<{data:any;error:any}> {
   private rows: DemoRow[]; private filters: ((row:DemoRow)=>boolean)[]=[]; private sortKey:string|null=null; private ascending=true; private maxRows:number|null=null; private singleRow=false;
-  constructor(private table:string){this.rows=[...(demoTables[table]||[])];}
-  select(_columns='*'){return this;} eq(k:string,v:any){this.filters.push(r=>r[k]===v);return this;} neq(k:string,v:any){this.filters.push(r=>r[k]!==v);return this;}
+  private countMode=false; private headMode=false; private mutation:'insert'|'update'|'delete'|null=null; private mutationPayload:any=null;
+  constructor(private table:string){this.rows=readDemoTable(table);}
+  select(_columns='*', opts?:{count?:'exact'|'planned'|'estimated';head?:boolean}){this.countMode=!!opts?.count;this.headMode=!!opts?.head;return this;}
+  eq(k:string,v:any){this.filters.push(r=>r[k]===v);return this;} neq(k:string,v:any){this.filters.push(r=>r[k]!==v);return this;}
+  in(k:string,values:any[]){this.filters.push(r=>values.includes(r[k]));return this;}
   ilike(k:string,p:string){const n=p.replace(/%/g,'').toLowerCase();this.filters.push(r=>String(r[k]??'').toLowerCase().includes(n));return this;}
+  gte(k:string,v:any){this.filters.push(r=>String(r[k]??'')>=String(v));return this;} lte(k:string,v:any){this.filters.push(r=>String(r[k]??'')<=String(v));return this;}
   order(k:string,o?:{ascending?:boolean}){this.sortKey=k;this.ascending=o?.ascending!==false;return this;} limit(n:number){this.maxRows=n;return this;} range(_f:number,t:number){this.maxRows=t+1;return this;}
-  maybeSingle(){this.singleRow=true;return this;} single(){this.singleRow=true;return this;} insert(_v:any){return this;} update(_v:any){return this;} delete(){return this;}
-  then<TResult1={data:any;error:any},TResult2=never>(ok?:((v:{data:any;error:any})=>TResult1|PromiseLike<TResult1>)|null,bad?:((e:any)=>TResult2|PromiseLike<TResult2>)|null):Promise<TResult1|TResult2>{
-    try{let result=this.rows.filter(r=>this.filters.every(f=>f(r))).map(r=>({...r}));if(this.sortKey)result.sort((a,b)=>{const av=a[this.sortKey!],bv=b[this.sortKey!];return av===bv?0:(av>bv?1:-1)*(this.ascending?1:-1)});if(this.maxRows!==null)result=result.slice(0,this.maxRows);return Promise.resolve({data:this.singleRow?(result[0]??null):result,error:null}).then(ok as any,bad as any)}catch(e){return Promise.reject(e).then(ok as any,bad as any)}
+  maybeSingle(){this.singleRow=true;return this;} single(){this.singleRow=true;return this;}
+  insert(values:any){this.mutation='insert';this.mutationPayload=Array.isArray(values)?values: [values];return this;}
+  update(values:any){this.mutation='update';this.mutationPayload=values;return this;}
+  delete(){this.mutation='delete';return this;}
+  then<TResult1={data:any;error:any},TResult2=never>(ok?:((v:{data:any;error:any;count?:number})=>TResult1|PromiseLike<TResult1>)|null,bad?:((e:any)=>TResult2|PromiseLike<TResult2>)|null):Promise<TResult1|TResult2>{
+    try {
+      let result=this.rows.filter(r=>this.filters.every(f=>f(r))).map(r=>({...r}));
+      if(this.mutation==='insert'){
+        result=this.mutationPayload.map((v:any)=>({...v,id:v.id||makeId(this.table),created_at:v.created_at||new Date().toISOString()}));
+        const all=readDemoTable(this.table); writeDemoTable(this.table,[...result,...all]);
+      } else if(this.mutation==='update'){
+        const all=readDemoTable(this.table); const changed=all.map(r=>this.filters.every(f=>f(r))?{...r,...this.mutationPayload}:r); writeDemoTable(this.table,changed); result=changed.filter(r=>this.filters.every(f=>f(r)));
+      } else if(this.mutation==='delete'){
+        const all=readDemoTable(this.table); const kept=all.filter(r=>!this.filters.every(f=>f(r))); writeDemoTable(this.table,kept); result=[];
+      }
+      if(this.sortKey)result.sort((a,b)=>{const av=a[this.sortKey!],bv=b[this.sortKey!];return av===bv?0:(av>bv?1:-1)*(this.ascending?1:-1)});
+      if(this.maxRows!==null)result=result.slice(0,this.maxRows);
+      const count=result.length;
+      const payload={data:this.headMode?null:(this.singleRow?(result[0]??null):result),error:null,count};
+      return Promise.resolve(payload).then(ok as any,bad as any);
+    } catch(e){return Promise.reject(e).then(ok as any,bad as any)}
   }
 }
 const demoClient={from:(table:string)=>new DemoQuery(table),rpc:(_fn:string,_args?:any)=>Promise.resolve({data:null,error:null})};
