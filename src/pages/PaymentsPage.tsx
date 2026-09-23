@@ -159,6 +159,43 @@ export default function PaymentsPage() {
     );
   }
 
+  const subscriptionAmount = Number(query.amount || 0);
+  const isSubscriptionCheckout = query.type === 'subscription' && subscriptionAmount > 0;
+
+  const startGenericCheckout = async () => {
+    setCheckoutLoading(true);
+    setError('');
+    try {
+      const response = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ amount: subscriptionAmount, currency: 'usd', description: `SB1 subscription ${query.plan || ''}`, reference_id: query.plan || 'subscription' }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.url) throw new Error(data.error || 'Checkout unavailable');
+      window.location.href = data.url;
+    } catch {
+      setError(lang === 'ar' ? 'بوابة الدفع المباشر غير مفعّلة على هذا النشر. يمكنك العودة واختيار وضع الاختبار.' : 'Live checkout is not configured on this deployment yet.');
+    } finally { setCheckoutLoading(false); }
+  };
+
+  if (isSubscriptionCheckout) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 bg-gray-50">
+        <div className="max-w-xl mx-auto px-4">
+          <div className="card p-8 text-center">
+            <ShieldCheck className="mx-auto w-14 h-14 text-teal-600" />
+            <h1 className="mt-4 text-2xl font-bold text-gray-800">{lang === 'ar' ? 'اشتراك SB1' : 'SB1 Subscription'}</h1>
+            <p className="mt-2 text-gray-500">{lang === 'ar' ? `الخطة: ${query.plan || ''} — المبلغ: ${subscriptionAmount} USD` : `Plan: ${query.plan || ''} — ${subscriptionAmount} USD`}</p>
+            {error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+            <button onClick={startGenericCheckout} disabled={checkoutLoading} className="btn-primary w-full mt-6 disabled:opacity-50">{checkoutLoading ? (lang === 'ar' ? 'جاري فتح الدفع...' : 'Opening checkout...') : (lang === 'ar' ? 'الدفع الآمن' : 'Pay securely')}</button>
+            <p className="mt-4 text-xs text-gray-400">{lang === 'ar' ? 'إذا لم يتم إعداد مزود الدفع بعد، ستظهر رسالة الإعداد بدلاً من خصم أي مبلغ.' : 'If the provider is not configured, no money is charged.'}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pt-24 pb-16 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
