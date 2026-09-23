@@ -104,7 +104,7 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-100 hover:text-primary-700"
-                  onClick={(e) => e.preventDefault()}
+                  
                 >
                   {item.label}
                 </a>
@@ -124,7 +124,7 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-100 hover:text-primary-700"
-                  onClick={(e) => e.preventDefault()}
+                  
                 >
                   {item.label}
                 </a>
@@ -152,11 +152,11 @@ export function Header() {
               <div className="hidden md:flex items-center gap-2">
                 {isAnonymous && (
                   <>
-                    <button className="btn-ghost text-sm" onClick={(e) => e.preventDefault()}>
+                    <button className="btn-ghost text-sm" >
                       <LogIn className="h-4 w-4" />
                       {t.nav.signIn}
                     </button>
-                    <button className="btn-primary text-sm" onClick={(e) => e.preventDefault()}>
+                    <button className="btn-primary text-sm" >
                       <UserPlus className="h-4 w-4" />
                       {t.nav.signUp}
                     </button>
