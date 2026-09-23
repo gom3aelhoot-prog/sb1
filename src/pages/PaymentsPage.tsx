@@ -32,10 +32,18 @@ export default function PaymentsPage() {
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (fetchError || !data) setError(lang === 'ar' ? 'تعذر تحميل عملية الدفع.' : 'Unable to load the payment.');
-      else {
+      if (data) {
         setPayment(data);
         setPaid(data.status === 'paid');
+      } else {
+        const localPayments = JSON.parse(localStorage.getItem('sb1_demo_payments') || '[]') as Array<{ id:string; amount:number; currency:string; reference_id:string; status:string }>;
+        const localPayment = localPayments.find((item) => item.reference_id === query.reference);
+        if (localPayment) {
+          setPayment(localPayment);
+          setPaid(localPayment.status === 'paid');
+        } else if (fetchError) {
+          setError(lang === 'ar' ? 'تعذر تحميل عملية الدفع.' : 'Unable to load the payment.');
+        }
       }
       setLoading(false);
     })().catch(() => {
@@ -49,17 +57,32 @@ export default function PaymentsPage() {
     setPaying(true);
     setError('');
     const { error: paymentError } = await supabase.from('payments').update({ status: 'paid' }).eq('id', payment.id);
-    if (paymentError) {
+    const localPayments = JSON.parse(localStorage.getItem('sb1_demo_payments') || '[]') as Array<{ id:string; amount:number; currency:string; reference_id:string; status:string }>;
+    const localIndex = localPayments.findIndex((item) => item.id === payment.id);
+    if (localIndex >= 0) {
+      localPayments[localIndex].status = 'paid';
+      localStorage.setItem('sb1_demo_payments', JSON.stringify(localPayments));
+      const localQuestions = JSON.parse(localStorage.getItem('sb1_demo_questions') || '[]') as Array<{ id:string; status:string }>;
+      const qIndex = localQuestions.findIndex((item) => item.id === payment.reference_id);
+      if (qIndex >= 0) {
+        localQuestions[qIndex].status = 'pending';
+        localStorage.setItem('sb1_demo_questions', JSON.stringify(localQuestions));
+      }
+    }
+    if (paymentError && localIndex < 0) {
       setError(lang === 'ar' ? 'تعذر تأكيد الدفع. تأكد من إعداد قاعدة البيانات.' : 'Could not confirm the payment. Check the database configuration.');
       setPaying(false);
       return;
     }
-    const { error: questionError } = await supabase.from('questions').update({ status: 'pending' }).eq('id', payment.reference_id);
-    if (questionError) {
-      setError(lang === 'ar' ? 'تم تسجيل الدفع لكن تعذر تحديث السؤال.' : 'Payment was recorded but the question status could not be updated.');
-      setPaying(false);
-      return;
+    if (!paymentError) {
+      const { error: questionError } = await supabase.from('questions').update({ status: 'pending' }).eq('id', payment.reference_id);
+      if (questionError && localIndex < 0) {
+        setError(lang === 'ar' ? 'تم تسجيل الدفع لكن تعذر تحديث السؤال.' : 'Payment was recorded but the question status could not be updated.');
+        setPaying(false);
+        return;
+      }
     }
+    setPayment({ ...payment, status: 'paid' });
     setPaid(true);
     setPaying(false);
   };
