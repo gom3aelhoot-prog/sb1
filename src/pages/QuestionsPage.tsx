@@ -34,7 +34,8 @@ export default function QuestionsPage() {
         if (spec) dbQuery = dbQuery.eq('specialty_id', spec.id);
       }
       const { data } = await dbQuery.order('created_at', { ascending: false });
-      setQuestions((data && data.length ? data : demoQuestions) as Question[]);
+      const local = JSON.parse(localStorage.getItem('sb1_demo_questions') || '[]') as Question[];
+      setQuestions((data && data.length ? [...local, ...data] : [...local, ...demoQuestions]) as Question[]);
       setLoading(false);
     })();
   }, [selectedSpecialty]);
