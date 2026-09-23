@@ -1,4 +1,4 @@
-import type { Doctor, Specialty, Article, DoctorVideo, DoctorAudio, Course, SpecialtyLibraryItem, Clinic, LabCenter, RadiologyCenter, AdditionalFacility, PharmacyProduct } from '@/lib/supabase';
+import type { Doctor, Specialty, Article, DoctorVideo, DoctorAudio, Course, SpecialtyLibraryItem, Clinic, LabCenter, RadiologyCenter, AdditionalFacility, PharmacyProduct, Question, Answer } from '@/lib/supabase';
 
 const now = new Date().toISOString();
 const photo = (id: string) => 'https://images.unsplash.com/' + id + '?auto=format&fit=crop&w=600&q=80';
@@ -58,4 +58,14 @@ export const demoLibrary: SpecialtyLibraryItem[] = [
  {id:'lib-2',specialty_id:'sp-cardiology',item_type:'book',title:'أساسيات صحة القلب',description:'مرجع تثقيفي مختصر.',url:null,image_url:null,source:'SB1 Medical Library',is_auto_generated:false,created_at:now,specialty:demoSpecialties[1]},
  {id:'lib-3',specialty_id:'sp-psych',item_type:'news',title:'الصحة النفسية وجودة الحياة',description:'محتوى توعوي حديث.',url:null,image_url:null,source:'SB1 Editorial',is_auto_generated:false,created_at:now,specialty:demoSpecialties[2]},
  {id:'lib-4',specialty_id:'sp-pediatrics',item_type:'service',title:'خدمات طب الأطفال',description:'دليل الخدمات والمواعيد.',url:null,image_url:null,source:'SB1',is_auto_generated:false,created_at:now,specialty:demoSpecialties[3]},
+];
+
+export const demoQuestions: Question[] = [
+ {id:'q-demo-1',specialty_id:'sp-cardiology',author_name:'مستخدم SB1',title:'ما الفحوصات الدورية المهمة لصحة القلب؟',body:'أرغب في معرفة الفحوصات العامة التي تناسب المتابعة الوقائية لصحة القلب.',age:42,gender:'ذكر',status:'pending',views:184,specialty:demoSpecialties[1],answers:[]},
+ {id:'q-demo-2',specialty_id:'sp-psych',author_name:'مستخدم SB1',title:'كيف أتعامل مع التوتر المتكرر؟',body:'أعاني من توتر متكرر وأريد معرفة الخطوات العامة التي تساعدني على تنظيمه ومتى أراجع مختصاً.',age:31,gender:'أنثى',status:'pending',views:231,specialty:demoSpecialties[2],answers:[]},
+ {id:'q-demo-3',specialty_id:'sp-pediatrics',author_name:'مستخدم SB1',title:'متى يحتاج الطفل إلى مراجعة طبيب الأطفال؟',body:'ما العلامات التي تستدعي التواصل مع طبيب الأطفال بدلاً من الاكتفاء بالمتابعة المنزلية؟',age:6,gender:'أنثى',status:'pending',views:96,specialty:demoSpecialties[3],answers:[]},
+];
+export const demoAnswers: Answer[] = [
+ {id:'ans-demo-1',question_id:'q-demo-1',doctor_id:'doc-3',body:'تختلف الفحوصات حسب العمر وعوامل الخطورة والتاريخ المرضي. من الأفضل تحديد خطة متابعة مع طبيبك بعد تقييم هذه العوامل.',helpful_count:42,created_at:now,doctor:demoDoctors[2]},
+ {id:'ans-demo-2',question_id:'q-demo-2',doctor_id:'doc-2',body:'تنظيم النوم والنشاط البدني وتمارين التنفس قد تساعد، وإذا استمر التوتر أو أثّر على الحياة اليومية فاستشارة مختص مناسبة.',helpful_count:37,created_at:now,doctor:demoDoctors[1]},
 ];
