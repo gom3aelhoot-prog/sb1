@@ -17,7 +17,7 @@ export default function LabsPage() {
       setCenters((data && data.length ? data : demoLabs) as LabCenter[]);
       setLoading(false);
     }).catch(() => {
-      setCenters([]);
+      setCenters(demoLabs);
       setLoading(false);
     });
   }, []);
