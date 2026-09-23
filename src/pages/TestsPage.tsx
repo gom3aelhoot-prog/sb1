@@ -14,6 +14,8 @@ const testIcons: Record<string, typeof Calculator> = {
   vision: Eye,
   depression: Brain,
   anxiety: Brain,
+  ocd: Brain,
+  ocd_screening: Brain,
 };
 
 const categories = [
@@ -96,11 +98,26 @@ const anxietyQuestions: Question[] = [
   ]},
 ];
 
+const ocdQuestions: Question[] = [
+ {id:'ocd1',text:'كم مرة تشعر بأفكار متكررة مزعجة لا تستطيع إيقافها بسهولة؟',text_en:'How often do intrusive repetitive thoughts bother you?',options:[{value:0,label:'أبداً',label_en:'Never'},{value:1,label:'أحياناً',label_en:'Sometimes'},{value:2,label:'كثيراً',label_en:'Often'},{value:3,label:'شبه يومي',label_en:'Nearly daily'}]},
+ {id:'ocd2',text:'هل تشعر بحاجة متكررة للقيام بسلوك أو طقس لتخفيف القلق؟',text_en:'Do you feel driven to perform a repeated behavior to reduce anxiety?',options:[{value:0,label:'أبداً',label_en:'Never'},{value:1,label:'أحياناً',label_en:'Sometimes'},{value:2,label:'كثيراً',label_en:'Often'},{value:3,label:'شبه يومي',label_en:'Nearly daily'}]},
+ {id:'ocd3',text:'هل تستغرق هذه الأفكار أو السلوكيات وقتاً يؤثر على يومك؟',text_en:'Do these thoughts or behaviors take time and affect your day?',options:[{value:0,label:'لا',label_en:'No'},{value:1,label:'قليلاً',label_en:'A little'},{value:2,label:'بشكل واضح',label_en:'Clearly'},{value:3,label:'بشكل كبير',label_en:'A lot'}]},
+ {id:'ocd4',text:'هل تتجنب أماكن أو مواقف خوفاً من أفكار أو مخاوف متكررة؟',text_en:'Do you avoid situations because of recurring fears or thoughts?',options:[{value:0,label:'لا',label_en:'No'},{value:1,label:'نادراً',label_en:'Rarely'},{value:2,label:'أحياناً',label_en:'Sometimes'},{value:3,label:'كثيراً',label_en:'Often'}]},
+ {id:'ocd5',text:'هل يصعب عليك مقاومة الطقوس أو التحقق المتكرر؟',text_en:'Is it difficult to resist rituals or repeated checking?',options:[{value:0,label:'لا',label_en:'No'},{value:1,label:'قليلاً',label_en:'A little'},{value:2,label:'نعم',label_en:'Yes'},{value:3,label:'بشكل شديد',label_en:'Severely'}]},
+];
+const demoMedicalTests: MedicalTest[] = [
+ {id:'demo-ocd',test_type:'ocd',title:'اختبار أعراض الوسواس القهري — فحص أولي',title_en:'OCD Symptom Screening',description:'فحص أولي تعليمي للأعراض وليس تشخيصاً.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
+ {id:'demo-ocd2',test_type:'ocd_screening',title:'اختبار الوسواس والتكرار — نسخة ثانية',title_en:'OCD Repetition Screening',description:'اختبار إضافي لاستكشاف الأعراض العامة.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
+ {id:'demo-depression',test_type:'depression',title:'فحص أعراض الاكتئاب',title_en:'Depression Symptom Screening',description:'فحص أولي للأعراض النفسية.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
+ {id:'demo-anxiety',test_type:'anxiety',title:'فحص أعراض القلق',title_en:'Anxiety Symptom Screening',description:'فحص أولي لأعراض القلق.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
+];
 const questionnaireMap: Record<string, Question[]> = {
   prediabetes: prediabetesQuestions,
   asthma: asthmaQuestions,
   depression: depressionQuestions,
   anxiety: anxietyQuestions,
+  ocd: ocdQuestions,
+  ocd_screening: ocdQuestions,
 };
 
 export default function TestsPage() {
@@ -117,7 +134,7 @@ export default function TestsPage() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from('medical_tests').select('*').eq('is_active', true).order('title');
-      setTests(data || []);
+      setTests((data && data.length ? data : demoMedicalTests));
       setLoading(false);
     })();
   }, []);
@@ -204,6 +221,7 @@ export default function TestsPage() {
       if (total >= 10) msg = tr('أعراض متوسطة-شديدة - راجع الطبيب', 'Moderate-severe symptoms - see a doctor');
       else if (total >= 5) msg = tr('أعراض خفيفة-متوسطة', 'Mild-moderate symptoms');
       else msg = tr('أعراض طبيعية', 'Minimal symptoms');
+    } else if (activeTest.test_type === 'ocd' || activeTest.test_type === 'ocd_screening') { if (total >= 10) msg = tr('أعراض تستحق تقييماً متخصصاً قريباً','Symptoms warrant specialist assessment'); else if (total >= 5) msg = tr('أعراض ملحوظة — يفضل مناقشتها مع مختص','Noticeable symptoms — consider discussing with a specialist'); else msg = tr('أعراض قليلة في هذا الفحص','Few symptoms on this screen');
     } else if (activeTest.test_type === 'anxiety') {
       if (total >= 10) msg = tr('قلق متوسط-شديد - راجع الطبيب', 'Moderate-severe anxiety - see a doctor');
       else if (total >= 5) msg = tr('قلق خفيف-متوسط', 'Mild-moderate anxiety');
