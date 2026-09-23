@@ -22,7 +22,7 @@ function timeAgo(date: string, lang: string): string {
 export default function QuestionCard({ question }: { question: Question }) {
   const { navigate } = useRouter();
   const { t, specialtyName, lang, dir } = useI18n();
-  const answerCount = question.answers?.length ?? 0;
+  const answerCount = question.answers?.length ?? (question as any).answer_count ?? 0;
   const title = localizedField(question as unknown as Record<string, unknown>, 'title', lang, question.title);
   const body = localizedField(question as unknown as Record<string, unknown>, 'body', lang, question.body);
 
