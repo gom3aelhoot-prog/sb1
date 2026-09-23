@@ -4,6 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import { useRouter } from '@/lib/router';
 import { supabase, type LabCenter } from '@/lib/supabase';
 import { demoLabs } from '@/lib/demoData';
+import { virtualFacilities } from '@/lib/catalog';
 
 export default function LabsPage() {
   const { t,lang } = useI18n();
@@ -16,10 +17,10 @@ export default function LabsPage() {
 
   useEffect(() => {
     supabase.from('lab_centers').select('*').eq('is_active', true).order('created_at', { ascending: false }).then(({ data }) => {
-      setCenters((data && data.length ? data : demoLabs) as LabCenter[]);
+      setCenters((data && data.length ? data : virtualFacilities(lang).filter(x=>x.facility_type==='lab')) as any);
       setLoading(false);
     }).catch(() => {
-      setCenters(demoLabs);
+      setCenters(virtualFacilities(lang).filter(x=>x.facility_type==='lab') as any);
       setLoading(false);
     });
   }, [lang]);
