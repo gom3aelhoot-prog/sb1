@@ -23,13 +23,19 @@ export default function FacilitiesPage() {
 
   useEffect(() => {
     (async () => {
-      const [{ data: facData }, { data: prodData }] = await Promise.all([
-        supabase.from('additional_facilities').select('*').eq('is_active', true).order('name'),
-        supabase.from('pharmacy_products').select('*').eq('is_active', true).order('name'),
-      ]);
-      setFacilities(facData || []);
-      setProducts(prodData || []);
-      setLoading(false);
+      try {
+        const [{ data: facData }, { data: prodData }] = await Promise.all([
+          supabase.from('additional_facilities').select('*').eq('is_active', true).order('name'),
+          supabase.from('pharmacy_products').select('*').eq('is_active', true).order('name'),
+        ]);
+        setFacilities(facData || []);
+        setProducts(prodData || []);
+      } catch {
+        setFacilities([]);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
