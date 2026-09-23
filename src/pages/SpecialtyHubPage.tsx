@@ -4,6 +4,7 @@ import { useRouter, getPathOnly } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 import { demoDoctors, demoQuestions } from '@/lib/demoData';
+import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty } from '@/lib/catalog';
 import { supabase } from '@/lib/supabase';
 import DoctorCard from '@/components/DoctorCard';
 import QuestionCard from '@/components/QuestionCard';
@@ -38,8 +39,8 @@ export default function SpecialtyHubPage() {
   }, [slug]);
 
   const title = specialty ? (lang === 'en' ? specialty.en : lang === 'de' ? specialty.de : lang === 'ru' ? specialty.ru : specialty.ar) : 'التخصص';
-  const relatedDoctors = useMemo(() => loadedDoctors.length ? loadedDoctors : demoDoctors.filter(d => d.specialty?.slug === slug), [loadedDoctors, slug]);
-  const relatedQuestions = useMemo(() => loadedQuestions.length ? loadedQuestions : demoQuestions.filter(q => q.specialty?.slug === slug), [loadedQuestions, slug]);
+  const relatedDoctors = useMemo(() => loadedDoctors.length ? loadedDoctors : virtualDoctorsForSpecialty(slug, lang, 8), [loadedDoctors, slug, lang]);
+  const relatedQuestions = useMemo(() => loadedQuestions.length ? loadedQuestions : virtualQuestionsForSpecialty(slug, lang, 50), [loadedQuestions, slug, lang]);
 
   if (!specialty) {
     return <div className="min-h-screen pt-28 pb-16 text-center" dir={dir}><h1 className="text-2xl font-bold">التخصص غير موجود</h1><button onClick={() => navigate('/specialties')} className="btn-primary mt-5">العودة للتخصصات</button></div>;
