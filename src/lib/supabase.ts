@@ -82,7 +82,24 @@ class DemoQuery implements PromiseLike<{data:any;error:any}> {
     } catch(e){return Promise.reject(e).then(ok as any,bad as any)}
   }
 }
-const demoClient={from:(table:string)=>new DemoQuery(table),rpc:(_fn:string,_args?:any)=>Promise.resolve({data:null,error:null})};
+const demoClient={
+  from:(table:string)=>new DemoQuery(table),
+  rpc:(_fn:string,_args?:any)=>Promise.resolve({data:null,error:null}),
+  auth:{
+    signUp:async({email,password,options}:{email:string;password:string;options?:{data?:any}})=>{
+      const user={id:makeId('user'),email,user_metadata:options?.data||{}};
+      if(typeof window!=='undefined') window.localStorage.setItem('sb1_demo_auth',JSON.stringify({user}));
+      return {data:{user,session:{user}},error:null};
+    },
+    signInWithPassword:async({email,password}:{email:string;password:string})=>{
+      const saved=typeof window!=='undefined'?window.localStorage.getItem('sb1_demo_auth'):null;
+      if(saved){const parsed=JSON.parse(saved); if(parsed.user?.email===email) return {data:{user:parsed.user,session:{user:parsed.user}},error:null};}
+      return {data:{user:{id:makeId('user'),email},session:{user:{id:makeId('user'),email}}},error:null};
+    },
+    signOut:async()=>{if(typeof window!=='undefined')window.localStorage.removeItem('sb1_demo_auth');return {error:null};},
+    getUser:async()=>{try{const saved=typeof window!=='undefined'?window.localStorage.getItem('sb1_demo_auth'):null;return {data:{user:saved?JSON.parse(saved).user:null},error:null};}catch{return {data:{user:null},error:null};}}
+  }
+};
 export const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl,supabaseAnonKey) : demoClient;
 
 export type Specialty = {
