@@ -32,8 +32,8 @@ export default function FacilitiesPage() {
         setFacilities((facData && facData.length ? facData : demoFacilities) as AdditionalFacility[]);
         setProducts((prodData && prodData.length ? prodData : demoProducts) as PharmacyProduct[]);
       } catch {
-        setFacilities([]);
-        setProducts([]);
+        setFacilities(demoFacilities as AdditionalFacility[]);
+        setProducts(demoProducts as PharmacyProduct[]);
       } finally {
         setLoading(false);
       }
