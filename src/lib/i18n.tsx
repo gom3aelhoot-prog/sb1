@@ -1380,7 +1380,8 @@ export function useI18n() {
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Language>(() => {
-    return (localStorage.getItem('lang') as Language) || 'ar';
+    const stored = (localStorage.getItem('app_language') || localStorage.getItem('lang')) as Language | null;
+    return stored && stored in translations ? stored : 'ar';
   });
 
   const dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -1390,6 +1391,15 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     document.documentElement.dir = dir;
     localStorage.setItem('lang', lang);
   }, [lang, dir]);
+
+  useEffect(() => {
+    const syncLanguage = (event: Event) => {
+      const next = (event as CustomEvent<Language>).detail;
+      if (next && next in translations) setLangState(next);
+    };
+    window.addEventListener('sb1-language-change', syncLanguage);
+    return () => window.removeEventListener('sb1-language-change', syncLanguage);
+  }, []);
 
   const setLang = (l: Language) => setLangState(l);
 
