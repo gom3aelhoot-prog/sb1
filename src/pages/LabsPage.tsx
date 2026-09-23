@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { MapPin, Phone, Calendar, X, TestTube } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { useRouter } from '@/lib/router';
 import { supabase, type LabCenter } from '@/lib/supabase';
 import { demoLabs } from '@/lib/demoData';
 
 export default function LabsPage() {
   const { t } = useI18n();
+  const { navigate } = useRouter();
   const [centers, setCenters] = useState<LabCenter[]>([]);
   const [loading, setLoading] = useState(true);
   const [bookingCenter, setBookingCenter] = useState<LabCenter | null>(null);
@@ -62,7 +64,7 @@ export default function LabsPage() {
                   {c.services && <p className="text-xs text-gray-500 mb-2">{c.services}</p>}
                   {c.address && <p className="text-xs text-gray-500 flex items-center gap-1 mb-1"><MapPin className="w-3.5 h-3.5" />{c.address}</p>}
                   {c.phone && <p className="text-xs text-gray-500 flex items-center gap-1 mb-3"><Phone className="w-3.5 h-3.5" />{c.phone}</p>}
-                  <button onClick={() => setBookingCenter(c)} className="btn-primary w-full text-sm flex items-center justify-center gap-2">
+                  <div className="mt-3 grid grid-cols-2 gap-2"><button onClick={() => navigate('/labs/'+c.id)} className="btn-secondary w-full text-sm">تفاصيل المؤسسة</button><button onClick={() => setBookingCenter(c)} className="btn-primary w-full text-sm flex items-center justify-center gap-2">
                     <Calendar className="w-4 h-4" />
                     {t('labs.book')}
                   </button>
