@@ -4,7 +4,7 @@ import { useRouter, getPathOnly } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 import { demoDoctors, demoQuestions } from '@/lib/demoData';
-import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty } from '@/lib/catalog';
+import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty, localizedSpecialty } from '@/lib/catalog';
 import { supabase } from '@/lib/supabase';
 import DoctorCard from '@/components/DoctorCard';
 import QuestionCard from '@/components/QuestionCard';
@@ -38,7 +38,7 @@ export default function SpecialtyHubPage() {
     })().catch(() => {});
   }, [slug]);
 
-  const title = specialty ? (lang === 'en' ? specialty.en : lang === 'de' ? specialty.de : lang === 'ru' ? specialty.ru : specialty.ar) : 'التخصص';
+  const title = specialty ? localizedSpecialty(specialty, lang) : 'التخصص';
   const relatedDoctors = useMemo(() => loadedDoctors.length ? loadedDoctors : virtualDoctorsForSpecialty(slug, lang, 8), [loadedDoctors, slug, lang]);
   const relatedQuestions = useMemo(() => loadedQuestions.length ? loadedQuestions : virtualQuestionsForSpecialty(slug, lang, 50), [loadedQuestions, slug, lang]);
 
@@ -66,7 +66,7 @@ export default function SpecialtyHubPage() {
         <div className="mt-6 flex flex-wrap gap-3">
           <button onClick={() => navigate('/ask?specialty='+encodeURIComponent(slug))} className="rounded-xl bg-white px-5 py-3 text-sm font-bold text-teal-700">اسأل عن حالتك</button>
           <button onClick={() => navigate('/sessions?specialty='+encodeURIComponent(slug))} className="rounded-xl bg-white/15 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/30">اطلب جلسة فيديو شخصية</button>
-          <button onClick={() => navigate('/questions?specialty='+encodeURIComponent(slug))} className="rounded-xl bg-white/15 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/30">شاهد الأسئلة والأجوبة</button>
+          <button onClick={() => navigate('/questions?specialty='+encodeURIComponent(slug))} className="rounded-xl bg-white/15 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/30">شاهد الأسئلة والأجوبة</button><button onClick={() => navigate('/media?specialty='+encodeURIComponent(slug))} className="rounded-xl bg-white/15 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/30">المحتوى والمكتبة</button>
         </div>
       </section>
 
