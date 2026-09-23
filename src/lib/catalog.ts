@@ -126,3 +126,10 @@ export function virtualFacilities(lang:string, country?:string): AdditionalFacil
     address:p.city+' - SB1 Health District',phone:null,email:null,logo_url:null,services:'Appointments, services, prices and schedules',schedule:{sun:'09:00-18:00',mon:'09:00-18:00',tue:'09:00-18:00',wed:'09:00-18:00',thu:'09:00-18:00'},rating:4.6,is_active:true,created_at:new Date().toISOString(),city:p.city,country:wanted,language:lang
   })) as any;
 }
+
+
+export function virtualCoursesForSpecialty(slug:string,lang:string,count=4) {
+ const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
+ const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const doc=virtualDoctorsForSpecialty(slug,lang,5)[0];
+ return Array.from({length:count},(_,i)=>({id:`catalog-course-${lang}-${slug}-${i+1}`,specialty_id:sp.id,doctor_id:doc.id,title:lang==='ar'?`دورة ${s.ar} العملية — المستوى ${i+1}`:`${s.en} Practical Course — Level ${i+1}`,description:lang==='ar'?`دورة تدريبية تجريبية مُنشأة بالذكاء الاصطناعي مع مراجعة تعليمية، تتضمن دروساً واختبارات وتطبيقات عملية.`:`AI-generated educational course draft for ${s.en}, with lessons, quizzes and practical exercises for editorial review.`,image_url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80',price:19+i*10,duration_weeks:4+i,lessons_count:8+i*2,level:i===0?'beginner':i===1?'intermediate':'advanced',enrolled_count:100+i*50,rating:4.7,is_published:true,created_at:new Date().toISOString(),doctor,specialty:sp}));
+}
