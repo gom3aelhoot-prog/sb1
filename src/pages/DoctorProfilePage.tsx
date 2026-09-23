@@ -28,8 +28,16 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   useEffect(() => {
     (async () => {
       const { data: doc } = await supabase.from('doctors').select('*, specialty(*)').eq('id', id).maybeSingle();
-      if (doc) {
-        setDoctor(doc);
+      let resolved = doc as Doctor | null;
+      if (!resolved && id.startsWith('catalog-doctor-')) {
+        const parts=id.split('-');
+        const langCode=parts[2] || lang;
+        const slug=parts.slice(3,-1).join('-');
+        resolved = virtualDoctorsForSpecialty(slug, langCode, 10).find(d=>d.id===id) || null;
+      }
+      if (resolved) {
+        setDoctor(resolved);
+        const doc = resolved;
         if (doc.is_virtual) {
           const slug=doc.specialty?.slug||'';
           setQuestions(virtualQuestionsForSpecialty(slug,lang,8));
