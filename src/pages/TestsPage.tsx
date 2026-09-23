@@ -466,7 +466,7 @@ export default function TestsPage() {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('tests.title')}</h1>
           <p className="text-gray-500">{t('tests.subtitle')}</p>
         </div>
-        <div className="flex flex-wrap gap-2 justify-center mb-8">
+        <div className="mb-5 max-w-2xl mx-auto"><input value={search} onChange={e=>setSearch(e.target.value)} placeholder={tr('ابحث عن اختبار مثل الوسواس أو القلق أو الاكتئاب','Search tests such as OCD, anxiety or depression')} className="w-full rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm outline-none focus:border-teal-500"/></div><div className="flex flex-wrap gap-2 justify-center mb-8">
           {categories.map((cat) => (
             <button key={cat.key} onClick={() => setActiveCategory(cat.key)} className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${activeCategory === cat.key ? 'bg-teal-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}>
               {t(cat.labelKey) !== cat.labelKey ? t(cat.labelKey) : tr('الفئة', cat.key === 'all' ? 'All' : cat.key)}
