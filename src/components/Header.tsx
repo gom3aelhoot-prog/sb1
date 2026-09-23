@@ -26,7 +26,7 @@ import { SPECIALTIES } from '@/types/i18n';
 
 export function Header() {
   const { t, isAnonymous } = useApp();
-  const { t: platformT } = useI18n();
+  const { t: platformT, lang } = useI18n();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSection, setMobileSection] = useState<'main' | 'specialties' | 'language'>('main');
@@ -49,10 +49,11 @@ export function Header() {
     };
   }, [mobileOpen]);
 
+  const labels:any = { ar:['الأخصائيون والأطباء','المحتوى الطبي والمكتبة','متجر الأخصائيين','المكافآت'], en:['Specialists & Doctors','Medical Content & Library','Specialist Store','Rewards'], de:['Fachärzte & Ärzte','Medizinische Inhalte & Bibliothek','Facharzt-Shop','Belohnungen'], ru:['Специалисты и врачи','Медицинский контент и библиотека','Магазин специалистов','Награды'], uk:['Спеціалісти та лікарі','Медичний контент і бібліотека','Магазин спеціалістів','Нагороди'], uz:['Mutaxassislar va shifokorlar','Tibbiy kontent va kutubxona','Mutaxassislar do‘koni','Mukofotlar'], hy:['Մասնագետներ և բժիշկներ','Բժշկական բովանդակություն և գրադարան','Մասնագետների խանութ','Պարգևներ'], tg:['Мутахассисон ва табибон','Мундариҷаи тиббӣ ва китобхона','Дӯкони мутахассисон','Мукофотҳо'], az:['Mütəxəssislər və həkimlər','Tibbi məzmun və kitabxana','Mütəxəssis mağazası','Mükafatlar'], am:['ስፔሻሊስቶች እና ሐኪሞች','የሕክምና ይዘት እና ቤተ-መጽሐፍት','የስፔሻሊስቶች መደብር','ሽልማቶች'], ka:['სპეციალისტები და ექიმები','სამედიცინო კონტენტი და ბიბლიოთეკა','სპეციალისტების მაღაზია','ჯილდოები']}[lang] || ['Specialists & Doctors','Medical Content & Library','Specialist Store','Rewards'];
   const platformSections = [
-    { label: 'الأخصائيون والأطباء', href: '/doctors' },
+    { label: labels[0], href: '/doctors' },
     { label: platformT('nav.questions'), href: '/questions' },
-    { label: 'المحتوى الطبي والمكتبة', href: '/media' },
+    { label: labels[1], href: '/media' },
     { label: platformT('nav.courses'), href: '/courses' },
     { label: platformT('nav.sessions'), href: '/sessions' },
     { label: platformT('nav.clinics'), href: '/clinics' },
@@ -60,8 +61,8 @@ export function Header() {
     { label: platformT('nav.radiology'), href: '/radiology' },
     { label: platformT('nav.facilities'), href: '/facilities' },
     { label: 'الاختبارات الطبية والنفسية', href: '/tests' },
-    { label: 'متجر الأخصائيين', href: '/store' },
-    { label: 'المكافآت', href: '/referral' },
+    { label: labels[2], href: '/store' },
+    { label: labels[3], href: '/referral' },
   ];
   const navItems = [
     { label: t.nav.home, href: '/#home', icon: Home },
