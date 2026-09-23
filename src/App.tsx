@@ -99,10 +99,10 @@ function PlatformRoute() {
   if (route === '/media') return <MediaHubPage />;
   if (route === '/store') return <SpecialistStorePage />;
   if (route === '/apps') return <AppsPage />;
-  if (route === '/articles') return <ArticlesPage />;
+  if (route === '/articles') return <MediaHubPage />;
   if (route.startsWith('/articles/')) return <ArticleDetailPage id={route.split('/')[2]} />;
-  if (route === '/videos') return <VideosPage />;
-  if (route === '/audio') return <AudioPage />;
+  if (route === '/videos') return <MediaHubPage />;
+  if (route === '/audio') return <MediaHubPage />;
   if (route === '/courses') return <CoursesPage />;
   if (route.startsWith('/courses/')) return <CourseDetailPage id={route.split('/')[2]} />;
   if (route === '/sessions') return <SessionsPage />;
@@ -110,7 +110,7 @@ function PlatformRoute() {
   if (route === '/verification') return <DoctorVerificationPage onNavigate={(view) => { window.location.hash = view.startsWith('#') ? view : `#${view}`; }} />;
   if (route === '/subscriptions') return <SubscriptionsPage />;
   if (route === '/chat') return <ChatRoomsPage />;
-  if (route === '/library') return <LibraryPage />;
+  if (route === '/library') return <MediaHubPage />;
   if (route === '/planner') return <PlannerPage />;
   if (route === '/clinics') return <ClinicsPage />;
   if (route === '/radiology') return <RadiologyPage />;
