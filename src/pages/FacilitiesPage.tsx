@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Building2, Pill, HeartPulse, Home, Stethoscope, MapPin, Phone, ShoppingCart } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type AdditionalFacility, type PharmacyProduct } from '@/lib/supabase';
+import { demoFacilities, demoProducts } from '@/lib/demoData';
 
 const facilityIcons: Record<string, typeof Building2> = {
   rehab: HeartPulse,
@@ -28,8 +29,8 @@ export default function FacilitiesPage() {
           supabase.from('additional_facilities').select('*').eq('is_active', true).order('name'),
           supabase.from('pharmacy_products').select('*').eq('is_active', true).order('name'),
         ]);
-        setFacilities(facData || []);
-        setProducts(prodData || []);
+        setFacilities((facData && facData.length ? facData : demoFacilities) as AdditionalFacility[]);
+        setProducts((prodData && prodData.length ? prodData : demoProducts) as PharmacyProduct[]);
       } catch {
         setFacilities([]);
         setProducts([]);
