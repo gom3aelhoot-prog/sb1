@@ -123,7 +123,7 @@ const az: TranslationData = {
     secondaryButton: 'Həkimlər haqqında öyrənin',
   },
   footer: {
-    about: 'Tabibi Online',
+    about: 'SB1',
     aboutDesc: 'Xəstələri dünyanın ən yaxşı həkimləri və terapevtləri ilə asan və təhlükəsiz birləşdirən inteqrasiya olunmuş tibbi və psixoloji sağlamlıq platforması.',
     quickLinks: 'Sürətli keçidlər',
     forPatients: 'Xəstələr üçün',
