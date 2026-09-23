@@ -363,6 +363,8 @@ export default function AdminPage() {
             ) : section === 'questions' ? (
               <DataTable
                 title={t('admin.questions')}
+                onAdd={() => setShowAdd('questions')}
+                addLabel={t('admin.add')}
                 columns={['title', 'author_name', 'status', 'specialty']}
                 headers={['العنوان', 'السائل', 'الحالة', 'التخصص']}
                 rows={questions.map(q => ({ id: q.id, title: q.title, author_name: q.author_name, status: q.status, specialty: specialtyName(q.specialty) || '-' }))}
