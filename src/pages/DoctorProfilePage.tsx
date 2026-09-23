@@ -36,7 +36,8 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           setQuestions(qs || []);
         }
         const { data: p } = await supabase.from('specialist_posts').select('*').eq('doctor_id', id).order('created_at', { ascending: false }).limit(20);
-        setPosts(p || []);
+        const demoPosts = doc.is_virtual ? Array.from({length:4},(_,i)=>({id:`virtual-post-${id}-${i+1}`,doctor_id:id,body:lang==='ar'?`منشور تجريبي من ${doc.name}: معلومة تثقيفية عامة مرتبطة بتخصصي.`:`Educational demo post from ${doc.name} about the specialty.`,image_url:null,video_url:i===1?'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4':null,post_type:i===1?'reel':'post',views:200+i*70,likes_count:30+i*11,comments_count:3+i,created_at:new Date(Date.now()-i*86400000).toISOString(),doctor:doc})) as SpecialistPost[] : [];
+        setPosts(p && p.length ? p : demoPosts);
         const { data: d } = await supabase.from('specialist_diary').select('id, title, body, created_at').eq('doctor_id', id).eq('is_public', true).order('created_at', { ascending: false }).limit(10);
         setDiary(d || []);
         const { data: arts } = await supabase.from('articles').select('*, specialty(*)').eq('doctor_id', id).order('created_at', { ascending: false }).limit(10);
