@@ -6,7 +6,7 @@ export default function ReferralPage() {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   const [points,setPoints] = useState(()=>Number(localStorage.getItem('sb1_reward_points')||'120'));
-  const referralLink = 'https://sb1.vercel.app/ref/sb1';
+  const referralLink = `${window.location.origin}/ref/sb1`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(referralLink);
