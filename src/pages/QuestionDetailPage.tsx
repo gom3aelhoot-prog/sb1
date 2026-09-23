@@ -5,10 +5,10 @@ import { useI18n } from '@/lib/i18n';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 import { virtualQuestionsForSpecialty,virtualAnswersForQuestion } from '@/lib/catalog';
 export default function QuestionDetailPage({id}:{id:string}){
- const {navigate}=useRouter();const {lang,dir}=useI18n();
+ const {navigate}=useRouter();const {lang,dir}=useI18n(); const labels:any={ar:{back:'{labels.back}',answers:'{labels.answers}',notfound:'{labels.notfound}'},en:{back:'Back to questions',answers:'demo answers',notfound:'Question not found in this language.'},ru:{back:'Назад к вопросам',answers:'демонстрационных ответов',notfound:'Вопрос не найден на этом языке.'},de:{back:'Zurück zu den Fragen',answers:'Demo-Antworten',notfound:'Frage in dieser Sprache nicht gefunden.'}}[lang]||{back:'Back to questions',answers:'demo answers',notfound:'Question not found.'};
  const match=id.match(/^catalog-q-([^-]+)-(.+)-(\d+)$/);const slug=match?.[2]||comprehensiveSpecialties[0].slug;
  const questions=virtualQuestionsForSpecialty(slug,lang,50);const localQuestions=(JSON.parse(localStorage.getItem('sb1_demo_questions')||'[]') as any[]);const question=questions.find(q=>q.id===id)||localQuestions.find(q=>q.id===id&&(!q.language||q.language===lang))||null;
- const answers=useMemo(()=>question?virtualAnswersForQuestion(question,lang,8):[],[question,lang]);
+ const answers=useMemo(()=>question?virtualAnswersForQuestion(question,lang,20):[],[question,lang]);
  if(!question)return <div className="min-h-screen pt-28 text-center" dir={dir}><p className="text-gray-500">السؤال غير موجود في هذه اللغة.</p><button onClick={()=>navigate('/questions')} className="mt-4 rounded-xl bg-teal-600 text-white px-5 py-3">العودة للأسئلة</button></div>;
  return <div className="min-h-screen bg-gray-50 pt-24 pb-16" dir={dir}><div className="mx-auto max-w-3xl px-4">
   <button onClick={()=>navigate('/questions')} className="mb-5 flex items-center gap-2 text-sm text-gray-500"><ArrowRight className="h-4 w-4"/>العودة للأسئلة</button>
