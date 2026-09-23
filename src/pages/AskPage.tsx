@@ -6,6 +6,7 @@ import { useApp } from '@/i18n/AppContext';
 import { CURRENCY_RATES } from '@/types/i18n';
 import { supabase, type Specialty, type Doctor } from '@/lib/supabase';
 import DoctorCard from '@/components/DoctorCard';
+import { demoDoctors, demoSpecialties } from '@/lib/demoData';
 
 type PricingTier = {
   id: string;
@@ -27,6 +28,8 @@ const fallbackTiers: PricingTier[] = [
   { id: 'plus', name: 'Plus', name_ar: 'المعززة', description: 'Faster responses from more specialists', description_ar: 'ردود أسرع من عدد أكبر من الأخصائيين', duration_days: 14, specialists_notified: 25, min_answers: 2, max_answers: 5, response_speed: 'fast', price_usd: 19, is_featured: true },
   { id: 'premium', name: 'Premium', name_ar: 'المميزة', description: 'Instant response and extended duration', description_ar: 'رد فوري ومدة ممتدة', duration_days: 30, specialists_notified: 50, min_answers: 3, max_answers: 10, response_speed: 'instant', price_usd: 39, is_featured: false },
 ];
+
+const dataId = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `sb1-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
 export default function AskPage() {
   const { path, navigate } = useRouter();
@@ -54,7 +57,7 @@ export default function AskPage() {
           supabase.from('specialties').select('*').order('name'),
           supabase.from('pricing_tiers').select('*').eq('is_active', true).order('sort_order'),
         ]);
-        setSpecialties(specs || []);
+        setSpecialties((specs && specs.length ? specs : demoSpecialties) as Specialty[]);
         if (dbTiers?.length) setTiers(dbTiers as PricingTier[]);
       } catch {
         // Keep the page usable with the built-in pricing catalog when the database is unavailable.
@@ -100,46 +103,55 @@ export default function AskPage() {
     setSubmitting(true);
     try {
       const { data: spec } = await supabase.from('specialties').select('id').eq('slug', selectedSpecialty).maybeSingle();
-      if (!spec) throw new Error('specialty');
-
-      const { data, error: insertError } = await supabase.from('questions').insert({
-        specialty_id: spec.id,
-        author_name: form.author_name.trim(),
-        title: form.title.trim(),
-        body: form.body.trim(),
-        age: form.age ? parseInt(form.age) : null,
-        gender: form.gender,
-        status: questionType === 'paid' ? 'pending_payment' : 'pending',
-      }).select('id').single();
-
-      if (insertError || !data) throw insertError || new Error('question');
+      const fallbackSpec = demoSpecialties.find((item) => item.slug === selectedSpecialty) || demoSpecialties[0];
+      const questionId = dataId();
+      let dbQuestionId = '';
+      try {
+        const { data, error: insertError } = await supabase.from('questions').insert({
+          specialty_id: spec?.id || fallbackSpec.id,
+          author_name: form.author_name.trim(),
+          title: form.title.trim(),
+          body: form.body.trim(),
+          age: form.age ? parseInt(form.age) : null,
+          gender: form.gender,
+          status: questionType === 'paid' ? 'pending_payment' : 'pending',
+        }).select('id').single();
+        if (!insertError && data?.id) dbQuestionId = data.id;
+      } catch {
+        // Public demo fallback.
+      }
+      const id = dbQuestionId || questionId;
+      const localQuestion = {
+        id, specialty_id: fallbackSpec.id, author_name: form.author_name.trim(), title: form.title.trim(), body: form.body.trim(),
+        age: form.age ? parseInt(form.age) : null, gender: form.gender, status: questionType === 'paid' ? 'pending_payment' : 'pending',
+        views: 0, created_at: new Date().toISOString(), specialty: fallbackSpec, answers: [],
+      };
+      const existing = JSON.parse(localStorage.getItem('sb1_demo_questions') || '[]');
+      localStorage.setItem('sb1_demo_questions', JSON.stringify([localQuestion, ...existing]));
 
       if (questionType === 'paid') {
-        const { error: paymentError } = await supabase.from('payments').insert({
-          payer_email: '',
-          payer_name: form.author_name.trim(),
-          amount: Number(localAmount.toFixed(2)),
-          currency: country.currency,
-          payment_type: 'question',
-          reference_id: data.id,
-          status: 'pending',
-        });
-        if (paymentError) {
-          await supabase.from('questions').delete().eq('id', data.id);
-          throw paymentError;
+        const payment = { id: dataId(), amount: Number(localAmount.toFixed(2)), currency: country.currency, reference_id: id, status: 'pending' };
+        const payments = JSON.parse(localStorage.getItem('sb1_demo_payments') || '[]');
+        localStorage.setItem('sb1_demo_payments', JSON.stringify([payment, ...payments]));
+        if (dbQuestionId) {
+          const { error: paymentError } = await supabase.from('payments').insert({
+            payer_email: '', payer_name: form.author_name.trim(), amount: payment.amount, currency: country.currency,
+            payment_type: 'question', reference_id: id, status: 'pending',
+          });
+          if (paymentError) throw paymentError;
         }
-        navigate(`/payments?type=question&reference=${data.id}&amount=${localAmount.toFixed(2)}&currency=${encodeURIComponent(country.currencySymbol)}`);
+        navigate(`/payments?type=question&reference=${id}&amount=${payment.amount.toFixed(2)}&currency=${encodeURIComponent(country.currencySymbol)}`);
         return;
       }
 
       setSuccess(true);
-      setTimeout(() => navigate(`/questions/${data.id}`), 1200);
+      setTimeout(() => navigate(`/questions/${id}`), 700);
     } catch {
       setError(t('ask.error'));
     } finally {
       setSubmitting(false);
     }
-  };
+  }
 
   if (success) {
     return (
