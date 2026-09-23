@@ -123,7 +123,7 @@ const uk: TranslationData = {
     secondaryButton: 'Дізнатися про лікарів',
   },
   footer: {
-    about: 'Tabibi Online',
+    about: 'SB1',
     aboutDesc: 'Інтегрована медична та психологічна платформа, що з\'єднує пацієнтів з найкращими лікарями та терапевтами світу легко та безпечно.',
     quickLinks: 'Швидкі посилання',
     forPatients: 'Пацієнтам',
