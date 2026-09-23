@@ -136,7 +136,16 @@ function AppContent() {
   const navigate = (v: string) => { window.location.hash = v; };
 
   const isHome = platformRoute === '/';
-  const localHashPage = isHome && window.location.hash;
+  const hash = window.location.hash;
+  const isHomeAnchor = ['', '#', '#home', '#how-it-works', '#about', '#contact'].includes(hash);
+  const localHashPage = isHome && hash && !isHomeAnchor;
+
+  useEffect(() => {
+    if (!isHome || !hash || !isHomeAnchor) return;
+    const id = hash.slice(1);
+    const timer = window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+    return () => window.clearTimeout(timer);
+  }, [isHome, hash, isHomeAnchor]);
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
