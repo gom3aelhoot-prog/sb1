@@ -4,6 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import { useRouter, parseQuery } from '@/lib/router';
 import { supabase, type SpecialtyLibraryItem, type Specialty } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
+import { demoLibrary, demoSpecialties } from '@/lib/demoData';
 
 export default function LibraryPage() {
   const { t, specialtyName, lang, dir } = useI18n();
@@ -16,14 +17,14 @@ export default function LibraryPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.from('specialties').select('*').order('name').then(({ data }) => setSpecialties(data || [])).catch(() => setSpecialties([]));
+    supabase.from('specialties').select('*').order('name').then(({ data }) => setSpecialties((data && data.length ? data : demoSpecialties) as Specialty[])).catch(() => setSpecialties([]));
   }, []);
   useEffect(() => {
     setLoading(true);
     let q = supabase.from('specialty_library_items').select('*, specialty(*)').order('created_at', { ascending: false }).limit(50);
     if (selectedSpec) q = q.eq('specialty_id', selectedSpec);
     if (filter !== 'all') q = q.eq('item_type', filter);
-    q.then(({ data }) => { setItems(data || []); setLoading(false); }).catch(() => { setItems([]); setLoading(false); });
+    q.then(({ data }) => { setItems((data && data.length ? data : demoLibrary) as SpecialtyLibraryItem[]); setLoading(false); }).catch(() => { setItems(demoLibrary); setLoading(false); });
   }, [selectedSpec, filter]);
 
   const typeIcons: Record<string, typeof BookOpen> = { news: Newspaper, book: BookOpen, service: Wrench, article: BookOpen };
