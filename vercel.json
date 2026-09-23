@@ -4,6 +4,6 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "rewrites": [
-    { "source": "/((?!assets/|favicon.ico|.*\\.(js|css|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|map)$).*)", "destination": "/index.html" }
+    { "source": "/:path*", "destination": "/index.html" }
   ]
 }
