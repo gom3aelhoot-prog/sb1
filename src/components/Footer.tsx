@@ -5,17 +5,17 @@ export function Footer() {
   const { t } = useApp();
 
   const patientLinks = [
-    { label: t.footer.findDoctor, href: '#' },
-    { label: t.footer.bookAppointment, href: '#' },
-    { label: t.footer.pricing, href: '#' },
-    { label: t.footer.faq, href: '#' },
+    { label: t.footer.findDoctor, href: '/doctors' },
+    { label: t.footer.bookAppointment, href: '/sessions' },
+    { label: t.footer.pricing, href: '/subscriptions' },
+    { label: t.footer.faq, href: '/questions' },
   ];
 
   const doctorLinks = [
-    { label: t.footer.joinAsDoctor, href: '#' },
-    { label: t.footer.doctorGuide, href: '#' },
-    { label: t.footer.about, href: '#' },
-    { label: t.footer.blog, href: '#' },
+    { label: t.footer.joinAsDoctor, href: '/verification' },
+    { label: t.footer.doctorGuide, href: '/doctors' },
+    { label: t.footer.about, href: '/#about' },
+    { label: t.footer.blog, href: '/articles' },
   ];
 
   const socialLinks = [
@@ -54,7 +54,7 @@ export function Footer() {
                 />
                 <button
                   className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary-600 text-white transition-all hover:bg-primary-700 active:scale-95"
-                  onClick={(e) => e.preventDefault()}
+                  
                   aria-label={t.footer.subscribe}
                 >
                   <Send className="h-4 w-4" />
