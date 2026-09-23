@@ -21,6 +21,8 @@ export default function PaymentsPage() {
   const [paid, setPaid] = useState(false);
   const [error, setError] = useState('');
   const [payment, setPayment] = useState<{ id: string; amount: number; currency: string; reference_id: string; status: string } | null>(null);
+  const [liveCheckout, setLiveCheckout] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   useEffect(() => {
     if (!isQuestionCheckout) return;
@@ -51,6 +53,32 @@ export default function PaymentsPage() {
       setLoading(false);
     });
   }, [isQuestionCheckout, query.reference, lang]);
+
+  const startLiveCheckout = async () => {
+    if (!payment) return;
+    setCheckoutLoading(true);
+    setError('');
+    try {
+      const response = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          amount: payment.amount,
+          currency: payment.currency,
+          description: 'SB1 medical question',
+          reference_id: payment.reference_id,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.url) throw new Error(data.error || 'Checkout unavailable');
+      window.location.href = data.url;
+    } catch (e) {
+      setLiveCheckout(false);
+      setError(lang === 'ar' ? 'الدفع المباشر غير مفعّل بعد. يمكنك استخدام وضع الاختبار.' : 'Live checkout is not configured yet. You can use sandbox mode.');
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
 
   const completeSandboxPayment = async () => {
     if (!payment) return;
@@ -117,8 +145,12 @@ export default function PaymentsPage() {
                 <p className="mt-1">{lang === 'ar' ? 'لا يتم خصم أموال حقيقية في هذه المرحلة. عند إضافة مفاتيح مزود الدفع، تتحول هذه الخطوة إلى Checkout فعلي.' : 'No real money is charged in this stage. Once a live payment provider is configured, this step becomes a real checkout.'}</p>
               </div>
               {error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-              <button disabled={paying || !payment} onClick={completeSandboxPayment} className="btn-primary w-full mt-5 flex items-center justify-center gap-2 disabled:opacity-50">
-                <CreditCard className="w-5 h-5" />{paying ? (lang === 'ar' ? 'جاري التأكيد...' : 'Confirming...') : (lang === 'ar' ? 'تأكيد الدفع التجريبي' : 'Confirm sandbox payment')}
+              <button type="button" onClick={() => setLiveCheckout(true)} className="btn-primary w-full mt-5 flex items-center justify-center gap-2">
+                <CreditCard className="w-5 h-5" />{lang === 'ar' ? 'الدفع الآمن عبر مزود الدفع' : 'Pay securely'}
+              </button>
+              {liveCheckout && <button type="button" disabled={checkoutLoading} onClick={startLiveCheckout} className="btn-secondary w-full mt-2 disabled:opacity-50">{checkoutLoading ? (lang === 'ar' ? 'جاري فتح الدفع...' : 'Opening checkout...') : (lang === 'ar' ? 'فتح بوابة الدفع' : 'Open payment gateway')}</button>}
+              <button type="button" disabled={paying || !payment} onClick={completeSandboxPayment} className="w-full mt-2 text-sm text-gray-500 underline disabled:opacity-50">
+                {paying ? (lang === 'ar' ? 'جاري التأكيد...' : 'Confirming...') : (lang === 'ar' ? 'استخدام وضع الاختبار' : 'Use sandbox mode')}
               </button>
             </div>
           )}
