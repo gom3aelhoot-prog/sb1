@@ -6,7 +6,7 @@ import { supabase, type Doctor, type Question, type SpecialistPost, type PostCom
 import QuestionCard from '@/components/QuestionCard';
 import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty, virtualArticlesForSpecialty, virtualAudioForSpecialty, virtualVideosForSpecialty } from '@/lib/catalog';
 
-type Tab = 'posts' | 'reels' | 'diary' | 'articles' | 'audio';
+type Tab = 'posts' | 'reels' | 'stories' | 'diary' | 'articles' | 'audio';
 
 export default function DoctorProfilePage({ id }: { id: string }) {
   const { navigate } = useRouter();
@@ -117,6 +117,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const tabs: { key: Tab; label: string; icon: typeof FileText }[] = [
     { key: 'posts', label: t('profile.posts'), icon: FileText },
     { key: 'reels', label: t('profile.reels'), icon: Video },
+    { key: 'stories', label: lang === 'ar' ? 'القصص' : lang === 'ru' ? 'Истории' : 'Stories', icon: Clock },
     { key: 'diary', label: t('profile.diary'), icon: PenLine },
     { key: 'articles', label: t('profile.articles'), icon: BookOpen },
     { key: 'audio', label: t('profile.audio'), icon: MessageCircle },
@@ -243,6 +244,17 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               </div>
             ))}
             {posts.filter((p) => p.video_url).length === 0 && <p className="text-center text-gray-400 py-8 col-span-full">{t('common.loading')}</p>}
+          </div>
+        )}
+
+        {activeTab === 'stories' && (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {posts.slice(0,5).map((p,i)=><button key={p.id} onClick={()=>setActiveTab('posts')} className="relative overflow-hidden rounded-2xl aspect-[3/5] bg-gradient-to-br from-teal-600 to-cyan-500 text-white p-4 text-start shadow-sm">
+              {p.image_url&&<img src={p.image_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-70"/>}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"/>
+              <span className="relative z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-teal-700 font-bold">{i+1}</span>
+              <span className="absolute bottom-3 start-3 end-3 z-10 text-xs font-semibold">{p.body}</span>
+            </button>)}
           </div>
         )}
 
