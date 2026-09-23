@@ -103,7 +103,7 @@ export default function FacilitiesPage() {
                     {facility.services && (
                       <p className="text-sm text-gray-400 mt-2">{facility.services}</p>
                     )}
-                    {(
+                    <
                       <button onClick={() => navigate('/facilities/'+facility.id)} className="mt-4 w-full bg-teal-50 hover:bg-teal-100 text-teal-700 font-medium py-2.5 rounded-xl transition-colors text-sm">
                         تفاصيل المؤسسة والحجز
                       </button>
