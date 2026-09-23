@@ -5,6 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Specialty } from '@/lib/supabase';
 import DoctorCard from '@/components/DoctorCard';
 import { demoDoctors, demoSpecialties } from '@/lib/demoData';
+import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 
 const cityNames: Record<string, Record<string, string>> = {
   دمشق: { ar: 'دمشق', en: 'Damascus', de: 'Damaskus', ru: 'Дамаск' },
@@ -27,7 +28,8 @@ export default function DoctorsPage() {
   useEffect(() => {
     (async () => {
       const { data: specs } = await supabase.from('specialties').select('*').order('name');
-      setSpecialties((specs && specs.length ? specs : demoSpecialties) as Specialty[]);
+      const comprehensive = comprehensiveSpecialties.map((s) => ({ id: `comp-${s.slug}`, slug: s.slug, name: s.ar, name_en: s.en, name_de: s.de, name_ru: s.ru, icon: 'Stethoscope', description: '', description_en: '', description_de: '', description_ru: '', created_at: new Date().toISOString() }));
+      setSpecialties((specs && specs.length ? specs : comprehensive) as Specialty[]);
     })();
   }, []);
 
@@ -47,9 +49,10 @@ export default function DoctorsPage() {
       }
       if (selectedCity) dbQuery = dbQuery.eq('city', selectedCity);
       const { data } = await dbQuery.order('rating', { ascending: false });
-      setDoctors((data && data.length ? data : demoDoctors) as Doctor[]);
+      const fallback = selectedSpecialty ? demoDoctors.filter((doctor) => doctor.specialty?.slug === selectedSpecialty) : demoDoctors;
+      setDoctors((data && data.length ? data : fallback) as Doctor[]);
       setLoading(false);
-    })().catch(() => { setDoctors(demoDoctors); setLoading(false); });
+    })().catch(() => { setDoctors(selectedSpecialty ? demoDoctors.filter((doctor) => doctor.specialty?.slug === selectedSpecialty) : demoDoctors); setLoading(false); });
   }, [search, selectedSpecialty, selectedCity]);
 
   const cities = ['دمشق', 'حلب', 'حمص', 'اللاذقية'];
