@@ -4,6 +4,7 @@ import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Course, type Specialty } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
+import { demoCourses, demoSpecialties } from '@/lib/demoData';
 
 export default function CoursesPage() {
   const { navigate } = useRouter();
@@ -20,7 +21,7 @@ export default function CoursesPage() {
   useEffect(() => {
     (async () => {
       const { data: specs } = await supabase.from('specialties').select('*').order('name');
-      setSpecialties(specs || []);
+      setSpecialties((specs && specs.length ? specs : demoSpecialties) as Specialty[]);
     })();
   }, []);
 
@@ -33,7 +34,7 @@ export default function CoursesPage() {
         if (spec) dbQuery = dbQuery.eq('specialty_id', spec.id);
       }
       const { data } = await dbQuery.order('created_at', { ascending: false });
-      setCourses(data || []);
+      setCourses((data && data.length ? data : demoCourses) as Course[]);
       setLoading(false);
     })();
   }, [selectedSpecialty]);
