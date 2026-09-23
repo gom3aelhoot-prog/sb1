@@ -35,6 +35,8 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           setQuestions(virtualQuestionsForSpecialty(slug,lang,8));
           setArticles(virtualArticlesForSpecialty(slug,lang,5));
           setAudios(virtualAudioForSpecialty(slug,lang,4));
+          setPosts(Array.from({length:5},(_,i)=>({id:`virtual-post-${id}-${i+1}`,doctor_id:id,body:lang==='ar'?`منشور تعليمي من ${doc.name} حول ${doc.specialty?.name||'التخصص'}.`:`Educational post from ${doc.name} about ${doc.specialty?.name||'the specialty'}.`,image_url:null,video_url:i===1?'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4':null,post_type:i===1?'reel':'post',views:200+i*70,likes_count:30+i*11,comments_count:3+i,created_at:new Date(Date.now()-i*86400000).toISOString(),doctor:doc})) as SpecialistPost[]);
+          setDiary([]); setComments({}); setLoading(false); return;
         }
         const { data: ans } = await supabase.from('answers').select('question_id').eq('doctor_id', id);
         if (ans && ans.length > 0) {
