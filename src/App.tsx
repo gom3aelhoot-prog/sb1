@@ -63,6 +63,8 @@ import ConsultationPage from '@/pages/ConsultationPage';
 import MessagesPage from '@/pages/MessagesPage';
 import NotificationsPage from '@/pages/NotificationsPage';
 import SettingsPage from '@/pages/SettingsPage';
+import MediaHubPage from '@/pages/MediaHubPage';
+import SpecialistStorePage from '@/pages/SpecialistStorePage';
 
 type HashView = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
 
@@ -93,6 +95,8 @@ function PlatformRoute() {
   if (route.startsWith('/labs/')) return <InstitutionDetailPage kind="lab" />;
   if (route.startsWith('/radiology/')) return <InstitutionDetailPage kind="radiology" />;
   if (route.startsWith('/facilities/')) return <InstitutionDetailPage kind="facility" />;
+  if (route === '/media') return <MediaHubPage />;
+  if (route === '/store') return <SpecialistStorePage />;
   if (route === '/articles') return <ArticlesPage />;
   if (route.startsWith('/articles/')) return <ArticleDetailPage id={route.split('/')[2]} />;
   if (route === '/videos') return <VideosPage />;
