@@ -86,6 +86,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const setLanguage = useCallback((lang: LanguageCode) => {
     setLanguageState(lang);
     localStorage.setItem(STORAGE_KEYS.language, lang);
+    window.dispatchEvent(new CustomEvent('sb1-language-change', { detail: lang }));
   }, []);
 
   const setCountry = useCallback((c: CountryInfo) => {
