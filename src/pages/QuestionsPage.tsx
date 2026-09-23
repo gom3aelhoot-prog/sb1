@@ -1,25 +1,27 @@
 import { useEffect, useState } from 'react';
 import { MessageCircle } from 'lucide-react';
-import { useRouter } from '@/lib/router';
+import { useRouter, parseQuery } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Question, type Specialty } from '@/lib/supabase';
 import QuestionCard from '@/components/QuestionCard';
 import { demoQuestions, demoSpecialties } from '@/lib/demoData';
 
 export default function QuestionsPage() {
-  const { navigate } = useRouter();
+  const { navigate, path } = useRouter();
+  const query = parseQuery(path);
   const { t, specialtyName, dir } = useI18n();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSpecialty, setSelectedSpecialty] = useState('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState(query.specialty || '');
 
   useEffect(() => {
     (async () => {
       const { data: specs } = await supabase.from('specialties').select('*').order('name');
       setSpecialties((specs && specs.length ? specs : demoSpecialties) as Specialty[]);
+      if (query.specialty) setSelectedSpecialty(query.specialty);
     })();
-  }, []);
+  }, [query.specialty]);
 
   useEffect(() => {
     (async () => {
@@ -35,7 +37,8 @@ export default function QuestionsPage() {
       }
       const { data } = await dbQuery.order('created_at', { ascending: false });
       const local = JSON.parse(localStorage.getItem('sb1_demo_questions') || '[]') as Question[];
-      setQuestions((data && data.length ? [...local, ...data] : [...local, ...demoQuestions]) as Question[]);
+      const fallback = selectedSpecialty ? demoQuestions.filter(q => q.specialty?.slug === selectedSpecialty) : demoQuestions;
+      setQuestions((data && data.length ? [...local, ...data] : [...local, ...fallback]) as Question[]);
       setLoading(false);
     })();
   }, [selectedSpecialty]);
