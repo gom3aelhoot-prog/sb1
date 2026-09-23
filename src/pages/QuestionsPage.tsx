@@ -4,6 +4,7 @@ import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Question, type Specialty } from '@/lib/supabase';
 import QuestionCard from '@/components/QuestionCard';
+import { demoQuestions, demoSpecialties } from '@/lib/demoData';
 
 export default function QuestionsPage() {
   const { navigate } = useRouter();
@@ -16,7 +17,7 @@ export default function QuestionsPage() {
   useEffect(() => {
     (async () => {
       const { data: specs } = await supabase.from('specialties').select('*').order('name');
-      setSpecialties(specs || []);
+      setSpecialties((specs && specs.length ? specs : demoSpecialties) as Specialty[]);
     })();
   }, []);
 
@@ -33,7 +34,7 @@ export default function QuestionsPage() {
         if (spec) dbQuery = dbQuery.eq('specialty_id', spec.id);
       }
       const { data } = await dbQuery.order('created_at', { ascending: false });
-      setQuestions(data || []);
+      setQuestions((data && data.length ? data : demoQuestions) as Question[]);
       setLoading(false);
     })();
   }, [selectedSpecialty]);
