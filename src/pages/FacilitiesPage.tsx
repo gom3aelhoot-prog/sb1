@@ -1,161 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Building2, Pill, HeartPulse, Home, Stethoscope, MapPin, Phone, ShoppingCart } from 'lucide-react';
+import { useMemo,useState } from 'react';
+import { Building2,Pill,HeartPulse,Home,Stethoscope,MapPin,ShoppingCart,Scan,FlaskConical,Accessibility } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useRouter } from '@/lib/router';
-import { supabase, type AdditionalFacility, type PharmacyProduct } from '@/lib/supabase';
-import { demoFacilities, demoProducts } from '@/lib/demoData';
-
-const facilityIcons: Record<string, typeof Building2> = {
-  rehab: HeartPulse,
-  addiction: HeartPulse,
-  nursing: Home,
-  pharmacy: Pill,
-  clinic: Stethoscope,
-  radiology: Building2,
-  lab: Building2,
-};
-
-export default function FacilitiesPage() {
-  const { t, lang } = useI18n();
-  const { navigate } = useRouter();
-  const [facilities, setFacilities] = useState<AdditionalFacility[]>(demoFacilities as AdditionalFacility[]);
-  const [products, setProducts] = useState<PharmacyProduct[]>(demoProducts as PharmacyProduct[]);
-  const [loading, setLoading] = useState(false);
-  const [activeType, setActiveType] = useState('all');
-  const [cart, setCart] = useState<string[]>([]);
-
-  useEffect(() => {
-    let alive = true;
-    const timer = window.setTimeout(() => {
-      if (alive) setLoading(false);
-    }, 2200);
-    (async () => {
-      try {
-        const result = await Promise.race([
-          Promise.all([
-            supabase.from('additional_facilities').select('*').eq('is_active', true).order('name'),
-            supabase.from('pharmacy_products').select('*').eq('is_active', true).order('name'),
-          ]),
-          new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 2000)),
-        ]);
-        if (!alive) return;
-        if (result) {
-          const [{ data: facData }, { data: prodData }] = result;
-          if (facData?.length) setFacilities(facData as AdditionalFacility[]);
-          if (prodData?.length) setProducts(prodData as PharmacyProduct[]);
-        }
-      } catch {
-        // Demo data is already visible, so a backend failure does not block the page.
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-    return () => { alive = false; window.clearTimeout(timer); };
-  }, []);
-
-  const types = [
-    { key: 'all', label: t('facilities.all_types') },
-    { key: 'rehab', label: t('facilities.rehab') },
-    { key: 'addiction', label: t('facilities.addiction') },
-    { key: 'nursing', label: t('facilities.nursing') },
-    { key: 'pharmacy', label: t('facilities.pharmacy') },
-    { key: 'clinic', label: t('facilities.clinics') },
-    { key: 'radiology', label: t('facilities.radiology') },
-    { key: 'lab', label: t('facilities.labs') },
-  ];
-
-  const filtered = activeType === 'all' ? facilities : facilities.filter((f) => f.facility_type === activeType);
-  const pharmacyFacilities = facilities.filter((f) => f.facility_type === 'pharmacy');
-
-  return (
-    <div className="min-h-screen bg-gray-50 pt-24 pb-12">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('facilities.title')}</h1>
-          <p className="text-gray-500">{t('facilities.subtitle')}</p>
-        </div>
-
-        <div className="flex flex-wrap gap-2 justify-center mb-8">
-          {types.map((type) => (
-            <button key={type.key} onClick={() => setActiveType(type.key)} className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${activeType === type.key ? 'bg-teal-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}>
-              {type.label}
-            </button>
-          ))}
-        </div>
-
-        {loading ? (
-          <p className="text-center text-gray-500">{t('common.loading')}</p>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
-              {filtered.map((facility) => {
-                const Icon = facilityIcons[facility.facility_type] || Building2;
-                return (
-                  <div key={facility.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all">
-                    <div className="flex items-start gap-4 mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-6 h-6 text-teal-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-gray-800">{facility.name}</h3>
-                        {facility.description && <p className="text-sm text-gray-500 mt-1">{facility.description}</p>}
-                      </div>
-                    </div>
-                    {facility.address && (
-                      <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-                        <MapPin className="w-4 h-4 text-teal-500" /> {facility.address}
-                      </div>
-                    )}
-                    {facility.phone && (
-                      <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-                        <Phone className="w-4 h-4 text-teal-500" /> {facility.phone}
-                      </div>
-                    )}
-                    {facility.services && (
-                      <p className="text-sm text-gray-400 mt-2">{facility.services}</p>
-                    )}
-                    <button onClick={() => navigate('/facilities/'+facility.id)} className="mt-4 w-full bg-teal-50 hover:bg-teal-100 text-teal-700 font-medium py-2.5 rounded-xl transition-colors text-sm">
-                      تفاصيل المؤسسة والحجز
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-
-            {activeType === 'all' || activeType === 'pharmacy' ? (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">{t('facilities.products')}</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {products.map((product) => (
-                    <div key={product.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all">
-                      <div className="w-full h-32 bg-gray-100 flex items-center justify-center">
-                        {product.image_url ? (
-                          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <Pill className="w-10 h-10 text-gray-300" />
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-medium text-gray-800 text-sm mb-1">{product.name}</h3>
-                        {product.description && <p className="text-xs text-gray-400 mb-2 line-clamp-2">{product.description}</p>}
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-teal-700">{product.price} {product.currency}</span>
-                          <button onClick={() => setCart([...cart, product.id])} className="p-2 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-600 transition-colors">
-                            <ShoppingCart className="w-4 h-4" />
-                          </button>
-                        </div>
-                        <p className="text-xs text-gray-400 mt-2">
-                          {product.delivery_option === 'delivery' ? t('facilities.delivery') : product.delivery_option === 'pickup' ? t('facilities.pickup') : t('facilities.hand_delivery')}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </>
-        )}
-      </div>
-    </div>
-  );
+import { virtualFacilities,languageCountry } from '@/lib/catalog';
+const icons:any={clinic:Stethoscope,lab:FlaskConical,radiology:Scan,elderly:Home,pharmacy:Pill,addiction:HeartPulse,rehab:Accessibility,'medical-supplies':Building2};
+const labels:any={clinic:{ar:'العيادات والمستشفيات',en:'Clinics & Hospitals'},lab:{ar:'التحاليل',en:'Laboratories'},radiology:{ar:'الأشعة',en:'Radiology'},elderly:{ar:'دور رعاية المسنين',en:'Elderly Care'},pharmacy:{ar:'الصيدليات',en:'Pharmacies'},addiction:{ar:'علاج الإدمان',en:'Addiction Care'},rehab:{ar:'التأهيل والعلاج الطبيعي',en:'Rehabilitation & Physiotherapy'},'medical-supplies':{ar:'الأدوات الطبية',en:'Medical Supplies'}};
+export default function FacilitiesPage(){
+ const {lang,dir}=useI18n();const {navigate}=useRouter();const p=languageCountry(lang);const [type,setType]=useState('clinic');const [country,setCountry]=useState(p.country);
+ const list=useMemo(()=>virtualFacilities(lang,country).filter(f=>f.facility_type===type),[lang,country,type]);
+ return <div className="min-h-screen bg-gray-50 pt-24 pb-16" dir={dir}><div className="mx-auto max-w-7xl px-4">
+  <div className="rounded-3xl bg-gradient-to-br from-teal-700 to-cyan-600 p-8 text-white"><h1 className="text-3xl font-extrabold">المرافق الطبية</h1><p className="mt-2 text-teal-50">المؤسسات تظهر حسب اللغة والبلد المختارين.</p></div>
+  <div className="sticky top-20 z-20 mt-4 rounded-2xl bg-white border p-3 shadow-sm overflow-x-auto"><div className="flex min-w-max gap-2">{Object.keys(labels).map(k=>{const I=icons[k];return <button key={k} onClick={()=>setType(k)} className={'flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold '+(type===k?'bg-teal-600 text-white':'bg-gray-50 text-gray-700')}><I className="h-4 w-4"/>{labels[k][lang]||labels[k].en}</button>})}</div></div>
+  <div className="my-5 flex items-center gap-3"><span className="font-semibold text-gray-700">البلد</span><select value={country} onChange={e=>setCountry(e.target.value)} className="rounded-xl border px-4 py-2.5 bg-white"><option>{p.country}</option><option>السعودية</option><option>الإمارات</option><option>مصر</option><option>الأردن</option><option>Deutschland</option><option>Россия</option><option>Հայաստան</option><option>საქართველო</option><option>O‘zbekiston</option><option>United Kingdom</option></select></div>
+  <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">{list.map(f=>{const I=icons[f.facility_type]||Building2;return <div key={f.id} className="rounded-2xl bg-white border p-6 shadow-sm"><div className="flex items-start gap-4"><div className="h-12 w-12 rounded-xl bg-teal-50 flex items-center justify-center"><I className="h-6 w-6 text-teal-600"/></div><div><h3 className="font-bold text-gray-900">{f.name}</h3><p className="text-sm text-gray-500 mt-1">{f.description}</p></div></div><div className="mt-4 flex items-center gap-2 text-sm text-gray-500"><MapPin className="h-4 w-4"/>{f.address}</div><button onClick={()=>navigate('/facilities/'+f.id)} className="mt-5 w-full rounded-xl bg-teal-50 py-3 font-bold text-teal-700 hover:bg-teal-100">تفاصيل المؤسسة والحجز</button></div>})}</div>
+  <div className="mt-8 rounded-2xl bg-white p-6 border flex items-center gap-2"><ShoppingCart className="text-teal-600"/><span>متجر الأدوات والمنتجات الطبية متاح ضمن SB1.</span></div>
+ </div></div>;
 }
