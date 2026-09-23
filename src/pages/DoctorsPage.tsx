@@ -63,7 +63,8 @@ export default function DoctorsPage() {
       }
       if (selectedCity) dbQuery = dbQuery.eq('city', selectedCity);
       const { data } = await dbQuery.order('rating', { ascending: false });
-      const realFallback = selectedSpecialty ? demoDoctors.filter((doctor) => doctor.specialty?.slug === selectedSpecialty) : demoDoctors;\n      const fallback = selectedSpecialty && realFallback.length === 0 ? virtualDoctorsFor(selectedSpecialty) : realFallback;
+      const realFallback = selectedSpecialty ? demoDoctors.filter((doctor) => doctor.specialty?.slug === selectedSpecialty) : demoDoctors;
+      const fallback = selectedSpecialty && realFallback.length === 0 ? virtualDoctorsFor(selectedSpecialty) : realFallback;
       setDoctors((data && data.length ? data : fallback) as Doctor[]);
       setLoading(false);
     })().catch(() => { setDoctors(selectedSpecialty ? (demoDoctors.filter((doctor) => doctor.specialty?.slug === selectedSpecialty).length ? demoDoctors.filter((doctor) => doctor.specialty?.slug === selectedSpecialty) : virtualDoctorsFor(selectedSpecialty)) : demoDoctors); setLoading(false); });
