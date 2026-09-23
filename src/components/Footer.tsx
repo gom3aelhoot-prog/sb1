@@ -109,7 +109,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3 text-sm text-neutral-400">
                 <Phone className="h-4 w-4 text-primary-400 flex-shrink-0" />
-                support@sb1.com
+                —
               </li>
               <li className="flex items-start gap-3 text-sm text-neutral-400">
                 <MapPin className="h-4 w-4 text-primary-400 flex-shrink-0 mt-0.5" />
