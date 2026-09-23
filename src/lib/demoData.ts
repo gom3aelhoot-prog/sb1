@@ -130,3 +130,23 @@ const generatedVideos: DoctorVideo[] = comprehensiveSpecialties.slice(0, 30).map
   };
 });
 demoVideos.push(...generatedVideos);
+
+
+const facilityCountries = [
+ ['دمشق','سوريا'],['الرياض','السعودية'],['دبي','الإمارات'],['القاهرة','مصر'],['عمّان','الأردن'],
+ ['بيروت','لبنان'],['برلين','ألمانيا'],['فيينا','النمسا'],['موسكو','روسيا'],['لندن','بريطانيا']
+] as const;
+const facilityKinds = [
+ ['rehab','مركز تأهيل وعلاج طبيعي'],['addiction','مركز صحة وعلاج الإدمان'],['nursing','دار رعاية وتمريض'],['pharmacy','صيدلية SB1'],['clinic','عيادة متعددة التخصصات'],['radiology','مركز تصوير طبي'],['lab','مختبر تشخيصي']
+] as const;
+facilityKinds.forEach(([kind,label], ki) => {
+  facilityCountries.slice(0,5).forEach(([city,country], ci) => {
+    demoFacilities.push({
+      id:`fac-global-${ki+1}-${ci+1}`,facility_type:kind,name:`${label} ${country}`,
+      description:`مرفق افتراضي تجريبي في ${city} لخدمات ${label}.`,address:`${city} - مركز SB1 الصحي`,
+      city,country,phone:null,email:null,logo_url:null,services:'حجز إلكتروني، مواعيد، معلومات الخدمات والأسعار',
+      schedule:{sun:'09:00-18:00',mon:'09:00-18:00',tue:'09:00-18:00',wed:'09:00-18:00',thu:'09:00-18:00'},
+      rating:4.5,is_active:true,created_at:now
+    } as any);
+  });
+});
