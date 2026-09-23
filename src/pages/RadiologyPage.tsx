@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { MapPin, Phone, Calendar, X, Scan } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type RadiologyCenter } from '@/lib/supabase';
+import { demoRadiology } from '@/lib/demoData';
 
 export default function RadiologyPage() {
   const { t } = useI18n();
@@ -13,7 +14,7 @@ export default function RadiologyPage() {
 
   useEffect(() => {
     supabase.from('radiology_centers').select('*').eq('is_active', true).order('created_at', { ascending: false }).then(({ data }) => {
-      setCenters(data || []);
+      setCenters((data && data.length ? data : demoRadiology) as RadiologyCenter[]);
       setLoading(false);
     }).catch(() => {
       setCenters([]);
