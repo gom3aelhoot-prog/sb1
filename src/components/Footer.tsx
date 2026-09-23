@@ -37,7 +37,7 @@ export function Footer() {
               </div>
               <div>
                 <span className="block text-lg font-bold leading-tight text-white">SB1</span>
-                <span className="block text-[10px] font-medium leading-tight text-primary-400">Online</span>
+                
               </div>
             </div>
             <p className="mt-4 text-sm leading-relaxed text-neutral-400 max-w-sm">{t.footer.aboutDesc}</p>
