@@ -31,6 +31,7 @@ export default function SessionsPage() {
   const [videoPrice, setVideoPrice] = useState(25);
   const [booking, setBooking] = useState(false);
   const [booked, setBooked] = useState(false);
+  const [bookedMeetingUrl, setBookedMeetingUrl] = useState('');
   const [doctorSchedule, setDoctorSchedule] = useState<SessionSchedule[]>([]);
   const [preferredTimes, setPreferredTimes] = useState('');
   const [requestSent, setRequestSent] = useState(false);
@@ -179,6 +180,7 @@ export default function SessionsPage() {
       client_email: videoEmail.trim(),
       status: 'booked',
     }).eq('id', slot.id);
+    const room = `https://meet.jit.si/SB1-${videoDoctor}-${Date.now()}`;
     await supabase.from('video_sessions').insert({
       doctor_id: videoDoctor,
       patient_name: videoName.trim(),
@@ -187,8 +189,10 @@ export default function SessionsPage() {
       duration_minutes: 30,
       price: videoPrice,
       status: 'confirmed',
-      is_recorded: true,
+      meeting_url: room,
+      is_recorded: false,
     });
+    setBookedMeetingUrl(room);
     setBooking(false);
     setBooked(true);
     setTimeout(() => { setMode('menu'); setBooked(false); }, 3000);
@@ -198,6 +202,7 @@ export default function SessionsPage() {
     e.preventDefault();
     if (!videoDoctor || !videoDate || !videoName.trim() || !videoEmail.trim()) return;
     setBooking(true);
+    const room = `https://meet.jit.si/SB1-${videoDoctor}-${Date.now()}`;
     const { data } = await supabase.from('video_sessions').insert({
       doctor_id: videoDoctor,
       patient_name: videoName.trim(),
@@ -206,8 +211,10 @@ export default function SessionsPage() {
       duration_minutes: 30,
       price: videoPrice,
       status: 'pending',
-      is_recorded: true,
+      meeting_url: room,
+      is_recorded: false,
     }).select('*, doctor(*)').single();
+    setBookedMeetingUrl(room);
     if (data) {
       await supabase.from('payments').insert({
         payer_email: videoEmail.trim(),
@@ -394,7 +401,8 @@ export default function SessionsPage() {
               <Video className="w-10 h-10 text-green-600" />
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-2">{t('sessions.booked')}</h3>
-            <p className="text-gray-500">سيصلك رابط الجلسة على بريدك الإلكتروني قبل الموعد</p>
+            <p className="text-gray-500">تم إنشاء غرفة فيديو مجانية عبر Jitsi لهذه الجلسة.</p>
+            {bookedMeetingUrl && <a href={bookedMeetingUrl} target="_blank" rel="noreferrer" className="btn-primary inline-flex mt-5 items-center gap-2"><Video className="w-4 h-4" />فتح غرفة الجلسة</a>}
           </div>
         ) : (
           <div className="card p-7">
