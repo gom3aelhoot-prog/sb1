@@ -49,5 +49,7 @@ export function parseQuery(path: string): Record<string, string> {
 
 export function getPathOnly(path: string): string {
   const queryIndex = path.indexOf('?');
-  return queryIndex === -1 ? path : path.substring(0, queryIndex);
+  const raw = queryIndex === -1 ? path : path.substring(0, queryIndex);
+  if (raw.length > 1 && raw.endsWith('/')) return raw.slice(0, -1);
+  return raw || '/';
 }
