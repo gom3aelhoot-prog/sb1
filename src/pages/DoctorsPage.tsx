@@ -13,7 +13,7 @@ export default function DoctorsPage(){
  useEffect(()=>{setSpecialty(q.specialty||'');setSearch(q.q||'')},[q.specialty,q.q]);
  useEffect(()=>{(async()=>{const {data}=await supabase.from('doctors').select('*, specialty(*)').eq('is_virtual',false);setDbDoctors((data||[]) as Doctor[])})().catch(()=>setDbDoctors([]))},[]);
  const doctors=useMemo(()=>{
-   if(!specialty) return dbDoctors.filter(d=>d.native_language===lang).slice(0,24);
+   if(!specialty){const real=dbDoctors.filter(d=>d.native_language===lang);const demo=comprehensiveSpecialties.slice(0,8).flatMap(s=>virtualDoctorsForSpecialty(s.slug,lang,3));return [...real,...demo].slice(0,24);}
    const real=dbDoctors.filter(d=>d.native_language===lang && d.specialty?.slug===specialty);
    return (real.length?real:virtualDoctorsForSpecialty(specialty,lang,8)).filter(d=>!search||d.name.toLowerCase().includes(search.toLowerCase())).filter(d=>!city||d.city===city);
  },[dbDoctors,specialty,lang,search,city]);
@@ -25,6 +25,5 @@ export default function DoctorsPage(){
    <input value={city} onChange={e=>setCity(e.target.value)} placeholder={profile.city} className="rounded-xl border px-4 py-3"/>
   </div>
   {specialty&&<div className="mb-5 rounded-2xl bg-teal-50 border border-teal-100 p-4 text-sm text-teal-800">يوجد 5 إلى 25 ملفاً افتراضياً لكل تخصص في كل لغة. الملفات الافتراضية تعليمية وليست أشخاصاً حقيقيين.</div>}
-  {!specialty?<div className="rounded-2xl bg-white border p-8 text-center"><Search className="mx-auto h-10 w-10 text-gray-300"/><p className="mt-3 text-gray-500">اختر التخصص لعرض الأخصائيين والأطباء.</p></div>:<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">{doctors.map(d=><DoctorCard key={d.id} doctor={d}/>)}</div>}
- </div></div>;
+  {!specialty?<><div className="mb-4 rounded-2xl bg-white border p-5"><p className="font-bold text-gray-800">أخصائيون وأطباء باللغة المختارة</p><p className="text-sm text-gray-500 mt-1">اختر التخصص لعرض 5 إلى 25 ملفاً تجريبياً في هذا التخصص.</p></div><div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">{doctors.map(d=><DoctorCard key={d.id} doctor={d}/>)}</div></>:<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 }
