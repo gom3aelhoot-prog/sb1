@@ -3,6 +3,7 @@ import { MessageSquare, Video, ArrowLeft, Send, AlertCircle, Shield, Clock, Cale
 import { useRouter, parseQuery } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Specialty, type TextSession, type ChatMessage, type SessionSchedule } from '@/lib/supabase';
+import { demoDoctors, demoSpecialties } from '@/lib/demoData';
 
 export default function SessionsPage() {
   const { path, navigate } = useRouter();
@@ -36,14 +37,19 @@ export default function SessionsPage() {
 
   useEffect(() => {
     (async () => {
-      const [{ data: docs }, { data: specs }, { data: settings }] = await Promise.all([
-        supabase.from('doctors').select('*, specialty(*)').order('rating', { ascending: false }),
-        supabase.from('specialties').select('*').order('name'),
-        supabase.from('site_settings').select('*').eq('id', 1).maybeSingle(),
-      ]);
-      setDoctors(docs || []);
-      setSpecialties(specs || []);
-      if (settings) setVideoPrice(Number(settings.video_session_price) || 25);
+      try {
+        const [{ data: docs }, { data: specs }, { data: settings }] = await Promise.all([
+          supabase.from('doctors').select('*, specialty(*)').order('rating', { ascending: false }),
+          supabase.from('specialties').select('*').order('name'),
+          supabase.from('site_settings').select('*').eq('id', 1).maybeSingle(),
+        ]);
+        setDoctors((docs && docs.length ? docs : demoDoctors) as Doctor[]);
+        setSpecialties((specs && specs.length ? specs : demoSpecialties) as Specialty[]);
+        if (settings) setVideoPrice(Number(settings.video_session_price) || 25);
+      } catch {
+        setDoctors(demoDoctors);
+        setSpecialties(demoSpecialties);
+      }
       if (query.doctor) setVideoDoctor(query.doctor);
     })();
   }, [query.doctor]);
