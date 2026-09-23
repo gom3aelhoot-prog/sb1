@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Building2, Pill, HeartPulse, Home, Stethoscope, MapPin, Phone, ShoppingCart } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { useRouter } from '@/lib/router';
 import { supabase, type AdditionalFacility, type PharmacyProduct } from '@/lib/supabase';
 import { demoFacilities, demoProducts } from '@/lib/demoData';
 
@@ -16,6 +17,7 @@ const facilityIcons: Record<string, typeof Building2> = {
 
 export default function FacilitiesPage() {
   const { t, lang } = useI18n();
+  const { navigate } = useRouter();
   const [facilities, setFacilities] = useState<AdditionalFacility[]>([]);
   const [products, setProducts] = useState<PharmacyProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,7 +104,7 @@ export default function FacilitiesPage() {
                       <p className="text-sm text-gray-400 mt-2">{facility.services}</p>
                     )}
                     {facility.facility_type !== 'pharmacy' && (
-                      <button className="mt-4 w-full bg-teal-50 hover:bg-teal-100 text-teal-700 font-medium py-2.5 rounded-xl transition-colors text-sm">
+                      <button onClick={() => navigate('/facilities/'+facility.id)} className="mt-4 w-full bg-teal-50 hover:bg-teal-100 text-teal-700 font-medium py-2.5 rounded-xl transition-colors text-sm">
                         {t('facilities.book')}
                       </button>
                     )}
