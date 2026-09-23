@@ -36,7 +36,7 @@ export function Footer() {
                 <HeartPulse className="h-5 w-5" />
               </div>
               <div>
-                <span className="block text-lg font-bold leading-tight text-white">Tabibi</span>
+                <span className="block text-lg font-bold leading-tight text-white">SB1</span>
                 <span className="block text-[10px] font-medium leading-tight text-primary-400">Online</span>
               </div>
             </div>
@@ -105,15 +105,15 @@ export function Footer() {
             <ul className="mt-4 space-y-3">
               <li className="flex items-center gap-3 text-sm text-neutral-400">
                 <Mail className="h-4 w-4 text-primary-400 flex-shrink-0" />
-                support@tabibionline.com
+                support@sb1.com
               </li>
               <li className="flex items-center gap-3 text-sm text-neutral-400">
                 <Phone className="h-4 w-4 text-primary-400 flex-shrink-0" />
-                +966 11 234 5678
+                support@sb1.com
               </li>
               <li className="flex items-start gap-3 text-sm text-neutral-400">
                 <MapPin className="h-4 w-4 text-primary-400 flex-shrink-0 mt-0.5" />
-                <span>Riyadh, Saudi Arabia</span>
+                <span>SB1</span>
               </li>
             </ul>
 
