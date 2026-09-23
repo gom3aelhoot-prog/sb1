@@ -3,6 +3,7 @@ import { ArrowRight, MessageCircle, Eye, Clock, ThumbsUp, User } from 'lucide-re
 import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Question, type Answer } from '@/lib/supabase';
+import { demoQuestions, demoAnswers } from '@/lib/demoData';
 
 export default function QuestionDetailPage({ id }: { id: string }) {
   const { navigate } = useRouter();
@@ -19,17 +20,18 @@ export default function QuestionDetailPage({ id }: { id: string }) {
         .eq('id', id)
         .maybeSingle();
 
-      if (q) {
-        setQuestion(q);
-        await supabase.from('questions').update({ views: (q.views || 0) + 1 }).eq('id', id);
-
+      const fallbackQuestion = demoQuestions.find((item) => item.id === id) || null;
+      const questionData = q || fallbackQuestion;
+      if (questionData) {
+        setQuestion(questionData as Question);
+        if (q) await supabase.from('questions').update({ views: (q.views || 0) + 1 }).eq('id', id);
         const { data: ans } = await supabase
           .from('answers')
           .select('*, doctor(*)')
           .eq('question_id', id)
           .order('helpful_count', { ascending: false });
-
-        setAnswers(ans || []);
+        const fallbackAnswers = demoAnswers.filter((item) => item.question_id === id);
+        setAnswers((ans && ans.length ? ans : fallbackAnswers) as Answer[]);
       }
       setLoading(false);
     })();
