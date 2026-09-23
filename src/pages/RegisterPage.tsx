@@ -8,11 +8,11 @@ import { useEffect } from 'react';
 export default function RegisterPage() {
   const { t, specialtyName } = useI18n();
   const { navigate } = useRouter();
-  const [accountType, setAccountType] = useState<'client' | 'specialist' | null>(null);
+  const [accountType, setAccountType] = useState<'client' | 'specialist' | 'institution' | null>(null);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', phone: '', specialty: '',
-    showName: true, anonymous: false,
+    showName: true, anonymous: false, institutionType: 'clinic', address: '', services: '',
   });
   const [docUrls, setDocUrls] = useState<{ id?: string; cert?: string; license?: string }>({});
   const [submitting, setSubmitting] = useState(false);
@@ -26,18 +26,28 @@ export default function RegisterPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
+      const authResult = await supabase.auth.signUp({ email: formData.email.trim().toLowerCase(), password: formData.password, options: { data: { name: formData.name, role: accountType } } });
+      if (authResult.error) throw authResult.error;
       if (accountType === 'client') {
-        const { error } = await supabase.from('doctors').insert({
+        const { error } = await supabase.from('profiles').insert({
+          id: authResult.data.user?.id,
           name: formData.anonymous ? 'مجهول' : formData.name,
-          specialty_id: null,
-          bio: 'عميل',
-          education: '',
-          experience_years: 0,
-          photo_url: '',
-          city: '',
-          native_language: 'ar',
-          is_verified: false,
-          phone_number: formData.phone,
+          email: formData.email.trim().toLowerCase(),
+          phone: formData.phone,
+          role: 'client',
+          is_anonymous: formData.anonymous,
+        });
+        if (!error) setSuccess(true);
+      } else if (accountType === 'institution') {
+        const { error } = await supabase.from('institutions').insert({
+          name: formData.name,
+          type: formData.institutionType,
+          address: formData.address,
+          phone: formData.phone,
+          email: formData.email.trim().toLowerCase(),
+          service_info: formData.services,
+          is_approved: false,
+          subscription_plan: 'free',
         });
         if (!error) setSuccess(true);
       } else if (accountType === 'specialist') {
@@ -109,6 +119,16 @@ export default function RegisterPage() {
               <h3 className="text-lg font-bold text-gray-800 mb-1">{t('register.specialist')}</h3>
               <p className="text-sm text-gray-500">{t('register.specialist_desc')}</p>
             </button>
+            <button
+              onClick={() => setAccountType('institution')}
+              className="card p-8 text-center hover:shadow-lg transition-all group"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Shield className="w-8 h-8 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">تسجيل مؤسسة</h3>
+              <p className="text-sm text-gray-500">عيادة، مختبر، أشعة، مستشفى، صيدلية أو مركز تأهيل</p>
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="card p-6 space-y-4">
@@ -133,6 +153,19 @@ export default function RegisterPage() {
               <label className="block text-sm font-semibold text-gray-700 mb-2">{t('register.phone')}</label>
               <input type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="input-field" />
             </div>
+
+            {accountType === 'institution' && (
+              <>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">نوع المؤسسة</label>
+                  <select value={formData.institutionType} onChange={(e) => setFormData({ ...formData, institutionType: e.target.value })} className="input-field">
+                    <option value="clinic">عيادة / مستشفى</option><option value="lab">مختبر</option><option value="radiology">مركز أشعة</option><option value="rehab">تأهيل</option><option value="pharmacy">صيدلية</option><option value="elderly">رعاية كبار السن</option><option value="addiction">علاج الإدمان</option>
+                  </select>
+                </div>
+                <input placeholder="العنوان" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="input-field" />
+                <textarea placeholder="الخدمات والأسعار والمواعيد" value={formData.services} onChange={(e) => setFormData({ ...formData, services: e.target.value })} className="input-field" rows={4} />
+              </>
+            )}
 
             {accountType === 'client' && (
               <div className="space-y-2">
