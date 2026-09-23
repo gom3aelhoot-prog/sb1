@@ -18,6 +18,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useApp } from '@/i18n/AppContext';
+import { useI18n } from '@/lib/i18n';
 import { MegaMenu } from '@/components/MegaMenu';
 import { LanguageSwitcher, MobileLanguageSwitcher } from '@/components/LanguageSwitcher';
 import { NotificationsPopover } from '@/components/NotificationsPopover';
@@ -25,6 +26,7 @@ import { SPECIALTIES } from '@/types/i18n';
 
 export function Header() {
   const { t, isAnonymous } = useApp();
+  const { t: platformT } = useI18n();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSection, setMobileSection] = useState<'main' | 'specialties' | 'language'>('main');
@@ -48,19 +50,19 @@ export function Header() {
   }, [mobileOpen]);
 
   const platformSections = [
-    { label: t.nav.doctors, href: '/doctors' },
-    { label: t.nav.questions, href: '/questions' },
-    { label: t.nav.ask, href: '/ask' },
-    { label: t.nav.articles, href: '/articles' },
-    { label: t.nav.videos, href: '/videos' },
-    { label: t.nav.audio, href: '/audio' },
-    { label: t.nav.courses, href: '/courses' },
-    { label: t.nav.sessions, href: '/sessions' },
-    { label: t.nav.clinics, href: '/clinics' },
-    { label: t.nav.labs, href: '/labs' },
-    { label: t.nav.radiology, href: '/radiology' },
-    { label: t.nav.facilities, href: '/facilities' },
-    { label: t.nav.library, href: '/library' },
+    { label: platformT('nav.doctors'), href: '/doctors' },
+    { label: platformT('nav.questions'), href: '/questions' },
+    { label: platformT('nav.ask'), href: '/ask' },
+    { label: platformT('nav.articles'), href: '/articles' },
+    { label: platformT('nav.videos'), href: '/videos' },
+    { label: platformT('nav.audio'), href: '/audio' },
+    { label: platformT('nav.courses'), href: '/courses' },
+    { label: platformT('nav.sessions'), href: '/sessions' },
+    { label: platformT('nav.clinics'), href: '/clinics' },
+    { label: platformT('nav.labs'), href: '/labs' },
+    { label: platformT('nav.radiology'), href: '/radiology' },
+    { label: platformT('nav.facilities'), href: '/facilities' },
+    { label: platformT('nav.library'), href: '/library' },
   ];
 
   const navItems = [
