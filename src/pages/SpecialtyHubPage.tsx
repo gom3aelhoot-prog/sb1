@@ -4,6 +4,7 @@ import { useRouter, getPathOnly } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 import { demoDoctors, demoQuestions } from '@/lib/demoData';
+import { supabase } from '@/lib/supabase';
 import DoctorCard from '@/components/DoctorCard';
 import QuestionCard from '@/components/QuestionCard';
 
@@ -22,14 +23,23 @@ export default function SpecialtyHubPage() {
   const slug = getPathOnly(path).split('/')[2] || '';
   const specialty = comprehensiveSpecialties.find(s => s.slug === slug);
   const [activeTab, setActiveTab] = useState<'doctors'|'questions'|'library'>('doctors');
+  const [loadedDoctors, setLoadedDoctors] = useState<any[]>([]);
+  const [loadedQuestions, setLoadedQuestions] = useState<any[]>([]);
+  useEffect(() => {
+    if (!slug) return;
+    (async () => {
+      const [{ data: doctors }, { data: questions }] = await Promise.all([
+        supabase.from('doctors').select('*, specialty(*)').eq('is_virtual', false),
+        supabase.from('questions').select('*, specialty(*), answers(*)').order('created_at', { ascending: false }),
+      ]);
+      setLoadedDoctors((doctors || []).filter((d:any) => d.specialty?.slug === slug));
+      setLoadedQuestions((questions || []).filter((q:any) => q.specialty?.slug === slug));
+    })().catch(() => {});
+  }, [slug]);
 
   const title = specialty ? (lang === 'en' ? specialty.en : lang === 'de' ? specialty.de : lang === 'ru' ? specialty.ru : specialty.ar) : 'التخصص';
-  const relatedDoctors = useMemo(() => {
-    const real = demoDoctors.filter(d => d.specialty?.slug === slug);
-    if (real.length) return real;
-    return [];
-  }, [slug]);
-  const relatedQuestions = useMemo(() => demoQuestions.filter(q => q.specialty?.slug === slug), [slug]);
+  const relatedDoctors = useMemo(() => loadedDoctors.length ? loadedDoctors : demoDoctors.filter(d => d.specialty?.slug === slug), [loadedDoctors, slug]);
+  const relatedQuestions = useMemo(() => loadedQuestions.length ? loadedQuestions : demoQuestions.filter(q => q.specialty?.slug === slug), [loadedQuestions, slug]);
 
   if (!specialty) {
     return <div className="min-h-screen pt-28 pb-16 text-center" dir={dir}><h1 className="text-2xl font-bold">التخصص غير موجود</h1><button onClick={() => navigate('/specialties')} className="btn-primary mt-5">العودة للتخصصات</button></div>;
