@@ -258,6 +258,8 @@ export default function TestsPage() {
       case 'asthma':
       case 'depression':
       case 'anxiety':
+      case 'ocd':
+      case 'ocd_screening':
         calculateQuestionnaire(); break;
       default: setResult(tr('هذا الاختبار سيتوفر قريباً', 'This test will be available soon'));
     }
