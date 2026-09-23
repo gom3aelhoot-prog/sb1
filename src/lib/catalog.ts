@@ -1,135 +1,108 @@
-import type { Doctor, Specialty, Question, Answer, Article, DoctorVideo, DoctorAudio, SpecialtyLibraryItem, AdditionalFacility } from '@/lib/supabase';
+import type { Doctor, Specialty, Question, Answer, Article, DoctorVideo, DoctorAudio, SpecialtyLibraryItem, AdditionalFacility, Course } from '@/lib/supabase';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 
 export const LANGUAGE_PROFILES: Record<string,{country:string;city:string;native:string;names:string[]}> = {
-  ar:{country:'الدول العربية',city:'دمشق',native:'العربية',names:['د. جمال نادي','د. أحمد خالد','د. سامر محمود','د. ياسر حسن','د. كريم علي','د. عمر يوسف','د. رامي أسعد','د. مازن خليل']},
-  en:{country:'United Kingdom',city:'London',native:'English',names:['Dr. James','Dr. Daniel Smith','Dr. Michael Brown','Dr. David Wilson','Dr. Robert Taylor','Dr. John Miller','Dr. William Davis','Dr. Thomas Moore']},
-  de:{country:'Deutschland',city:'Berlin',native:'Deutsch',names:['Dr. James','Dr. Lukas Müller','Dr. Anna Schneider','Dr. Thomas Weber','Dr. Julia Fischer','Dr. Felix Wagner','Dr. Marie Becker','Dr. Paul Hoffmann']},
-  ru:{country:'Россия',city:'Москва',native:'Русский',names:['ДОКТОР ДЖЕЙМС','Доктор Иван Петров','Доктор Анна Смирнова','Доктор Сергей Волков','Доктор Елена Кузнецова','Доктор Дмитрий Орлов','Доктор Мария Соколова','Доктор Алексей Морозов']},
-  uk:{country:'Україна',city:'Київ',native:'Українська',names:['Доктор Джеймс','Доктор Олександр Коваль','Доктор Анна Шевченко','Доктор Дмитро Бондар','Доктор Марія Ткач','Доктор Ірина Мельник','Доктор Андрій Левченко','Доктор Наталія Романюк']},
-  uz:{country:'O‘zbekiston',city:'Toshkent',native:'O‘zbekcha',names:['Doktor Jeyms','Doktor Aziz Karimov','Doktor Dilnoza Aliyeva','Doktor Bekzod Rahimov','Doktor Malika Xasanova','Doktor Sardor Yusupov','Doktor Nigora Tursunova','Doktor Kamol Ergashev']},
-  hy:{country:'Հայաստան',city:'Երևան',native:'Հայերեն',names:['Դոկտոր Ջեյմս','Դոկտոր Արման Սարգսյան','Դոկտոր Աննա Մկրտչյան','Դոկտոր Հայկ Պետրոսյան','Դոկտոր Մարիամ Գրիգորյան','Դոկտոր Նարեկ Հովհաննիսյան','Դոկտոր Լիլիթ Կարապետյան','Դոկտոր Գոռ Մանուկյան']},
-  tg:{country:'Тоҷикистон',city:'Душанбе',native:'Тоҷикӣ',names:['Доктор Ҷеймс','Доктор Фарид Саидов','Доктор Манижа Раҳимова','Доктор Камол Нуров','Доктор Меҳринисо Каримова','Доктор Ҷамшед Ҳусейнов','Доктор Шаҳноза Алиева','Доктор Беҳрӯз Давлатов']},
-  az:{country:'Azərbaycan',city:'Bakı',native:'Azərbaycan dili',names:['Doktor Ceyms','Doktor Elvin Məmmədov','Doktor Aysel Əliyeva','Doktor Murad Həsənov','Doktor Nigar Hüseynova','Doktor Kamran Rzayev','Doktor Leyla Quliyeva','Doktor Tural Abbasov']},
-  am:{country:'ኢትዮጵያ',city:'አዲስ አበባ',native:'አማርኛ',names:['ዶክተር ጄምስ','ዶክተር አበበ ተስፋዬ','ዶክተር ሚሚ አለሙ','ዶክተር ዳዊት በቀለ','ዶክተር ሳራ ገብረ','ዶክተር ናትናኤል ሀይሉ','ዶክተር ሜሮን አሰፋ','ዶክተር ዮሐንስ ከበደ']},
-  ka:{country:'საქართველო',city:'თბილისი',native:'ქართული',names:['დოქტორი ჯეიმსი','დოქტორი გიორგი ბერიძე','დოქტორი ნინო კაპანაძე','დოქტორი დავით მაისურაძე','დოქტორი მარიამ ჯაფარიძე','დოქტორი ლაშა ქავთარაძე','დოქტორი ანა გელაშვილი','დოქტორი ირაკლი ხუციშვილი']},
+ ar:{country:'سوريا',city:'دمشق',native:'العربية',names:['د. جمال نادي','د. أحمد خالد','د. سامر محمود','د. ياسر حسن','د. كريم علي','د. عمر يوسف','د. رامي أسعد','د. مازن خليل','د. خالد منصور','د. وليد عادل','د. حسام نجيب','د. طارق عبد الله']},
+ en:{country:'United Kingdom',city:'London',native:'English',names:['Dr. James','Dr. Daniel Smith','Dr. Michael Brown','Dr. David Wilson','Dr. Robert Taylor','Dr. John Miller','Dr. William Davis','Dr. Thomas Moore','Dr. George Clark','Dr. Henry Lewis','Dr. Oliver Walker','Dr. Benjamin Hall']},
+ de:{country:'Deutschland',city:'Berlin',native:'Deutsch',names:['Dr. James','Dr. Lukas Müller','Dr. Anna Schneider','Dr. Thomas Weber','Dr. Julia Fischer','Dr. Felix Wagner','Dr. Marie Becker','Dr. Paul Hoffmann','Dr. Laura Klein','Dr. Martin Bauer','Dr. Sophie Wolf','Dr. Daniel Koch']},
+ ru:{country:'Россия',city:'Москва',native:'Русский',names:['ДОКТОР ДЖЕЙМС','Доктор Иван Петров','Доктор Анна Смирнова','Доктор Сергей Волков','Доктор Елена Кузнецова','Доктор Дмитрий Орлов','Доктор Мария Соколова','Доктор Алексей Морозов','Доктор Николай Фёдоров','Доктор Ольга Попова','Доктор Максим Лебедев','Доктор Ирина Васильева']},
+ uk:{country:'Україна',city:'Київ',native:'Українська',names:['Доктор Джеймс','Доктор Олександр Коваль','Доктор Анна Шевченко','Доктор Дмитро Бондар','Доктор Марія Ткач','Доктор Ірина Мельник','Доктор Андрій Левченко','Доктор Наталія Романюк','Доктор Сергій Бойко','Доктор Олена Кравець','Доктор Максим Петренко','Доктор Софія Гнатюк']},
+ uz:{country:'O‘zbekiston',city:'Toshkent',native:'O‘zbekcha',names:['Doktor Jeyms','Doktor Aziz Karimov','Doktor Dilnoza Aliyeva','Doktor Bekzod Rahimov','Doktor Malika Xasanova','Doktor Sardor Yusupov','Doktor Nigora Tursunova','Doktor Kamol Ergashev','Doktor Jasur Abdullayev','Doktor Mohira Ismoilova','Doktor Ulug‘bek Qodirov','Doktor Zilola Rustamova']},
+ hy:{country:'Հայաստան',city:'Երևան',native:'Հայերեն',names:['Դոկտոր Ջեյմս','Դոկտոր Արման Սարգսյան','Դոկտոր Աննա Մկրտչյան','Դոկտոր Հայկ Պետրոսյան','Դոկտոր Մարիամ Գրիգորյան','Դոկտոր Նարեկ Հովհաննիսյան','Դոկտոր Լիլիթ Կարապետյան','Դոկտոր Գոռ Մանուկյան','Դոկտոր Դավիթ Հարությունյան','Դոկտոր Էլինա Ավետիսյան','Դոկտոր Սամվել Մարտիրոսյան','Դոկտոր Նարե Խաչատրյան']},
+tg:{country:'Тоҷикистон',city:'Душанбе',native:'Тоҷикӣ',names:['Доктор Ҷеймс','Доктор Фарид Саидов','Доктор Манижа Раҳимова','Доктор Камол Нуров','Доктор Меҳринисо Каримова','Доктор Ҷамшед Ҳусейнов','Доктор Шаҳноза Алиева','Доктор Беҳрӯз Давлатов','Доктор Рустам Нозиров','Доктор Зуҳро Сафарова','Доктор Сироҷиддин Ҳалимов','Доктор Мавлуда Қодирова']},
+az:{country:'Azərbaycan',city:'Bakı',native:'Azərbaycan dili',names:['Doktor Ceyms','Doktor Elvin Məmmədov','Doktor Aysel Əliyeva','Doktor Murad Həsənov','Doktor Nigar Hüseynova','Doktor Kamran Rzayev','Doktor Leyla Quliyeva','Doktor Tural Abbasov','Doktor Orxan Əliyev','Doktor Günel Məmmədova','Doktor Rauf Hüseynov','Doktor Sevinc Qasımova']},
+am:{country:'ኢትዮጵያ',city:'አዲስ አበባ',native:'አማርኛ',names:['ዶክተር ጄምስ','ዶክተር አበበ ተስፋዬ','ዶክተር ሚሚ አለሙ','ዶክተር ዳዊት በቀለ','ዶክተር ሳራ ገብረ','ዶክተር ናትናኤል ሀይሉ','ዶክተር ሜሮን አሰፋ','ዶክተር ዮሐንስ ከበደ','ዶክተር ሊዲያ ታደሰ','ዶክተር ሚካኤል ወልደ','ዶክተር ሄለን ገብረ','ዶክተር ሰለሞን አስፋው']},
+ka:{country:'საქართველო',city:'თბილისი',native:'ქართული',names:['დოქტორი ჯეიმსი','დოქტორი გიორგი ბერიძე','დოქტორი ნინო კაპანაძე','დოქტორი დავით მაისურაძე','დოქტორი მარიამ ჯაფარიძე','დოქტორი ლაშა ქავთარაძე','დოქტორი ანა გელაშვილი','დოქტორი ირაკლი ხუციშვილი','დოქტორი სალომე აბაშიძე','დოქტორი ნიკა კვარაცხელია','დოქტორი თაკო მჭედლიშვილი','დოქტორი ლევან ჩხეტიანი']},
 };
 
-export const languageCountry = (lang:string) => LANGUAGE_PROFILES[lang] || LANGUAGE_PROFILES.ar;
+export const languageCountry=(lang:string)=>LANGUAGE_PROFILES[lang]||LANGUAGE_PROFILES.ar;
 
-export function localizedSpecialty(s:any, lang:string) {
-  if (lang==='ar') return s.ar;
-  if (lang==='en') return s.en;
-  if (lang==='de') return s.de;
-  if (lang==='ru') return s.ru;
-  return s.en || s.ar;
+const countryData:Record<string,{city:string;names:Record<string,string>}> = {
+ syria:{city:'دمشق',names:{ar:'سوريا',en:'Syria',de:'Syrien',ru:'Сирия',uk:'Сирія',uz:'Suriya',hy:'Սիրիա',tg:'Сурия',az:'Suriya',am:'ሶሪያ',ka:'სირია'}},
+ saudi:{city:'الرياض',names:{ar:'السعودية',en:'Saudi Arabia',de:'Saudi-Arabien',ru:'Саудовская Аравия',uk:'Саудівська Аравія',uz:'Saudiya Arabistoni',hy:'Սաուդյան Արաբիա',tg:'Арабистони Саудӣ',az:'Səudiyyə Ərəbistanı',am:'ሳውዲ አረቢያ',ka:'საუდის არაბეთი'}},
+ uae:{city:'دبي',names:{ar:'الإمارات',en:'United Arab Emirates',de:'Vereinigte Arabische Emirate',ru:'ОАЭ',uk:'ОАЕ',uz:'BAA',hy:'ԱՄԷ',tg:'АМА',az:'BƏƏ',am:'የኤምሬትስ',ka:'არაბთა გაერთიანებული საამიროები'}},
+ egypt:{city:'القاهرة',names:{ar:'مصر',en:'Egypt',de:'Ägypten',ru:'Египет',uk:'Єгипет',uz:'Misr',hy:'Եգիպտոս',tg:'Миср',az:'Misir',am:'ግብፅ',ka:'ეგვიპტე'}},
+ jordan:{city:'عمّان',names:{ar:'الأردن',en:'Jordan',de:'Jordanien',ru:'Иордания',uk:'Йорданія',uz:'Iordaniya',hy:'Հորդանան',tg:'Урдун',az:'İordaniya',am:'ዮርዳኖስ',ka:'იორდანია'}},
+ lebanon:{city:'بيروت',names:{ar:'لبنان',en:'Lebanon',de:'Libanon',ru:'Ливан',uk:'Ліван',uz:'Livan',hy:'Լիբանան',tg:'Лубнон',az:'Livan',am:'ሊባኖስ',ka:'ლიბანი'}},
+ germany:{city:'Berlin',names:{ar:'ألمانيا',en:'Germany',de:'Deutschland',ru:'Германия',uk:'Німеччина',uz:'Germaniya',hy:'Գերմանիա',tg:'Олмон',az:'Almaniya',am:'ጀርመን',ka:'გერმანია'}},
+ austria:{city:'Wien',names:{ar:'النمسا',en:'Austria',de:'Österreich',ru:'Австрия',uk:'Австрія',uz:'Avstriya',hy:'Ավստրիա',tg:'Австрия',az:'Avstriya',am:'ኦስትሪያ',ka:'ავსტრია'}},
+ switzerland:{city:'Zürich',names:{ar:'سويسرا',en:'Switzerland',de:'Schweiz',ru:'Швейцария',uk:'Швейцарія',uz:'Shveytsariya',hy:'Շվեյցարիա',tg:'Швейтсария',az:'İsveçrə',am:'ስዊዘርላንድ',ka:'შვეიცარია'}},
+ russia:{city:'Москва',names:{ar:'روسيا',en:'Russia',de:'Russland',ru:'Россия',uk:'Росія',uz:'Rossiya',hy:'Ռուսաստան',tg:'Русия',az:'Rusiya',am:'ሩሲያ',ka:'რუსეთი'}},
+ ukraine:{city:'Київ',names:{ar:'أوكرانيا',en:'Ukraine',de:'Ukraine',ru:'Украина',uk:'Україна',uz:'Ukraina',hy:'Ուկրաինա',tg:'Украина',az:'Ukrayna',am:'ዩክሬን',ka:'უკრაინა'}},
+ uzbekistan:{city:'Toshkent',names:{ar:'أوزبكستان',en:'Uzbekistan',de:'Usbekistan',ru:'Узбекистан',uk:'Узбекистан',uz:'O‘zbekiston',hy:'Ուզբեկստան',tg:'Ӯзбекистон',az:'Özbəkistan',am:'ኡዝቤኪስታን',ka:'უზბეკეთი'}},
+ armenia:{city:'Երևան',names:{ar:'أرمينيا',en:'Armenia',de:'Armenien',ru:'Армения',uk:'Вірменія',uz:'Armaniston',hy:'Հայաստան',tg:'Арманистон',az:'Ermənistan',am:'አርሜኒያ',ka:'სომხეთი'}},
+ tajikistan:{city:'Душанбе',names:{ar:'طاجيكستان',en:'Tajikistan',de:'Tadschikistan',ru:'Таджикистан',uk:'Таджикистан',uz:'Tojikiston',hy:'Տաջիկստան',tg:'Тоҷикистон',az:'Tacikistan',am:'ታጂኪስታን',ka:'ტაჯიკეთი'}},
+ azerbaijan:{city:'Bakı',names:{ar:'أذربيجان',en:'Azerbaijan',de:'Aserbaidschan',ru:'Азербайджан',uk:'Азербайджан',uz:'Ozarbayjon',hy:'Ադրբեջան',tg:'Озарбойҷон',az:'Azərbaycan',am:'አዘርባጃን',ka:'აზერბაიჯანი'}},
+ georgia:{city:'თბილისი',names:{ar:'جورجيا',en:'Georgia',de:'Georgien',ru:'Грузия',uk:'Грузія',uz:'Gruziya',hy:'Վրաստան',tg:'Гурҷистон',az:'Gürcüstan',am:'ጆርጂያ',ka:'საქართველო'}},
+ ethiopia:{city:'አዲስ አበባ',names:{ar:'إثيوبيا',en:'Ethiopia',de:'Äthiopien',ru:'Эфиопия',uk:'Ефіопія',uz:'Efiopiya',hy:'Եթովպիա',tg:'Эфиопия',az:'Efiopiya',am:'ኢትዮጵያ',ka:'ეთიოპია'}},
+ uk:{city:'London',names:{ar:'بريطانيا',en:'United Kingdom',de:'Vereinigtes Königreich',ru:'Великобритания',uk:'Велика Британія',uz:'Buyuk Britaniya',hy:'Միացյալ Թագավորություն',tg:'Британияи Кабир',az:'Böyük Britaniya',am:'ዩናይትድ ኪንግደም',ka:'გაერთიანებული სამეფო'}},
+ usa:{city:'New York',names:{ar:'الولايات المتحدة',en:'United States',de:'Vereinigte Staaten',ru:'США',uk:'США',uz:'AQSh',hy:'ԱՄՆ',tg:'ИМА',az:'ABŞ',am:'አሜሪካ',ka:'აშშ'}},
+ canada:{city:'Toronto',names:{ar:'كندا',en:'Canada',de:'Kanada',ru:'Канада',uk:'Канада',uz:'Kanada',hy:'Կանադա',tg:'Канада',az:'Kanada',am:'ካናዳ',ka:'კანადა'}},
+};
+
+export function countriesForLanguage(lang:string){
+ const preferred=lang==='ar'?['syria','saudi','uae','egypt','jordan','lebanon']:lang==='ru'?['russia','ukraine','kazakhstan' in countryData?'kazakhstan':'russia']:lang==='hy'?['armenia','georgia','russia']:lang==='ka'?['georgia','armenia','turkey' in countryData?'turkey':'georgia']:lang==='uz'?['uzbekistan','kazakhstan' in countryData?'kazakhstan':'russia']:lang==='de'?['germany','austria','switzerland']:['uk','usa','canada'];
+ return preferred.map(k=>({key:k,name:countryData[k]?.names[lang]||countryData[k]?.names.en||k,city:countryData[k]?.city||''}));
 }
 
+export function localizedSpecialty(s:any,lang:string){
+ return s?.[lang] || (lang==='ar'?s.ar:lang==='de'?s.de:lang==='ru'?s.ru:s.en) || s.ar;
+}
 export function specialtyCatalog(lang:string): Specialty[] {
-  return comprehensiveSpecialties.map((s,i)=>({
-    id:'catalog-sp-'+s.slug, slug:s.slug, name:localizedSpecialty(s,lang), icon:'Stethoscope', description:s.ar,
-    name_en:s.en,name_de:s.de,name_ru:s.ru,description_en:s.en,description_de:s.de,description_ru:s.ru,created_at:new Date(2026,0,1+i).toISOString()
-  }));
+ return comprehensiveSpecialties.map((s,i)=>({id:`catalog-sp-${s.slug}`,slug:s.slug,name:localizedSpecialty(s,lang),icon:'Stethoscope',description:localizedSpecialty(s,lang),name_en:s.en,name_de:s.de,name_ru:s.ru,description_en:s.en,description_de:s.de,description_ru:s.ru,created_at:new Date(2026,0,1+i).toISOString()}));
 }
 
-export function virtualDoctorsForSpecialty(slug:string, lang:string, count=8): Doctor[] {
-  const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
-  const p=languageCountry(lang); const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!;
-  return Array.from({length:Math.max(5,Math.min(25,count))},(_,i)=>({
-    id:`catalog-doctor-${lang}-${slug}-${i+1}`, name:p.names[i%p.names.length], specialty_id:sp.id,
-    bio: lang==='ar' ? `أخصائي افتراضي تعليمي في ${s.ar}. هذا الملف تجريبي وغير مرتبط بشخص حقيقي.` : `Virtual educational specialist profile for ${s.en}. This demo profile is not a real person.`,
-    education:'SB1 Virtual Specialist Program', experience_years:5+(i%18), photo_url:'',
-    city:p.city, rating:4.5+(i%5)/10, consultation_count:120+i*31, native_language:lang,
-    is_online:i%3!==0, is_verified:false, is_virtual:true, phone_number:null, follower_count:600+i*47,
-    nationality:p.country, created_at:new Date().toISOString(), specialty:sp
-  })) as Doctor[];
-}
-
-const qTemplates: Record<string,string[]> = {
-  ar:['ما أهم الأعراض التي تستدعي مراجعة الأخصائي؟','ما الفحوصات الأولية المناسبة لهذه الحالة؟','كيف يمكن تحسين الأعراض بشكل آمن؟','متى تصبح المتابعة الطبية ضرورية؟','ما العوامل التي تزيد احتمال المشكلة؟','هل توجد عادات يومية تساعد على الوقاية؟','ما الفرق بين الحالات البسيطة والحالات التي تحتاج تقييماً؟','ما الأسئلة التي يجب طرحها على الأخصائي؟','هل يمكن أن تتشابه هذه الأعراض مع مشكلة أخرى؟','كيف أتابع حالتي بين الزيارات؟'],
-  en:['What symptoms should prompt a specialist visit?','Which initial tests are commonly considered?','What safe steps may help improve symptoms?','When is medical follow-up important?','Which factors can increase the risk?','Which daily habits may support prevention?','How can mild and concerning cases differ?','What should I ask the specialist?','Can these symptoms overlap with another condition?','How should I monitor my condition between visits?'],
-  de:['Welche Symptome erfordern eine fachärztliche Abklärung?','Welche ersten Untersuchungen sind üblich?','Welche sicheren Schritte können Beschwerden lindern?','Wann ist eine ärztliche Kontrolle wichtig?','Welche Faktoren erhöhen das Risiko?','Welche Gewohnheiten können vorbeugen?','Wie unterscheiden sich leichte und bedenkliche Verläufe?','Was sollte ich den Facharzt fragen?','Können die Symptome auch andere Ursachen haben?','Wie kann ich meinen Verlauf beobachten?'],
-  ru:['Какие симптомы требуют обращения к специалисту?','Какие первичные обследования обычно нужны?','Что может безопасно помочь уменьшить симптомы?','Когда необходимо медицинское наблюдение?','Какие факторы повышают риск?','Какие привычки помогают профилактике?','Чем отличаются лёгкие и тревожные случаи?','Что спросить у специалиста?','Могут ли эти симптомы иметь другую причину?','Как наблюдать состояние между визитами?']
+const localized:Record<string,{question:string;answer:string;articleIntro:string;articleEnd:string;book:string;audio:string;video:string;course:string;virtual:string}> = {
+ ar:{question:'ما المعلومات المهمة التي يجب معرفتها حول',answer:'إجابة تثقيفية تجريبية: تختلف الخطوات حسب التاريخ المرضي والأعراض والفحص. هذه معلومات عامة وليست تشخيصاً فردياً.',articleIntro:'مقال طبي تثقيفي مولد بالذكاء الاصطناعي يشرح التعريف والأعراض وعوامل الخطورة والتقييم والمتابعة.',articleEnd:'المحتوى للتثقيف العام ويحتاج مراجعة مختص قبل اعتماده كمرجع طبي.',book:'دليل طبي',audio:'دليل صوتي',video:'شرح طبي مبسط',course:'دورة تدريبية',virtual:'أخصائي افتراضي تعليمي'},
+ en:{question:'What important information should be known about',answer:'Educational demo answer: the appropriate approach depends on the history, symptoms and examination. This is general information, not an individual diagnosis.',articleIntro:'An AI-generated medical education article covering definition, symptoms, risk factors, evaluation and follow-up.',articleEnd:'For general education and editorial review; it is not individual diagnosis or treatment.',book:'Medical Handbook',audio:'Audio Guide',video:'Medical Explainer',course:'Training Course',virtual:'Virtual educational specialist'},
+ de:{question:'Welche wichtigen Informationen sollte man über',answer:'Beispielhafte Bildungsantwort: Das Vorgehen hängt von Vorgeschichte, Symptomen und Untersuchung ab. Dies ist keine individuelle Diagnose.',articleIntro:'Ein KI-generierter medizinischer Bildungsartikel zu Definition, Symptomen, Risikofaktoren, Abklärung und Verlauf.',articleEnd:'Zur allgemeinen Information und redaktionellen Prüfung; keine individuelle Diagnose oder Therapie.',book:'Medizinisches Handbuch',audio:'Audio-Ratgeber',video:'Medizinische Erklärung',course:'Fortbildungskurs',virtual:'Virtueller Bildungsspezialist'},
+ ru:{question:'Какая важная информация нужна о',answer:'Учебный демонстрационный ответ: тактика зависит от анамнеза, симптомов и обследования. Это общая информация, а не индивидуальный диагноз.',articleIntro:'Медицинская образовательная статья, созданная ИИ, о понятии, симптомах, факторах риска, обследовании и наблюдении.',articleEnd:'Для общего образования и редакторской проверки; не является индивидуальной диагностикой или лечением.',book:'Медицинское руководство',audio:'Аудиогид',video:'Медицинское объяснение',course:'Учебный курс',virtual:'Виртуальный образовательный специалист'},
+ uk:{question:'Яку важливу інформацію потрібно знати про',answer:'Демонстраційна освітня відповідь: тактика залежить від анамнезу, симптомів та обстеження. Це загальна інформація, а не індивідуальний діагноз.',articleIntro:'Медична освітня стаття, створена ШІ, про визначення, симптоми, фактори ризику, обстеження та спостереження.',articleEnd:'Для загальної освіти та редакційної перевірки; не є індивідуальною діагностикою чи лікуванням.',book:'Медичний посібник',audio:'Аудіогід',video:'Медичне пояснення',course:'Навчальний курс',virtual:'Віртуальний освітній спеціаліст'},
+ uz:{question:'haqida qanday muhim maʼlumotlarni bilish kerak',answer:'Taʼlimiy demo javob: yondashuv anamnez, alomatlar va tekshiruvga bog‘liq. Bu umumiy maʼlumot, individual tashxis emas.',articleIntro:'Sunʼiy intellekt yaratgan tibbiy maqola: taʼrif, belgilar, xavf omillari, tekshiruv va kuzatuv.',articleEnd:'Umumiy taʼlim va tahririy tekshiruv uchun; individual tashxis yoki davolash emas.',book:'Tibbiy qo‘llanma',audio:'Audio qo‘llanma',video:'Tibbiy tushuntirish',course:'O‘quv kursi',virtual:'Virtual taʼlim mutaxassisi'},
+ hy:{question:'Ի՞նչ կարևոր տեղեկություններ պետք է իմանալ',answer:'Ուսուցողական օրինակային պատասխան. մոտեցումը կախված է պատմությունից, ախտանիշներից և զննությունից։ Սա ընդհանուր տեղեկատվություն է, ոչ անհատական ախտորոշում։',articleIntro:'ԱԲ-ի կողմից ստեղծված բժշկական կրթական հոդված՝ սահմանման, ախտանիշների, ռիսկերի, հետազոտության և հետևման մասին։',articleEnd:'Ընդհանուր կրթական նյութ է և պահանջում է մասնագիտական խմբագրական ստուգում։',book:'Բժշկական ուղեցույց',audio:'Աուդիո ուղեցույց',video:'Բժշկական բացատրություն',course:'Ուսուցման դասընթաց',virtual:'Վիրտուալ կրթական մասնագետ'},
+ tg:{question:'Кадом маълумоти муҳимро дар бораи',answer:'Ҷавоби намунавии омӯзишӣ: равиш аз таърихча, нишонаҳо ва муоина вобаста аст. Ин маълумоти умумӣ аст, на ташхиси инфиродӣ.',articleIntro:'Мақолаи тиббии таълимӣ, ки бо ИИ дар бораи таъриф, нишонаҳо, омилҳои хатар, ташхис ва пайгирӣ сохта шудааст.',articleEnd:'Барои омӯзиши умумӣ ва санҷиши таҳрирӣ; ташхис ё табобати инфиродӣ нест.',book:'Роҳнамои тиббӣ',audio:'Роҳнамои аудиоӣ',video:'Шарҳи тиббӣ',course:'Курси омӯзишӣ',virtual:'Мутахассиси виртуалии таълимӣ'},
+ az:{question:'haqqında hansı vacib məlumatları bilmək lazımdır',answer:'Tədris nümunəsi cavab: yanaşma anamnez, simptomlar və müayinədən asılıdır. Bu ümumi məlumatdır, fərdi diaqnoz deyil.',articleIntro:'Süni intellekt tərəfindən yaradılmış tibbi maarifləndirici məqalə: tərif, simptomlar, risklər, müayinə və izləmə.',articleEnd:'Ümumi maarifləndirmə və redaktə yoxlaması üçündür; fərdi diaqnoz və müalicə deyil.',book:'Tibbi bələdçi',audio:'Audio bələdçi',video:'Tibbi izah',course:'Təlim kursu',virtual:'Virtual təhsil mütəxəssisi'},
+ am:{question:'ስለ ምን አስፈላጊ መረጃ መታወቅ አለበት',answer:'የትምህርት ምሳሌ መልስ፦ አቀራረቡ በታሪክ፣ ምልክቶች እና ምርመራ ይወሰናል። ይህ አጠቃላይ መረጃ ነው።',articleIntro:'በAI የተፈጠረ የሕክምና ትምህርታዊ ጽሑፍ፣ ትርጉም፣ ምልክቶች፣ አደጋዎች፣ ምርመራ እና ክትትልን ይሸፍናል።',articleEnd:'ለአጠቃላይ ትምህርት እና ለአርትኦት ምርመራ ብቻ ነው።',book:'የሕክምና መመሪያ',audio:'የድምጽ መመሪያ',video:'የሕክምና ማብራሪያ',course:'የስልጠና ኮርስ',virtual:'ምናባዊ የትምህርት ባለሙያ'},
+ ka:{question:'რა მნიშვნელოვანი ინფორმაცია უნდა ვიცოდეთ',answer:'სასწავლო პასუხი: მიდგომა დამოკიდებულია ისტორიაზე, სიმპტომებსა და გამოკვლევაზე. ეს ზოგადი ინფორმაციაა და არა ინდივიდუალური დიაგნოზი.',articleIntro:'AI-ის მიერ შექმნილი სამედიცინო საგანმანათლებლო სტატია განმარტებაზე, სიმპტომებზე, რისკებზე, გამოკვლევასა და მონიტორინგზე.',articleEnd:'ზოგადი განათლებისთვის და რედაქტორული შემოწმებისთვის; არ წარმოადგენს ინდივიდუალურ დიაგნოზს ან მკურნალობას.',book:'სამედიცინო სახელმძღვანელო',audio:'აუდიო გზამკვლევი',video:'სამედიცინო ახსნა',course:'სასწავლო კურსი',virtual:'ვირტუალური საგანმანათლებლო სპეციალისტი'}
 };
 
-export function virtualQuestionsForSpecialty(slug:string,lang:string,count=50): Question[] {
-  const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
-  const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const names=LANGUAGE_PROFILES[lang]?.names||LANGUAGE_PROFILES.ar.names;
-  const templates=qTemplates[lang]||qTemplates.en;
-  return Array.from({length:count},(_,i)=>({
-    id:`catalog-q-${lang}-${slug}-${i+1}`, specialty_id:sp.id, author_name:lang==='ar'?'مستخدم SB1': 'SB1 User',
-    title:`${templates[i%templates.length]} — ${localizedSpecialty(s,lang)} #${i+1}`,
-    body:lang==='ar'? `سؤال تجريبي تعليمي عن ${s.ar}. نرجو قراءة الإجابات العامة وعدم اعتبارها تشخيصاً فردياً.` : `Educational demo question about ${s.en}. The answers are general information, not an individual diagnosis.`,
-    age:18+(i%55),gender:i%2?'أنثى':'ذكر',status:'answered',views:80+i*7,created_at:new Date(2026,0,1+(i%28)).toISOString(),specialty:sp
-  }));
+function L(lang:string){return localized[lang]||localized.en}
+function namesFor(lang:string){return LANGUAGE_PROFILES[lang]?.names||LANGUAGE_PROFILES.en.names}
+function spec(slug:string){return comprehensiveSpecialties.find(x=>x.slug===slug)}
+function sp(lang:string,slug:string){return specialtyCatalog(lang).find(x=>x.slug===slug)!}
+
+export function virtualDoctorsForSpecialty(slug:string,lang:string,count=10):Doctor[]{
+ const s=spec(slug);if(!s)return[];const specialty=sp(lang,slug);const p=languageCountry(lang);const names=namesFor(lang);
+ return Array.from({length:Math.max(5,Math.min(25,count))},(_,i)=>({id:`catalog-doctor-${lang}-${slug}-${i+1}`,name:names[i%names.length],specialty_id:specialty.id,bio:`${L(lang).virtual} في ${localizedSpecialty(s,lang)}. ${lang==='ar'?'ملف تجريبي وليس شخصاً حقيقياً ولا يمثل ترخيصاً مهنياً.':'Demo profile, not a real person and not a professional license.'}`,education:'SB1 Virtual Specialist Program',experience_years:5+(i%18),photo_url:'',city:p.city,rating:4.5+(i%5)/10,consultation_count:120+i*31,native_language:lang,is_online:i%3!==0,is_verified:false,is_virtual:true,phone_number:null,follower_count:500+i*77,nationality:p.country,created_at:new Date(2026,0,1+i).toISOString(),specialty} as Doctor));
 }
 
-export function virtualAnswersForQuestion(question:Question,lang:string,count=8): Answer[] {
-  const names=LANGUAGE_PROFILES[lang]?.names||LANGUAGE_PROFILES.en.names;
-  return Array.from({length:Math.max(5,Math.min(20,count))},(_,i)=>({
-    id:`${question.id}-answer-${i+1}`, question_id:question.id, doctor_id:`${question.id}-doctor-${i+1}`,
-    body:lang==='ar'? `إجابة تجريبية من أخصائي افتراضي: تعتمد الخطوة المناسبة على تفاصيل الحالة والتاريخ المرضي والفحص. عند وجود أعراض شديدة أو مستمرة يجب طلب تقييم طبي مباشر.` : `Demo specialist answer: the appropriate next step depends on the history, examination and details of the case. Persistent or severe symptoms should be assessed by a qualified professional.`,
-    helpful_count:20+i*3,created_at:new Date().toISOString(),doctor:virtualDoctorsForSpecialty(question.specialty?.slug||'',lang,8)[i%8]
-  }));
+const qTopics=['التعريف والمعلومات الأساسية','الأعراض والعلامات','الفحوصات والتشخيص','العلاج والمتابعة','الوقاية ونمط الحياة'];
+export function virtualQuestionsForSpecialty(slug:string,lang:string,count=50):Question[]{
+ const s=spec(slug);if(!s)return[];const specialty=sp(lang,slug);const l=L(lang);
+ return Array.from({length:count},(_,i)=>{const topic=qTopics[i%qTopics.length];const q:Question={id:`catalog-q-${lang}-${slug}-${i+1}`,specialty_id:specialty.id,author_name:lang==='ar'?'مستخدم SB1':'SB1 User',title:lang==='ar'?`${topic} عن ${s.ar} — سؤال ${i+1}`:`${l.question} ${localizedSpecialty(s,lang)}? — ${i+1}`,body:lang==='ar'?`سؤال تجريبي تعليمي حول ${s.ar}. ما أهم النقاط التي ينبغي معرفتها ومتى يجب طلب تقييم من مختص؟`:`${l.question} ${localizedSpecialty(s,lang)}? Please explain the main educational points and when professional assessment is appropriate.`,age:18+(i%55),gender:i%2?'أنثى':'ذكر',status:'answered',views:80+i*7,created_at:new Date(2026,0,1+(i%28)).toISOString(),specialty:specialty};q.answers=virtualAnswersForQuestion(q,lang,5+(i%16));return q});
+}
+export function virtualAnswersForQuestion(question:Question,lang:string,count=8):Answer[]{
+ const slug=question.specialty?.slug||question.specialty_id.replace(/^catalog-sp-/,'');const docs=virtualDoctorsForSpecialty(slug,lang,Math.max(5,count));const l=L(lang);
+ return Array.from({length:Math.max(5,Math.min(20,count))},(_,i)=>({id:`${question.id}-answer-${i+1}`,question_id:question.id,doctor_id:docs[i%docs.length].id,body:l.answer,helpful_count:20+i*3,created_at:new Date(2026,0,2+i).toISOString(),doctor:docs[i%docs.length]}));
 }
 
-export function virtualArticlesForSpecialty(slug:string,lang:string,count=3): Article[] {
-  const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
-  const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const doc=virtualDoctorsForSpecialty(slug,lang,5)[0];
-  return Array.from({length:count},(_,i)=>({
-    id:`catalog-art-${lang}-${slug}-${i+1}`,specialty_id:sp.id,doctor_id:doc.id,
-    title:lang==='ar'?`دليل تثقيفي: ${s.ar} — الجزء ${i+1}`:`Educational guide: ${s.en} — Part ${i+1}`,
-    excerpt:lang==='ar'?`مقال تثقيفي مُنشأ بالذكاء الاصطناعي للمراجعة التحريرية حول ${s.ar}.`:`AI-generated educational draft for editorial review about ${s.en}.`,
-    body:lang==='ar'? `هذا محتوى تثقيفي تجريبي مُنشأ بالذكاء الاصطناعي لأغراض العرض، يشرح المفاهيم العامة وعوامل الخطورة والمتابعة ومتى يجب مراجعة الأخصائي. لا يُستخدم للتشخيص أو العلاج الفردي.\\n\\n${s.ar} موضوع واسع ويجب تخصيص النصيحة حسب الحالة.`:`This is an AI-generated educational draft for demonstration and editorial review about ${s.en}. It covers general concepts, risk factors, monitoring and when to seek professional care. It is not individual diagnosis or treatment.\\n\\nContent should be reviewed before publication.`,
-    image_url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80',reading_time_min:5+i,views:1000+i*300,created_at:new Date().toISOString(),specialty:sp,doctor:doc
-  })) as Article[];
+const articleTopics=['مقدمة ومفاهيم أساسية','الأعراض والعلامات التي تستدعي الانتباه','عوامل الخطورة والوقاية','الفحوصات والتشخيص والمتابعة','العلاج والتعايش ونمط الحياة'];
+export function virtualArticlesForSpecialty(slug:string,lang:string,count=5):Article[]{
+ const s=spec(slug);if(!s)return[];const specialty=sp(lang,slug);const doctor=virtualDoctorsForSpecialty(slug,lang,5)[0];const l=L(lang);
+ return Array.from({length:count},(_,i)=>({id:`catalog-art-${lang}-${slug}-${i+1}`,specialty_id:specialty.id,doctor_id:doctor.id,title:lang==='ar'?`${articleTopics[i%articleTopics.length]}: ${s.ar}`:`${l.book}: ${localizedSpecialty(s,lang)} — ${i+1}`,excerpt:l.articleIntro,body:`${l.articleIntro}\n\n${localizedSpecialty(s,lang)}: ${articleTopics[i%articleTopics.length]}. ${l.articleEnd}`,image_url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80',reading_time_min:6+i,views:1000+i*250,created_at:new Date(2026,1,1+i).toISOString(),specialty:specialty,doctor} as Article));
 }
 
-export function virtualVideosForSpecialty(slug:string,lang:string,count=2): DoctorVideo[] {
-  const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
-  const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const doc=virtualDoctorsForSpecialty(slug,lang,5)[0];
-  return Array.from({length:count},(_,i)=>({
-    id:`catalog-vid-${lang}-${slug}-${i+1}`,doctor_id:doc.id,specialty_id:sp.id,
-    title:lang==='ar'?`شرح مبسط في ${s.ar} — ${i+1}`:`Simple lesson in ${s.en} — ${i+1}`,
-    description:lang==='ar'?'فيديو تجريبي مبسط باللغة المختارة.':'Simple demo video in the selected language.',
-    video_url:'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
-    thumbnail_url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80',duration_seconds:180,views:500+i*100,created_at:new Date().toISOString(),doctor:doc,specialty:sp
-  }));
+export function virtualVideosForSpecialty(slug:string,lang:string,count=2):DoctorVideo[]{
+ const s=spec(slug);if(!s)return[];const specialty=sp(lang,slug);const doctor=virtualDoctorsForSpecialty(slug,lang,5)[0];const supported=['ar','ru','en','ka','hy','uz'];if(!supported.includes(lang))return[];
+ return Array.from({length:count},(_,i)=>({id:`catalog-vid-${lang}-${slug}-${i+1}`,doctor_id:doctor.id,specialty_id:specialty.id,title:`${L(lang).video}: ${localizedSpecialty(s,lang)} — ${i+1}`,description:L(lang).articleIntro,video_url:'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',thumbnail_url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80',duration_seconds:180,views:500+i*100,created_at:new Date(2026,1,5+i).toISOString(),doctor,specialty:specialty}));
 }
+export function virtualAudioForSpecialty(slug:string,lang:string,count=3):DoctorAudio[]{const s=spec(slug);if(!s)return[];const specialty=sp(lang,slug);const doctor=virtualDoctorsForSpecialty(slug,lang,5)[0];return Array.from({length:count},(_,i)=>({id:`catalog-audio-${lang}-${slug}-${i+1}`,doctor_id:doctor.id,specialty_id:specialty.id,title:`${L(lang).audio}: ${localizedSpecialty(s,lang)} — ${i+1}`,description:L(lang).articleIntro,audio_url:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',duration_seconds:300,listens:200+i*30,created_at:new Date(2026,1,10+i).toISOString(),doctor,specialty:specialty}));}
+export function virtualLibraryForSpecialty(slug:string,lang:string,count=3):SpecialtyLibraryItem[]{const s=spec(slug);if(!s)return[];const specialty=sp(lang,slug);return Array.from({length:count},(_,i)=>({id:`catalog-book-${lang}-${slug}-${i+1}`,specialty_id:specialty.id,item_type:'book',title:`${L(lang).book}: ${localizedSpecialty(s,lang)} — ${i+1}`,description:L(lang).articleIntro,url:null,image_url:null,source:'SB1 AI Editorial Library',is_auto_generated:true,created_at:new Date(2026,1,15+i).toISOString(),specialty}));}
+export function virtualCoursesForSpecialty(slug:string,lang:string,count=4):Course[]{const s=spec(slug);if(!s)return[];const specialty=sp(lang,slug);const doctor=virtualDoctorsForSpecialty(slug,lang,5)[0];return Array.from({length:count},(_,i)=>({id:`catalog-course-${lang}-${slug}-${i+1}`,specialty_id:specialty.id,doctor_id:doctor.id,title:`${L(lang).course}: ${localizedSpecialty(s,lang)} — ${i+1}`,description:L(lang).articleIntro,image_url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80',price:19+i*10,duration_weeks:4+i,lessons_count:8+i*2,level:i===0?'beginner':i===1?'intermediate':'advanced',enrolled_count:100+i*50,rating:4.7,is_published:true,created_at:new Date(2026,2,1+i).toISOString(),doctor,specialty}));}
 
-export function virtualAudioForSpecialty(slug:string,lang:string,count=2): DoctorAudio[] {
-  const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
-  const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const doc=virtualDoctorsForSpecialty(slug,lang,5)[0];
-  return Array.from({length:count},(_,i)=>({
-    id:`catalog-audio-${lang}-${slug}-${i+1}`,doctor_id:doc.id,specialty_id:sp.id,
-    title:lang==='ar'?`تسجيل صوتي: ${s.ar} — ${i+1}`:`Audio guide: ${s.en} — ${i+1}`,
-    description:lang==='ar'?'تسجيل صوتي تجريبي للتثقيف الصحي.':'Demo educational audio in the selected language.',
-    audio_url:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',duration_seconds:300,listens:200,created_at:new Date().toISOString(),doctor:doc,specialty:sp
-  }));
-}
+const facilityKinds=[['clinic','clinic'],['lab','lab'],['radiology','radiology'],['elderly','elderly'],['pharmacy','pharmacy'],['addiction','addiction'],['rehab','rehab'],['medical-supplies','medical-supplies']] as const;
+const facilityNames:Record<string,Record<string,string>>={ar:{clinic:'عيادة / مستشفى',lab:'مختبر تحاليل',radiology:'مركز أشعة',elderly:'دار رعاية مسنين',pharmacy:'صيدلية',addiction:'مركز علاج الإدمان',rehab:'مركز تأهيل وعلاج طبيعي','medical-supplies':'متجر أدوات طبية'},en:{clinic:'Clinic / Hospital',lab:'Laboratory',radiology:'Radiology Center',elderly:'Elderly Care Home',pharmacy:'Pharmacy',addiction:'Addiction Treatment Center',rehab:'Rehabilitation & Physiotherapy','medical-supplies':'Medical Supplies'},ru:{clinic:'Клиника / больница',lab:'Лаборатория',radiology:'Радиологический центр',elderly:'Дом ухода',pharmacy:'Аптека',addiction:'Центр лечения зависимостей',rehab:'Реабилитация и физиотерапия','medical-supplies':'Магазин медтехники'},de:{clinic:'Klinik / Krankenhaus',lab:'Labor',radiology:'Radiologiezentrum',elderly:'Seniorenpflege',pharmacy:'Apotheke',addiction:'Suchtbehandlungszentrum',rehab:'Rehabilitation & Physiotherapie','medical-supplies':'Medizinbedarf'},uk:{clinic:'Клініка / лікарня',lab:'Лабораторія',radiology:'Радіологічний центр',elderly:'Догляд за літніми',pharmacy:'Аптека',addiction:'Центр лікування залежностей',rehab:'Реабілітація та фізіотерапія','medical-supplies':'Медичні товари'},uz:{clinic:'Klinika / shifoxona',lab:'Laboratoriya',radiology:'Radiologiya markazi',elderly:'Keksalar parvarishi',pharmacy:'Dorixona',addiction:'Giyohvandlikni davolash markazi',rehab:'Reabilitatsiya va fizioterapiya','medical-supplies':'Tibbiy jihozlar'},hy:{clinic:'Կլինիկա / հիվանդանոց',lab:'Լաբորատորիա',radiology:'Ռադիոլոգիական կենտրոն',elderly:'Տարեցների խնամք',pharmacy:'Դեղատուն',addiction:'Կախվածության բուժման կենտրոն',rehab:'Վերականգնում և ֆիզիոթերապիա','medical-supplies':'Բժշկական պարագաներ'},tg:{clinic:'Клиника / беморхона',lab:'Лаборатория',radiology:'Маркази радиология',elderly:'Нигоҳубини пиронсолон',pharmacy:'Дорухона',addiction:'Маркази табобати вобастагӣ',rehab:'Барқарорсозӣ ва физиотерапия','medical-supplies':'Таҷҳизоти тиббӣ'},az:{clinic:'Klinika / xəstəxana',lab:'Laboratoriya',radiology:'Radiologiya mərkəzi',elderly:'Yaşlılara qayğı',pharmacy:'Aptek',addiction:'Asılılıq müalicə mərkəzi',rehab:'Reabilitasiya və fizioterapiya','medical-supplies':'Tibbi ləvazimatlar'},am:{clinic:'ክሊኒክ / ሆስፒታል',lab:'ላቦራቶሪ',radiology:'ራዲዮሎጂ ማዕከል',elderly:'የአረጋውያን እንክብካቤ',pharmacy:'ፋርማሲ',addiction:'የሱስ ሕክምና ማዕከል',rehab:'ማገገሚያ እና ፊዚዮቴራፒ','medical-supplies':'የሕክምና እቃዎች'},ka:{clinic:'კლინიკა / საავადმყოფო',lab:'ლაბორატორია',radiology:'რადიოლოგიის ცენტრი',elderly:'ხანდაზმულთა მოვლა',pharmacy:'აფთიაქი',addiction:'დამოკიდებულების მკურნალობის ცენტრი',rehab:'რეაბილიტაცია და ფიზიოთერაპია','medical-supplies':'სამედიცინო ინვენტარი'}};
 
-export function virtualLibraryForSpecialty(slug:string,lang:string,count=2): SpecialtyLibraryItem[] {
-  const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
-  const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!;
-  return Array.from({length:count},(_,i)=>({
-    id:`catalog-book-${lang}-${slug}-${i+1}`,specialty_id:sp.id,item_type:'book',title:lang==='ar'?`كتاب ${s.ar} — المجلد ${i+1}`:`${s.en} Handbook — Volume ${i+1}`,
-    description:lang==='ar'?'كتاب تجريبي تعليمي من مكتبة SB1.':'Demo educational book in the SB1 library.',url:null,image_url:null,source:'SB1 AI Editorial Library',is_auto_generated:true,created_at:new Date().toISOString(),specialty:sp
-  })) as SpecialtyLibraryItem[];
-}
+export function virtualFacilities(lang:string,countryKey?:string):AdditionalFacility[]{const p=languageCountry(lang);const choices=countriesForLanguage(lang);const key=countryKey&&countryData[countryKey]?countryKey:(choices[0]?.key||'syria');const c=countryData[key]||countryData.syria;const countryName=c.names[lang]||c.names.en;return facilityKinds.flatMap(([kind])=>Array.from({length:3},(_,i)=>({id:`catalog-fac-${lang}-${key}-${kind}-${i+1}`,facility_type:kind,name:`${facilityNames[lang]?.[kind]||facilityNames.en[kind]} ${countryName} ${i+1}`,description:`${L(lang).articleIntro} — ${countryName}`,address:`${c.city} · SB1 Health District`,city:c.city,country:countryName,phone:null,email:null,logo_url:null,services:'Appointments · services · prices · schedules',schedule:{sun:'09:00-18:00',mon:'09:00-18:00',tue:'09:00-18:00',wed:'09:00-18:00',thu:'09:00-18:00'},rating:4.6+(i/10),is_active:true,created_at:new Date(2026,0,1+i).toISOString()} as any)));}
 
-export function virtualFacilities(lang:string, country?:string): AdditionalFacility[] {
-  const p=languageCountry(lang); const wanted=country||p.country;
-  const kinds=[['clinic','عيادة / Clinic'],['lab','مختبر / Lab'],['radiology','مركز أشعة / Radiology'],['elderly','دار رعاية مسنين / Elderly Care'],['pharmacy','صيدلية / Pharmacy'],['addiction','مركز علاج الإدمان / Addiction Care'],['rehab','مركز تأهيل وعلاج طبيعي / Rehabilitation'],['medical-supplies','متجر أدوات طبية / Medical Supplies']];
-  return kinds.map(([kind,label],i)=>({
-    id:`catalog-fac-${lang}-${kind}`,facility_type:kind,name:lang==='ar'?`${label.split(' / ')[0]} ${wanted}`:`${label.split(' / ')[1]} ${wanted}`,
-    description:lang==='ar'?`بيانات تجريبية للمرفق باللغة العربية في ${wanted}.`:`Demo facility data in ${p.native} for ${wanted}.`,
-    address:p.city+' - SB1 Health District',phone:null,email:null,logo_url:null,services:'Appointments, services, prices and schedules',schedule:{sun:'09:00-18:00',mon:'09:00-18:00',tue:'09:00-18:00',wed:'09:00-18:00',thu:'09:00-18:00'},rating:4.6,is_active:true,created_at:new Date().toISOString(),city:p.city,country:wanted,language:lang
-  })) as any;
-}
-
-
-export function virtualCoursesForSpecialty(slug:string,lang:string,count=4) {
- const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
- const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const doc=virtualDoctorsForSpecialty(slug,lang,5)[0];
- return Array.from({length:count},(_,i)=>({id:`catalog-course-${lang}-${slug}-${i+1}`,specialty_id:sp.id,doctor_id:doc.id,title:lang==='ar'?`دورة ${s.ar} العملية — المستوى ${i+1}`:`${s.en} Practical Course — Level ${i+1}`,description:lang==='ar'?`دورة تدريبية تجريبية مُنشأة بالذكاء الاصطناعي مع مراجعة تعليمية، تتضمن دروساً واختبارات وتطبيقات عملية.`:`AI-generated educational course draft for ${s.en}, with lessons, quizzes and practical exercises for editorial review.`,image_url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80',price:19+i*10,duration_weeks:4+i,lessons_count:8+i*2,level:i===0?'beginner':i===1?'intermediate':'advanced',enrolled_count:100+i*50,rating:4.7,is_published:true,created_at:new Date().toISOString(),doctor,specialty:sp}));
-}
+export function languageContentSummary(lang:string){return {language:languageCountry(lang).native,country:languageCountry(lang).country,doctorsPerSpecialty:'10 virtual demo profiles',questionsPerSpecialty:'50 demo questions',answersPerQuestion:'5–20 demo answers',articlesPerSpecialty:'5 AI-generated educational drafts',videos:lang==='ar'||lang==='ru'||lang==='en'||lang==='ka'||lang==='hy'||lang==='uz'?'2 demo videos':'not currently seeded',audio:'3 demo audio items',books:'3 demo library books',courses:'4 demo courses'};}
