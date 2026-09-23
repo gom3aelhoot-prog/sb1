@@ -7,7 +7,7 @@ import QuestionCard from '@/components/QuestionCard';
 import { specialtyCatalog,virtualQuestionsForSpecialty } from '@/lib/catalog';
 export default function QuestionsPage(){
  const {path,navigate}=useRouter();const {lang,dir}=useI18n();const q=parseQuery(path);const [selected,setSelected]=useState(q.specialty||'');const [page,setPage]=useState(0);const specs=specialtyCatalog(lang);
- const questions=useMemo(()=>selected?virtualQuestionsForSpecialty(selected,lang,50):comprehensiveSpecialties.flatMap(s=>virtualQuestionsForSpecialty(s.slug,lang,1)),[selected,lang]);
+ const questions=useMemo(()=>selected?virtualQuestionsForSpecialty(selected,lang,50):comprehensiveSpecialties.flatMap(s=>virtualQuestionsForSpecialty(s.slug,lang,50)),[selected,lang]);
  const shown=questions.slice(page*30,page*30+30);
  return <div className="min-h-screen pt-24 pb-16 bg-gray-50" dir={dir}><div className="mx-auto max-w-6xl px-4">
   <div className="rounded-3xl bg-gradient-to-br from-teal-700 to-cyan-600 p-7 text-white text-center"><MessageCircle className="mx-auto mb-3 h-9 w-9"/><h1 className="text-3xl font-extrabold">الأسئلة والأجوبة</h1><p className="mt-2">50 سؤالاً تجريبياً لكل تخصص، مع 5 إلى 20 إجابة افتراضية داخل صفحة السؤال.</p></div>
