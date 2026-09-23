@@ -47,6 +47,22 @@ export function Header() {
     };
   }, [mobileOpen]);
 
+  const platformSections = [
+    { label: 'الأطباء والأخصائيون', href: '/doctors' },
+    { label: 'الأسئلة والاستشارات', href: '/questions' },
+    { label: 'طرح سؤال', href: '/ask' },
+    { label: 'المقالات', href: '/articles' },
+    { label: 'الفيديوهات والريلز', href: '/videos' },
+    { label: 'الصوتيات', href: '/audio' },
+    { label: 'الكورسات', href: '/courses' },
+    { label: 'الجلسات', href: '/sessions' },
+    { label: 'العيادات', href: '/clinics' },
+    { label: 'التحاليل', href: '/labs' },
+    { label: 'الأشعة', href: '/radiology' },
+    { label: 'المرافق والصيدليات', href: '/facilities' },
+    { label: 'المكتبة', href: '/library' },
+  ];
+
   const navItems = [
     { label: t.nav.home, href: '#home', icon: Home },
     { label: t.specialists.title, href: '#specialists', icon: Stethoscope },
@@ -157,6 +173,16 @@ export function Header() {
             </div>
           </div>
         </div>
+        <div className="hidden lg:block border-t border-neutral-100">
+          <div className="container-x flex items-center gap-1 overflow-x-auto py-1.5 scrollbar-thin">
+            {platformSections.map((item) => (
+              <a key={item.href} href={item.href}
+                className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-primary-50 hover:text-primary-700 transition-colors">
+                {item.label}
+              </a>
+            ))}
+          </div>
+        </div>
       </header>
 
       {/* Mobile drawer */}
@@ -218,6 +244,18 @@ export function Header() {
                     {item.label}
                   </a>
                 ))}
+
+                {/* Main platform sections */}
+                <div className="my-3 border-y border-neutral-100 py-2">
+                  <p className="px-3 pb-2 text-xs font-bold text-neutral-400">أقسام المنصة</p>
+                  {platformSections.map((item) => (
+                    <a key={item.href} href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="block rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-primary-50 hover:text-primary-700">
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
 
                 {/* Specialties */}
                 <button
