@@ -29,7 +29,7 @@ export function Features() {
   ];
 
   return (
-    <section className="py-16 lg:py-24 bg-white">
+    <section id="about" className="py-16 lg:py-24 bg-white">
       <div className="container-x">
         <div className="text-center max-w-2xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-neutral-900 text-balance">{t.features.title}</h2>
