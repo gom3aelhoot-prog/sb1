@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowLeft, Calendar, CheckCircle2, Clock, MapPin, Phone, Star, ShoppingBag } from 'lucide-react';
 import { useRouter, getPathOnly } from '@/lib/router';
 import { demoClinics, demoFacilities, demoLabs, demoProducts, demoRadiology } from '@/lib/demoData';
+import { supabase } from '@/lib/supabase';
 
 type Kind = 'clinic'|'lab'|'radiology'|'facility';
 
@@ -11,15 +12,25 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
   const [booked, setBooked] = useState(false);
   const [date, setDate] = useState('');
   const [service, setService] = useState('');
+  const [data, setData] = useState<any>(null);
 
-  const data = useMemo(() => {
-    if (kind==='clinic') return demoClinics.find(x=>x.id===id);
-    if (kind==='lab') return demoLabs.find(x=>x.id===id);
-    if (kind==='radiology') return demoRadiology.find(x=>x.id===id);
-    return demoFacilities.find(x=>x.id===id);
-  }, [kind,id]);
+  useEffect(() => {
+    const table = kind==='clinic' ? 'clinics' : kind==='lab' ? 'lab_centers' : kind==='radiology' ? 'radiology_centers' : 'additional_facilities';
+    supabase.from(table).select('*').eq('id', id).maybeSingle().then(({ data: row }) => {
+      if (row) setData(row);
+      else if (kind==='clinic') setData(demoClinics.find(x=>x.id===id) || null);
+      else if (kind==='lab') setData(demoLabs.find(x=>x.id===id) || null);
+      else if (kind==='radiology') setData(demoRadiology.find(x=>x.id===id) || null);
+      else setData(demoFacilities.find(x=>x.id===id) || null);
+    }).catch(() => {
+      if (kind==='clinic') setData(demoClinics.find(x=>x.id===id) || null);
+      else if (kind==='lab') setData(demoLabs.find(x=>x.id===id) || null);
+      else if (kind==='radiology') setData(demoRadiology.find(x=>x.id===id) || null);
+      else setData(demoFacilities.find(x=>x.id===id) || null);
+    });
+  }, [kind, id]);
 
-  if (!data) return <div className="min-h-screen pt-28 text-center" dir="rtl"><h1 className="text-2xl font-bold">المؤسسة غير موجودة</h1><button className="btn-primary mt-5" onClick={()=>navigate('/facilities')}>العودة للمرافق</button></div>;
+  if (!data) return <div className="min-h-screen pt-28 text-center" dir="rtl"><h1 className="text-2xl font-bold">جاري تحميل المؤسسة أو المؤسسة غير موجودة</h1><button className="btn-primary mt-5" onClick={()=>navigate('/facilities')}>العودة للمرافق</button></div>;
 
   const name = data.name;
   const image = 'image_url' in data ? data.image_url : null;
@@ -36,7 +47,18 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
         ? ['أشعة X-Ray — 20 USD','Ultrasound — 35 USD','CT / MRI — حسب الخدمة']
         : ['تقييم أولي — 20 USD','جلسة تأهيل — 30 USD','برنامج شهري — حسب الخطة'];
 
-  const handleBook = (e: React.FormEvent) => { e.preventDefault(); if (!date) return; setBooked(true); };
+  const handleBook = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!date || !service) return;
+    const bookingTable = kind==='clinic' ? 'clinic_bookings' : kind==='lab' ? 'lab_bookings' : kind==='radiology' ? 'radiology_bookings' : 'facility_bookings';
+    const payload:any = { patient_name: 'زائر SB1', patient_phone: '', scheduled_at: new Date(date).toISOString(), status: 'pending', price: 0 };
+    if (kind==='clinic') payload.clinic_id=id;
+    if (kind==='lab') { payload.center_id=id; payload.test_type=service; }
+    if (kind==='radiology') { payload.center_id=id; payload.service_type=service; }
+    if (kind==='facility') payload.facility_id=id;
+    await supabase.from(bookingTable).insert(payload);
+    setBooked(true);
+  };
 
   return <div className="min-h-screen bg-gray-50 pt-24 pb-16" dir="rtl">
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
