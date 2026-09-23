@@ -3,7 +3,7 @@ import { ArrowLeft, Calendar, CheckCircle2, Clock, MapPin, Phone, Star, Shopping
 import { useRouter, getPathOnly } from '@/lib/router';
 import { demoClinics, demoFacilities, demoLabs, demoProducts, demoRadiology } from '@/lib/demoData';
 import { supabase } from '@/lib/supabase';
-import { virtualFacilities, languageCountry } from '@/lib/catalog';
+import { virtualFacilities, languageCountry, countriesForLanguage } from '@/lib/catalog';
 import { useI18n } from '@/lib/i18n';
 
 type Kind = 'clinic'|'lab'|'radiology'|'facility';
@@ -24,7 +24,7 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
       else if (kind==='clinic') setData(demoClinics.find(x=>x.id===id) || null);
       else if (kind==='lab') setData(demoLabs.find(x=>x.id===id) || null);
       else if (kind==='radiology') setData(demoRadiology.find(x=>x.id===id) || null);
-      else setData(demoFacilities.find(x=>x.id===id) || virtualFacilities(lang).find(x=>x.id===id) || null);
+      else setData(demoFacilities.find(x=>x.id===id) || countriesForLanguage(lang).flatMap(c=>virtualFacilities(lang,c.key)).find(x=>x.id===id) || null);
     }).catch(() => {
       if (kind==='clinic') setData(demoClinics.find(x=>x.id===id) || null);
       else if (kind==='lab') setData(demoLabs.find(x=>x.id===id) || null);
