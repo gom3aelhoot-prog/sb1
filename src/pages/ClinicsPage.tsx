@@ -69,6 +69,7 @@ export default function ClinicsPage() {
                     <Calendar className="w-4 h-4" />
                     {t('clinics.book')}
                   </button>
+                  </div>
                 </div>
               </div>
             ))}
