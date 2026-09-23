@@ -41,6 +41,7 @@ export default function AskPage() {
   const [questionType, setQuestionType] = useState<'free' | 'paid'>('free');
   const [selectedTierId, setSelectedTierId] = useState('plus');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
+  const [contentLanguage, setContentLanguage] = useState(lang);
   const [form, setForm] = useState({ author_name: '', age: '', gender: 'ذكر', title: '', body: '' });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -122,7 +123,7 @@ export default function AskPage() {
       }
       const id = dbQuestionId || questionId;
       const localQuestion = {
-        id, specialty_id: fallbackSpec.id, author_name: form.author_name.trim(), title: form.title.trim(), body: form.body.trim(),
+        id, language: contentLanguage, specialty_id: fallbackSpec.id, author_name: form.author_name.trim(), title: form.title.trim(), body: form.body.trim(),
         age: form.age ? parseInt(form.age) : null, gender: form.gender, status: questionType === 'paid' ? 'pending_payment' : 'pending',
         views: 0, created_at: new Date().toISOString(), specialty: fallbackSpec, answers: [],
       };
@@ -202,7 +203,7 @@ export default function AskPage() {
           </div>
         )}
 
-        <div className="card p-5 mb-6">
+        <div className="card p-5 mb-6"><label className="block text-sm font-bold text-gray-700 mb-2">{lang==='ar'?'لغة السؤال والمحتوى':'Question language'}</label><select value={contentLanguage} onChange={e=>setContentLanguage(e.target.value)} className="input-field mb-5"><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
           <div className="grid grid-cols-2 gap-3">
             <button type="button" onClick={() => setQuestionType('free')} className={`rounded-2xl border-2 p-4 text-start transition ${questionType === 'free' ? 'border-teal-500 bg-teal-50' : 'border-gray-100'}`}>
               <div className="font-bold text-gray-800">{lang === 'ar' ? 'سؤال مجاني' : 'Free question'}</div>
