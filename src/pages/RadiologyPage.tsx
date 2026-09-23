@@ -68,6 +68,7 @@ export default function RadiologyPage() {
                     <Calendar className="w-4 h-4" />
                     {t('radiology.book')}
                   </button>
+                  </div>
                 </div>
               </div>
             ))}
