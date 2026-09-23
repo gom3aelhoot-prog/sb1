@@ -101,3 +101,32 @@ comprehensiveSpecialties.forEach((s, si) => {
   });
 });
 demoDoctors.push(...generatedVirtualDoctors);
+
+
+const generatedArticles: Article[] = comprehensiveSpecialties.slice(0, 40).map((s, i) => {
+  const sp = demoSpecialties.find(x=>x.slug===s.slug)!;
+  const doc = generatedVirtualDoctors[i % generatedVirtualDoctors.length];
+  const title = `دليل SB1: ${s.ar}`;
+  const excerpt = `محتوى تثقيفي عام عن ${s.ar}، مع نقاط أساسية ومتى يلزم الرجوع إلى مختص.`;
+  return {
+    id:`art-global-${i+1}`,specialty_id:sp.id,doctor_id:doc.id,title,excerpt,
+    body:`${excerpt} هذه مادة تثقيفية وليست تشخيصاً فردياً.`,
+    image_url:photo(['photo-1576091160399-112ba8d25d1d','photo-1559757175-0eb30cd8c063','photo-1505751172876-fa1923c5c528'][i%3]),
+    reading_time_min:4+(i%8),views:800+i*173,created_at:now,specialty:sp,doctor:doc,
+    translations:{en:{title:`SB1 Guide: ${s.en}`,excerpt:`Educational guide about ${s.en} and when to seek professional care.`},de:{title:`SB1 Leitfaden: ${s.de}`,excerpt:`Allgemeine Informationen zu ${s.de}.`},ru:{title:`SB1: ${s.ru}`,excerpt:`Образовательная информация о направлении.`}}
+  } as any;
+});
+demoArticles.push(...generatedArticles);
+
+const generatedVideos: DoctorVideo[] = comprehensiveSpecialties.slice(0, 30).map((s, i) => {
+  const sp=demoSpecialties.find(x=>x.slug===s.slug)!;
+  const doc=generatedVirtualDoctors[i%generatedVirtualDoctors.length];
+  return {
+    id:`vid-global-${i+1}`,doctor_id:doc.id,specialty_id:sp.id,title:`فيديو SB1: ${s.ar}`,
+    description:`شرح تثقيفي مختصر حول ${s.ar}.`,
+    video_url:'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+    thumbnail_url:photo('photo-1576091160399-112ba8d25d1d'),duration_seconds:180+(i%10)*30,
+    views:1500+i*211,created_at:now,doctor:doc,specialty:sp
+  };
+});
+demoVideos.push(...generatedVideos);
