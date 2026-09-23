@@ -4,6 +4,7 @@ import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Question, type SpecialistPost, type PostComment, type Article, type DoctorAudio } from '@/lib/supabase';
 import QuestionCard from '@/components/QuestionCard';
+import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty, virtualArticlesForSpecialty, virtualAudioForSpecialty, virtualVideosForSpecialty } from '@/lib/catalog';
 
 type Tab = 'posts' | 'reels' | 'diary' | 'articles' | 'audio';
 
@@ -29,6 +30,12 @@ export default function DoctorProfilePage({ id }: { id: string }) {
       const { data: doc } = await supabase.from('doctors').select('*, specialty(*)').eq('id', id).maybeSingle();
       if (doc) {
         setDoctor(doc);
+        if (doc.is_virtual) {
+          const slug=doc.specialty?.slug||'';
+          setQuestions(virtualQuestionsForSpecialty(slug,lang,8));
+          setArticles(virtualArticlesForSpecialty(slug,lang,5));
+          setAudios(virtualAudioForSpecialty(slug,lang,4));
+        }
         const { data: ans } = await supabase.from('answers').select('question_id').eq('doctor_id', id);
         if (ans && ans.length > 0) {
           const qIds = ans.map((a) => a.question_id);
@@ -54,7 +61,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
       }
       setLoading(false);
     })();
-  }, [id]);
+  }, [id, lang]);
 
   const handleLike = (postId: string) => {
     setLikedPosts((prev) => { const n = new Set(prev); if (n.has(postId)) n.delete(postId); else n.add(postId); return n; });
