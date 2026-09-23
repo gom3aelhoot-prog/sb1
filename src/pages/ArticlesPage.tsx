@@ -4,6 +4,7 @@ import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Article, type Specialty } from '@/lib/supabase';
 import ArticleCard from '@/components/ArticleCard';
+import { demoArticles, demoSpecialties } from '@/lib/demoData';
 
 export default function ArticlesPage() {
   const { specialtyName, t, dir } = useI18n();
@@ -16,7 +17,7 @@ export default function ArticlesPage() {
   useEffect(() => {
     (async () => {
       const { data: specs } = await supabase.from('specialties').select('*').order('name');
-      setSpecialties(specs || []);
+      setSpecialties((specs && specs.length ? specs : demoSpecialties) as Specialty[]);
     })();
   }, []);
 
@@ -33,7 +34,7 @@ export default function ArticlesPage() {
         if (spec) dbQuery = dbQuery.eq('specialty_id', spec.id);
       }
       const { data } = await dbQuery.order('created_at', { ascending: false });
-      setArticles(data || []);
+      setArticles((data && data.length ? data : demoArticles) as Article[]);
       setLoading(false);
     })();
   }, [selectedSpecialty]);
