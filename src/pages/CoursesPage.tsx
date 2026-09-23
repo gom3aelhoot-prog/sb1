@@ -5,6 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import { supabase, type Course, type Specialty } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
 import { demoCourses, demoSpecialties } from '@/lib/demoData';
+import { virtualCoursesForSpecialty } from '@/lib/catalog';
 
 export default function CoursesPage() {
   const { navigate } = useRouter();
@@ -34,10 +35,11 @@ export default function CoursesPage() {
         if (spec) dbQuery = dbQuery.eq('specialty_id', spec.id);
       }
       const { data } = await dbQuery.order('created_at', { ascending: false });
-      setCourses((data && data.length ? data : demoCourses) as Course[]);
+      const generated = selectedSpecialty ? virtualCoursesForSpecialty(selectedSpecialty, lang, 4) : demoSpecialties.slice(0,12).flatMap(s => virtualCoursesForSpecialty(s.slug, lang, 2));
+      setCourses((data && data.length ? data : (generated.length ? generated : demoCourses)) as Course[]);
       setLoading(false);
     })().catch(() => { setCourses(demoCourses); setLoading(false); });
-  }, [selectedSpecialty]);
+  }, [selectedSpecialty, lang]);
 
   const handleEnroll = async (e: React.FormEvent) => {
     e.preventDefault();
