@@ -4,6 +4,7 @@ import { useRouter, parseQuery } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Specialty } from '@/lib/supabase';
 import DoctorCard from '@/components/DoctorCard';
+import { demoDoctors, demoSpecialties } from '@/lib/demoData';
 
 const cityNames: Record<string, Record<string, string>> = {
   دمشق: { ar: 'دمشق', en: 'Damascus', de: 'Damaskus', ru: 'Дамаск' },
@@ -26,7 +27,7 @@ export default function DoctorsPage() {
   useEffect(() => {
     (async () => {
       const { data: specs } = await supabase.from('specialties').select('*').order('name');
-      setSpecialties(specs || []);
+      setSpecialties((specs && specs.length ? specs : demoSpecialties) as Specialty[]);
     })();
   }, []);
 
@@ -46,7 +47,7 @@ export default function DoctorsPage() {
       }
       if (selectedCity) dbQuery = dbQuery.eq('city', selectedCity);
       const { data } = await dbQuery.order('rating', { ascending: false });
-      setDoctors(data || []);
+      setDoctors((data && data.length ? data : demoDoctors) as Doctor[]);
       setLoading(false);
     })();
   }, [search, selectedSpecialty, selectedCity]);
