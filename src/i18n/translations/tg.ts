@@ -123,7 +123,7 @@ const tg: TranslationData = {
     secondaryButton: 'Дар бораи духтурон биомӯзед',
   },
   footer: {
-    about: 'Tabibi Online',
+    about: 'SB1',
     aboutDesc: 'Платформаи мукаммали тиббӣ ва рӯҳӣ, ки беморонро бо беҳтарин духтурон ва терапевтҳои ҷаҳон осон ва бехатар пайваст мекунад.',
     quickLinks: 'Пайвандҳои тез',
     forPatients: 'Барои беморон',
