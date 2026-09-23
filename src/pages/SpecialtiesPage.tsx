@@ -23,7 +23,7 @@ export default function SpecialtiesPage() {
     <input value={q} onChange={e=>setQ(e.target.value)} className="w-full rounded-2xl border bg-white py-4 pe-12 ps-4 outline-none focus:border-teal-400" placeholder={lang==='ar'?'ابحث عن تخصص طبي أو نفسي...':'Search medical or psychological specialty...'} />
    </div>
    <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-    {list.map(s=>{const Icon=iconFor(s.slug); return <button key={s.slug} onClick={()=>navigate('/doctors?specialty='+encodeURIComponent(s.slug))} className="card p-5 text-center hover:shadow-lg transition">
+    {list.map(s=>{const Icon=iconFor(s.slug); return <button key={s.slug} onClick={()=>navigate('/specialties/'+encodeURIComponent(s.slug))} className="card p-5 text-center hover:shadow-lg transition">
       <Icon className="mx-auto w-8 h-8 text-teal-600"/><div className="mt-3 text-sm font-semibold text-gray-700">{label(s,lang)}</div>
      </button>})}
    </div>
