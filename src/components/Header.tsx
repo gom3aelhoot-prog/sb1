@@ -66,13 +66,13 @@ export function Header() {
   ];
 
   const navItems = [
-    { label: t.nav.home, href: '#home', icon: Home },
-    { label: t.specialists.title, href: '#specialists', icon: Stethoscope },
+    { label: t.nav.home, href: '/#home', icon: Home },
+    { label: t.specialists.title, href: '/#specialists', icon: Stethoscope },
     { label: t.facilities.title, href: '/facilities', icon: Building2 },
-    { label: t.nav.howItWorks, href: '#how-it-works', icon: HelpCircle },
-    { label: t.nav.about, href: '#about', icon: Info },
+    { label: t.nav.howItWorks, href: '/#how-it-works', icon: HelpCircle },
+    { label: t.nav.about, href: '/#about', icon: Info },
     { label: t.nav.blog, href: '/library', icon: BookOpen },
-    { label: t.nav.contact, href: '#contact', icon: Phone },
+    { label: t.nav.contact, href: '/#contact', icon: Phone },
   ];
 
   return (
@@ -87,13 +87,13 @@ export function Header() {
         <div className="container-x">
           <div className="flex h-16 items-center justify-between gap-4 lg:h-20">
             {/* Logo */}
-            <a href="#" className="flex items-center gap-2.5 flex-shrink-0" onClick={(e) => e.preventDefault()}>
+            <a href="#" className="flex items-center gap-2.5 flex-shrink-0" onClick={() => setMobileOpen(false)}>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 text-white shadow-lg shadow-primary-500/25">
                 <HeartPulse className="h-5 w-5" />
               </div>
               <div className="hidden sm:block">
                 <span className="block text-lg font-bold leading-tight text-neutral-900">SB1</span>
-                <span className="block text-[10px] font-medium leading-tight text-primary-600">Online</span>
+                
               </div>
             </a>
 
@@ -203,7 +203,7 @@ export function Header() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 text-white">
                   <HeartPulse className="h-4.5 w-4.5" />
                 </div>
-                <span className="font-bold text-neutral-900">SB1 Online</span>
+                <span className="font-bold text-neutral-900">SB1</span>
               </div>
               <button
                 onClick={() => {
