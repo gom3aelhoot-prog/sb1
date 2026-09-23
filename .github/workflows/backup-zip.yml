@@ -1,0 +1,19 @@
+name: SB1 Backup ZIP
+on:
+  push:
+    branches: [main]
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create backup
+        run: |
+          zip -r SB1-complete-backup.zip . -x ".git/*" ".github/workflows/backup-zip.yml"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SB1-complete-backup
+          path: SB1-complete-backup.zip
+          retention-days: 90
