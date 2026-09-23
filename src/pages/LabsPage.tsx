@@ -6,7 +6,7 @@ import { supabase, type LabCenter } from '@/lib/supabase';
 import { demoLabs } from '@/lib/demoData';
 
 export default function LabsPage() {
-  const { t } = useI18n();
+  const { t,lang } = useI18n();
   const { navigate } = useRouter();
   const [centers, setCenters] = useState<LabCenter[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,7 @@ export default function LabsPage() {
       setCenters(demoLabs);
       setLoading(false);
     });
-  }, []);
+  }, [lang]);
 
   const handleBook = async () => {
     if (!bookingCenter || !bookForm.patient_name || !bookForm.scheduled_at) return;
