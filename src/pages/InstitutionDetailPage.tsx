@@ -40,7 +40,7 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
 
   return <div className="min-h-screen bg-gray-50 pt-24 pb-16" dir="rtl">
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-      <button onClick={()=>navigate(kind==='facility'?'/facilities':`/${kind}s`)} className="mb-5 flex items-center gap-2 text-sm text-gray-500"><ArrowLeft className="h-4 w-4"/>العودة</button>
+      <button onClick={()=>navigate(kind==='facility'?'/facilities':kind==='radiology'?'/radiology':`/${kind}s`)} className="mb-5 flex items-center gap-2 text-sm text-gray-500"><ArrowLeft className="h-4 w-4"/>العودة</button>
       <div className="overflow-hidden rounded-3xl bg-white shadow-sm border border-gray-100">
         <div className="grid lg:grid-cols-[1.25fr_1fr]">
           <div className="min-h-[280px] bg-gray-100">{image ? <img src={image} alt={name} className="h-full w-full object-cover"/> : <div className="flex h-full min-h-[280px] items-center justify-center text-gray-300 text-6xl">+</div>}</div>
