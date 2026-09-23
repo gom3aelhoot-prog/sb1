@@ -103,9 +103,9 @@ export default function FacilitiesPage() {
                     {facility.services && (
                       <p className="text-sm text-gray-400 mt-2">{facility.services}</p>
                     )}
-                    {facility.facility_type !== 'pharmacy' && (
+                    {(
                       <button onClick={() => navigate('/facilities/'+facility.id)} className="mt-4 w-full bg-teal-50 hover:bg-teal-100 text-teal-700 font-medium py-2.5 rounded-xl transition-colors text-sm">
-                        {t('facilities.book')}
+                        تفاصيل المؤسسة والحجز
                       </button>
                     )}
                   </div>
