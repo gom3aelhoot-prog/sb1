@@ -112,9 +112,9 @@ function PlatformRoute() {
   if (route === '/chat') return <ChatRoomsPage />;
   if (route === '/library') return <MediaHubPage />;
   if (route === '/planner') return <PlannerPage />;
-  if (route === '/clinics') return <ClinicsPage />;
-  if (route === '/radiology') return <RadiologyPage />;
-  if (route === '/labs') return <LabsPage />;
+  if (route === '/clinics') return <FacilitiesPage />;
+  if (route === '/radiology') return <FacilitiesPage />;
+  if (route === '/labs') return <FacilitiesPage />;
   if (route === '/policy') return <PolicyPage />;
   if (route === '/tests') return <TestsPage />;
   if (route === '/facilities') return <FacilitiesPage />;
