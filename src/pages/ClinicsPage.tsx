@@ -15,6 +15,9 @@ export default function ClinicsPage() {
     supabase.from('clinics').select('*, doctor(name)').eq('is_active', true).order('created_at', { ascending: false }).then(({ data }) => {
       setClinics(data || []);
       setLoading(false);
+    }).catch(() => {
+      setClinics([]);
+      setLoading(false);
     });
   }, []);
 
@@ -66,7 +69,7 @@ export default function ClinicsPage() {
                 </div>
               </div>
             ))}
-            {clinics.length === 0 && <p className="text-center text-gray-400 py-8 col-span-full">{t('common.loading')}</p>}
+            {clinics.length === 0 && <p className="text-center text-gray-400 py-8 col-span-full">{t('clinics.subtitle')}</p>}
           </div>
         )}
       </div>
