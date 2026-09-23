@@ -1,0 +1,16 @@
+name: Export SB1 source ZIP
+on:
+  push:
+    branches: [main]
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create source archive
+        run: git archive --format=zip --output=sb1-full-source.zip HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sb1-full-source
+          path: sb1-full-source.zip
+          retention-days: 30
