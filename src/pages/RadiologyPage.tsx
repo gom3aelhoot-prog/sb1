@@ -15,6 +15,9 @@ export default function RadiologyPage() {
     supabase.from('radiology_centers').select('*').eq('is_active', true).order('created_at', { ascending: false }).then(({ data }) => {
       setCenters(data || []);
       setLoading(false);
+    }).catch(() => {
+      setCenters([]);
+      setLoading(false);
     });
   }, []);
 
@@ -65,7 +68,7 @@ export default function RadiologyPage() {
                 </div>
               </div>
             ))}
-            {centers.length === 0 && <p className="text-center text-gray-400 py-8 col-span-full">{t('common.loading')}</p>}
+            {centers.length === 0 && <p className="text-center text-gray-400 py-8 col-span-full">{t('radiology.subtitle')}</p>}
           </div>
         )}
       </div>
