@@ -571,7 +571,7 @@ export default function AdminPage() {
               )}
               {showAdd === 'videos' && (
                 <>
-                  <input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
+                  <select value={addForm.content_language || 'ar'} className="input-field" onChange={(e) => setAddForm({ ...addForm, content_language: e.target.value })}><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select><input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
                   <textarea placeholder="الوصف" className="input-field" onChange={(e) => setAddForm({ ...addForm, description: e.target.value })} />
                   <input placeholder="رابط الفيديو" className="input-field" onChange={(e) => setAddForm({ ...addForm, video_url: e.target.value })} />
                   <input placeholder="رابط الصورة المصغرة" className="input-field" onChange={(e) => setAddForm({ ...addForm, thumbnail_url: e.target.value })} />
@@ -584,7 +584,7 @@ export default function AdminPage() {
               )}
               {showAdd === 'audio' && (
                 <>
-                  <input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
+                  <select value={addForm.content_language || 'ar'} className="input-field" onChange={(e) => setAddForm({ ...addForm, content_language: e.target.value })}><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select><input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
                   <textarea placeholder="الوصف" className="input-field" onChange={(e) => setAddForm({ ...addForm, description: e.target.value })} />
                   <input placeholder="رابط الصوت" className="input-field" onChange={(e) => setAddForm({ ...addForm, audio_url: e.target.value })} />
                   <select className="input-field" onChange={(e) => setAddForm({ ...addForm, doctor_id: e.target.value })}>
@@ -596,7 +596,7 @@ export default function AdminPage() {
               )}
               {showAdd === 'courses' && (
                 <>
-                  <input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
+                  <select value={addForm.content_language || 'ar'} className="input-field" onChange={(e) => setAddForm({ ...addForm, content_language: e.target.value })}><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select><input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
                   <textarea placeholder="الوصف" className="input-field" onChange={(e) => setAddForm({ ...addForm, description: e.target.value })} />
                   <input placeholder="السعر" type="number" className="input-field" onChange={(e) => setAddForm({ ...addForm, price: e.target.value })} />
                   <input placeholder="المدة (أسابيع)" type="number" className="input-field" onChange={(e) => setAddForm({ ...addForm, duration_weeks: e.target.value })} />
