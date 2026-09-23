@@ -31,7 +31,7 @@ export default function AudioPage() {
       const { data } = await dbQuery.order('created_at', { ascending: false });
       setAudios((data && data.length ? data : demoAudio) as DoctorAudio[]);
       setLoading(false);
-    })();
+    })().catch(() => { setAudios(demoAudio); setLoading(false); });
   }, [selectedSpecialty]);
 
   const togglePlay = (audio: DoctorAudio) => {
