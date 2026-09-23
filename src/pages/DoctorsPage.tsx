@@ -7,6 +7,20 @@ import DoctorCard from '@/components/DoctorCard';
 import { demoDoctors, demoSpecialties } from '@/lib/demoData';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 
+const virtualDoctorsFor = (slug: string): Doctor[] => {
+  const spec = comprehensiveSpecialties.find(s => s.slug === slug);
+  if (!spec) return [];
+  const specialty = {
+    id: 'virtual-'+slug, slug: spec.slug, name: spec.ar, name_en: spec.en, name_de: spec.de, name_ru: spec.ru,
+    icon: 'Stethoscope', description: '', description_en: '', description_de: '', description_ru: '', created_at: new Date().toISOString()
+  } as Specialty;
+  return [1,2,3].map((n) => ({
+    id: 'virtual-'+slug+'-'+n, name: 'أخصائي SB1 افتراضي '+n, specialty_id: specialty.id, bio: 'ملف افتراضي تعليمي لهذا التخصص. غير متاح لجلسة مباشرة، ويقترح SB1 مختصين حقيقيين عند طلب الاستشارة.', education: 'SB1 Virtual Profile',
+    experience_years: 8+n, photo_url: '', city: ['دمشق','الرياض','موسكو'][n-1], rating: 4.7, consultation_count: 120+n*37,
+    native_language: n===2?'ru':'ar', is_online: false, is_verified: false, is_virtual: true, phone_number: null, follower_count: 900+n*120, nationality: n===2?'Russian':'Arab', created_at: new Date().toISOString(), specialty
+  })) as Doctor[];
+};
+
 const cityNames: Record<string, Record<string, string>> = {
   دمشق: { ar: 'دمشق', en: 'Damascus', de: 'Damaskus', ru: 'Дамаск' },
   حلب: { ar: 'حلب', en: 'Aleppo', de: 'Aleppo', ru: 'Алеппо' },
@@ -49,10 +63,10 @@ export default function DoctorsPage() {
       }
       if (selectedCity) dbQuery = dbQuery.eq('city', selectedCity);
       const { data } = await dbQuery.order('rating', { ascending: false });
-      const fallback = selectedSpecialty ? demoDoctors.filter((doctor) => doctor.specialty?.slug === selectedSpecialty) : demoDoctors;
+      const realFallback = selectedSpecialty ? demoDoctors.filter((doctor) => doctor.specialty?.slug === selectedSpecialty) : demoDoctors;\n      const fallback = selectedSpecialty && realFallback.length === 0 ? virtualDoctorsFor(selectedSpecialty) : realFallback;
       setDoctors((data && data.length ? data : fallback) as Doctor[]);
       setLoading(false);
-    })().catch(() => { setDoctors(selectedSpecialty ? demoDoctors.filter((doctor) => doctor.specialty?.slug === selectedSpecialty) : demoDoctors); setLoading(false); });
+    })().catch(() => { setDoctors(selectedSpecialty ? (demoDoctors.filter((doctor) => doctor.specialty?.slug === selectedSpecialty).length ? demoDoctors.filter((doctor) => doctor.specialty?.slug === selectedSpecialty) : virtualDoctorsFor(selectedSpecialty)) : demoDoctors); setLoading(false); });
   }, [search, selectedSpecialty, selectedCity]);
 
   const cities = ['دمشق', 'حلب', 'حمص', 'اللاذقية'];
