@@ -107,7 +107,7 @@ export default function DoctorCard({ doctor }: { doctor: Doctor }) {
 
       <div className="mt-4 flex w-full gap-2">
         <button onClick={handleConsult} className="flex-1 rounded-xl bg-teal-600 py-2.5 text-xs font-semibold text-white transition hover:bg-teal-700">
-          <MessageCircle className="mx-auto inline h-3.5 w-3.5" /> <span className="ms-1">{t('sessions.start_free')}</span>
+          <MessageCircle className="mx-auto inline h-3.5 w-3.5" /> <span className="ms-1">{lang === 'ar' ? 'طلب استشارة' : 'Ask a doctor'}</span>
         </button>
         <button onClick={handleSession} className="flex-1 rounded-xl bg-gray-100 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-200">
           <Calendar className="mx-auto inline h-3.5 w-3.5" /> <span className="ms-1">{sessionLabel}</span>
