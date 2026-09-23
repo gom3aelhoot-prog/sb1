@@ -49,7 +49,7 @@ export default function DoctorsPage() {
       const { data } = await dbQuery.order('rating', { ascending: false });
       setDoctors((data && data.length ? data : demoDoctors) as Doctor[]);
       setLoading(false);
-    })();
+    })().catch(() => { setDoctors(demoDoctors); setLoading(false); });
   }, [search, selectedSpecialty, selectedCity]);
 
   const cities = ['دمشق', 'حلب', 'حمص', 'اللاذقية'];
