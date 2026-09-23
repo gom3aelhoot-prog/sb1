@@ -71,7 +71,7 @@ export function Footer() {
                 <li key={i}>
                   <a
                     href={link.href}
-                    onClick={(e) => e.preventDefault()}
+                    
                     className="text-sm text-neutral-400 transition-colors hover:text-primary-400"
                   >
                     {link.label}
@@ -89,7 +89,7 @@ export function Footer() {
                 <li key={i}>
                   <a
                     href={link.href}
-                    onClick={(e) => e.preventDefault()}
+                    
                     className="text-sm text-neutral-400 transition-colors hover:text-primary-400"
                   >
                     {link.label}
@@ -125,7 +125,7 @@ export function Footer() {
                   <a
                     key={i}
                     href={social.href}
-                    onClick={(e) => e.preventDefault()}
+                    
                     className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-800 text-neutral-400 transition-all hover:bg-primary-600 hover:text-white"
                     aria-label={t.footer.followUs}
                   >
@@ -144,9 +144,9 @@ export function Footer() {
               © {new Date().getFullYear()} {t.footer.about}. {t.footer.rights}.
             </p>
             <div className="flex gap-5">
-              <a href="#" onClick={(e) => e.preventDefault()} className="text-xs text-neutral-500 hover:text-primary-400 transition-colors">{t.footer.privacy}</a>
-              <a href="#" onClick={(e) => e.preventDefault()} className="text-xs text-neutral-500 hover:text-primary-400 transition-colors">{t.footer.terms}</a>
-              <a href="#" onClick={(e) => e.preventDefault()} className="text-xs text-neutral-500 hover:text-primary-400 transition-colors">{t.footer.cookies}</a>
+              <a href="#"  className="text-xs text-neutral-500 hover:text-primary-400 transition-colors">{t.footer.privacy}</a>
+              <a href="#"  className="text-xs text-neutral-500 hover:text-primary-400 transition-colors">{t.footer.terms}</a>
+              <a href="#"  className="text-xs text-neutral-500 hover:text-primary-400 transition-colors">{t.footer.cookies}</a>
             </div>
           </div>
         </div>
