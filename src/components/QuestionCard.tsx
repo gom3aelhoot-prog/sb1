@@ -2,61 +2,45 @@ import { MessageCircle, Eye, Clock } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import type { Question } from '@/lib/supabase';
+import { localizedField } from '@/lib/localizedContent';
 
-function timeAgo(date: string): string {
+function timeAgo(date: string, lang: string): string {
   const diff = Date.now() - new Date(date).getTime();
-  const days = Math.floor(diff / 86400000);
-  if (days === 0) {
-    const hours = Math.floor(diff / 3600000);
-    if (hours === 0) return 'منذ دقائق';
-    return `منذ ${hours} ساعة`;
+  const seconds = Math.max(1, Math.floor(diff / 1000));
+  const units: [Intl.RelativeTimeFormatUnit, number][] = [
+    ['year', 31536000], ['month', 2592000], ['week', 604800], ['day', 86400], ['hour', 3600], ['minute', 60], ['second', 1],
+  ];
+  const unit = units.find(([, secondsPer]) => seconds >= secondsPer) || units[units.length - 1];
+  const value = -Math.floor(seconds / unit[1]);
+  try {
+    return new Intl.RelativeTimeFormat(lang, { numeric: 'auto' }).format(value, unit[0]);
+  } catch {
+    return `${Math.abs(value)} ${unit[0]} ago`;
   }
-  if (days === 1) return 'منذ يوم';
-  if (days < 7) return `منذ ${days} أيام`;
-  if (days < 30) return `منذ ${Math.floor(days / 7)} أسابيع`;
-  return `منذ ${Math.floor(days / 30)} أشهر`;
 }
 
 export default function QuestionCard({ question }: { question: Question }) {
   const { navigate } = useRouter();
-  const { specialtyName } = useI18n();
+  const { t, specialtyName, lang, dir } = useI18n();
   const answerCount = question.answers?.length ?? 0;
+  const title = localizedField(question as unknown as Record<string, unknown>, 'title', lang, question.title);
+  const body = localizedField(question as unknown as Record<string, unknown>, 'body', lang, question.body);
 
   return (
-    <button
-      onClick={() => navigate(`/questions/${question.id}`)}
-      className="card card-hover p-5 text-right w-full"
-    >
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <h3 className="font-bold text-gray-800 text-base leading-snug group-hover:text-teal-600 line-clamp-2">
-          {question.title}
-        </h3>
-        {question.specialty && (
-          <span className="badge bg-teal-50 text-teal-700 whitespace-nowrap shrink-0">
-            {specialtyName(question.specialty)}
-          </span>
-        )}
+    <button onClick={() => navigate(`/questions/${question.id}`)} className="card card-hover w-full p-5 text-start" dir={dir}>
+      <div className="mb-2 flex items-start justify-between gap-3">
+        <h3 className="line-clamp-2 text-base font-bold leading-snug text-gray-800">{title}</h3>
+        {question.specialty && <span className="badge shrink-0 whitespace-nowrap bg-teal-50 text-teal-700">{specialtyName(question.specialty)}</span>}
       </div>
-      <p className="text-gray-500 text-sm line-clamp-2 mb-3">{question.body}</p>
-      <div className="flex items-center gap-4 text-xs text-gray-400">
+      <p className="mb-3 line-clamp-2 text-sm text-gray-500">{body}</p>
+      <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400">
         <span className="flex items-center gap-1">
-          <span className="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-[10px]">
-            {question.author_name.charAt(0)}
-          </span>
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-teal-100 text-[10px] font-bold text-teal-700">{question.author_name.charAt(0)}</span>
           {question.author_name}
         </span>
-        <span className="flex items-center gap-1">
-          <MessageCircle className="w-3.5 h-3.5" />
-          {answerCount} إجابة
-        </span>
-        <span className="flex items-center gap-1">
-          <Eye className="w-3.5 h-3.5" />
-          {question.views}
-        </span>
-        <span className="flex items-center gap-1">
-          <Clock className="w-3.5 h-3.5" />
-          {timeAgo(question.created_at)}
-        </span>
+        <span className="flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" />{answerCount} {t('questions.answers')}</span>
+        <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{question.views}</span>
+        <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{timeAgo(question.created_at, lang)}</span>
       </div>
     </button>
   );
