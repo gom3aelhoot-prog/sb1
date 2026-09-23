@@ -5,7 +5,8 @@ import { useI18n } from '@/lib/i18n';
 export default function ReferralPage() {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
-  const referralLink = 'https://sahla-wa-basita.com/ref/sahla2026';
+  const [points,setPoints] = useState(()=>Number(localStorage.getItem('sb1_reward_points')||'120'));
+  const referralLink = 'https://sb1.vercel.app/ref/sb1';
 
   const copyLink = () => {
     navigator.clipboard.writeText(referralLink);
@@ -53,8 +54,8 @@ export default function ReferralPage() {
             <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center mx-auto mb-3">
               <DollarSign className="w-6 h-6 text-teal-600" />
             </div>
-            <p className="text-3xl font-bold text-gray-800">$0</p>
-            <p className="text-sm text-gray-500">{t('referral.total_earned')}</p>
+            <p className="text-3xl font-bold text-gray-800">{points}</p>
+            <p className="text-sm text-gray-500">نقاط المكافآت</p>
           </div>
         </div>
 
