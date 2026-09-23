@@ -1,4 +1,4 @@
-import { useMemo,useState } from 'react';
+import { useEffect,useMemo,useState } from 'react';
 import { Award,BookOpen,Download,Video,MessageCircle,PlayCircle,Users,Clock3 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useRouter,getPathOnly } from '@/lib/router';
