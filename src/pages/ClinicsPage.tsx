@@ -6,7 +6,7 @@ import { supabase, type Clinic } from '@/lib/supabase';
 import { demoClinics } from '@/lib/demoData';
 
 export default function ClinicsPage() {
-  const { t } = useI18n();
+  const { t,lang } = useI18n();
   const { navigate } = useRouter();
   const [clinics, setClinics] = useState<(Clinic & { doctor?: { name: string } })[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,13 +16,13 @@ export default function ClinicsPage() {
 
   useEffect(() => {
     supabase.from('clinics').select('*, doctor(name)').eq('is_active', true).order('created_at', { ascending: false }).then(({ data }) => {
-      setClinics((data && data.length ? data : demoClinics) as Clinic[]);
+      setClinics((data && data.length ? data : virtualFacilities(lang).filter(x=>x.facility_type==='clinic')) as any);
       setLoading(false);
     }).catch(() => {
       setClinics([]);
       setLoading(false);
     });
-  }, []);
+  }, [lang]);
 
   const handleBook = async () => {
     if (!bookingClinic || !bookForm.patient_name || !bookForm.scheduled_at) return;
