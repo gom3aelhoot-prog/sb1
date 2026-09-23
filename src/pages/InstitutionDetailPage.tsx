@@ -3,11 +3,14 @@ import { ArrowLeft, Calendar, CheckCircle2, Clock, MapPin, Phone, Star, Shopping
 import { useRouter, getPathOnly } from '@/lib/router';
 import { demoClinics, demoFacilities, demoLabs, demoProducts, demoRadiology } from '@/lib/demoData';
 import { supabase } from '@/lib/supabase';
+import { virtualFacilities, languageCountry } from '@/lib/catalog';
+import { useI18n } from '@/lib/i18n';
 
 type Kind = 'clinic'|'lab'|'radiology'|'facility';
 
 export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
   const { path, navigate } = useRouter();
+  const { lang } = useI18n();
   const id = getPathOnly(path).split('/')[2] || '';
   const [booked, setBooked] = useState(false);
   const [date, setDate] = useState('');
@@ -21,14 +24,14 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
       else if (kind==='clinic') setData(demoClinics.find(x=>x.id===id) || null);
       else if (kind==='lab') setData(demoLabs.find(x=>x.id===id) || null);
       else if (kind==='radiology') setData(demoRadiology.find(x=>x.id===id) || null);
-      else setData(demoFacilities.find(x=>x.id===id) || null);
+      else setData(demoFacilities.find(x=>x.id===id) || virtualFacilities(lang).find(x=>x.id===id) || null);
     }).catch(() => {
       if (kind==='clinic') setData(demoClinics.find(x=>x.id===id) || null);
       else if (kind==='lab') setData(demoLabs.find(x=>x.id===id) || null);
       else if (kind==='radiology') setData(demoRadiology.find(x=>x.id===id) || null);
-      else setData(demoFacilities.find(x=>x.id===id) || null);
+      else setData(demoFacilities.find(x=>x.id===id) || virtualFacilities(lang).find(x=>x.id===id) || null);
     });
-  }, [kind, id]);
+  }, [kind, id, lang]);
 
   if (!data) return <div className="min-h-screen pt-28 text-center" dir="rtl"><h1 className="text-2xl font-bold">جاري تحميل المؤسسة أو المؤسسة غير موجودة</h1><button className="btn-primary mt-5" onClick={()=>navigate('/facilities')}>العودة للمرافق</button></div>;
 
