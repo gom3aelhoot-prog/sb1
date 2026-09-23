@@ -162,8 +162,12 @@ export default function AdminPage() {
 
   const handleAdd = async (table: string) => {
     const contentLanguage = addForm.content_language || 'ar';
-    const payload = { ...addForm } as Record<string,string>;
+    const payload = { ...addForm } as Record<string, any>;
     delete payload.content_language;
+    const translationKeys = ['name','bio','title','excerpt','body','description','source','level'];
+    const translation:any = {};
+    for (const key of translationKeys) if (payload[key] !== undefined && payload[key] !== '') translation[key] = payload[key];
+    payload.translations = { [contentLanguage]: translation };
     if (table === 'doctors') payload.native_language = contentLanguage;
     localStorage.setItem('sb1_content_language_last', contentLanguage);
     const stored = JSON.parse(localStorage.getItem('sb1_content_language_catalog') || '{}');
