@@ -16,6 +16,8 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
   const [date, setDate] = useState('');
   const [service, setService] = useState('');
   const [data, setData] = useState<any>(null);
+  const [patientName, setPatientName] = useState('');
+  const [patientPhone, setPatientPhone] = useState('');
 
   useEffect(() => {
     const table = kind==='clinic' ? 'clinics' : kind==='lab' ? 'lab_centers' : kind==='radiology' ? 'radiology_centers' : 'additional_facilities';
@@ -54,12 +56,16 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
     e.preventDefault();
     if (!date || !service) return;
     const bookingTable = kind==='clinic' ? 'clinic_bookings' : kind==='lab' ? 'lab_bookings' : kind==='radiology' ? 'radiology_bookings' : 'facility_bookings';
-    const payload:any = { patient_name: 'زائر SB1', patient_phone: '', scheduled_at: new Date(date).toISOString(), status: 'pending', price: 0 };
+    const payload:any = { patient_name: patientName.trim() || 'زائر SB1', patient_phone: patientPhone.trim(), scheduled_at: new Date(date).toISOString(), status: 'pending', price: 0 };
     if (kind==='clinic') payload.clinic_id=id;
     if (kind==='lab') { payload.center_id=id; payload.test_type=service; }
     if (kind==='radiology') { payload.center_id=id; payload.service_type=service; }
     if (kind==='facility') payload.facility_id=id;
-    await supabase.from(bookingTable).insert(payload);
+    const { error } = await supabase.from(bookingTable).insert(payload);
+    if (error) {
+      const local=JSON.parse(localStorage.getItem('sb1_demo_bookings')||'[]');
+      localStorage.setItem('sb1_demo_bookings',JSON.stringify([{...payload,id:`demo-booking-${Date.now()}`,institution_id:id,kind},...local]));
+    }
     setBooked(true);
   };
 
@@ -81,7 +87,7 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
         <div className="grid gap-6 border-t border-gray-100 p-7 lg:grid-cols-3">
           <section className="rounded-2xl bg-gray-50 p-5"><h2 className="font-bold text-gray-800">الخدمات</h2><p className="mt-3 text-sm leading-7 text-gray-600">{services || 'خدمات المؤسسة تظهر هنا بالتفصيل ويمكن للمالك تعديلها من لوحة التحكم.'}</p></section>
           <section className="rounded-2xl bg-gray-50 p-5"><h2 className="font-bold text-gray-800">الأسعار</h2><ul className="mt-3 space-y-3 text-sm text-gray-600">{priceRows.map(x=><li key={x} className="flex gap-2"><CheckCircle2 className="h-4 w-4 shrink-0 text-teal-600"/>{x}</li>)}</ul></section>
-          <section className="rounded-2xl bg-teal-50 p-5"><h2 className="font-bold text-gray-800">الحجز</h2>{booked ? <div className="mt-5 text-center"><CheckCircle2 className="mx-auto h-10 w-10 text-teal-600"/><p className="mt-2 font-bold text-gray-800">تم إرسال طلب الحجز</p><p className="mt-1 text-xs text-gray-500">ستصل التفاصيل للمؤسسة ويؤكد الموعد.</p></div> : <form onSubmit={handleBook} className="mt-3 space-y-3"><select required value={service} onChange={e=>setService(e.target.value)} className="input-field"><option value="">اختر الخدمة</option>{priceRows.map(x=><option key={x}>{x}</option>)}</select><input required type="datetime-local" value={date} onChange={e=>setDate(e.target.value)} className="input-field"/><input required placeholder="اسم العميل" className="input-field"/><input placeholder="رقم الهاتف" className="input-field"/><button className="btn-primary w-full flex items-center justify-center gap-2"><Calendar className="h-4 w-4"/>إرسال طلب الحجز</button></form>}</section>
+          <section className="rounded-2xl bg-teal-50 p-5"><h2 className="font-bold text-gray-800">الحجز</h2>{booked ? <div className="mt-5 text-center"><CheckCircle2 className="mx-auto h-10 w-10 text-teal-600"/><p className="mt-2 font-bold text-gray-800">تم إرسال طلب الحجز</p><p className="mt-1 text-xs text-gray-500">ستصل التفاصيل للمؤسسة ويؤكد الموعد.</p></div> : <form onSubmit={handleBook} className="mt-3 space-y-3"><select required value={service} onChange={e=>setService(e.target.value)} className="input-field"><option value="">اختر الخدمة</option>{priceRows.map(x=><option key={x}>{x}</option>)}</select><input required type="datetime-local" value={date} onChange={e=>setDate(e.target.value)} className="input-field"/><input required placeholder="اسم العميل" value={patientName} onChange={e=>setPatientName(e.target.value)} className="input-field"/><input placeholder="رقم الهاتف" value={patientPhone} onChange={e=>setPatientPhone(e.target.value)} className="input-field"/><button className="btn-primary w-full flex items-center justify-center gap-2"><Calendar className="h-4 w-4"/>إرسال طلب الحجز</button></form>}</section>
         </div>
 
         {kind==='facility' && <div className="border-t border-gray-100 p-7"><h2 className="mb-4 flex items-center gap-2 text-xl font-bold"><ShoppingBag className="h-5 w-5 text-teal-600"/>منتجات / خدمات المؤسسة</h2><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{demoProducts.map(p=><div key={p.id} className="rounded-2xl border bg-white p-4"><div className="h-32 overflow-hidden rounded-xl bg-gray-100">{p.image_url&&<img src={p.image_url} alt={p.name} className="h-full w-full object-cover"/>}</div><h3 className="mt-3 font-semibold">{p.name}</h3><p className="mt-1 text-sm text-gray-500">{p.description}</p><p className="mt-2 font-bold text-teal-700">{p.price} {p.currency}</p></div>)}</div></div>}
