@@ -36,7 +36,7 @@ export default function ArticlesPage() {
       const { data } = await dbQuery.order('created_at', { ascending: false });
       setArticles((data && data.length ? data : demoArticles) as Article[]);
       setLoading(false);
-    })();
+    })().catch(() => { setArticles(demoArticles); setLoading(false); });
   }, [selectedSpecialty]);
 
   return (
