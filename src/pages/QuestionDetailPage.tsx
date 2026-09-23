@@ -7,7 +7,7 @@ import { virtualQuestionsForSpecialty,virtualAnswersForQuestion } from '@/lib/ca
 export default function QuestionDetailPage({id}:{id:string}){
  const {navigate}=useRouter();const {lang,dir}=useI18n();
  const match=id.match(/^catalog-q-([^-]+)-(.+)-(\d+)$/);const slug=match?.[2]||comprehensiveSpecialties[0].slug;
- const questions=virtualQuestionsForSpecialty(slug,lang,50);const question=questions.find(q=>q.id===id)||null;
+ const questions=virtualQuestionsForSpecialty(slug,lang,50);const localQuestions=(JSON.parse(localStorage.getItem('sb1_demo_questions')||'[]') as any[]);const question=questions.find(q=>q.id===id)||localQuestions.find(q=>q.id===id&&(!q.language||q.language===lang))||null;
  const answers=useMemo(()=>question?virtualAnswersForQuestion(question,lang,8):[],[question,lang]);
  if(!question)return <div className="min-h-screen pt-28 text-center" dir={dir}><p className="text-gray-500">السؤال غير موجود في هذه اللغة.</p><button onClick={()=>navigate('/questions')} className="mt-4 rounded-xl bg-teal-600 text-white px-5 py-3">العودة للأسئلة</button></div>;
  return <div className="min-h-screen bg-gray-50 pt-24 pb-16" dir={dir}><div className="mx-auto max-w-3xl px-4">
