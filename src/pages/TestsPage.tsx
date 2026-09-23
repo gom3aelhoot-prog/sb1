@@ -446,9 +446,11 @@ export default function TestsPage() {
             {result && result !== '__pending__' && (
               <div className="mt-6 p-6 bg-teal-50 rounded-xl text-center">
                 <p className="text-lg font-bold text-teal-800 whitespace-pre-line">{result}</p>
-                <button onClick={saveResult} className="mt-4 flex items-center gap-2 mx-auto text-teal-600 hover:text-teal-700 text-sm font-medium">
-                  <Save className="w-4 h-4" /> {t('tests.save')}
-                </button>
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  <button onClick={saveResult} className="flex items-center gap-2 rounded-xl bg-teal-50 px-4 py-2 text-teal-700 text-sm font-medium"><Save className="w-4 h-4" /> {t('tests.save')}</button>
+                  <button onClick={()=>{localStorage.setItem('sb1_test_result_draft',result);window.location.href='/doctors?specialty=clinical-psychology'}} className="rounded-xl bg-indigo-50 px-4 py-2 text-indigo-700 text-sm font-medium">إرسال لأخصائي</button>
+                  <button onClick={()=>{localStorage.setItem('sb1_test_result_draft',result);window.location.href='/ask'}} className="rounded-xl bg-amber-50 px-4 py-2 text-amber-700 text-sm font-medium">إدراج في سؤال</button>
+                </div>
               </div>
             )}
           </div>
