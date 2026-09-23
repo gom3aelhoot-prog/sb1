@@ -52,7 +52,7 @@ export function Header() {
   const platformSections = [
     { label: platformT('nav.doctors'), href: '/doctors' },
     { label: platformT('nav.questions'), href: '/questions' },
-    { label: platformT('nav.ask'), href: '/ask' },
+    { label: platformT('nav.ask'), href: '/consult' },
     { label: platformT('nav.articles'), href: '/articles' },
     { label: platformT('nav.videos'), href: '/videos' },
     { label: platformT('nav.audio'), href: '/audio' },
