@@ -12,9 +12,12 @@ import {
   Star,
 } from 'lucide-react';
 import { useApp } from '@/i18n/AppContext';
+import { useI18n } from '@/lib/i18n';
 
 export function Hero() {
   const { t, direction } = useApp();
+  const { lang } = useI18n();
+  const ownerNames:any = { ar:'دكتور جمال نادي', ru:'ДОКТОР ДЖЕЙМС', en:'Dr. James', de:'Dr. James', uk:'Доктор Джеймс', uz:'Doktor Jeyms', hy:'Դոկտոր Ջեյմս', tg:'Доктор Ҷеймс', az:'Doktor Ceyms', am:'ዶክተር ጄምስ', ka:'დოქტორი ჯეიმსი' };
   const ArrowIcon = direction === 'rtl' ? ArrowLeft : ArrowRight;
 
   const stats = [
@@ -109,8 +112,8 @@ export function Hero() {
                       <Stethoscope className="h-8 w-8 text-primary-600" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-neutral-900">Dr. Ahmed Hassan</h3>
-                      <p className="text-sm text-neutral-500">Cardiology • 15 years exp.</p>
+                      <h3 className="text-lg font-bold text-neutral-900">{ownerNames[lang]||ownerNames.en}</h3>
+                      <p className="text-sm text-neutral-500">{lang==='ar'?'استشارات طبية أونلاين':lang==='ru'?'Онлайн-консультация':lang==='de'?'Online-Beratung':'Online consultation'}</p>
                       <div className="mt-1 flex items-center gap-1">
                         <Star className="h-3.5 w-3.5 fill-accent-400 text-accent-400" />
                         <Star className="h-3.5 w-3.5 fill-accent-400 text-accent-400" />
@@ -127,7 +130,7 @@ export function Hero() {
                       <Video className="h-4 w-4" />
                       Video consultation
                     </div>
-                    <span className="text-lg font-bold text-primary-700">$49</span>
+                    <span className="text-lg font-bold text-primary-700">$25</span>
                   </div>
 
                   <button className="mt-4 w-full rounded-xl bg-primary-600 py-3 text-sm font-semibold text-white transition-all hover:bg-primary-700 active:scale-95">
