@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { MapPin, Phone, Calendar, X, TestTube } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type LabCenter } from '@/lib/supabase';
+import { demoLabs } from '@/lib/demoData';
 
 export default function LabsPage() {
   const { t } = useI18n();
@@ -13,7 +14,7 @@ export default function LabsPage() {
 
   useEffect(() => {
     supabase.from('lab_centers').select('*').eq('is_active', true).order('created_at', { ascending: false }).then(({ data }) => {
-      setCenters(data || []);
+      setCenters((data && data.length ? data : demoLabs) as LabCenter[]);
       setLoading(false);
     }).catch(() => {
       setCenters([]);
