@@ -18,28 +18,39 @@ const facilityIcons: Record<string, typeof Building2> = {
 export default function FacilitiesPage() {
   const { t, lang } = useI18n();
   const { navigate } = useRouter();
-  const [facilities, setFacilities] = useState<AdditionalFacility[]>([]);
-  const [products, setProducts] = useState<PharmacyProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [facilities, setFacilities] = useState<AdditionalFacility[]>(demoFacilities as AdditionalFacility[]);
+  const [products, setProducts] = useState<PharmacyProduct[]>(demoProducts as PharmacyProduct[]);
+  const [loading, setLoading] = useState(false);
   const [activeType, setActiveType] = useState('all');
   const [cart, setCart] = useState<string[]>([]);
 
   useEffect(() => {
+    let alive = true;
+    const timer = window.setTimeout(() => {
+      if (alive) setLoading(false);
+    }, 2200);
     (async () => {
       try {
-        const [{ data: facData }, { data: prodData }] = await Promise.all([
-          supabase.from('additional_facilities').select('*').eq('is_active', true).order('name'),
-          supabase.from('pharmacy_products').select('*').eq('is_active', true).order('name'),
+        const result = await Promise.race([
+          Promise.all([
+            supabase.from('additional_facilities').select('*').eq('is_active', true).order('name'),
+            supabase.from('pharmacy_products').select('*').eq('is_active', true).order('name'),
+          ]),
+          new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 2000)),
         ]);
-        setFacilities((facData && facData.length ? facData : demoFacilities) as AdditionalFacility[]);
-        setProducts((prodData && prodData.length ? prodData : demoProducts) as PharmacyProduct[]);
+        if (!alive) return;
+        if (result) {
+          const [{ data: facData }, { data: prodData }] = result;
+          if (facData?.length) setFacilities(facData as AdditionalFacility[]);
+          if (prodData?.length) setProducts(prodData as PharmacyProduct[]);
+        }
       } catch {
-        setFacilities(demoFacilities as AdditionalFacility[]);
-        setProducts(demoProducts as PharmacyProduct[]);
+        // Demo data is already visible, so a backend failure does not block the page.
       } finally {
-        setLoading(false);
+        if (alive) setLoading(false);
       }
     })();
+    return () => { alive = false; window.clearTimeout(timer); };
   }, []);
 
   const types = [
