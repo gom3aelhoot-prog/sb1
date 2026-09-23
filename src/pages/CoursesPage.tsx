@@ -36,7 +36,7 @@ export default function CoursesPage() {
       const { data } = await dbQuery.order('created_at', { ascending: false });
       setCourses((data && data.length ? data : demoCourses) as Course[]);
       setLoading(false);
-    })();
+    })().catch(() => { setCourses(demoCourses); setLoading(false); });
   }, [selectedSpecialty]);
 
   const handleEnroll = async (e: React.FormEvent) => {
