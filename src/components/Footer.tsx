@@ -26,7 +26,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-neutral-900 text-neutral-300">
+    <footer id="contact" className="bg-neutral-900 text-neutral-300">
       <div className="container-x py-16">
         <div className="grid gap-10 lg:grid-cols-12">
           {/* Brand */}
