@@ -20,7 +20,8 @@ export default function QuestionDetailPage({ id }: { id: string }) {
         .eq('id', id)
         .maybeSingle();
 
-      const fallbackQuestion = demoQuestions.find((item) => item.id === id) || null;
+      const localQuestions = JSON.parse(localStorage.getItem('sb1_demo_questions') || '[]') as Question[];
+      const fallbackQuestion = localQuestions.find((item) => item.id === id) || demoQuestions.find((item) => item.id === id) || null;
       const questionData = q || fallbackQuestion;
       if (questionData) {
         setQuestion(questionData as Question);
