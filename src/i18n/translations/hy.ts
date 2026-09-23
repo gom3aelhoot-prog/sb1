@@ -123,7 +123,7 @@ const hy: TranslationData = {
     secondaryButton: 'Իմացեք բժիշկների մասին',
   },
   footer: {
-    about: 'Tabibi Online',
+    about: 'SB1',
     aboutDesc: 'Համակարգված բժշկական և հոգեբանական հարթակ, որը հիվանդներին կապում է աշխարհի լավագույն բժիշկների և թերապևտների հետ՝ հեշտ և անվտանգ։',
     quickLinks: 'Արագ հղումներ',
     forPatients: 'Հիվանդների համար',
