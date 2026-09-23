@@ -48,19 +48,19 @@ export function Header() {
   }, [mobileOpen]);
 
   const platformSections = [
-    { label: 'الأطباء والأخصائيون', href: '/doctors' },
-    { label: 'الأسئلة والاستشارات', href: '/questions' },
-    { label: 'طرح سؤال', href: '/ask' },
-    { label: 'المقالات', href: '/articles' },
-    { label: 'الفيديوهات والريلز', href: '/videos' },
-    { label: 'الصوتيات', href: '/audio' },
-    { label: 'الكورسات', href: '/courses' },
-    { label: 'الجلسات', href: '/sessions' },
-    { label: 'العيادات', href: '/clinics' },
-    { label: 'التحاليل', href: '/labs' },
-    { label: 'الأشعة', href: '/radiology' },
-    { label: 'المرافق والصيدليات', href: '/facilities' },
-    { label: 'المكتبة', href: '/library' },
+    { label: t.nav.doctors, href: '/doctors' },
+    { label: t.nav.questions, href: '/questions' },
+    { label: t.nav.ask, href: '/ask' },
+    { label: t.nav.articles, href: '/articles' },
+    { label: t.nav.videos, href: '/videos' },
+    { label: t.nav.audio, href: '/audio' },
+    { label: t.nav.courses, href: '/courses' },
+    { label: t.nav.sessions, href: '/sessions' },
+    { label: t.nav.clinics, href: '/clinics' },
+    { label: t.nav.labs, href: '/labs' },
+    { label: t.nav.radiology, href: '/radiology' },
+    { label: t.nav.facilities, href: '/facilities' },
+    { label: t.nav.library, href: '/library' },
   ];
 
   const navItems = [
