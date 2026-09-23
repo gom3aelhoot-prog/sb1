@@ -126,6 +126,7 @@ export default function TestsPage() {
   const [tests, setTests] = useState<MedicalTest[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [search, setSearch] = useState('');
   const [activeTest, setActiveTest] = useState<MedicalTest | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
@@ -140,7 +141,7 @@ export default function TestsPage() {
     })();
   }, []);
 
-  const filteredTests = activeCategory === 'all' ? tests : tests.filter((tst) => tst.category === activeCategory);
+  const filteredTests = tests.filter((tst) => (activeCategory === 'all' || tst.category === activeCategory) && (!search || tst.title.toLowerCase().includes(search.toLowerCase()) || (tst.title_en||'').toLowerCase().includes(search.toLowerCase())));
 
   const tr = (ar: string, en: string) => lang === 'en' ? en : ar;
 
