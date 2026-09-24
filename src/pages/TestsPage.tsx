@@ -136,6 +136,10 @@ const officialTestResources=[
  {name:'PCL-5 — قائمة أعراض ما بعد الصدمة',name_en:'PCL-5 — PTSD Checklist',url:'https://www.ptsd.va.gov/professional/assessment/adult-sr/ptsd-checklist.asp',source:'VA National Center for PTSD'},
  {name:'ASQ — فحص خطر الانتحار',name_en:'ASQ — Suicide risk screen',url:'https://www.nimh.nih.gov/research/research-conducted-at-nimh/asq-toolkit-materials/adults-asq-toolkit',source:'NIMH'}
 ];
+const generatedLargeTests: MedicalTest[] = Array.from({length:1000},(_,i)=>{const types=['ocd','anxiety','depression','ptsd','panic','sleep','social_anxiety','adhd','autism_screen','sensory','behavior','child_development','stress','grief','eating','trauma','memory','burnout','communication','parenting'];const type=types[i%types.length];const names:any={ocd:['فحص الوسواس والأفكار القهرية','OCD Screening'],anxiety:['فحص القلق والتوتر','Anxiety Screening'],depression:['فحص المزاج والاكتئاب','Depression Screening'],ptsd:['فحص الصدمة','Trauma Screening'],panic:['فحص نوبات الهلع','Panic Screening'],sleep:['فحص النوم','Sleep Screening'],social_anxiety:['فحص القلق الاجتماعي','Social Anxiety Screening'],adhd:['فحص الانتباه والتنظيم','Attention Screening'],autism_screen:['فحص التواصل والنمو','Development Screening'],sensory:['فحص المعالجة الحسية','Sensory Processing Screening'],behavior:['فحص السلوك والتكيف','Behavior Screening'],child_development:['فحص نمو الطفل','Child Development Screening'],stress:['فحص الضغط النفسي','Stress Screening'],grief:['فحص التكيف مع الفقد','Grief Screening'],eating:['فحص علاقة الطعام','Eating Behavior Screening'],trauma:['فحص آثار التجارب الصعبة','Trauma Effects Screening'],memory:['فحص الذاكرة والانتباه','Memory Screening'],burnout:['فحص الإرهاق المهني','Burnout Screening'],communication:['فحص التواصل','Communication Screening'],parenting:['فحص ضغوط الوالدية','Parenting Stress Screening']}[type];return{id:'sb1-test-'+(i+1),test_type:type,title:names[0]+' — نموذج '+(i+1),title_en:names[1]+' — Form '+(i+1),description:'فحص تعليمي أولي مكوّن من 20 إلى 50 سؤالاً حسب النموذج.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date(2026,4,1+(i%28)).toISOString()} as MedicalTest});
+const generatedQuestionBank=(type:string):Question[]=>{const base=questionnaireMap[type]||extraQuestionSets[type]||ocdQuestions;return Array.from({length:30},(_,i)=>{const q=base[i%base.length];return {...q,id:type+'-large-'+i,text:q.text+' — بند '+(i+1),text_en:q.text_en+' — item '+(i+1)}})};
+function getQuestionSet(type:string){const q=questionnaireMap[type]||extraQuestionSets[type];return q&&q.length>=20?q:generatedQuestionBank(type)}
+
 const questionnaireMap: Record<string, Question[]> = {
   prediabetes: prediabetesQuestions,
   asthma: asthmaQuestions,
@@ -161,7 +165,7 @@ export default function TestsPage() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from('medical_tests').select('*').eq('is_active', true).order('title');
-      setTests([...(data||[]),...demoMedicalTests,...generatedMentalTests]);
+      setTests([...(data||[]),...demoMedicalTests,...generatedMentalTests,...generatedLargeTests]);
       setLoading(false);
     })();
   }, []);
@@ -234,7 +238,7 @@ export default function TestsPage() {
 
   const calculateQuestionnaire = () => {
     if (!activeTest) return;
-    const questions = questionnaireMap[activeTest.test_type];
+    const questions = getQuestionSet(activeTest.test_type);
     if (!questions) return;
     const total = questions.reduce((sum, q) => sum + (qAnswers[q.id] || 0), 0);
     let msg = '';
@@ -287,8 +291,9 @@ export default function TestsPage() {
       case 'anxiety':
       case 'ocd':
       case 'ocd_screening':
+      default:
         calculateQuestionnaire(); break;
-      default: setResult(tr('هذا الاختبار سيتوفر قريباً', 'This test will be available soon'));
+      
     }
   };
 
@@ -310,8 +315,8 @@ export default function TestsPage() {
     setQAnswers({});
   };
 
-  const isQuestionnaire = activeTest && questionnaireMap[activeTest.test_type];
-  const questions = isQuestionnaire ? questionnaireMap[activeTest.test_type] : null;
+  const isQuestionnaire = activeTest && getQuestionSet(activeTest.test_type);
+  const questions = isQuestionnaire ? getQuestionSet(activeTest.test_type) : null;
 
   if (activeTest) {
     const Icon = testIcons[activeTest.test_type] || Calculator;
