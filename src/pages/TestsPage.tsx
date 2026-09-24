@@ -481,7 +481,7 @@ export default function TestsPage() {
             {/* Result */}
             {result && result !== '__pending__' && (
               <div className="mt-6 p-6 bg-teal-50 rounded-xl text-center">
-                <p className="text-lg font-bold text-teal-800 whitespace-pre-line">{result}</p>
+                <p className="text-lg font-bold text-teal-800 whitespace-pre-line">{result}</p><div className="mt-6 mx-auto max-w-md"><div className="flex items-end gap-2 h-28 border-b border-teal-200 px-2">{Object.entries(qAnswers).slice(0,20).map(([k,v]:any,i)=><div key={k} className="flex-1 min-w-[4px]" title={'سؤال '+(i+1)+': '+v}><div className="bg-teal-500 rounded-t" style={{height:(Number(v)+1)*22}}/></div>)}</div><p className="mt-2 text-xs text-gray-500">رسم مبسط لتوزيع إجابات الاختبار. النتيجة للتثقيف ولا تشخّص حالة مرضية.</p></div>
                 <div className="mt-4 flex flex-wrap justify-center gap-2">
                   <button onClick={saveResult} className="flex items-center gap-2 rounded-xl bg-teal-50 px-4 py-2 text-teal-700 text-sm font-medium"><Save className="w-4 h-4" /> {t('tests.save')}</button>
                   <button onClick={()=>{localStorage.setItem('sb1_test_result_draft',result);window.location.href='/doctors?specialty=clinical-psychology'}} className="rounded-xl bg-indigo-50 px-4 py-2 text-indigo-700 text-sm font-medium">إرسال لأخصائي</button>
