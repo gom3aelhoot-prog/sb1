@@ -6,7 +6,7 @@ import { supabase, type Course, type Specialty } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
 import { demoCourses, demoSpecialties } from '@/lib/demoData';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
-import { virtualCoursesForSpecialty,featuredCourses } from '@/lib/catalog';
+import { virtualCoursesForSpecialty,featuredCourses,specialtyCatalog } from '@/lib/catalog';
 
 export default function CoursesPage() {
   const { navigate } = useRouter();
@@ -23,9 +23,9 @@ export default function CoursesPage() {
   useEffect(() => {
     (async () => {
       const { data: specs } = await supabase.from('specialties').select('*').order('name');
-      setSpecialties((specs && specs.length ? specs : demoSpecialties) as Specialty[]);
+      setSpecialties(specialtyCatalog(lang) as Specialty[]);
     })();
-  }, []);
+  }, [lang]);
 
   useEffect(() => {
     (async () => {
