@@ -47,7 +47,7 @@ export default function DoctorCard({ doctor }: { doctor: Doctor }) {
 
   const handleSession = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/sessions?doctor=${doctor.id}`);
+    navigate(`/sessions?doctor=${doctor.id}&specialty=${doctor.specialty?.slug || ''}`);
   };
 
   return (
@@ -110,8 +110,8 @@ export default function DoctorCard({ doctor }: { doctor: Doctor }) {
         <button onClick={handleConsult} className="flex-1 rounded-xl bg-teal-600 py-2.5 text-xs font-semibold text-white transition hover:bg-teal-700">
           <MessageCircle className="mx-auto inline h-3.5 w-3.5" /> <span className="ms-1">{lang === 'ar' ? 'طلب استشارة' : 'Ask a doctor'}</span>
         </button>
-        <button onClick={doctor.is_virtual ? (e)=>e.stopPropagation() : handleSession} disabled={doctor.is_virtual} className="flex-1 rounded-xl bg-gray-100 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60">
-          <Calendar className="mx-auto inline h-3.5 w-3.5" /> <span className="ms-1">{doctor.is_virtual ? (lang==='ar'?'غير متاح':lang==='ru'?'Недоступно':'Unavailable') : sessionLabel}</span>
+        <button onClick={doctor.is_virtual ? (e)=>e.stopPropagation() : handleSession} disabled={false} className="flex-1 rounded-xl bg-gray-100 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60">
+          <Calendar className="mx-auto inline h-3.5 w-3.5" /> <span className="ms-1">{sessionLabel}</span>
         </button>
       </div>
     </div>
