@@ -6,7 +6,7 @@ import { supabase, type Course, type Specialty } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
 import { demoCourses, demoSpecialties } from '@/lib/demoData';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
-import { virtualCoursesForSpecialty } from '@/lib/catalog';
+import { virtualCoursesForSpecialty,featuredCourses } from '@/lib/catalog';
 
 export default function CoursesPage() {
   const { navigate } = useRouter();
@@ -36,7 +36,7 @@ export default function CoursesPage() {
         if (spec) dbQuery = dbQuery.eq('specialty_id', spec.id);
       }
       const { data } = await dbQuery.order('created_at', { ascending: false });
-      const generated = selectedSpecialty ? virtualCoursesForSpecialty(selectedSpecialty, lang, 4) : comprehensiveSpecialties.flatMap(s => virtualCoursesForSpecialty(s.slug, lang, 2));
+      const generated = selectedSpecialty ? virtualCoursesForSpecialty(selectedSpecialty, lang, 4) : [...featuredCourses(lang,12),...comprehensiveSpecialties.flatMap(s => virtualCoursesForSpecialty(s.slug, lang, 2))];
       const localizedData=(data||[]).filter((x:any)=>!x.translations || x.translations?.[lang]).map((x:any)=>{const tr=x.translations?.[lang]||{};return {...x,title:tr.title||x.title,description:tr.description||x.description}}); setCourses((localizedData.length ? localizedData : (generated.length ? generated : demoCourses)) as Course[]);
       setLoading(false);
     })().catch(() => { setCourses(demoCourses); setLoading(false); });
