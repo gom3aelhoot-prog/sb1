@@ -23,7 +23,7 @@ export default function SpecialtyHubPage() {
   const { lang, dir, specialtyName } = useI18n();
   const slug = getPathOnly(path).split('/')[2] || '';
   const specialty = comprehensiveSpecialties.find(s => s.slug === slug);
-  const [activeTab, setActiveTab] = useState<'doctors'|'questions'|'library'>('doctors');
+  const [activeTab, setActiveTab] = useState<'doctors'|'questions'|'library'>('questions');
   const [loadedDoctors, setLoadedDoctors] = useState<any[]>([]);
   const [loadedQuestions, setLoadedQuestions] = useState<any[]>([]);
   useEffect(() => {
@@ -82,8 +82,8 @@ export default function SpecialtyHubPage() {
       </section>}
 
       {activeTab==='questions' && <section className="mt-6">
-        <div className="mb-4 flex items-center justify-between"><h2 className="text-xl font-bold text-gray-800">أسئلة وأجوبة {title}</h2><button onClick={() => navigate('/ask?specialty='+encodeURIComponent(slug))} className="btn-primary">اكتب سؤالك</button></div>
-        {relatedQuestions.length ? <div className="grid grid-cols-1 gap-5 md:grid-cols-2">{relatedQuestions.map(q => <QuestionCard key={q.id} question={q}/>)}</div> : <div className="rounded-2xl bg-white p-8 text-center text-gray-500">لا توجد أسئلة منشورة في هذه النسخة التجريبية بعد. ابدأ أول سؤال.</div>}
+        <div className="mb-4 flex items-center justify-between"><h2 className="text-xl font-bold text-gray-800">أسئلة وأجوبة {title}</h2><div className="flex flex-wrap gap-2"><button onClick={() => navigate('/ask?specialty='+encodeURIComponent(slug))} className="btn-primary">اكتب سؤالك</button><button onClick={() => navigate('/doctors?specialty='+encodeURIComponent(slug))} className="rounded-xl border bg-white px-4 py-2 font-bold text-teal-700">أطباء تخصص {title}</button><button onClick={() => navigate('/sessions?specialty='+encodeURIComponent(slug))} className="rounded-xl border bg-white px-4 py-2 font-bold text-teal-700">الجلسات المجانية</button></div></div>
+        {relatedQuestions.length ? <div className="mx-auto max-w-4xl space-y-4">{relatedQuestions.map(q => <QuestionCard key={q.id} question={q}/>)}</div> : <div className="rounded-2xl bg-white p-8 text-center text-gray-500">لا توجد أسئلة منشورة في هذه النسخة التجريبية بعد. ابدأ أول سؤال.</div>}
       </section>}
 
       {activeTab==='library' && <section className="mt-6 grid gap-5 md:grid-cols-3">
