@@ -92,15 +92,13 @@ export default function CoursesPage() {
           <p className="text-gray-500">{t('courses.subtitle')}</p>
         </div>
 
-        <div className="mb-8 flex flex-wrap justify-center gap-2">
-          <button onClick={() => setSelectedSpecialty('')} className={`badge ${!selectedSpecialty ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-            {t('common.all')}
-          </button>
-          {specialties.map((spec) => (
-            <button key={spec.id} onClick={() => setSelectedSpecialty(spec.slug)} className={`badge ${selectedSpecialty === spec.slug ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-              {specialtyName(spec)}
-            </button>
-          ))}
+        <div className="mb-8 mx-auto max-w-2xl rounded-2xl bg-white border border-gray-100 p-5 shadow-sm">
+          <label className="mb-2 block text-sm font-bold text-gray-700">{lang==='ar'?'اختار التخصص':'Choose specialty'}</label>
+          <select value={selectedSpecialty} onChange={e=>setSelectedSpecialty(e.target.value)} className="input-field w-full">
+            <option value="">{t('common.all')}</option>
+            {specialties.map((spec) => <option key={spec.id} value={spec.slug}>{specialtyName(spec)}</option>)}
+          </select>
+          <p className="mt-2 text-xs text-gray-400">{lang==='ar'?'اختر تخصصاً واحداً ثم ستظهر الدورات الخاصة به فقط.':'Choose one specialty to view only its courses.'}</p>
         </div>
 
         {loading ? (
