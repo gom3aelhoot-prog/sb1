@@ -71,21 +71,122 @@ function namesFor(lang:string){return LANGUAGE_PROFILES[lang]?.names||LANGUAGE_P
 function spec(slug:string){return comprehensiveSpecialties.find(x=>x.slug===slug)}
 function sp(lang:string,slug:string){return specialtyCatalog(lang).find(x=>x.slug===slug)!}
 
+const doctorPhotoPool=[
+ '/jamal-james.jpg',
+ 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-2',
+ 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-3',
+ 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-4',
+ 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-5',
+ 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-6',
+ 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-7',
+ 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-8',
+ 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-9',
+ 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-10',
+ 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-11',
+ 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-12',
+];
 export function virtualDoctorsForSpecialty(slug:string,lang:string,count=10,countryKey?:string):Doctor[]{
- const s=spec(slug);if(!s)return[];const specialty=sp(lang,slug);const base=countryKey&&countryData[countryKey]?countryData[countryKey]:null;const p=base?{country:base.names[lang]||base.names.en,city:base.city,native:LANGUAGE_PROFILES[lang]?.native||'English'}:languageCountry(lang);const names=namesFor(lang);
- return Array.from({length:Math.max(5,Math.min(25,count))},(_,i)=>({id:`catalog-doctor-${lang}-${slug}-${i+1}`,name:names[i%names.length],specialty_id:specialty.id,bio:`${L(lang).virtual} في ${localizedSpecialty(s,lang)}. ${lang==='ar'?'ملف تجريبي وليس شخصاً حقيقياً ولا يمثل ترخيصاً مهنياً.':'Demo profile, not a real person and not a professional license.'}`,education:'SB1 Virtual Specialist Program',experience_years:5+(i%18),photo_url:'',city:p.city,rating:4.5+(i%5)/10,consultation_count:120+i*31,native_language:lang,is_online:i%3!==0,is_verified:false,is_virtual:true,phone_number:null,follower_count:500+i*77,nationality:p.country,created_at:new Date(2026,0,1+i).toISOString(),specialty} as Doctor));
+ const s=spec(slug);if(!s)return[];const specialty=sp(lang,slug);const base=countryKey&&countryData[countryKey]?countryData[countryKey]:null;
+ const p=base?{country:base.names[lang]||base.names.en,city:base.city,native:LANGUAGE_PROFILES[lang]?.native||'English'}:languageCountry(lang);const names=namesFor(lang);
+ return Array.from({length:Math.max(5,Math.min(25,count))},(_,i)=>({id:\`catalog-doctor-\${lang}-\${slug}-\${i+1}\`,name:names[i%names.length],specialty_id:specialty.id,
+ bio:\`\${L(lang).virtual} في \${localizedSpecialty(s,lang)}. \${lang==='ar'?'ملف افتراضي تعليمي وليس شخصاً حقيقياً ولا يمثل ترخيصاً مهنياً.':'Educational virtual profile, not a real person and not a professional license.'}\`,
+ education:'SB1 Virtual Specialist Program',experience_years:i===0?17:5+(i%18),photo_url:doctorPhotoPool[i%doctorPhotoPool.length],city:p.city,rating:4.5+(i%5)/10,consultation_count:120+i*31,native_language:lang,is_online:i%3!==0,is_verified:false,is_virtual:true,phone_number:null,
+ follower_count:i===0?98500:500+i*77,nationality:p.country,created_at:new Date(2026,0,1+i).toISOString(),specialty} as Doctor));
 }
 
-const qTopics=['التعريف والمعلومات الأساسية','الأعراض والعلامات','الفحوصات والتشخيص','العلاج والمتابعة','الوقاية ونمط الحياة'];
+const questionScenarios:any={
+ ar:[
+  'أعاني منذ عدة أيام من أعراض مرتبطة بـ {s}، وتزداد في المساء. ما الفحوصات الأولية التي عادةً يناقشها الطبيب؟',
+  'لدي أعراض متكررة في {s} وأشعر أنها تتحسن ثم تعود. هل هذا يستدعي مراجعة مختص وما العلامات التي تستوجب سرعة التقييم؟',
+  'أجريت تحليلاً أو فحصاً وكانت النتيجة غير طبيعية في شيء يتعلق بـ {s}. كيف أفهم النتيجة وما المعلومات التي يجب أن أحضرها للطبيب؟',
+  'أستخدم دواءً حالياً وظهرت لدي أعراض جديدة. هل يمكن أن يكون هناك ارتباط بالدواء، وما الذي يجب تجنبه قبل سؤال الطبيب؟',
+  'طفلي يعاني من مشكلة قد تكون مرتبطة بـ {s}. ما العلامات التي تستدعي تقييم طبيب أطفال أو أخصائي؟',
+  'أنا حامل ولدي أعراض مرتبطة بـ {s}. ما الأسئلة المهمة التي أطرحها على الطبيب قبل تناول أي دواء أو إجراء؟',
+  'ما الفرق بين الأسباب الشائعة والأسباب التي تحتاج فحوصات إضافية عند ظهور أعراض مرتبطة بـ {s}؟',
+  'أعاني من أعراض منذ فترة طويلة وأثر ذلك على نومي أو عملي. ما الخطوة العملية الأولى للحصول على تقييم مناسب لـ {s}؟',
+  'هل توجد تغييرات في النوم أو الغذاء أو النشاط قد تساعد في التعامل مع أعراض {s}، ومتى لا تكفي هذه التغييرات وحدها؟',
+  'لدي أكثر من عرض في الوقت نفسه ولا أعرف هل هي مشكلة واحدة أم عدة مشاكل مرتبطة بـ {s}. كيف يقيّم الطبيب الحالة؟'
+ ],
+ en:[
+  'For several days I have had symptoms related to {s}, worse in the evening. What initial evaluation is usually discussed?',
+  'My symptoms related to {s} keep improving and returning. When should I see a specialist and what warning signs matter?',
+  'I had a test or scan related to {s} with an abnormal result. How should I understand it and what records should I bring?',
+  'I take a medication and developed new symptoms. Could there be a medication connection and what should I discuss before changing it?',
+  'My child has a problem that may be related to {s}. Which signs should prompt a pediatric or specialist assessment?',
+  'I am pregnant and have symptoms related to {s}. What should I ask my clinician before taking any medicine or having a procedure?',
+  'What is the difference between common causes and causes that need additional testing when symptoms involve {s}?',
+  'Symptoms have lasted for weeks and affect my sleep or work. What is a practical first step for a {s} evaluation?',
+  'Can sleep, diet or activity changes help with {s}, and when are lifestyle measures not enough?',
+  'I have several symptoms at once and cannot tell whether they are connected to {s}. How is this usually assessed?'
+ ],
+ ru:[
+  'У меня несколько дней симптомы, связанные с «{s}», и вечером они усиливаются. Какое первичное обследование обычно обсуждают?',
+  'Симптомы, связанные с «{s}», то проходят, то возвращаются. Когда нужен специалист и какие признаки требуют быстрой оценки?',
+  'Я сделал анализ или исследование по поводу «{s}», результат оказался необычным. Как его понимать и какие документы показать врачу?',
+  'Я принимаю лекарство и появились новые симптомы. Может ли это быть связано с препаратом и что обсудить с врачом до изменения лечения?',
+  'У ребёнка проблема, которая может быть связана с «{s}». Какие признаки требуют оценки педиатра или специалиста?',
+  'Я беременна и у меня симптомы, связанные с «{s}». Что важно спросить врача до лекарства или процедуры?',
+  'Чем отличаются частые причины симптомов при «{s}» от ситуаций, когда нужны дополнительные обследования?',
+  'Симптомы продолжаются и мешают сну или работе. Какой первый практический шаг нужен для оценки «{s}»?',
+  'Могут ли сон, питание и активность помочь при «{s}» и когда этого недостаточно?',
+  'У меня несколько симптомов одновременно. Как врач определяет, связаны ли они с «{s}»?'
+ ],
+ de:[
+  'Seit einigen Tagen habe ich Beschwerden im Zusammenhang mit {s}, abends stärker. Welche erste Abklärung wird üblicherweise besprochen?',
+  'Die Beschwerden bei {s} kommen immer wieder. Wann ist eine fachärztliche Abklärung sinnvoll und welche Warnzeichen sind wichtig?',
+  'Eine Untersuchung zu {s} war auffällig. Wie lässt sich der Befund einordnen und welche Unterlagen sollte ich mitbringen?',
+  'Ich nehme ein Medikament und habe neue Beschwerden bekommen. Kann ein Zusammenhang bestehen und was sollte ich vor einer Änderung klären?',
+  'Mein Kind hat ein Problem, das mit {s} zusammenhängen könnte. Welche Zeichen sprechen für eine kinderärztliche Abklärung?',
+  'Ich bin schwanger und habe Beschwerden im Zusammenhang mit {s}. Was sollte ich vor Medikamenten oder einer Untersuchung fragen?',
+  'Was unterscheidet häufige Ursachen von Situationen, in denen bei {s} weitere Untersuchungen nötig sind?',
+  'Die Beschwerden bestehen länger und beeinträchtigen Schlaf oder Arbeit. Was ist der erste sinnvolle Schritt bei {s}?',
+  'Können Schlaf, Ernährung oder Bewegung bei {s} helfen und wann reichen diese Maßnahmen nicht aus?',
+  'Ich habe mehrere Beschwerden gleichzeitig. Wie prüft ein Arzt, ob sie mit {s} zusammenhängen?'
+ ]
+};
+const genericScenarioMap:any={uk:questionScenarios.ru,uz:questionScenarios.en,hy:questionScenarios.en,tg:questionScenarios.ru,az:questionScenarios.en,am:questionScenarios.en,ka:questionScenarios.en};
+
 export function virtualQuestionsForSpecialty(slug:string,lang:string,count=50):Question[]{
- const s=spec(slug);if(!s)return[];const specialty=sp(lang,slug);const l=L(lang);
- return Array.from({length:count},(_,i)=>{const topic=qTopics[i%qTopics.length];const q:Question={id:`catalog-q-${lang}-${slug}-${i+1}`,specialty_id:specialty.id,author_name:lang==='ar'?'مستخدم SB1':'SB1 User',title:lang==='ar'?`${topic} عن ${s.ar} — سؤال ${i+1}`:`${l.question} ${localizedSpecialty(s,lang)}? — ${i+1}`,body:lang==='ar'?`سؤال تجريبي تعليمي حول ${s.ar}. ما أهم النقاط التي ينبغي معرفتها ومتى يجب طلب تقييم من مختص؟`:`${l.question} ${localizedSpecialty(s,lang)}? Please explain the main educational points and when professional assessment is appropriate.`,age:18+(i%55),gender:i%2?'أنثى':'ذكر',status:'answered',views:80+i*7,created_at:new Date(2026,0,1+(i%28)).toISOString(),specialty:specialty};(q as any).answer_count=5+(i%16);return q});
+ const s=spec(slug);if(!s)return[];const specialty=sp(lang,slug);const bank=questionScenarios[lang]||genericScenarioMap[lang]||questionScenarios.en;
+ return Array.from({length:count},(_,i)=>{const body=bank[i%bank.length].replaceAll('{s}',localizedSpecialty(s,lang));const title=body.split(/[؟?]/)[0].slice(0,110);
+ const q:any={id:\`catalog-q-\${lang}-\${slug}-\${i+1}\`,specialty_id:specialty.id,author_name:lang==='ar'?'مستخدم SB1':'SB1 User',title,body,age:18+(i%55),gender:i%2?'أنثى':'ذكر',status:'answered',views:80+i*7,created_at:new Date(2026,0,1+(i%28)).toISOString(),specialty:specialty,language:lang};
+ q.answer_count=5+(i%16);return q});
 }
+const answerTemplates:any={
+ ar:[
+  'الأعراض المذكورة لها أكثر من احتمال، ولا يمكن تحديد السبب أو الجرعة من النص وحده. الأفضل جمع مدة الأعراض، الأدوية الحالية، الأمراض السابقة ونتائج الفحوصات ومناقشتها مع المختص.',
+  'إذا كانت النتيجة أو الأعراض جديدة، فالأولوية لفهم السياق السريري كاملاً قبل اتخاذ قرار علاجي. لا تغيّر دواءً موصوفاً دون التواصل مع الطبيب.',
+  'قد يحتاج الطبيب إلى فحص مباشر أو تحليل إضافي حسب العمر والأعراض والعلامات المصاحبة. وجود ألم شديد أو تدهور سريع أو صعوبة تنفس يستدعي تقييماً عاجلاً.',
+  'يمكن أن تساعد متابعة الأعراض وتسجيل وقت ظهورها والعوامل التي تزيدها أو تخففها في الوصول إلى تقييم أدق.',
+  'هذه إجابة تعليمية تجريبية في SB1 وليست تشخيصاً أو وصفة شخصية. يمكن فتح جلسة مع أخصائي لمراجعة الحالة بالتفصيل.'
+ ],
+ en:[
+  'These symptoms can have several causes, and a diagnosis or medication dose cannot be determined from a text alone. Bring the timeline, current medicines, past conditions and test results to a clinician.',
+  'A new or abnormal result needs clinical context before treatment decisions are made. Do not change a prescribed medicine without speaking with the clinician who manages it.',
+  'A clinician may need an examination or additional testing depending on age, symptoms and associated signs. Severe pain, rapid deterioration or breathing difficulty needs urgent assessment.',
+  'Tracking when symptoms occur and what makes them better or worse can help a clinician reach a clearer assessment.',
+  'This is an educational SB1 demo answer, not a personal diagnosis or prescription. A specialist session can be used for a full review.'
+ ],
+ ru:[
+  'У этих симптомов может быть несколько причин; по одному тексту нельзя определить диагноз или дозу препарата. Подготовьте историю симптомов, лекарства и результаты обследований.',
+  'Новый или необычный результат нужно оценивать с учётом всей клинической картины. Не меняйте назначенное лекарство без связи с врачом.',
+  'В зависимости от возраста и симптомов врачу может понадобиться осмотр или дополнительное обследование. Сильная боль, быстрое ухудшение или затруднение дыхания требуют срочной оценки.',
+  'Полезно записывать время появления симптомов и факторы, которые их усиливают или уменьшают.',
+  'Это учебный демонстрационный ответ SB1, а не индивидуальный диагноз или назначение лечения.'
+ ],
+ de:[
+  'Die Beschwerden können verschiedene Ursachen haben; aus einem Text allein lassen sich Diagnose oder Dosierung nicht sicher ableiten. Bringen Sie Verlauf, Medikamente und Befunde zur Untersuchung mit.',
+  'Ein neuer oder auffälliger Befund sollte im klinischen Zusammenhang bewertet werden. Verordnete Medikamente nicht ohne Rücksprache ändern.',
+  'Je nach Alter und Beschwerden können Untersuchung oder weitere Tests erforderlich sein. Starke Schmerzen, schnelle Verschlechterung oder Atemnot erfordern eine zeitnahe Abklärung.',
+  'Notieren Sie Beginn, Verlauf und auslösende oder lindernde Faktoren der Beschwerden.',
+  'Dies ist eine lehrorientierte SB1-Demoantwort und keine individuelle Diagnose oder Therapieempfehlung.'
+ ]
+};
+const genericAnswers:any={uk:answerTemplates.ru,uz:answerTemplates.en,hy:answerTemplates.en,tg:answerTemplates.ru,az:answerTemplates.en,am:answerTemplates.en,ka:answerTemplates.en};
 export function virtualAnswersForQuestion(question:Question,lang:string,count=8):Answer[]{
- const slug=question.specialty?.slug||question.specialty_id.replace(/^catalog-sp-/,'');const docs=virtualDoctorsForSpecialty(slug,lang,Math.max(5,count));const l=L(lang);
- return Array.from({length:Math.max(5,Math.min(20,count))},(_,i)=>({id:`${question.id}-answer-${i+1}`,question_id:question.id,doctor_id:docs[i%docs.length].id,body:l.answer,helpful_count:20+i*3,created_at:new Date(2026,0,2+i).toISOString(),doctor:docs[i%docs.length]}));
+ const slug=question.specialty?.slug||question.specialty_id.replace(/^catalog-sp-/,'');const docs=virtualDoctorsForSpecialty(slug,lang,Math.max(5,count));const bank=answerTemplates[lang]||genericAnswers[lang]||answerTemplates.en;
+ return Array.from({length:Math.max(5,Math.min(20,count))},(_,i)=>({id:\`\${question.id}-answer-\${i+1}\`,question_id:question.id,doctor_id:docs[i%docs.length].id,body:bank[i%bank.length],helpful_count:20+i*3,created_at:new Date(2026,0,2+i).toISOString(),doctor:docs[i%docs.length]}));
 }
-
 const articleTopics=['التعريف والمفاهيم الأساسية','الأعراض والعلامات الشائعة','عوامل الخطورة والوقاية','التقييم والفحوصات والمتابعة','العلاج والتعايش ونمط الحياة'];
 const articleSections:any={ar:['التعريف','الأعراض والعلامات','عوامل الخطورة','التقييم والتشخيص','التعامل والمتابعة','متى تطلب مساعدة عاجلة'],en:['Definition','Symptoms and signs','Risk factors','Evaluation and diagnosis','Management and follow-up','When urgent help is needed'],de:['Definition','Symptome und Zeichen','Risikofaktoren','Abklärung und Diagnose','Behandlung und Verlauf','Wann dringend Hilfe nötig ist'],ru:['Определение','Симптомы и признаки','Факторы риска','Обследование и диагностика','Ведение и наблюдение','Когда нужна срочная помощь'],uk:['Визначення','Симптоми та ознаки','Фактори ризику','Обстеження і діагностика','Ведення та спостереження','Коли потрібна невідкладна допомога'],uz:['Ta’rif','Alomatlar','Xavf omillari','Tekshiruv va tashxis','Davolash va kuzatuv','Qachon shoshilinch yordam kerak'],hy:['Սահմանում','Ախտանիշներ և նշաններ','Ռիսկի գործոններ','Գնահատում և ախտորոշում','Վարում և հետևում','Երբ է պետք շտապ օգնություն'],tg:['Таъриф','Нишонаҳо','Омилҳои хавф','Арзёбӣ ва ташхис','Идоракунӣ ва пайгирӣ','Кай ёрии фаврӣ лозим аст'],az:['Tərif','Əlamətlər','Risk amilləri','Qiymətləndirmə və diaqnostika','Müalicə və izləmə','Təcili yardım nə vaxt lazımdır'],am:['ትርጉም','ምልክቶች','የአደጋ ምክንያቶች','ግምገማ እና ምርመራ','አያያዝ እና ክትትል','አስቸኳይ እርዳታ መቼ ያስፈልጋል'],ka:['განმარტება','სიმპტომები და ნიშნები','რისკის ფაქტორები','შეფასება და დიაგნოზი','მართვა და დაკვირვება','როდის არის საჭირო სასწრაფო დახმარება']};
 export function virtualArticlesForSpecialty(slug:string,lang:string,count=8):Article[]{
