@@ -3,6 +3,7 @@ import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import type { Question } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
+import { virtualDoctorsForSpecialty } from '@/lib/catalog';
 
 function timeAgo(date: string, lang: string): string {
   const diff = Date.now() - new Date(date).getTime();
@@ -23,6 +24,7 @@ export default function QuestionCard({ question }: { question: Question }) {
   const { navigate } = useRouter();
   const { t, specialtyName, lang, dir } = useI18n();
   const answerCount = question.answers?.length ?? (question as any).answer_count ?? 0;
+  const qDoctor:any = (question.answers as any)?.[0]?.doctor || virtualDoctorsForSpecialty((question.specialty as any)?.slug || '', lang, 5)[0];
   const title = localizedField(question as unknown as Record<string, unknown>, 'title', lang, question.title);
   const body = localizedField(question as unknown as Record<string, unknown>, 'body', lang, question.body);
 
@@ -34,10 +36,7 @@ export default function QuestionCard({ question }: { question: Question }) {
       </div>
       <p className="mb-3 line-clamp-2 text-sm text-gray-500">{body}</p>
       <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400">
-        <span className="flex items-center gap-1">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-teal-100 text-[10px] font-bold text-teal-700">{question.author_name.charAt(0)}</span>
-          {question.author_name}
-        </span>
+        <span className="flex items-center gap-2"><img src={(question as any).author_avatar || `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(question.author_name)}`} className="h-7 w-7 rounded-full border object-cover"/><span>{question.author_name}</span></span><span className="flex items-center gap-2"><img src={qDoctor?.photo_url || `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(qDoctor?.name||'specialist')}`} className="h-7 w-7 rounded-full border object-cover"/><span className="text-teal-600">{qDoctor?.name || 'Specialist'}</span></span>
         <span className="flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" />{answerCount} {t('questions.answers')}</span>
         <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{question.views}</span>
         <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{timeAgo(question.created_at, lang)}</span>
