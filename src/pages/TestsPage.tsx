@@ -254,8 +254,8 @@ export default function TestsPage() {
     } else if (activeTest.test_type === 'anxiety') {
       if (total >= 10) msg = tr('قلق متوسط-شديد - راجع الطبيب', 'Moderate-severe anxiety - see a doctor');
       else if (total >= 5) msg = tr('قلق خفيف-متوسط', 'Mild-moderate anxiety');
-      else msg = tr('أعراض طبيعية', 'Minimal symptoms');
-    }
+      else msg = tr('أعراض قليلة في هذا الفحص', 'Few symptoms on this screen');
+    } else { msg = tr('نتيجة فحص أولي — ناقش النتيجة مع مختص عند الحاجة', 'Screening result — discuss the result with a specialist when appropriate'); }
     setResult(`${tr('النتيجة', 'Score')}: ${total}/${questions.length * 3} - ${msg}`);
   };
 
@@ -368,8 +368,8 @@ export default function TestsPage() {
                             } else if (activeTest.test_type === 'anxiety') {
                               if (total >= 10) msg = tr('قلق متوسط-شديد - راجع الطبيب', 'Moderate-severe anxiety - see a doctor');
                               else if (total >= 5) msg = tr('قلق خفيف-متوسط', 'Mild-moderate anxiety');
-                              else msg = tr('أعراض طبيعية', 'Minimal symptoms');
-                            }
+                              else msg = tr('أعراض قليلة في هذا الفحص', 'Few symptoms on this screen');
+                            } else { msg = tr('نتيجة فحص أولي — ناقش النتيجة مع مختص عند الحاجة', 'Screening result — discuss the result with a specialist when appropriate'); }
                             setResult(`${tr('النتيجة', 'Score')}: ${total}/${questions.length * 3} - ${msg}`);
                           }, 300);
                         }
