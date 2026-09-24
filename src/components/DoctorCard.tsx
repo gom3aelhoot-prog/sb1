@@ -9,11 +9,12 @@ export default function DoctorCard({ doctor }: { doctor: Doctor }) {
   const { navigate } = useRouter();
   const { specialtyName, t, lang, dir } = useI18n();
   const [imgError, setImgError] = useState(false);
-  const [imgSrc, setImgSrc] = useState(doctor.photo_url);
+  const fallbackAvatar = `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(doctor.id || doctor.name)}`;
+  const [imgSrc, setImgSrc] = useState(doctor.photo_url || fallbackAvatar);
   const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
-    setImgSrc(doctor.photo_url);
+    setImgSrc(doctor.photo_url || fallbackAvatar);
     setImgError(false);
   }, [doctor.photo_url]);
 
@@ -81,7 +82,7 @@ export default function DoctorCard({ doctor }: { doctor: Doctor }) {
       <div className="relative mb-4">
         <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-teal-100 to-teal-50 ring-2 ring-teal-100 transition-all group-hover:ring-teal-300">
           {!imgError && imgSrc ? (
-            <img src={imgSrc} alt={name} className="h-full w-full object-cover" onError={() => setImgError(true)} />
+            <img src={imgSrc} alt={name} className="h-full w-full object-cover" onError={() => { if (imgSrc !== fallbackAvatar) setImgSrc(fallbackAvatar); else setImgError(true); }} />
           ) : doctor.is_virtual ? (
             <Bot className="h-10 w-10 text-teal-600" />
           ) : (
