@@ -161,7 +161,7 @@ export default function TestsPage() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from('medical_tests').select('*').eq('is_active', true).order('title');
-      setTests((data && data.length ? data : [...demoMedicalTests,...generatedMentalTests]));
+      setTests([...(data||[]),...demoMedicalTests,...generatedMentalTests]);
       setLoading(false);
     })();
   }, []);
