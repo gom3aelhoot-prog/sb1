@@ -73,17 +73,17 @@ function sp(lang:string,slug:string){return specialtyCatalog(lang).find(x=>x.slu
 
 const doctorPhotoPool=[
  '/jamal-james.jpg',
- 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-2',
- 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-3',
- 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-4',
- 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-5',
- 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-6',
- 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-7',
- 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-8',
- 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-9',
- 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-10',
- 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-11',
- 'https://api.dicebear.com/9.x/personas/svg?seed=sb1-doctor-12',
+ 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=600&q=85',
+ 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=600&q=85',
+ 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=600&q=85',
+ 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=600&q=85',
+ 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=600&q=85',
+ 'https://images.unsplash.com/photo-1618498082410-b4aa22193b38?auto=format&fit=crop&w=600&q=85',
+ 'https://images.unsplash.com/photo-1651008376811-b90baee60c1f?auto=format&fit=crop&w=600&q=85',
+ 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=600&q=85',
+ 'https://images.unsplash.com/photo-1666887360389-0f4f5c9e0c9a?auto=format&fit=crop&w=600&q=85',
+ 'https://images.unsplash.com/photo-1643297654413-6f6f6b8e2a2d?auto=format&fit=crop&w=600&q=85',
+ 'https://images.unsplash.com/photo-1591604021695-0c69b7c05981?auto=format&fit=crop&w=600&q=85',
 ];
 export function virtualDoctorsForSpecialty(slug:string,lang:string,count=10,countryKey?:string):Doctor[]{
  const s=spec(slug);if(!s)return[];const specialty=sp(lang,slug);const base=countryKey&&countryData[countryKey]?countryData[countryKey]:null;
