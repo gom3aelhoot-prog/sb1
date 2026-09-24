@@ -112,6 +112,30 @@ const demoMedicalTests: MedicalTest[] = [
  {id:'demo-depression',test_type:'depression',title:'فحص أعراض الاكتئاب',title_en:'Depression Symptom Screening',description:'فحص أولي للأعراض النفسية.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
  {id:'demo-anxiety',test_type:'anxiety',title:'فحص أعراض القلق',title_en:'Anxiety Symptom Screening',description:'فحص أولي لأعراض القلق.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
 ];
+const generatedMentalTests: MedicalTest[] = [
+  ...Array.from({length:8},(_,i)=>({id:'sb1-ocd-'+(i+1),test_type:'ocd',title:'فحص الوسواس والتكرار — نموذج '+(i+1),title_en:'OCD & Repetitive Thoughts Screen — Form '+(i+1),description:'فحص تعليمي أولي للأفكار المتكررة والسلوكيات القهرية.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()} as MedicalTest)),
+  ...Array.from({length:8},(_,i)=>({id:'sb1-anxiety-'+(i+1),test_type:'anxiety',title:'فحص القلق والتوتر — نموذج '+(i+1),title_en:'Anxiety & Worry Screen — Form '+(i+1),description:'فحص تعليمي أولي لأعراض القلق والتوتر.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()} as MedicalTest)),
+  ...Array.from({length:8},(_,i)=>({id:'sb1-depression-'+(i+1),test_type:'depression',title:'فحص المزاج والاكتئاب — نموذج '+(i+1),title_en:'Mood & Depression Screen — Form '+(i+1),description:'فحص تعليمي أولي للمزاج وفقدان الاهتمام والطاقة.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()} as MedicalTest)),
+  ...Array.from({length:6},(_,i)=>({id:'sb1-ptsd-'+(i+1),test_type:'ptsd',title:'فحص أعراض ما بعد الصدمة — نموذج '+(i+1),title_en:'Trauma & PTSD Symptom Screen — Form '+(i+1),description:'فحص تعليمي أولي للأعراض المرتبطة بالصدمة.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()} as MedicalTest)),
+  ...Array.from({length:6},(_,i)=>({id:'sb1-panic-'+(i+1),test_type:'panic',title:'فحص نوبات الهلع — نموذج '+(i+1),title_en:'Panic Symptom Screen — Form '+(i+1),description:'فحص تعليمي أولي لأعراض نوبات الهلع.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()} as MedicalTest)),
+  ...Array.from({length:6},(_,i)=>({id:'sb1-sleep-'+(i+1),test_type:'sleep',title:'فحص النوم والأرق — نموذج '+(i+1),title_en:'Sleep & Insomnia Screen — Form '+(i+1),description:'فحص تعليمي أولي لجودة النوم والأرق.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()} as MedicalTest)),
+  ...Array.from({length:6},(_,i)=>({id:'sb1-social-'+(i+1),test_type:'social_anxiety',title:'فحص القلق الاجتماعي — نموذج '+(i+1),title_en:'Social Anxiety Screen — Form '+(i+1),description:'فحص تعليمي أولي للخوف والقلق في المواقف الاجتماعية.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()} as MedicalTest)),
+  ...Array.from({length:6},(_,i)=>({id:'sb1-adhd-'+(i+1),test_type:'adhd',title:'فحص الانتباه وفرط الحركة — نموذج '+(i+1),title_en:'Attention & Hyperactivity Screen — Form '+(i+1),description:'فحص تعليمي أولي لصعوبات الانتباه والتنظيم.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()} as MedicalTest)),
+];
+
+const extraQuestionSets: Record<string,Question[]> = {
+ ptsd:Array.from({length:8},(_,i)=>({id:'ptsd-'+i,text:['هل تتكرر لديك ذكريات أو أحلام مزعجة بعد حدث شديد التوتر؟','هل تتجنب أشياء تذكرك بالحدث؟','هل تشعر بأنك في حالة تأهب أو فزع بسهولة؟','هل تشعر بالانفصال أو الخدر العاطفي؟','هل يؤثر ما حدث على نومك؟','هل تتجنب الحديث عن الحدث أو التفكير فيه؟','هل أثرت الأعراض على العمل أو الدراسة؟','هل تشعر بالذنب أو لوم الذات بسبب ما حدث؟'][i],text_en:['Do unwanted memories or dreams about a stressful event recur?','Do you avoid reminders of the event?','Do you feel constantly on guard or easily startled?','Do you feel detached or emotionally numb?','Has the event affected your sleep?','Do you avoid talking or thinking about the event?','Have symptoms affected work or study?','Do you feel guilt or self-blame about what happened?'][i],options:[{value:0,label:'أبداً',label_en:'Not at all'},{value:1,label:'أحياناً',label_en:'Sometimes'},{value:2,label:'كثيراً',label_en:'Often'},{value:3,label:'شديداً',label_en:'Very much'}]})),
+ panic:Array.from({length:8},(_,i)=>({id:'panic-'+i,text:['هل تأتيك نوبات مفاجئة من خوف شديد أو انزعاج؟','هل تشعر بخفقان أو تسارع ضربات القلب أثناء النوبة؟','هل تشعر بضيق نفس أو دوخة أثناء النوبة؟','هل تخاف من حدوث نوبة أخرى؟','هل بدأت تتجنب أماكن خوفاً من النوبة؟','هل تحدث النوبات دون سبب واضح؟','هل تؤثر النوبات على العمل أو الدراسة؟','هل تستمر في مراقبة جسمك بحثاً عن علامات النوبة؟'][i],text_en:['Do you have sudden episodes of intense fear or discomfort?','Do you notice a racing or pounding heart during episodes?','Do you feel short of breath or dizzy during an episode?','Do you worry about having another episode?','Do you avoid places because of fear of an episode?','Do episodes occur without an obvious trigger?','Do episodes affect work or study?','Do you monitor your body for signs of another attack?'][i],options:[{value:0,label:'أبداً',label_en:'Never'},{value:1,label:'أحياناً',label_en:'Sometimes'},{value:2,label:'كثيراً',label_en:'Often'},{value:3,label:'شديداً',label_en:'Very much'}]})),
+ sleep:Array.from({length:8},(_,i)=>({id:'sleep-'+i,text:['هل تجد صعوبة في بدء النوم؟','هل تستيقظ عدة مرات أثناء الليل؟','هل تستيقظ أبكر مما تريد ولا تستطيع العودة للنوم؟','هل تشعر بالتعب خلال النهار؟','هل يؤثر ضعف النوم على التركيز؟','هل تقلق كثيراً بشأن النوم؟','هل تستخدم الهاتف أو المنبهات قبل النوم مباشرة؟','هل استمرت مشكلة النوم لأسابيع؟'][i],text_en:['Do you have trouble falling asleep?','Do you wake several times during the night?','Do you wake earlier than intended and cannot return to sleep?','Do you feel tired during the day?','Does poor sleep affect concentration?','Do you worry a lot about sleep?','Do you use screens or stimulants immediately before sleep?','Has the sleep problem lasted for weeks?'][i],options:[{value:0,label:'أبداً',label_en:'Never'},{value:1,label:'أحياناً',label_en:'Sometimes'},{value:2,label:'كثيراً',label_en:'Often'},{value:3,label:'شبه يومي',label_en:'Nearly daily'}]})),
+ social_anxiety:Array.from({length:8},(_,i)=>({id:'social-'+i,text:['هل تشعر بخوف واضح من تقييم الآخرين لك؟','هل تتجنب الحديث أمام مجموعة؟','هل تشعر بقلق شديد عند مقابلة أشخاص جدد؟','هل تتجنب المناسبات الاجتماعية بسبب القلق؟','هل تفكر طويلاً في أخطاء اجتماعية صغيرة؟','هل تظهر أعراض جسدية مثل التعرق أو الرجفة في المواقف الاجتماعية؟','هل يؤثر هذا القلق على الدراسة أو العمل؟','هل ترغب في المشاركة الاجتماعية لكن القلق يمنعك؟'][i],text_en:['Do you strongly fear being judged by others?','Do you avoid speaking in groups?','Do you feel intense anxiety meeting new people?','Do you avoid social events because of anxiety?','Do you replay small social mistakes for a long time?','Do you have sweating or trembling in social situations?','Does this anxiety affect work or study?','Do you want social participation but anxiety stops you?'][i],options:[{value:0,label:'أبداً',label_en:'Never'},{value:1,label:'أحياناً',label_en:'Sometimes'},{value:2,label:'كثيراً',label_en:'Often'},{value:3,label:'شديداً',label_en:'Very much'}]})),
+ adhd:Array.from({length:8},(_,i)=>({id:'adhd-'+i,text:['هل تجد صعوبة متكررة في إنهاء المهام التي بدأت بها؟','هل تتشتت بسهولة أثناء العمل أو الدراسة؟','هل تنسى المواعيد أو الأشياء الضرورية؟','هل تؤجل المهام التي تحتاج تركيزاً طويلاً؟','هل تجد صعوبة في تنظيم الوقت والأولويات؟','هل تتحرك أو تتململ عندما يفترض أن تبقى هادئاً؟','هل تتحدث أو تتصرف بسرعة قبل التفكير أحياناً؟','هل بدأت هذه الصعوبات منذ فترة طويلة وتظهر في أكثر من بيئة؟'][i],text_en:['Do you often struggle to finish tasks you started?','Are you easily distracted at work or study?','Do you forget appointments or necessary items?','Do you delay tasks that require sustained attention?','Do you struggle to organize time and priorities?','Do you fidget when expected to stay still?','Do you sometimes act or speak before thinking?','Have these difficulties been long-standing and present in more than one setting?'][i],options:[{value:0,label:'أبداً',label_en:'Never'},{value:1,label:'أحياناً',label_en:'Sometimes'},{value:2,label:'كثيراً',label_en:'Often'},{value:3,label:'شديداً',label_en:'Very often'}]}))
+};
+const officialTestResources=[
+ {name:'PHQ-9 — فحص الاكتئاب',name_en:'PHQ-9 — Depression screening',url:'https://www.nih.gov/node/19946',source:'NIH'},
+ {name:'PC-PTSD-5 — فحص ما بعد الصدمة',name_en:'PC-PTSD-5 — PTSD screen',url:'https://www.ptsd.va.gov/professional/assessment/screens/pc-ptsd.asp',source:'VA National Center for PTSD'},
+ {name:'PCL-5 — قائمة أعراض ما بعد الصدمة',name_en:'PCL-5 — PTSD Checklist',url:'https://www.ptsd.va.gov/professional/assessment/adult-sr/ptsd-checklist.asp',source:'VA National Center for PTSD'},
+ {name:'ASQ — فحص خطر الانتحار',name_en:'ASQ — Suicide risk screen',url:'https://www.nimh.nih.gov/research/research-conducted-at-nimh/asq-toolkit-materials/adults-asq-toolkit',source:'NIMH'}
+];
 const questionnaireMap: Record<string, Question[]> = {
   prediabetes: prediabetesQuestions,
   asthma: asthmaQuestions,
@@ -119,6 +143,7 @@ const questionnaireMap: Record<string, Question[]> = {
   anxiety: anxietyQuestions,
   ocd: ocdQuestions,
   ocd_screening: ocdQuestions,
+  ...Object.fromEntries(Object.keys(extraQuestionSets).map(k=>[k,extraQuestionSets[k]])),
 };
 
 export default function TestsPage() {
@@ -136,11 +161,13 @@ export default function TestsPage() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from('medical_tests').select('*').eq('is_active', true).order('title');
-      setTests((data && data.length ? data : demoMedicalTests));
+      setTests((data && data.length ? data : [...demoMedicalTests,...generatedMentalTests]));
       setLoading(false);
     })();
   }, []);
 
+  const getTestTitle=(test:MedicalTest)=>{const x:any=test;return x.translations?.[lang]?.title || (lang==='en'&&test.title_en?test.title_en:test.title)};
+  const getTestDescription=(test:MedicalTest)=>{const x:any=test;return x.translations?.[lang]?.description || test.description};
   const filteredTests = tests.filter((tst) => (activeCategory === 'all' || tst.category === activeCategory) && (!search || tst.title.toLowerCase().includes(search.toLowerCase()) || (tst.title_en||'').toLowerCase().includes(search.toLowerCase())));
 
   const tr = (ar: string, en: string) => lang === 'en' ? en : ar;
@@ -300,8 +327,8 @@ export default function TestsPage() {
                 <Icon className="w-7 h-7 text-teal-600" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-800">{lang === 'en' && activeTest.title_en ? activeTest.title_en : activeTest.title}</h1>
-                <p className="text-sm text-gray-500">{activeTest.description}</p>
+                <h1 className="text-xl font-bold text-gray-800">{getTestTitle(activeTest)}</h1>
+                <p className="text-sm text-gray-500">{getTestDescription(activeTest)}</p>
               </div>
             </div>
 
@@ -488,8 +515,8 @@ export default function TestsPage() {
                   <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                     <Icon className="w-6 h-6 text-teal-600" />
                   </div>
-                  <h3 className="font-bold text-gray-800 mb-1">{lang === 'en' && test.title_en ? test.title_en : test.title}</h3>
-                  <p className="text-sm text-gray-500">{test.description}</p>
+                  <h3 className="font-bold text-gray-800 mb-1">{getTestTitle(test)}</h3>
+                  <p className="text-sm text-gray-500">{getTestDescription(test)}</p>
                   <span className="mt-3 inline-flex items-center gap-1 text-teal-600 text-sm font-medium">
                     {t('tests.start')} <ArrowRight className="w-4 h-4" />
                   </span>
@@ -498,6 +525,7 @@ export default function TestsPage() {
             })}
           </div>
         )}
+      <div className="mt-10"><h2 className="text-xl font-extrabold text-gray-800 mb-4">{lang==='ar'?'اختبارات وأدوات رسمية مجانية':'Official free screening resources'}</h2><div className="grid gap-4 md:grid-cols-2">{officialTestResources.map(x=><a key={x.url} href={x.url} target="_blank" rel="noreferrer" className="bg-white rounded-2xl border p-5 hover:border-teal-300"><h3 className="font-bold text-gray-800">{lang==='en'?x.name_en:x.name}</h3><p className="text-xs text-gray-500 mt-2">{x.source}</p><span className="mt-3 inline-block text-teal-600 text-sm font-bold">{lang==='ar'?'فتح المصدر الرسمي':'Open official source'} →</span></a>)}</div></div>
       </div>
     </div>
   );
