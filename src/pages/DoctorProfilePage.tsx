@@ -24,6 +24,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [imgError, setImgError] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const profileAvatar = doctor?.photo_url || ('https://api.dicebear.com/9.x/personas/svg?seed=' + encodeURIComponent(id));
 
   useEffect(() => {
     (async () => {
@@ -137,8 +138,8 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           <div className="px-6 pb-6">
             <div className="flex flex-col md:flex-row gap-4 -mt-12">
               <div className="w-28 h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center shrink-0 ring-4 ring-white mx-auto md:mx-0">
-                {!imgError && doctor.photo_url ? (
-                  <img src={doctor.photo_url} alt={doctor.name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
+                {!imgError ? (
+                  <img src={profileAvatar} alt={doctor.name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
                 ) : (
                   <span className="text-4xl font-bold text-teal-600">{doctor.name.replace('د. ', '').charAt(0)}</span>
                 )}
