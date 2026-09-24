@@ -59,6 +59,7 @@ export default function ReferralPage() {
           </div>
         </div>
 
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8"><h2 className="text-lg font-bold text-gray-800 mb-5">طرق كسب المكافآت</h2><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-xl bg-teal-50 p-4">إحالة مستخدم جديد <b className="block text-teal-700 mt-1">+50 نقطة</b></div><div className="rounded-xl bg-indigo-50 p-4">إحالة أخصائي موثق <b className="block text-indigo-700 mt-1">+150 نقطة</b></div><div className="rounded-xl bg-amber-50 p-4">إحالة مؤسسة طبية <b className="block text-amber-700 mt-1">+200 نقطة</b></div><div className="rounded-xl bg-purple-50 p-4">إكمال دورة أو اختبار <b className="block text-purple-700 mt-1">+20 نقطة</b></div></div><p className="mt-4 text-xs text-gray-400">القيم الحالية تجريبية ويمكن للمالك تغييرها من الإعدادات لاحقاً.</p></div>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
           <h2 className="text-lg font-bold text-gray-800 mb-6">{t('referral.how_it_works')}</h2>
           <div className="space-y-4">
