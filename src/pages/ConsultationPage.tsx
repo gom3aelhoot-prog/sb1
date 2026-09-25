@@ -8,7 +8,7 @@ export default function ConsultationPage() {
   return <div className="min-h-screen bg-gray-50 pt-24 pb-16" dir={dir}>
     <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
       <button onClick={()=>navigate('/')} className="mb-6 flex items-center gap-2 text-sm text-gray-500"><ArrowLeft className="h-4 w-4"/>الرئيسية</button>
-      <div className="mb-8 text-center"><h1 className="text-3xl font-extrabold text-gray-900">استشر طبيباً</h1><p className="mx-auto mt-3 max-w-2xl text-gray-500">اختر الطريقة المناسبة: اكتب مشكلتك ليجيب عليها الأطباء، أو احجز جلسة شخصية بالفيديو مع طبيب تختاره.</p></div>
+      <div className="mb-8 text-center"><h1 className="text-3xl font-extrabold text-gray-900">استشر طبيباً</h1><p className="mx-auto mt-3 max-w-2xl text-gray-500">اختر الطريقة المناسبة: اكتب مشكلتك ليجيب عليها الأطباء، أو احجز جلسة شخصية بالفيديو مع طبيب تختاره.</p><button onClick={()=>navigate("/academy")} className="mt-5 rounded-xl bg-slate-900 px-5 py-3 font-bold text-white hover:bg-slate-800">الانتقال إلى أكاديمية SB1</button></div>
       <div className="grid gap-6 md:grid-cols-2">
         <article className="card p-7">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50"><FileText className="h-7 w-7 text-teal-600"/></div>
