@@ -20,13 +20,15 @@ function timeAgo(date: string, lang: string): string {
   }
 }
 
-export default function QuestionCard({ question }: { question: Question }) {
+export default function QuestionCard({ question, specialistView = false }: { question: Question; specialistView?: boolean }) {
   const { navigate } = useRouter();
   const { t, specialtyName, lang, dir } = useI18n();
   const answerCount = question.answers?.length ?? (question as any).answer_count ?? 0;
   const qDoctor:any = (question.answers as any)?.[0]?.doctor || virtualDoctorsForSpecialty((question.specialty as any)?.slug || '', lang, 5)[0];
   const title = localizedField(question as unknown as Record<string, unknown>, 'title', lang, question.title);
   const body = localizedField(question as unknown as Record<string, unknown>, 'body', lang, question.body);
+  const marketStatus=(question as any).market_status;
+  const questionPrice=(question as any).question_price;
 
   return (
     <button onClick={() => navigate(`/questions/${question.id}`)} className="card card-hover w-full p-5 text-start" dir={dir}>
@@ -34,9 +36,10 @@ export default function QuestionCard({ question }: { question: Question }) {
         <h3 className="line-clamp-2 text-base font-bold leading-snug text-gray-800">{title}</h3>
         {question.specialty && <span className="badge shrink-0 whitespace-nowrap bg-teal-50 text-teal-700">{specialtyName(question.specialty)}</span>}
       </div>
+      {specialistView && <div className="mb-3 flex flex-wrap gap-2">{marketStatus === 'closed' ? <span className="badge bg-gray-100 text-gray-600">مغلقة</span> : marketStatus === 'free' ? <span className="badge bg-emerald-50 text-emerald-700">مجانية</span> : <span className="badge bg-teal-50 text-teal-700">متاحة · {questionPrice} USD</span>}</div>}
       <p className="mb-3 line-clamp-2 text-sm text-gray-500">{body}</p>
       <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400">
-        <span className="flex items-center gap-2"><img src={(question as any).author_avatar || `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(question.author_name)}`} className="h-7 w-7 rounded-full border object-cover"/><span>{question.author_name}</span></span><span className="flex items-center gap-2"><img src={qDoctor?.photo_url || `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(qDoctor?.name||'specialist')}`} className="h-7 w-7 rounded-full border object-cover"/><span className="text-teal-600">{qDoctor?.name || 'Specialist'}</span></span>
+        <span className="flex items-center gap-2"><img src={(question as any).author_avatar || `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(question.author_name)}`} className="h-7 w-7 rounded-full border object-cover"/><span>{question.author_name}</span></span><span className="flex items-center gap-2"><span className="relative inline-flex h-7 w-7 shrink-0"><img src={qDoctor?.photo_url || `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(qDoctor?.name||'specialist')}`} className="h-7 w-7 rounded-full border object-cover"/><span className={`absolute bottom-0 end-0 h-2.5 w-2.5 rounded-full border-2 border-white ${qDoctor?.is_online ? 'bg-emerald-500' : 'bg-gray-400'}`}></span></span><span className="text-teal-600">{qDoctor?.name || 'Specialist'}</span></span>
         <span className="flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" />{answerCount} {t('questions.answers')}</span>
         <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{question.views}</span>
         <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{timeAgo(question.created_at, lang)}</span>
