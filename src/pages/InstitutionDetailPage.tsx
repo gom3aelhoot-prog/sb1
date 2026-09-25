@@ -23,14 +23,14 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
     const table = kind==='clinic' ? 'clinics' : kind==='lab' ? 'lab_centers' : kind==='radiology' ? 'radiology_centers' : 'additional_facilities';
     supabase.from(table).select('*').eq('id', id).maybeSingle().then(({ data: row }) => {
       if (row) setData(row);
-      else if (kind==='clinic') setData(demoClinics.find(x=>x.id===id) || null);
-      else if (kind==='lab') setData(demoLabs.find(x=>x.id===id) || null);
-      else if (kind==='radiology') setData(demoRadiology.find(x=>x.id===id) || null);
+      else if (kind==='clinic') setData(demoClinics.find(x=>x.id===id) || countriesForLanguage(lang).flatMap(c=>virtualFacilities(lang,c.key)).find(x=>x.id===id) || null);
+      else if (kind==='lab') setData(demoLabs.find(x=>x.id===id) || countriesForLanguage(lang).flatMap(c=>virtualFacilities(lang,c.key)).find(x=>x.id===id) || null);
+      else if (kind==='radiology') setData(demoRadiology.find(x=>x.id===id) || countriesForLanguage(lang).flatMap(c=>virtualFacilities(lang,c.key)).find(x=>x.id===id) || null);
       else setData(demoFacilities.find(x=>x.id===id) || countriesForLanguage(lang).flatMap(c=>virtualFacilities(lang,c.key)).find(x=>x.id===id) || null);
     }).catch(() => {
       if (kind==='clinic') setData(demoClinics.find(x=>x.id===id) || null);
-      else if (kind==='lab') setData(demoLabs.find(x=>x.id===id) || null);
-      else if (kind==='radiology') setData(demoRadiology.find(x=>x.id===id) || null);
+      else if (kind==='lab') setData(demoLabs.find(x=>x.id===id) || countriesForLanguage(lang).flatMap(c=>virtualFacilities(lang,c.key)).find(x=>x.id===id) || null);
+      else if (kind==='radiology') setData(demoRadiology.find(x=>x.id===id) || countriesForLanguage(lang).flatMap(c=>virtualFacilities(lang,c.key)).find(x=>x.id===id) || null);
       else setData(demoFacilities.find(x=>x.id===id) || countriesForLanguage(lang).flatMap(c=>virtualFacilities(lang,c.key)).find(x=>x.id===id) || null);
     });
   }, [kind, id, lang]);
