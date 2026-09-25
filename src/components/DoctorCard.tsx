@@ -27,6 +27,7 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
   const virtualLabel: any = { ar:'افتراضي', en:'Virtual', de:'Virtuell', ru:'Виртуальный', uk:'Віртуальний', uz:'Virtual', hy:'Վիրտուալ', tg:'Виртуалӣ', az:'Virtual', am:'ምናባዊ', ka:'ვირტუალური' }[lang] || 'Virtual';
   const fullProfileLabel: any = { ar:'عرض الصفحة الكاملة', en:'View full profile', de:'Profil öffnen', ru:'Открыть профиль', uk:'Відкрити профіль', uz:'To‘liq profil', hy:'Դիտել ամբողջական էջը', tg:'Кушодани профил', az:'Tam profili aç', am:'ሙሉ መገለጫ', ka:'სრული პროფილის ნახვა' }[lang] || 'View full profile';
   const sessionLabel: any = { ar:'طلب جلسة', en:'Session', de:'Sitzung', ru:'Сессия', uk:'Сесія', uz:'Sessiya', hy:'Նիստ', tg:'Ҷаласа', az:'Sessiya', am:'ክፍለ ጊዜ', ka:'სესია' }[lang] || 'Session';
+  const askLabel: any = { ar:'طلب استشارة', en:'Ask a doctor', de:'Arzt fragen', ru:'Задать вопрос врачу', uk:'Запитати лікаря', uz:'Shifokordan so‘rash', hy:'Հարցնել բժշկին', tg:'Аз духтур пурсед', az:'Həkimdən soruş', am:'ሐኪምን ይጠይቁ', ka:'ჰკითხეთ ექიმს' }[lang] || 'Ask a doctor';
 
   const handleConsult = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -132,7 +133,7 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
 
       <div className="mt-4 flex w-full gap-2">
         <button onClick={handleConsult} className="flex-1 rounded-xl bg-blue-700 py-2.5 text-xs font-semibold text-white transition hover:bg-blue-800">
-          <MessageCircle className="mx-auto inline h-3.5 w-3.5" /> <span className="ms-1">{{ ar:'طلب استشارة', en:'Ask a doctor', de:'Arzt fragen', ru:'Задать вопрос врачу', uk:'Запитати лікаря', uz:'Shifokordan so‘rash', hy:'Հարցնել բժշկին', tg:'Аз духтур пурсед', az:'Həkimdən soruş', am:'ሐኪምን ይጠይቁ', ka:'ჰკითხეთ ექიმს' } as any)[lang] || 'Ask a doctor'</span>
+          <MessageCircle className="mx-auto inline h-3.5 w-3.5" /> <span className="ms-1">{askLabel}</span>
         </button>
         <button onClick={doctor.is_virtual ? (e)=>e.stopPropagation() : handleSession} disabled={false} className="flex-1 rounded-xl bg-gray-100 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60">
           <Calendar className="mx-auto inline h-3.5 w-3.5" /> <span className="ms-1">{sessionLabel}</span>
