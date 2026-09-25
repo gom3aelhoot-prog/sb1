@@ -22,21 +22,11 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
   const bio = localizedField(doctor as unknown as Record<string, unknown>, 'bio', lang, doctor.bio);
   const city = localizedField(doctor as unknown as Record<string, unknown>, 'city', lang, doctor.city);
 
-  const expLabel: any = {
-    ar: 'سنة', ru: 'лет', de: 'Jahre', en: 'yrs'
-  }[lang as any] || 'yrs';
-  const consultLabel: any = {
-    ar: 'استشارة', ru: 'консультаций', de: 'Beratungen', en: 'consults'
-  }[lang] || 'consults';
-  const virtualLabel: any = {
-    ar: 'افتراضي', ru: 'Виртуальный', de: 'Virtuell', en: 'Virtual'
-  }[lang] || 'Virtual';
-  const fullProfileLabel: any = {
-    ar: 'عرض الصفحة الكاملة', ru: 'Открыть профиль', de: 'Profil öffnen', en: 'View full profile'
-  }[lang] || 'View full profile';
-  const sessionLabel: any = {
-    ar: 'طلب جلسة', ru: 'Сессия', de: 'Sitzung', en: 'Session'
-  }[lang] || 'Session';
+  const expLabel: any = { ar:'سنة', en:'yrs', de:'Jahre', ru:'лет', uk:'років', uz:'yil', hy:'տարի', tg:'сол', az:'il', am:'ዓመት', ka:'წელი' }[lang] || 'yrs';
+  const consultLabel: any = { ar:'استشارة', en:'consults', de:'Beratungen', ru:'консультаций', uk:'консультацій', uz:'maslahat', hy:'խորհրդատվություն', tg:'машварат', az:'məsləhət', am:'ምክክር', ka:'კონსულტაცია' }[lang] || 'consults';
+  const virtualLabel: any = { ar:'افتراضي', en:'Virtual', de:'Virtuell', ru:'Виртуальный', uk:'Віртуальний', uz:'Virtual', hy:'Վիրտուալ', tg:'Виртуалӣ', az:'Virtual', am:'ምናባዊ', ka:'ვირტუალური' }[lang] || 'Virtual';
+  const fullProfileLabel: any = { ar:'عرض الصفحة الكاملة', en:'View full profile', de:'Profil öffnen', ru:'Открыть профиль', uk:'Відкрити профіль', uz:'To‘liq profil', hy:'Դիտել ամբողջական էջը', tg:'Кушодани профил', az:'Tam profili aç', am:'ሙሉ መገለጫ', ka:'სრული პროფილის ნახვა' }[lang] || 'View full profile';
+  const sessionLabel: any = { ar:'طلب جلسة', en:'Session', de:'Sitzung', ru:'Сессия', uk:'Сесія', uz:'Sessiya', hy:'Նիստ', tg:'Ҷаласа', az:'Sessiya', am:'ክፍለ ጊዜ', ka:'სესია' }[lang] || 'Session';
 
   const handleConsult = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -52,21 +42,21 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
 
   if (directory) {
     return (
-      <div onClick={() => navigate(`/doctors/${doctor.id}`)} className="relative w-full cursor-pointer rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" dir={dir}>
+      <div onClick={() => navigate(`/doctors/${doctor.id}`)} className="relative w-full cursor-pointer rounded-2xl border border-blue-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" dir={dir}>
         <div className="flex items-start gap-4">
           <div className="relative shrink-0">
-            <div className="h-20 w-20 overflow-hidden rounded-2xl bg-gray-100 ring-2 ring-emerald-100">
-              {!imgError && imgSrc ? <img src={imgSrc} alt={name} className="h-full w-full object-cover" onError={() => { if (imgSrc !== fallbackAvatar) setImgSrc(fallbackAvatar); else setImgError(true); }} /> : <span className="flex h-full w-full items-center justify-center text-2xl font-bold text-teal-600">{name.replace(/^د\\. |^(Dr\\. |Доктор |Դոկտոր |დოქტორი )/,'').charAt(0)}</span>}
+            <div className="h-20 w-20 overflow-hidden rounded-2xl bg-gray-100 ring-2 ring-blue-100">
+              {!imgError && imgSrc ? <img src={imgSrc} alt={name} className="h-full w-full object-cover" onError={() => { if (imgSrc !== fallbackAvatar) setImgSrc(fallbackAvatar); else setImgError(true); }} /> : <span className="flex h-full w-full items-center justify-center text-2xl font-bold text-blue-700">{name.replace(/^د\\. |^(Dr\\. |Доктор |Դոկտոր |დოქტორი )/,'').charAt(0)}</span>}
             </div>
-            <span className="absolute -bottom-1 -start-1 h-5 w-5 rounded-full border-2 border-white bg-emerald-500" />
+            <span className="absolute -bottom-1 -start-1 h-5 w-5 rounded-full border-2 border-white bg-green-500" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-lg font-extrabold text-gray-900">{name}</h3>
-              {doctor.is_verified && <span className="rounded-full bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700"><BadgeCheck className="inline h-3.5 w-3.5" /> موثق</span>}
+              {doctor.is_verified && <span className="rounded-full bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700"><BadgeCheck className="inline h-3.5 w-3.5" /> موثق</span>}
               <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-bold text-amber-700">الأكثر تقييماً</span>
             </div>
-            {doctor.specialty && <p className="mt-1 font-medium text-emerald-700">{specialtyName(doctor.specialty)}</p>}
+            {doctor.specialty && <p className="mt-1 font-medium text-blue-700">{specialtyName(doctor.specialty)}</p>}
             <p className="mt-3 line-clamp-2 text-sm leading-6 text-gray-500">{bio}</p>
             <div className="mt-3 grid grid-cols-3 gap-2 text-center">
               <div className="rounded-xl bg-gray-50 p-2"><b className="block text-base text-gray-900">{(doctor.follower_count||0).toLocaleString()}</b><span className="text-xs text-gray-400">متابع</span></div>
@@ -76,7 +66,7 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
             <div className="mt-3 flex items-center justify-between"><span className="text-xl font-extrabold text-emerald-700">{'75'} <small className="text-xs font-normal text-gray-400">ر.س/شهر</small></span><span className="text-xs text-gray-400"><Star className="inline h-3 w-3 fill-amber-400 text-amber-400" /> {Number(doctor.rating).toFixed(1)}</span></div>
             <div className="mt-3 flex gap-2">
               <button onClick={handleSession} className="flex-1 rounded-xl border py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50"><Calendar className="inline h-4 w-4" /> حجز جلسة</button>
-              <button onClick={handleConsult} className="flex-1 rounded-xl bg-emerald-600 py-2.5 text-sm font-bold text-white hover:bg-emerald-700"><MessageCircle className="inline h-4 w-4" /> متابعة</button>
+              <button onClick={handleConsult} className="flex-1 rounded-xl bg-blue-700 py-2.5 text-sm font-bold text-white hover:bg-blue-800"><MessageCircle className="inline h-4 w-4" /> متابعة</button>
             </div>
           </div>
         </div>
@@ -96,10 +86,10 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
         <div className="card absolute end-0 top-full z-20 mt-2 w-64 p-4 shadow-xl animate-fade-in">
           <div className="mb-2 flex items-center gap-2">
             <p className="text-sm font-bold text-gray-800">{name}</p>
-            {doctor.is_verified && <BadgeCheck className="h-4 w-4 text-teal-500" />}
+            {doctor.is_verified && <BadgeCheck className="h-4 w-4 text-blue-600" />}
             {doctor.is_virtual && <span className="badge bg-purple-100 text-purple-600 text-[10px]">{virtualLabel}</span>}
           </div>
-          {doctor.specialty && <p className="mb-2 text-xs text-teal-600">{specialtyName(doctor.specialty)}</p>}
+          {doctor.specialty && <p className="mb-2 text-xs text-blue-700">{specialtyName(doctor.specialty)}</p>}
           {bio && <p className="mb-2 line-clamp-3 text-xs text-gray-500">{bio}</p>}
           <div className="space-y-1 text-xs text-gray-500">
             {city && <p className="flex items-center gap-1"><MapPin className="h-3 w-3" />{city}</p>}
@@ -107,14 +97,14 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
             <p className="flex items-center gap-1"><MessageCircle className="h-3 w-3" />{doctor.consultation_count} {consultLabel}</p>
             {doctor.phone_number && !doctor.is_virtual && <p className="flex items-center gap-1 text-teal-600"><Stethoscope className="h-3 w-3" />{doctor.phone_number}</p>}
           </div>
-          <button onClick={(e) => { e.stopPropagation(); navigate(`/doctors/${doctor.id}`); }} className="mt-2 text-xs font-medium text-teal-600 hover:text-teal-700">
+          <button onClick={(e) => { e.stopPropagation(); navigate(`/doctors/${doctor.id}`); }} className="mt-2 text-xs font-medium text-teal-600 hover:text-blue-700">
             {fullProfileLabel}
           </button>
         </div>
       )}
 
       <div className="relative mb-4">
-        <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-teal-100 to-teal-50 ring-2 ring-teal-100 transition-all group-hover:ring-teal-300">
+        <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-blue-100 via-white to-green-50 ring-2 ring-blue-100 transition-all group-hover:ring-blue-300">
           {!imgError && imgSrc ? (
             <img src={imgSrc} alt={name} className="h-full w-full object-cover" onError={() => { if (imgSrc !== fallbackAvatar) setImgSrc(fallbackAvatar); else setImgError(true); }} />
           ) : doctor.is_virtual ? (
@@ -141,8 +131,8 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
       </div>
 
       <div className="mt-4 flex w-full gap-2">
-        <button onClick={handleConsult} className="flex-1 rounded-xl bg-teal-600 py-2.5 text-xs font-semibold text-white transition hover:bg-teal-700">
-          <MessageCircle className="mx-auto inline h-3.5 w-3.5" /> <span className="ms-1">{lang === 'ar' ? 'طلب استشارة' : 'Ask a doctor'}</span>
+        <button onClick={handleConsult} className="flex-1 rounded-xl bg-blue-700 py-2.5 text-xs font-semibold text-white transition hover:bg-blue-800">
+          <MessageCircle className="mx-auto inline h-3.5 w-3.5" /> <span className="ms-1">{{ ar:'طلب استشارة', en:'Ask a doctor', de:'Arzt fragen', ru:'Задать вопрос врачу', uk:'Запитати лікаря', uz:'Shifokordan so‘rash', hy:'Հարցնել բժշկին', tg:'Аз духтур пурсед', az:'Həkimdən soruş', am:'ሐኪምን ይጠይቁ', ka:'ჰკითხეთ ექიმს' } as any)[lang] || 'Ask a doctor'</span>
         </button>
         <button onClick={doctor.is_virtual ? (e)=>e.stopPropagation() : handleSession} disabled={false} className="flex-1 rounded-xl bg-gray-100 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60">
           <Calendar className="mx-auto inline h-3.5 w-3.5" /> <span className="ms-1">{sessionLabel}</span>
