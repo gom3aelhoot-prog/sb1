@@ -101,7 +101,7 @@ const demoClient={
     getUser:async()=>{try{const saved=typeof window!=='undefined'?window.localStorage.getItem('sb1_demo_auth'):null;return {data:{user:saved?JSON.parse(saved).user:null},error:null};}catch{return {data:{user:null},error:null};}}
   }
 };
-export const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl,supabaseAnonKey) : demoClient;
+export const supabase: any = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl,supabaseAnonKey) : demoClient;
 
 export type Specialty = {
   id: string;
