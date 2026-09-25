@@ -151,6 +151,7 @@ export type Question = {
   status: string;
   views: number;
   created_at: string;
+  language?: string;
   specialty?: Specialty;
   answers?: Answer[];
 };
@@ -743,6 +744,7 @@ export type AdditionalFacility = {
 export type PharmacyProduct = {
   id: string;
   pharmacy_id: string | null;
+  facility_id?: string | null;
   name: string;
   description: string | null;
   image_url: string | null;
