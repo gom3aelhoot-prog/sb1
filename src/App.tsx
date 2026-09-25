@@ -13,6 +13,7 @@ import { DiscountBanner } from '@/components/DiscountBanner';
 import { SpecialistsPage } from '@/components/SpecialistsPage';
 import { DoctorVerificationPage } from '@/components/DoctorVerificationPage';
 import { FacilitiesPage as LocalFacilitiesPage } from '@/components/FacilitiesPage';
+import FacilitiesPage from '@/pages/FacilitiesPage';
 import { FacilityRegistrationPage } from '@/components/FacilityRegistrationPage';
 import { PharmacyStorePage } from '@/components/PharmacyStorePage';
 import { TrackingPage } from '@/components/TrackingPage';
