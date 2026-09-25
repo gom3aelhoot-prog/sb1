@@ -5,7 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import type { Doctor } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
 
-export default function DoctorCard({ doctor }: { doctor: Doctor }) {
+export default function DoctorCard({ doctor, directory = false }: { doctor: Doctor; directory?: boolean }) {
   const { navigate } = useRouter();
   const { specialtyName, t, lang, dir } = useI18n();
   const [imgError, setImgError] = useState(false);
@@ -49,6 +49,40 @@ export default function DoctorCard({ doctor }: { doctor: Doctor }) {
     e.stopPropagation();
     navigate(`/sessions?doctor=${doctor.id}&specialty=${doctor.specialty?.slug || ''}`);
   };
+
+  if (directory) {
+    return (
+      <div onClick={() => navigate(`/doctors/${doctor.id}`)} className="relative w-full cursor-pointer rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" dir={dir}>
+        <div className="flex items-start gap-4">
+          <div className="relative shrink-0">
+            <div className="h-20 w-20 overflow-hidden rounded-2xl bg-gray-100 ring-2 ring-emerald-100">
+              {!imgError && imgSrc ? <img src={imgSrc} alt={name} className="h-full w-full object-cover" onError={() => { if (imgSrc !== fallbackAvatar) setImgSrc(fallbackAvatar); else setImgError(true); }} /> : <span className="flex h-full w-full items-center justify-center text-2xl font-bold text-teal-600">{name.replace(/^د\\. |^(Dr\\. |Доктор |Դոկտոր |დოქტორი )/,'').charAt(0)}</span>}
+            </div>
+            <span className="absolute -bottom-1 -start-1 h-5 w-5 rounded-full border-2 border-white bg-emerald-500" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-lg font-extrabold text-gray-900">{name}</h3>
+              {doctor.is_verified && <span className="rounded-full bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700"><BadgeCheck className="inline h-3.5 w-3.5" /> موثق</span>}
+              <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-bold text-amber-700">الأكثر تقييماً</span>
+            </div>
+            {doctor.specialty && <p className="mt-1 font-medium text-emerald-700">{specialtyName(doctor.specialty)}</p>}
+            <p className="mt-3 line-clamp-2 text-sm leading-6 text-gray-500">{bio}</p>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-xl bg-gray-50 p-2"><b className="block text-base text-gray-900">{(doctor.follower_count||0).toLocaleString()}</b><span className="text-xs text-gray-400">متابع</span></div>
+              <div className="rounded-xl bg-gray-50 p-2"><b className="block text-base text-gray-900">{(doctor.consultation_count||0).toLocaleString()}</b><span className="text-xs text-gray-400">إجابة</span></div>
+              <div className="rounded-xl bg-gray-50 p-2"><b className="block text-base text-gray-900">{(doctor.follower_count ? (doctor.follower_count/10).toFixed(1)+'k' : '3.9k')}</b><span className="text-xs text-gray-400">السمعة</span></div>
+            </div>
+            <div className="mt-3 flex items-center justify-between"><span className="text-xl font-extrabold text-emerald-700">{doctor.consultation_price ? Number(doctor.consultation_price).toLocaleString() : '75'} <small className="text-xs font-normal text-gray-400">ر.س/شهر</small></span><span className="text-xs text-gray-400"><Star className="inline h-3 w-3 fill-amber-400 text-amber-400" /> {Number(doctor.rating).toFixed(1)}</span></div>
+            <div className="mt-3 flex gap-2">
+              <button onClick={handleSession} className="flex-1 rounded-xl border py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50"><Calendar className="inline h-4 w-4" /> حجز جلسة</button>
+              <button onClick={handleConsult} className="flex-1 rounded-xl bg-emerald-600 py-2.5 text-sm font-bold text-white hover:bg-emerald-700"><MessageCircle className="inline h-4 w-4" /> متابعة</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
