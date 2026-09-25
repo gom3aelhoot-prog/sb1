@@ -71,13 +71,13 @@ export default function CoursesPage() {
     advanced: t('courses.advanced'),
   };
 
-  const successTitle = {
+  const successTitle: any = {
     ar: 'تم التسجيل بنجاح!', ru: 'Регистрация прошла успешно!', de: 'Anmeldung erfolgreich!', en: 'Enrollment successful!'
   }[lang] || 'Enrollment successful!';
-  const successBody = {
+  const successBody: any = {
     ar: 'ستصلك تفاصيل الدورة على بريدك الإلكتروني', ru: 'Детали курса будут отправлены на вашу электронную почту', de: 'Die Kursdetails werden an Ihre E-Mail-Adresse gesendet', en: 'Course details will be sent to your email'
   }[lang] || 'Course details will be sent to your email';
-  const payLabel = {
+  const payLabel: any = {
     ar: 'ادفع وسجل الآن', ru: 'Оплатить и записаться', de: 'Bezahlen und anmelden', en: 'Pay & enroll now'
   }[lang] || 'Pay & enroll now';
 
