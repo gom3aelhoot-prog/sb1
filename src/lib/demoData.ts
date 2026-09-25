@@ -55,7 +55,7 @@ export const demoFacilities: AdditionalFacility[] = [
  {id:'fac-1',facility_type:'rehab',name:'مركز SB1 للتأهيل',description:'إعادة تأهيل وعلاج طبيعي.',address:'دمشق - شارع العلاج',phone:'+963 11 555 5555',image_url:photo('photo-1576091160550-2173dba999ef'),is_active:true,created_at:now},
  {id:'fac-2',facility_type:'pharmacy',name:'صيدلية SB1',description:'صيدلية وخدمة توصيل.',address:'دمشق - المركز',phone:'+963 11 666 6666',image_url:photo('photo-1585435557343-3b092031a831'),is_active:true,created_at:now},
  {id:'fac-3',facility_type:'nursing',name:'دار SB1 للرعاية',description:'رعاية كبار السن وخدمات تمريضية.',address:'حلب - حي الهدوء',phone:'+963 21 777 7777',image_url:photo('photo-1516307365426-bea591f05011'),is_active:true,created_at:now},
-] as AdditionalFacility[];
+] as unknown as AdditionalFacility[];
 export const demoProducts: PharmacyProduct[] = [
  {id:'prod-1',facility_id:'fac-2',name:'مجموعة فيتامينات يومية',description:'منتج تجريبي للعرض في المتجر.',price:12,currency:'USD',image_url:photo('photo-1607619056574-7b8d3ee536b2'),stock_quantity:40,is_active:true,created_at:now},
  {id:'prod-2',facility_id:'fac-2',name:'جهاز قياس ضغط الدم',description:'جهاز منزلي للمتابعة.',price:35,currency:'USD',image_url:photo('photo-1559757148-5c350d0d3c56'),stock_quantity:25,is_active:true,created_at:now},
@@ -68,9 +68,9 @@ export const demoLibrary: SpecialtyLibraryItem[] = [
 ];
 
 export const demoQuestions: Question[] = [
- {id:'q-demo-1',specialty_id:'sp-cardiology',author_name:'مستخدم SB1',title:'ما الفحوصات الدورية المهمة لصحة القلب؟',body:'أرغب في معرفة الفحوصات العامة التي تناسب المتابعة الوقائية لصحة القلب.',age:42,gender:'ذكر',status:'pending',views:184,specialty:demoSpecialties[1],answers:[]},
- {id:'q-demo-2',specialty_id:'sp-psych',author_name:'مستخدم SB1',title:'كيف أتعامل مع التوتر المتكرر؟',body:'أعاني من توتر متكرر وأريد معرفة الخطوات العامة التي تساعدني على تنظيمه ومتى أراجع مختصاً.',age:31,gender:'أنثى',status:'pending',views:231,specialty:demoSpecialties[2],answers:[]},
- {id:'q-demo-3',specialty_id:'sp-pediatrics',author_name:'مستخدم SB1',title:'متى يحتاج الطفل إلى مراجعة طبيب الأطفال؟',body:'ما العلامات التي تستدعي التواصل مع طبيب الأطفال بدلاً من الاكتفاء بالمتابعة المنزلية؟',age:6,gender:'أنثى',status:'pending',views:96,specialty:demoSpecialties[3],answers:[]},
+ {id:'q-demo-1',specialty_id:'sp-cardiology',author_name:'مستخدم SB1',title:'ما الفحوصات الدورية المهمة لصحة القلب؟',body:'أرغب في معرفة الفحوصات العامة التي تناسب المتابعة الوقائية لصحة القلب.',age:42,gender:'ذكر',status:'pending',views:184,created_at:now,specialty:demoSpecialties[1],answers:[]},
+ {id:'q-demo-2',specialty_id:'sp-psych',author_name:'مستخدم SB1',title:'كيف أتعامل مع التوتر المتكرر؟',body:'أعاني من توتر متكرر وأريد معرفة الخطوات العامة التي تساعدني على تنظيمه ومتى أراجع مختصاً.',age:31,gender:'أنثى',status:'pending',views:231,created_at:now,specialty:demoSpecialties[2],answers:[]},
+ {id:'q-demo-3',specialty_id:'sp-pediatrics',author_name:'مستخدم SB1',title:'متى يحتاج الطفل إلى مراجعة طبيب الأطفال؟',body:'ما العلامات التي تستدعي التواصل مع طبيب الأطفال بدلاً من الاكتفاء بالمتابعة المنزلية؟',age:6,gender:'أنثى',status:'pending',views:96,created_at:now,specialty:demoSpecialties[3],answers:[]},
 ];
 export const demoAnswers: Answer[] = [
  {id:'ans-demo-1',question_id:'q-demo-1',doctor_id:'doc-3',body:'تختلف الفحوصات حسب العمر وعوامل الخطورة والتاريخ المرضي. من الأفضل تحديد خطة متابعة مع طبيبك بعد تقييم هذه العوامل.',helpful_count:42,created_at:now,doctor:demoDoctors[2]},
