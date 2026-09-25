@@ -1,0 +1,23 @@
+name: SB1 build and package
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+      - run: zip -r sb1-source-and-build.zip . -x ".git/*" "node_modules/*" ".bolt/*"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sb1-source-and-build
+          path: sb1-source-and-build.zip
+          retention-days: 30
