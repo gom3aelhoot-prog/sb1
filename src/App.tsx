@@ -67,6 +67,7 @@ import SettingsPage from '@/pages/SettingsPage';
 import MediaHubPage from '@/pages/MediaHubPage';
 import SpecialistStorePage from '@/pages/SpecialistStorePage';
 import AppsPage from '@/pages/AppsPage';
+import ChooseDoctorPage from '@/pages/ChooseDoctorPage';
 
 type HashView = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
 
@@ -107,6 +108,7 @@ function PlatformRoute() {
   if (route === '/courses') return <CoursesPage />;
   if (route.startsWith('/courses/')) return <CourseDetailPage id={route.split('/')[2]} />;
   if (route === '/sessions') return <SessionsPage />;
+  if (route === '/choose-doctor') return <ChooseDoctorPage />;
   if (route === '/register') return <RegisterPage />;
   if (route === '/verification') return <DoctorVerificationPage onNavigate={(view) => { window.location.hash = view.startsWith('#') ? view : `#${view}`; }} />;
   if (route === '/subscriptions') return <SubscriptionsPage />;
