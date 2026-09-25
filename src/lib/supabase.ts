@@ -754,6 +754,7 @@ export type PharmacyProduct = {
   pickup_address: string | null;
   is_active: boolean;
   stock: number;
+  stock_quantity?: number;
   created_at: string;
 };
 
