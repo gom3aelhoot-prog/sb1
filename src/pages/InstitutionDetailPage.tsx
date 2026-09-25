@@ -28,7 +28,7 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
       else if (kind==='radiology') setData(demoRadiology.find(x=>x.id===id) || countriesForLanguage(lang).flatMap(c=>virtualFacilities(lang,c.key)).find(x=>x.id===id) || null);
       else setData(demoFacilities.find(x=>x.id===id) || countriesForLanguage(lang).flatMap(c=>virtualFacilities(lang,c.key)).find(x=>x.id===id) || null);
     }).catch(() => {
-      if (kind==='clinic') setData(demoClinics.find(x=>x.id===id) || null);
+      if (kind==='clinic') setData(demoClinics.find(x=>x.id===id) || countriesForLanguage(lang).flatMap(c=>virtualFacilities(lang,c.key)).find(x=>x.id===id) || null);
       else if (kind==='lab') setData(demoLabs.find(x=>x.id===id) || countriesForLanguage(lang).flatMap(c=>virtualFacilities(lang,c.key)).find(x=>x.id===id) || null);
       else if (kind==='radiology') setData(demoRadiology.find(x=>x.id===id) || countriesForLanguage(lang).flatMap(c=>virtualFacilities(lang,c.key)).find(x=>x.id===id) || null);
       else setData(demoFacilities.find(x=>x.id===id) || countriesForLanguage(lang).flatMap(c=>virtualFacilities(lang,c.key)).find(x=>x.id===id) || null);
