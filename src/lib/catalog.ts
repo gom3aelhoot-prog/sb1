@@ -1,7 +1,7 @@
 import type { Doctor, Specialty, Question, Answer, Article, DoctorVideo, DoctorAudio, SpecialtyLibraryItem, AdditionalFacility, Course } from '@/lib/supabase';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 
-export const LANGUAGE_PROFILES: Record<string,{country:string;city:string;native:string;names:string[]}> = {
+export const LANGUAGE_PROFILES: Record<string,{country:string;city:string;native:string;names:string[];hospital?:string;rental?:string;sale?:string}> = {
  ar:{country:'سوريا',city:'دمشق',native:'العربية',names:['د. جمال نادي','د. أحمد خالد','د. سامر محمود','د. ياسر حسن','د. كريم علي','د. عمر يوسف','د. رامي أسعد','د. مازن خليل','د. خالد منصور','د. وليد عادل','د. حسام نجيب','د. طارق عبد الله']},
  en:{country:'United Kingdom',city:'London',native:'English',names:['Dr. James','Dr. Daniel Smith','Dr. Michael Brown','Dr. David Wilson','Dr. Robert Taylor','Dr. John Miller','Dr. William Davis','Dr. Thomas Moore','Dr. George Clark','Dr. Henry Lewis','Dr. Oliver Walker','Dr. Benjamin Hall']},
  de:{country:'Deutschland',city:'Berlin',native:'Deutsch',names:['Dr. James','Dr. Lukas Müller','Dr. Anna Schneider','Dr. Thomas Weber','Dr. Julia Fischer','Dr. Felix Wagner','Dr. Marie Becker','Dr. Paul Hoffmann','Dr. Laura Klein','Dr. Martin Bauer','Dr. Sophie Wolf','Dr. Daniel Koch']},
