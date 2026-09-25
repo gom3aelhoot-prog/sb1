@@ -22,19 +22,19 @@ export default function DoctorCard({ doctor }: { doctor: Doctor }) {
   const bio = localizedField(doctor as unknown as Record<string, unknown>, 'bio', lang, doctor.bio);
   const city = localizedField(doctor as unknown as Record<string, unknown>, 'city', lang, doctor.city);
 
-  const expLabel = {
+  const expLabel: any = {
     ar: 'سنة', ru: 'лет', de: 'Jahre', en: 'yrs'
   }[lang] || 'yrs';
-  const consultLabel = {
+  const consultLabel: any = {
     ar: 'استشارة', ru: 'консультаций', de: 'Beratungen', en: 'consults'
   }[lang] || 'consults';
-  const virtualLabel = {
+  const virtualLabel: any = {
     ar: 'افتراضي', ru: 'Виртуальный', de: 'Virtuell', en: 'Virtual'
   }[lang] || 'Virtual';
-  const fullProfileLabel = {
+  const fullProfileLabel: any = {
     ar: 'عرض الصفحة الكاملة', ru: 'Открыть профиль', de: 'Profil öffnen', en: 'View full profile'
   }[lang] || 'View full profile';
-  const sessionLabel = {
+  const sessionLabel: any = {
     ar: 'طلب جلسة', ru: 'Сессия', de: 'Sitzung', en: 'Session'
   }[lang] || 'Session';
 
