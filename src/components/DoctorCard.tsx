@@ -24,7 +24,7 @@ export default function DoctorCard({ doctor }: { doctor: Doctor }) {
 
   const expLabel: any = {
     ar: 'سنة', ru: 'лет', de: 'Jahre', en: 'yrs'
-  }[lang] || 'yrs';
+  }[lang as any] || 'yrs';
   const consultLabel: any = {
     ar: 'استشارة', ru: 'консультаций', de: 'Beratungen', en: 'consults'
   }[lang] || 'consults';
