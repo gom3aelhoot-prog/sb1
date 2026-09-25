@@ -45,7 +45,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           setArticles(virtualArticlesForSpecialty(slug,lang,5));
           setAudios(virtualAudioForSpecialty(slug,lang,4));
           setPosts(Array.from({length:5},(_,i)=>({id:`virtual-post-${id}-${i+1}`,doctor_id:id,body:lang==='ar'?`منشور تعليمي من ${doc.name} حول ${doc.specialty?.name||'التخصص'}.`:`Educational post from ${doc.name} about ${doc.specialty?.name||'the specialty'}.`,image_url:null,video_url:i===1?'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4':null,post_type:i===1?'reel':'post',views:200+i*70,likes_count:30+i*11,comments_count:3+i,created_at:new Date(Date.now()-i*86400000).toISOString(),doctor:doc})) as SpecialistPost[]);
-          setDiary([]); setComments({}); setLoading(false); return;
+          setDiary(Array.from({length:4},(_,i)=>({id:`virtual-diary-${id}-${i+1}`,title:lang==='ar'?`يوميات الأخصائي — ${i+1}`:`Specialist diary — ${i+1}`,body:lang==='ar'?`ملاحظة تعليمية تجريبية من ${doc.name} حول ${doc.specialty?.name||'التخصص'}، مع نصائح عامة ومصادر للمراجعة.`:`Educational demo note from ${doc.name} about ${doc.specialty?.name||'the specialty'}, with general information for review.`,created_at:new Date(Date.now()-i*86400000*2).toISOString()}))); setComments({}); setLoading(false); return;
         }
         const { data: ans } = await supabase.from('answers').select('question_id').eq('doctor_id', id);
         if (ans && ans.length > 0) {
@@ -82,10 +82,9 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     const text = commentInputs[postId]?.trim();
     if (!text) return;
     const name = localStorage.getItem('chat_name') || 'مستخدم';
-    const { data } = await supabase.from('post_comments').insert({ post_id: postId, author_name: name, body: text }).select().single();
-    if (data) {
-      setComments((prev) => ({ ...prev, [postId]: [...(prev[postId] || []), data] }));
-    }
+    const local = { id:`comment-${Date.now()}`, post_id:postId, author_name:name, body:text, created_at:new Date().toISOString() } as PostComment;
+    const postIsVirtual = posts.some(p=>p.id===postId && p.id.startsWith('virtual-post-'));
+    if(postIsVirtual){setComments(prev=>({...prev,[postId]:[...(prev[postId]||[]),local]}));}else{const {data}=await supabase.from('post_comments').insert({post_id:postId,author_name:name,body:text}).select().single();if(data)setComments(prev=>({...prev,[postId]:[...(prev[postId]||[]),data]}));}
     setCommentInputs((prev) => ({ ...prev, [postId]: '' }));
   };
 
