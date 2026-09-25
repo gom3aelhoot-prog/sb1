@@ -743,17 +743,17 @@ export type AdditionalFacility = {
 
 export type PharmacyProduct = {
   id: string;
-  pharmacy_id: string | null;
+  pharmacy_id?: string | null;
   facility_id?: string | null;
   name: string;
   description: string | null;
   image_url: string | null;
   price: number;
   currency: string;
-  delivery_option: string;
-  pickup_address: string | null;
+  delivery_option?: string;
+  pickup_address?: string | null;
   is_active: boolean;
-  stock: number;
+  stock?: number;
   stock_quantity?: number;
   created_at: string;
 };
