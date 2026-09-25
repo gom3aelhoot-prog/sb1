@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calculator, Heart, Brain, Eye, Activity, Baby, FlaskConical, Star, Save, ArrowRight } from 'lucide-react';
+import { Calculator, Heart, Brain, Eye, Activity, Baby, FlaskConical, Star, Save, ArrowRight, Search } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type MedicalTest } from '@/lib/supabase';
 
