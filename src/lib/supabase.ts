@@ -138,6 +138,9 @@ export type Doctor = {
   phone_number: string | null;
   follower_count: number;
   nationality: string | null;
+  country_code?: string | null;
+  language_code?: string | null;
+  approval_status?: string;
   created_at: string;
   specialty?: Specialty;
 };
