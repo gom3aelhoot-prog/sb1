@@ -126,6 +126,10 @@ export default function AskPage() {
         // Public demo fallback.
       }
       const id = dbQuestionId || questionId;
+      const expiresAt = questionType === 'paid' && selectedTier ? new Date(Date.now() + selectedTier.duration_days * 86400000).toISOString() : null;
+      try {
+        await supabase.from('consultation_requests').insert({ question_id: dbQuestionId || null, patient_name: form.author_name.trim(), specialty_id: spec?.id || fallbackSpec.id, country_code: country.code, language_code: contentLanguage, service_type: 'question', price_usd: selectedTier?.price_usd || 0, local_price: localAmount, currency_code: country.currency, duration_days: selectedTier?.duration_days || 7, specialists_limit: selectedTier?.specialists_notified || 5, answers_limit: selectedTier?.max_answers || 3, response_speed: selectedTier?.response_speed || 'standard', status: questionType === 'paid' ? 'pending' : 'active', expires_at: expiresAt });
+      } catch {}
       const localQuestion = {
         id, language: contentLanguage, specialty_id: fallbackSpec.id, author_name: form.author_name.trim(), title: form.title.trim(), body: form.body.trim(),
         age: form.age ? parseInt(form.age) : null, gender: form.gender, status: questionType === 'paid' ? 'pending_payment' : 'pending',
