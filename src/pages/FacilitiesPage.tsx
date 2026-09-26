@@ -40,7 +40,7 @@ export default function FacilitiesPage({initialCategory}:{initialCategory?:strin
        <div className="flex items-start gap-3"><div className="h-11 w-11 shrink-0 rounded-xl bg-teal-50 flex items-center justify-center"><Building2 className="h-5 w-5 text-teal-600"/></div><div className="min-w-0"><h3 className="font-bold truncate">{f.name}</h3><p className="text-sm text-gray-500 mt-1">{f.description}</p></div></div>
        <div className="mt-3 flex items-center gap-1 text-amber-500"><Star className="h-4 w-4 fill-current"/><span>{Number(f.rating||4.6).toFixed(1)}</span></div>
        <div className="mt-2 flex items-center gap-2 text-sm text-gray-500"><MapPin className="h-4 w-4"/><span>{f.address}</span></div>
-       <button onClick={()=>navigate('/facilities/'+f.id)} className="mt-4 w-full rounded-xl bg-teal-50 py-3 font-bold text-teal-700">{c[3]}</button>
+       <div className="mt-4 grid grid-cols-1 gap-2"><button onClick={()=>navigate('/facilities/'+f.id)} className="w-full rounded-xl bg-teal-50 py-3 font-bold text-teal-700">{c[3]}</button>{type==='pharmacy'&&<button onClick={()=>{window.location.hash='pharmacy-store?id='+encodeURIComponent(f.id)}} className="w-full rounded-xl bg-green-600 py-3 font-bold text-white">تسوق الأدوية والسلة</button>}{type==='medical-supplies'&&<button onClick={()=>navigate('/medical-supplies')} className="w-full rounded-xl bg-indigo-600 py-3 font-bold text-white">فتح متجر الأدوات الطبية</button>}</div>
       </div>
      </div>)}
    </div>
