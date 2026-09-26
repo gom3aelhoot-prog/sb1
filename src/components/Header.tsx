@@ -60,7 +60,7 @@ export function Header() {
     { label: lang==='ar'?'اختار طبيبك':lang==='ru'?'Выберите врача':lang==='de'?'Arzt auswählen':'Choose your doctor', href: '/choose-doctor' },
     { label: lang==='ar'?'المرافق الطبية':lang==='ru'?'Медицинские учреждения':lang==='de'?'Medizinische Einrichtungen':lang==='en'?'Medical Facilities':'Medical Facilities', href: '/facilities' },
     { label: 'الاختبارات الطبية والنفسية', href: '/tests' },
-    { label: labels[2], href: '/store' },
+    { label: 'المتجر', href: '/store' },
     { label: labels[3], href: '/referral' },
     { label: lang==='ar'?'الألعاب والتطبيقات':lang==='ru'?'Игры и приложения':lang==='de'?'Spiele & Apps':'Games & Apps', href: '/apps' },
     { label: lang==='ar'?'أماكن للبيع أو الإيجار':lang==='ru'?'Объекты для продажи или аренды':lang==='de'?'Objekte zum Verkauf oder zur Miete':lang==='en'?'Places for Sale or Rent':'Places for Sale or Rent', href: '/properties' },
