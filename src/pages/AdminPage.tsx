@@ -7,8 +7,9 @@ import {
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Question, type Article, type DoctorVideo, type DoctorAudio, type Course, type Payment, type AIViolation, type SiteSettings, type VideoSession, type TextSession, type Specialty } from '@/lib/supabase';
+import { DEFAULT_DISCOUNT,DEFAULT_AD_SLOTS,getDiscountConfig,getAdSlots,saveDiscountConfig,saveAdSlots,type DiscountConfig,type AdSlot } from '@/lib/adConfig';
 
-type AdminSection = 'overview' | 'doctors' | 'questions' | 'articles' | 'videos' | 'audio' | 'courses' | 'sessions' | 'payments' | 'pricing' | 'violations' | 'admins' | 'settings';
+type AdminSection = 'overview' | 'doctors' | 'questions' | 'articles' | 'videos' | 'audio' | 'courses' | 'sessions' | 'payments' | 'pricing' | 'violations' | 'admins' | 'ads' | 'settings';
 
 function PricingRow({item,onSaved}:{item:any;onSaved:()=>void}){const [v,setV]=useState(item);return <tr className="border-b"><td className="p-3 font-bold">{v.name_ar||v.name||v.country_code||'قاعدة دولة'}</td><td className="p-3"><input className="input-field w-28" type="number" value={v.price_usd??v.base_price??0} onChange={e=>setV({...v,price_usd:Number(e.target.value),base_price:Number(e.target.value)})}/></td><td className="p-3"><input className="input-field w-20" type="number" value={v.duration_days??7} onChange={e=>setV({...v,duration_days:Number(e.target.value)})}/></td><td className="p-3"><input className="input-field w-20" type="number" value={v.specialists_notified??v.notification_reach??5} onChange={e=>setV({...v,specialists_notified:Number(e.target.value),notification_reach:Number(e.target.value)})}/></td><td className="p-3"><input className="input-field w-20" type="number" value={v.max_answers??3} onChange={e=>setV({...v,max_answers:Number(e.target.value)})}/></td><td className="p-3"><button className="btn-primary text-xs" onClick={async()=>{const payload={...v};delete payload.id;delete payload.name;delete payload.name_ar;delete payload.description;delete payload.description_ar;delete payload.sort_order;const {error}=await supabase.from(item.base_price!==undefined?'question_pricing_rules':'pricing_tiers').update(payload).eq('id',item.id);if(!error)onSaved()}}>حفظ</button></td></tr>}
 export default function AdminPage() {
@@ -37,6 +38,8 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [admins, setAdmins] = useState<any[]>([]);
   const [newAdmin, setNewAdmin] = useState({name:'',email:'',role:'moderator'});
+  const [discountConfig,setDiscountConfig]=useState<DiscountConfig>(getDiscountConfig());
+  const [adSlots,setAdSlots]=useState<AdSlot[]>(getAdSlots());
 
   // Add modal
   const [showAdd, setShowAdd] = useState<AdminSection | null>(null);
@@ -74,6 +77,10 @@ export default function AdminPage() {
     setAdminRole('');
     localStorage.removeItem('admin_auth');
   };
+  const saveAds=()=>{saveDiscountConfig(discountConfig);saveAdSlots(adSlots);alert('تم حفظ إعدادات الإعلانات والعرض بنجاح')};
+  const updateSlot=(id:string,key:string,value:any)=>setAdSlots(v=>v.map(s=>s.id===id?{...s,[key]:value}:s));
+  const readMediaFile=(file:File,onDone:(url:string)=>void)=>{const reader=new FileReader();reader.onload=()=>onDone(String(reader.result||''));reader.readAsDataURL(file)};
+
 
   const loadData = async (sec: AdminSection) => {
     setLoading(true);
@@ -245,6 +252,7 @@ export default function AdminPage() {
     { key: 'sessions', label: t('admin.sessions'), icon: Users },
     { key: 'payments', label: t('admin.payments'), icon: DollarSign },
     { key: 'pricing', label: 'أسعار الأسئلة والدول', icon: DollarSign },
+    { key: 'ads', label: 'الإعلانات والمساحات الإعلانية', icon: TrendingUp },
     { key: 'violations', label: t('admin.violations'), icon: AlertTriangle },
     ...(adminRole === 'owner' ? [{ key: 'admins' as AdminSection, label: 'المشرفون', icon: UserPlus }] : []),
     { key: 'settings', label: t('admin.settings'), icon: Settings },
@@ -289,7 +297,35 @@ export default function AdminPage() {
 
           {/* Content */}
           <div className="lg:col-span-3">
-            {section === 'pricing' ? (
+                        {section === 'ads' ? (
+              <div className="space-y-6">
+                <div><h2 className="text-xl font-bold text-gray-800">الإعلانات والعروض</h2><p className="mt-1 text-sm text-gray-500">تحكم كامل في إعلان خصم 10% والمساحات الإعلانية التي تظهر في صفحات SB1. التغييرات تحفظ محلياً في نسخة العرض الحالية.</p></div>
+                <div className="card p-6 space-y-5">
+                  <h3 className="text-lg font-extrabold">عرض خصم 10% — دكتور جمال نادي</h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <label className="text-sm font-semibold">نوع الوسائط<select value={discountConfig.mediaType} onChange={e=>setDiscountConfig({...discountConfig,mediaType:e.target.value as any})} className="input-field mt-2"><option value="image">صورة</option><option value="video">فيديو</option></select></label>
+                    <label className="text-sm font-semibold">رابط الصورة<input value={discountConfig.imageUrl} onChange={e=>setDiscountConfig({...discountConfig,imageUrl:e.target.value})} className="input-field mt-2"/></label>
+                    <label className="text-sm font-semibold">رابط الفيديو<input value={discountConfig.videoUrl} onChange={e=>setDiscountConfig({...discountConfig,videoUrl:e.target.value})} className="input-field mt-2"/></label>
+                    <label className="text-sm font-semibold">السعر الظاهر<input value={discountConfig.priceText} onChange={e=>setDiscountConfig({...discountConfig,priceText:e.target.value})} className="input-field mt-2"/></label>
+                    <label className="text-sm font-semibold">بعد الإغلاق يظهر بعد (دقائق)<input type="number" min="0" value={discountConfig.repeatAfterMinutes} onChange={e=>setDiscountConfig({...discountConfig,repeatAfterMinutes:Number(e.target.value)})} className="input-field mt-2"/></label>
+                    <label className="text-sm font-semibold">مدة عرض الإعلان (دقائق)<input type="number" min="0" value={discountConfig.displayDurationMinutes} onChange={e=>setDiscountConfig({...discountConfig,displayDurationMinutes:Number(e.target.value)})} className="input-field mt-2"/></label>
+                  </div>
+                  <div className="flex flex-wrap gap-5 text-sm"><label className="flex gap-2 items-center"><input type="checkbox" checked={discountConfig.enabled} onChange={e=>setDiscountConfig({...discountConfig,enabled:e.target.checked})}/>تفعيل الإعلان</label><label className="flex gap-2 items-center"><input type="checkbox" checked={discountConfig.fixed} onChange={e=>setDiscountConfig({...discountConfig,fixed:e.target.checked})}/>ثابت في الصفحة</label><label className="flex gap-2 items-center"><input type="checkbox" checked={discountConfig.dismissible} onChange={e=>setDiscountConfig({...discountConfig,dismissible:e.target.checked})}/>يسمح للمستخدم بالإغلاق</label></div>
+                  <div className="grid md:grid-cols-2 gap-3">{Object.keys(discountConfig.nameByLang).map(l=><label key={l} className="text-sm font-semibold">{l}<input value={discountConfig.nameByLang[l]||''} onChange={e=>setDiscountConfig({...discountConfig,nameByLang:{...discountConfig.nameByLang,[l]:e.target.value}})} className="input-field mt-1"/></label>)}</div>
+                  <div><label className="text-sm font-semibold">رفع صورة من الجهاز<input type="file" accept="image/*" className="input-field mt-2" onChange={e=>{const f=e.target.files?.[0];if(f)readMediaFile(f,u=>setDiscountConfig({...discountConfig,imageUrl:u}))}}/></label></div>
+                </div>
+                <div className="card p-6 space-y-5">
+                  <div className="flex items-center justify-between"><div><h3 className="text-lg font-extrabold">المساحات الإعلانية للبيع في متجر الأخصائيين</h3><p className="text-sm text-gray-500">السعر يحسب حسب المساحة/الموقع وعدد الأيام.</p></div><button onClick={()=>setAdSlots(v=>[...v,{id:'slot-'+Date.now(),name:'مساحة جديدة',position:'صفحة جديدة',size:'300x250',mediaType:'image',mediaUrl:'',title:'',description:'',pricePerDay:25,durationDays:1,enabled:false,fixed:false,dismissible:true,autoCloseMinutes:0}])} className="btn-primary"><Plus className="inline h-4 w-4 me-1"/>إضافة مساحة</button></div>
+                  <div className="space-y-4">{adSlots.map(s=><div key={s.id} className="rounded-2xl border p-4 space-y-3">
+                    <div className="grid md:grid-cols-3 gap-3"><input value={s.name} onChange={e=>updateSlot(s.id,'name',e.target.value)} className="input-field" placeholder="اسم المساحة"/><input value={s.position} onChange={e=>updateSlot(s.id,'position',e.target.value)} className="input-field" placeholder="موقع الإعلان"/><input value={s.size} onChange={e=>updateSlot(s.id,'size',e.target.value)} className="input-field" placeholder="المقاس"/></div>
+                    <div className="grid md:grid-cols-4 gap-3"><select value={s.mediaType} onChange={e=>updateSlot(s.id,'mediaType',e.target.value)} className="input-field"><option value="image">صورة</option><option value="video">فيديو</option></select><input value={s.mediaUrl} onChange={e=>updateSlot(s.id,'mediaUrl',e.target.value)} className="input-field md:col-span-2" placeholder="رابط الصورة أو الفيديو"/><input type="number" min="0" value={s.pricePerDay} onChange={e=>updateSlot(s.id,'pricePerDay',Number(e.target.value))} className="input-field" placeholder="السعر/يوم USD"/></div>
+                    <div className="grid md:grid-cols-4 gap-3"><input type="number" min="1" value={s.durationDays} onChange={e=>updateSlot(s.id,'durationDays',Number(e.target.value))} className="input-field" placeholder="المدة بالأيام"/><input type="number" min="0" value={s.autoCloseMinutes} onChange={e=>updateSlot(s.id,'autoCloseMinutes',Number(e.target.value))} className="input-field" placeholder="إغلاق بعد دقائق"/><label className="flex gap-2 items-center text-sm"><input type="checkbox" checked={s.enabled} onChange={e=>updateSlot(s.id,'enabled',e.target.checked)}/>تفعيل للبيع</label><label className="flex gap-2 items-center text-sm"><input type="checkbox" checked={s.fixed} onChange={e=>updateSlot(s.id,'fixed',e.target.checked)}/>ثابت</label></div>
+                    <div className="flex justify-between items-center"><b>السعر الافتراضي: {(s.pricePerDay*Math.max(1,s.durationDays)).toFixed(2)} USD</b><button onClick={()=>setAdSlots(v=>v.filter(x=>x.id!==s.id))} className="text-red-600"><Trash2 className="inline h-4 w-4 me-1"/>حذف المساحة</button></div>
+                  </div>)}</div>
+                </div>
+                <button onClick={saveAds} className="btn-primary px-8">حفظ كل إعدادات الإعلانات</button>
+              </div>
+            ) : section === 'pricing' ? (
               <div className="space-y-5"><div><h2 className="text-xl font-bold text-gray-800">أسعار الأسئلة والدول</h2><p className="text-sm text-gray-500 mt-1">يمكن للمالك ضبط السعر والمدة وعدد الأخصائيين وعدد الإجابات لكل باقة وقاعدة دولة.</p></div>
               <div className="overflow-x-auto card p-5"><table className="w-full text-sm"><thead><tr className="border-b text-right"><th className="p-3">الباقة/الدولة</th><th className="p-3">السعر USD</th><th className="p-3">الأيام</th><th className="p-3">الأخصائيون</th><th className="p-3">الإجابات</th><th className="p-3">حفظ</th></tr></thead><tbody>{pricingRules.map((x:any)=><PricingRow key={x.id} item={x} onSaved={()=>loadData('pricing')}/>)}</tbody></table></div></div>
             ) : (loading ? (
