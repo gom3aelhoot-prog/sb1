@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Question, type Article, type DoctorVideo, type DoctorAudio, type Course, type Payment, type AIViolation, type SiteSettings, type VideoSession, type TextSession, type Specialty } from '@/lib/supabase';
-import { DEFAULT_DISCOUNT,DEFAULT_AD_SLOTS,getDiscountConfig,getAdSlots,saveDiscountConfig,saveAdSlots,type DiscountConfig,type AdSlot } from '@/lib/adConfig';
+import { getDiscountConfig,getAdSlots,saveDiscountConfig,saveAdSlots,type DiscountConfig,type AdSlot } from '@/lib/adConfig';
 
 type AdminSection = 'overview' | 'doctors' | 'questions' | 'articles' | 'videos' | 'audio' | 'courses' | 'sessions' | 'payments' | 'pricing' | 'violations' | 'admins' | 'ads' | 'settings';
 
