@@ -113,3 +113,9 @@ create policy "pediatric reactions authenticated write" on public.sb1_pediatric_
 create index if not exists sb1_doctors_approval_idx on public.doctors(approval_status);
 create index if not exists sb1_team_messages_room_idx on public.sb1_team_chat_messages(room_id,created_at);
 create index if not exists sb1_pediatric_posts_room_idx on public.sb1_pediatric_library_posts(room_id,created_at);
+
+-- Replace legacy open doctor policies: pending specialists must not be publicly visible or directly writable.
+drop policy if exists "anon_select_doctors" on public.doctors;
+drop policy if exists "anon_insert_doctors" on public.doctors;
+create policy "public can read approved doctors" on public.doctors for select to anon,authenticated using (approval_status='approved');
+create policy "admins can write doctors" on public.doctors for all to authenticated using (public.sb1_is_admin()) with check (public.sb1_is_admin());
