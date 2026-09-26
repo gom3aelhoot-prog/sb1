@@ -70,6 +70,7 @@ import AppsPage from '@/pages/AppsPage';
 import SpecialistContentUploadPage from '@/pages/SpecialistContentUploadPage';
 import ContentModerationPage from '@/pages/ContentModerationPage';
 import ChooseDoctorPage from '@/pages/ChooseDoctorPage';
+import SpecialistFreeSessionsPage from '@/pages/SpecialistFreeSessionsPage';
 
 type HashView = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
 
@@ -112,6 +113,7 @@ function PlatformRoute() {
   if (route === '/courses') return <CoursesPage />;
   if (route.startsWith('/courses/')) return <CourseDetailPage id={route.split('/')[2]} />;
   if (route === '/sessions') return <SessionsPage />;
+  if (route === '/specialist-sessions') return <SpecialistFreeSessionsPage />;
   if (route === '/choose-doctor') return <ChooseDoctorPage />;
   if (route === '/register') return <RegisterPage />;
   if (route === '/verification') return <DoctorVerificationPage onNavigate={(view) => { window.location.hash = view.startsWith('#') ? view : `#${view}`; }} />;
