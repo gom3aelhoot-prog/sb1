@@ -119,6 +119,8 @@ export default function AskPage() {
           body: form.body.trim(),
           age: form.age ? parseInt(form.age) : null,
           gender: form.gender,
+          country_code: country.code,
+          translations: { [contentLanguage]: { title: form.title.trim(), body: form.body.trim() } },
           status: questionType === 'paid' ? 'pending_payment' : 'pending',
         }).select('id').single();
         if (!insertError && data?.id) dbQuestionId = data.id;
