@@ -5,6 +5,7 @@ import { useRouter, parseQuery, getPathOnly } from '@/lib/router';
 import { supabase, type SpecialtyChatRoom, type ChatRoomMessage, type Specialty } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
 import { specialtyCatalog } from '@/lib/catalog';
+import { moderateAndLog } from '@/lib/questionEconomy';
 
 export default function ChatRoomsPage() {
   const { t, specialtyName, lang, dir } = useI18n();
