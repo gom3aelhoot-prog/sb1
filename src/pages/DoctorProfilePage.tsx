@@ -89,9 +89,8 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     setCommentInputs((prev) => ({ ...prev, [postId]: '' }));
   };
 
-  const handleFollow = () => {
-    setIsFollowing((prev) => !prev);
-  };
+  const handleFollow = () => { setIsFollowing((prev) => !prev); };
+  const shareProfile = async () => { const url = window.location.origin + '/doctors/' + id; try { if (navigator.share) await navigator.share({ title: doctor?.name || 'SB1', text: `تابع صفحة ${doctor?.name || 'الأخصائي'} على SB1`, url }); else { await navigator.clipboard.writeText(url); alert('تم نسخ رابط صفحة الأخصائي'); } } catch {} };
 
   if (loading) {
     return (
