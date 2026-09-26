@@ -68,7 +68,6 @@ import MediaHubPage from '@/pages/MediaHubPage';
 import SpecialistStorePage from '@/pages/SpecialistStorePage';
 import StoreAdminPage from '@/pages/StoreAdminPage';
 import AppsPage from '@/pages/AppsPage';
-import PropertyListingsPage from '@/pages/PropertyListingsPage';
 import SpecialistContentUploadPage from '@/pages/SpecialistContentUploadPage';
 import ContentModerationPage from '@/pages/ContentModerationPage';
 import ChooseDoctorPage from '@/pages/ChooseDoctorPage';
@@ -112,7 +111,6 @@ function PlatformRoute() {
   if (route === '/cart') return <SpecialistStorePage />;
   if (route === '/admin/store') return <StoreAdminPage />;
   if (route === '/apps') return <AppsPage />;
-  if (route === '/properties') return <PropertyListingsPage />;
   if (route === '/specialist/content') return <SpecialistContentUploadPage />;
   if (route === '/admin/content') return <ContentModerationPage />;
   if (route === '/articles') return <MediaHubPage />;
