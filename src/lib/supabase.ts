@@ -164,6 +164,7 @@ export type Doctor = {
   nationality: string | null;
   country_code?: string | null;
   language_code?: string | null;
+  stripe_connect_account_id?: string | null;
   approval_status?: string;
   created_at: string;
   specialty?: Specialty;
