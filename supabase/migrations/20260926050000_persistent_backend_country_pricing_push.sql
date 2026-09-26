@@ -150,3 +150,20 @@ begin
   if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and tablename='question_followups') then alter publication supabase_realtime add table public.question_followups; end if;
   if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and tablename='notifications') then alter publication supabase_realtime add table public.notifications; end if;
 end $$;
+
+
+do $$
+begin
+  if to_regclass('public.profiles') is not null then
+    alter table public.profiles add column if not exists country_code text;
+    alter table public.profiles add column if not exists language_code text;
+  end if;
+  if to_regclass('public.doctors') is not null then
+    alter table public.doctors add column if not exists country_code text;
+    alter table public.doctors add column if not exists language_code text;
+  end if;
+  if to_regclass('public.institutions') is not null then
+    alter table public.institutions add column if not exists country_code text;
+    alter table public.institutions add column if not exists language_code text;
+  end if;
+end $$;
