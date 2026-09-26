@@ -43,9 +43,9 @@ const demoTables: Record<string, DemoRow[]> = {
     { id:'premium', name:'Premium', name_ar:'المميزة', description:'Priority response', description_ar:'أولوية', duration_days:30, specialists_notified:50, min_answers:3, max_answers:10, response_speed:'instant', price_usd:39, is_featured:false, is_active:true, sort_order:3 },
   ],
   subscription_plans: [
-    { id:'sub-free', name:'Free', name_ar:'مجاني', duration_months:1, price:0, daily_questions_limit:1, weekly_questions_limit:3, free_courses_limit:0, free_books_limit:1, features:'سؤال مجاني، مكتبة أساسية', is_active:true, created_at:now },
-    { id:'sub-plus', name:'Plus', name_ar:'بلس', duration_months:1, price:9.99, daily_questions_limit:3, weekly_questions_limit:10, free_courses_limit:1, free_books_limit:5, features:'أسئلة أكثر، كتب ودورات مخفضة', is_active:true, created_at:now },
-    { id:'sub-pro', name:'Pro', name_ar:'احترافي', duration_months:1, price:24.99, daily_questions_limit:10, weekly_questions_limit:30, free_courses_limit:3, free_books_limit:20, features:'أولوية، مكتبة كاملة، خصومات', is_active:true, created_at:now },
+    { id:'free', name:'Free', name_ar:'مجاني', duration_months:1, price:0, daily_questions_limit:10, weekly_questions_limit:null, free_courses_limit:0, free_books_limit:1, features:'10 أسئلة شهرياً', is_active:true, created_at:now },
+    { id:'pro', name:'Pro', name_ar:'Pro', duration_months:1, price:10, daily_questions_limit:500, weekly_questions_limit:null, free_courses_limit:2, free_books_limit:10, features:'500 سؤال + 50 صورة شهرياً', is_active:true, created_at:now },
+    { id:'business', name:'Business', name_ar:'Business', duration_months:1, price:30, daily_questions_limit:null, weekly_questions_limit:null, free_courses_limit:10, free_books_limit:50, features:'أسئلة وصور غير محدودة', is_active:true, created_at:now },
   ],
   site_settings: [{ id:1, site_name:'SB1', default_language:'ar', free_session_messages:3, video_session_price:25, currency:'USD', ai_moderation_enabled:true, stripe_enabled:false, updated_at:now }],
   admin_users: [],
