@@ -84,6 +84,7 @@ import VideoAppointmentDoctorPage from '@/pages/VideoAppointmentDoctorPage';
 import SpecialistFreeSessionsPage from '@/pages/SpecialistFreeSessionsPage';
 import PushNotifications from '@/components/PushNotifications';
 import JobsTicker from '@/components/JobsTicker';
+import OnboardingTour from '@/components/OnboardingTour';
 
 type HashView = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
 
@@ -224,6 +225,7 @@ function AppContent() {
       <Footer />
       <DiscountBanner />
       <PushNotifications />
+      <OnboardingTour />
       {!isHome && <AIChatWidget />}
     </div>
   );
