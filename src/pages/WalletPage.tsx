@@ -8,7 +8,7 @@ import {accountKey,ensureWallet} from '@/lib/commerce';
 
 export default function WalletPage(){
  const {lang,dir}=useI18n();const {formatPrice}=useApp();const {path}=useRouter();const q=parseQuery(path);
- const [wallet,setWallet]=useState<any>(null);const [tx,setTx]=useState<any[]>([]);const [amount,setAmount]=useState('25');const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');const [token,setToken]=useState('');
+ const [wallet,setWallet]=useState<any>(null);const [tx,setTx]=useState<any[]>([]);const [amount,setAmount]=useState('25');const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');const [sessionKey,setSessionKey]=useState('');
  const key=accountKey();
  const load=async()=>{setWallet(await ensureWallet());const {data}=await supabase.from('sb1_wallet_transactions').select('*').eq('account_key',key).order('created_at',{ascending:false}).limit(30);setTx(data||[])};
  useEffect(()=>{load()},[]);
