@@ -7,6 +7,7 @@ import { localizedField } from '@/lib/localizedContent';
 import { demoCourses, demoSpecialties } from '@/lib/demoData';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 import { virtualCoursesForSpecialty } from '@/lib/catalog';
+import { clientPrice, clientDiscountLabel } from '@/lib/pricing';
 import { getCountryServicePrice } from '@/lib/countryPricing';
 import { useApp } from '@/i18n/AppContext';
 
@@ -60,7 +61,7 @@ export default function CoursesPage() {
     if (!error) {
       await supabase.from('courses').update({ enrolled_count: (enrollCourse.enrolled_count || 0) + 1 }).eq('id', enrollCourse.id);
       await supabase.from('payments').insert({
-        payer_email: enrollForm.email.trim(), payer_name: enrollForm.name.trim(), amount: Number((enrollCourse.price * (courseBasePrice.local_price / courseBasePrice.price_usd)).toFixed(2)),
+        payer_email: enrollForm.email.trim(), payer_name: enrollForm.name.trim(), amount: clientPrice(Number((enrollCourse.price * (courseBasePrice.local_price / courseBasePrice.price_usd)).toFixed(2))),
         currency: country.currency, payment_type: 'course', reference_id: enrollCourse.id, status: 'pending',
       });
     }
@@ -143,7 +144,7 @@ export default function CoursesPage() {
                       <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />{Number(course.rating).toFixed(1)}</span>
                     </div>
                     <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-                      <span className="text-2xl font-bold text-teal-600">{Number((course.price * (courseBasePrice.local_price / courseBasePrice.price_usd)).toFixed(2)).toLocaleString(lang==='ar'?'ar-EG':'en-US')} {courseBasePrice.currency_symbol}</span>
+                      <span className="text-2xl font-bold text-teal-600">{clientPrice(Number((course.price * (courseBasePrice.local_price / courseBasePrice.price_usd)).toFixed(2))).toLocaleString(lang==='ar'?'ar-EG':'en-US')} {courseBasePrice.currency_symbol}</span>
                       <div className="flex items-center gap-2">
                         <button onClick={() => navigate('/courses/'+course.id)} className="btn-secondary text-sm">تفاصيل</button>
                         <button onClick={() => { setEnrollCourse(course); setEnrolled(false); }} className="btn-primary flex items-center gap-2 text-sm">
