@@ -119,3 +119,26 @@ drop policy if exists "anon_select_doctors" on public.doctors;
 drop policy if exists "anon_insert_doctors" on public.doctors;
 create policy "public can read approved doctors" on public.doctors for select to anon,authenticated using (approval_status='approved');
 create policy "admins can write doctors" on public.doctors for all to authenticated using (public.sb1_is_admin()) with check (public.sb1_is_admin());
+
+
+create table if not exists public.sb1_specialist_registration_requests(
+ id uuid primary key default gen_random_uuid(),
+ user_id uuid,
+ name text not null,
+ email text not null,
+ phone text,
+ specialty_id uuid,
+ country_code text,
+ language_code text,
+ documents jsonb not null default '{}'::jsonb,
+ status text not null default 'pending' check(status in ('pending','approved','rejected')),
+ rejection_reason text,
+ reviewed_by uuid,
+ reviewed_at timestamptz,
+ created_at timestamptz not null default now()
+);
+alter table public.sb1_specialist_registration_requests enable row level security;
+create policy "specialists can submit registration request" on public.sb1_specialist_registration_requests for insert to anon,authenticated with check(status='pending');
+create policy "request owner or admins can read" on public.sb1_specialist_registration_requests for select to authenticated using(user_id=auth.uid() or public.sb1_is_admin());
+create policy "admins review specialist requests" on public.sb1_specialist_registration_requests for update to authenticated using(public.sb1_is_admin()) with check(public.sb1_is_admin());
+create index if not exists sb1_specialist_requests_status_idx on public.sb1_specialist_registration_requests(status);
