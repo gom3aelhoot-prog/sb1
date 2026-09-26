@@ -1,0 +1,27 @@
+name: SB1 Backup ZIP
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npm run build
+      - name: Package SB1
+        run: |
+          mkdir -p backup/SB1
+          rsync -a --exclude='.git' --exclude='node_modules' --exclude='backup' ./ backup/SB1/
+          cd backup
+          zip -r SB1-complete.zip SB1
+      - name: Upload SB1 ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: SB1-complete-${{ github.sha }}
+          path: backup/SB1-complete.zip
+          retention-days: 90
