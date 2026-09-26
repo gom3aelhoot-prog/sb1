@@ -23,5 +23,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: SB1-complete-${{ github.sha }}
-          path: backup/SB1-complete.zip
+          path: backup/SB1
           retention-days: 90
