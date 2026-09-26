@@ -70,6 +70,10 @@ import AppsPage from '@/pages/AppsPage';
 import SpecialistContentUploadPage from '@/pages/SpecialistContentUploadPage';
 import ContentModerationPage from '@/pages/ContentModerationPage';
 import ChooseDoctorPage from '@/pages/ChooseDoctorPage';
+import AppointmentBookingPage from '@/pages/AppointmentBookingPage';
+import AppointmentsPage from '@/pages/AppointmentsPage';
+import VideoAppointmentDoctorPage from '@/pages/VideoAppointmentDoctorPage';
+import VideoSessionCountdown from '@/components/VideoSessionCountdown';
 import SpecialistFreeSessionsPage from '@/pages/SpecialistFreeSessionsPage';
 
 type HashView = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
@@ -115,6 +119,9 @@ function PlatformRoute() {
   if (route === '/sessions') return <SessionsPage />;
   if (route === '/specialist-sessions') return <SpecialistFreeSessionsPage />;
   if (route === '/choose-doctor') return <ChooseDoctorPage />;
+  if (route === '/appointments') return <AppointmentsPage />;
+  if (route === '/appointments/book') return <AppointmentBookingPage />;
+  if (route === '/specialist-appointments') return <VideoAppointmentDoctorPage />;
   if (route === '/register') return <RegisterPage />;
   if (route === '/verification') return <DoctorVerificationPage onNavigate={(view) => { window.location.hash = view.startsWith('#') ? view : `#${view}`; }} />;
   if (route === '/subscriptions') return <SubscriptionsPage />;
@@ -198,6 +205,7 @@ function AppContent() {
       </main>
       <Footer />
       <DiscountBanner />
+      <VideoSessionCountdown />
       {!isHome && <AIChatWidget />}
     </div>
   );
