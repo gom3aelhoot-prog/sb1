@@ -55,6 +55,9 @@ const demoTables: Record<string, DemoRow[]> = {
   country_pricing: [], institutions: [], delivery_workers: [], admin_chat_messages: [],
   store_products: defaultStoreProducts, store_orders: [],
   signup_promotions: [{ id:'promo-demo', code:'SB1-FIRST-SIGNUP', discount_percent:10, is_active:true }],
+  question_pricing_durations: [3,5,10,15].map((days,i)=>({id:`q-duration-${days}`,days,price_usd:[3,5,9,12][i],is_active:true})),
+  question_answer_selections: [], question_answer_ratings: [], question_earnings: [], question_accounting_reports: [], question_report_shares: [], sb1_notifications: [], sb1_moderation_events: [], sb1_credit_transactions: [],
+  sb1_credit_wallets: [], sb1_subscription_usage: [],
 };
 
 const demoStorageKey = 'sb1_demo_db_v2';
