@@ -261,7 +261,6 @@ export type Course = {
   specialist_connect_account_id?: string | null;
   free_seats?: number;
   translations?: Record<string, {title?: string;description?: string}>;
-  doctor?: Doctor;
   specialty?: Specialty;
   doctor?: Doctor;
 };
