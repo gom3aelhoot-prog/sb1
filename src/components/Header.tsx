@@ -64,7 +64,7 @@ export function Header() {
     { label: labels[3], href: '/referral' },
     { label: lang==='ar'?'سلة المشتريات':lang==='ru'?'Корзина':lang==='de'?'Warenkorb':'Cart', href: '/cart' },
     { label: lang==='ar'?'الألعاب والتطبيقات':lang==='ru'?'Игры и приложения':lang==='de'?'Spiele & Apps':'Games & Apps', href: '/apps' },
-    { label: lang==='ar'?'أماكن للبيع أو الإيجار':lang==='ru'?'Объекты для продажи или аренды':lang==='de'?'Objekte zum Verkauf oder zur Miete':lang==='en'?'Places for Sale or Rent':'Places for Sale or Rent', href: '/properties' },
+
   ];
   const navItems = [
     { label: t.nav.home, href: '/#home', icon: Home },
