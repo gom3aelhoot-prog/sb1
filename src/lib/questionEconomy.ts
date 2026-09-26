@@ -1,10 +1,9 @@
 import { supabase } from '@/lib/supabase';
 
 export const PAID_QUESTION_DURATIONS = [
-  { id:'q3', days:3, price_usd:3, label_ar:'3 أيام', label_en:'3 days' },
-  { id:'q5', days:5, price_usd:5, label_ar:'5 أيام', label_en:'5 days' },
-  { id:'q10', days:10, price_usd:9, label_ar:'10 أيام', label_en:'10 days' },
-  { id:'q15', days:15, price_usd:12, label_ar:'15 يوماً', label_en:'15 days' },
+  { id:'basic', days:7, price_sar:33.75, price_usd:9, specialists_limit:10, label_ar:'الأساسية', label_en:'Basic', featured:false },
+  { id:'boosted', days:14, price_sar:71.25, price_usd:19, specialists_limit:25, label_ar:'المعززة', label_en:'Boosted', featured:true },
+  { id:'premium', days:30, price_sar:146.25, price_usd:39, specialists_limit:50, label_ar:'المميزة', label_en:'Premium', featured:false },
 ] as const;
 
 export const CREDITS = {
@@ -42,6 +41,14 @@ export async function recordUsage(type:'question'|'image',units=1){
  try{await supabase.from('sb1_credit_transactions').insert({account_key:key(),transaction_type:'usage',units:cost*units,amount_usd:cost*units*CREDITS.bundleUsd/CREDITS.bundle});}catch{}
  return {ok:true,credits:creditsBalance()};
 }
+
+// Request plans are based on visibility duration and number of specialists allowed to respond.
+// There is intentionally no "number of answers" ranking: any notified specialist may answer while the request is open.
+export const REQUEST_PLAN_COPY = {
+ ar:'اختر كم يوماً يبقى طلبك ظاهراً للأطباء والأخصائيين، ثم اختر عدد الأطباء المسموح لهم بفتح الطلب وترك رد. بعد انتهاء المدة أو وصول الطلب إلى الحد المحدد من الأخصائيين، يُغلق الطلب ويمكنك مقارنة الردود واختيار الأخصائي المناسب.',
+ en:'Choose how many days your request stays visible, then how many specialists may open it and leave a response. When the duration ends or the specialist limit is reached, the request closes so you can compare responses and choose a specialist.',
+ ru:'Выберите срок публикации запроса и количество специалистов, которым разрешено открыть запрос и ответить. После окончания срока или достижения лимита специалистов запрос закрывается, и вы выбираете специалиста из полученных ответов.'
+} as const;
 
 const blocked=[
  {type:'politics',re:/\b(president|election|politics|party|government|حزب|انتخابات|سياسة|سياسي|حكومة)\b/i},
