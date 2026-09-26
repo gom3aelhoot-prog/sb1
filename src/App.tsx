@@ -75,6 +75,7 @@ import AppointmentsPage from '@/pages/AppointmentsPage';
 import VideoAppointmentDoctorPage from '@/pages/VideoAppointmentDoctorPage';
 import VideoSessionCountdown from '@/components/VideoSessionCountdown';
 import SpecialistFreeSessionsPage from '@/pages/SpecialistFreeSessionsPage';
+import PushNotifications from '@/components/PushNotifications';
 
 type HashView = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
 
@@ -205,6 +206,7 @@ function AppContent() {
       </main>
       <Footer />
       <DiscountBanner />
+      <PushNotifications />
       <VideoSessionCountdown />
       {!isHome && <AIChatWidget />}
     </div>
