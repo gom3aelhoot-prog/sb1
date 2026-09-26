@@ -18,6 +18,8 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
   const [data, setData] = useState<any>(null);
   const [patientName, setPatientName] = useState('');
   const [patientPhone, setPatientPhone] = useState('');
+  const [review, setReview] = useState('');
+  const [liked, setLiked] = useState(false);
 
   useEffect(() => {
     const table = kind==='clinic' ? 'clinics' : kind==='lab' ? 'lab_centers' : kind==='radiology' ? 'radiology_centers' : 'additional_facilities';
@@ -91,6 +93,11 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
         </div>
 
         {kind==='facility' && <div className="border-t border-gray-100 p-7"><h2 className="mb-4 flex items-center gap-2 text-xl font-bold"><ShoppingBag className="h-5 w-5 text-teal-600"/>منتجات / خدمات المؤسسة</h2><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{demoProducts.map(p=><div key={p.id} className="rounded-2xl border bg-white p-4"><div className="h-32 overflow-hidden rounded-xl bg-gray-100">{p.image_url&&<img src={p.image_url} alt={p.name} className="h-full w-full object-cover"/>}</div><h3 className="mt-3 font-semibold">{p.name}</h3><p className="mt-1 text-sm text-gray-500">{p.description}</p><p className="mt-2 font-bold text-teal-700">{p.price} {p.currency}</p></div>)}</div></div>}
+        <div className="border-t border-gray-100 p-7 grid gap-6 lg:grid-cols-2">
+          <section className="rounded-2xl bg-gray-50 p-5"><h2 className="font-bold text-gray-800">المراجعات والتقييمات</h2><div className="mt-3 flex items-center gap-2"><button onClick={()=>setLiked(!liked)} className={'rounded-xl px-4 py-2 '+(liked?'bg-rose-100 text-rose-700':'bg-white border')}>{liked?'♥ أعجبني':'♡ إعجاب'}</button><span className="text-amber-500">★★★★★</span></div><textarea value={review} onChange={e=>setReview(e.target.value)} placeholder="اكتب مراجعتك عن الخدمة..." className="mt-3 input-field min-h-24"/><button onClick={()=>{if(review){localStorage.setItem('sb1_review_'+id,JSON.stringify({review,created_at:new Date().toISOString()}));setReview('')}}} className="mt-2 rounded-xl bg-teal-700 px-4 py-2 font-bold text-white">إرسال المراجعة</button></section>
+          <section className="rounded-2xl bg-orange-50 p-5"><h2 className="font-bold text-gray-800">طلبات المؤسسة</h2><p className="mt-2 text-sm text-gray-600">يمكن للمؤسسة إدارة الحسابات، المواعيد، المدفوعات، الإشعارات، الشكاوى، التقارير والمراجعات من لوحة الحساب.</p>{data.facility_type==='pharmacy'&&<button onClick={()=>navigate('/delivery')} className="mt-4 rounded-xl bg-orange-600 px-4 py-2 font-bold text-white">إدارة توصيل الصيدلية</button>}</section>
+        </div>
+        <div className="border-t border-gray-100 p-7"><h2 className="font-bold text-gray-800">وظائف المؤسسة</h2><div className="mt-4 grid gap-3 md:grid-cols-2"><div className="rounded-2xl border bg-white p-4"><b>أخصائي / فني / موظف استقبال</b><p className="mt-1 text-sm text-gray-500">هذه وظيفة تجريبية منشورة على SB1 ويمكن التقديم عليها من جريدة الوظائف.</p><button onClick={()=>navigate('/jobs')} className="mt-3 rounded-xl bg-teal-50 px-4 py-2 font-bold text-teal-700">عرض الوظائف</button></div><div className="rounded-2xl border bg-white p-4"><b>نظام المواعيد والجدولة</b><p className="mt-1 text-sm text-gray-500">مواعيد الخدمة وساعات العمل والحجز تظهر للعميل حسب لغة وبلد المؤسسة.</p></div></div></div>
       </div>
     </div>
   </div>;
