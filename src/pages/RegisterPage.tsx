@@ -16,7 +16,7 @@ export default function RegisterPage() {
   const [accountType, setAccountType] = useState<'client' | 'specialist' | 'institution' | null>(null);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [formData, setFormData] = useState({
-    name: '', email: '', password: '', phone: '', specialty: '',
+    name: '', email: '', password: '', phone: '', age: '', parentalConsent: false, specialty: '',
     showName: true, anonymous: false, institutionType: 'clinic', address: '', services: '', deliveryEnabled: false, deliveryMethod: 'platform', schedule: '', documents: '',
   });
   const [docUrls, setDocUrls] = useState<{ id?: string; cert?: string; license?: string }>({});
@@ -32,13 +32,13 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreed) { alert(lang === 'ar' ? 'يجب قراءة وقبول العقد والقواعد قبل التسجيل.' : 'Please accept the agreement and rules before registration.'); return; }
-    setSubmitting(true); setSuccess(false);
+    const age=Number(formData.age||0);\n    if(age>0 && age<18 && !formData.parentalConsent){ alert(lang==='ar'?'يجب إرفاق موافقة كتابية من ولي الأمر لمن هو دون 18 عاماً.':'Written parental consent is required for users under 18.'); return; }\n    setSubmitting(true); setSuccess(false);
     try {
       const email = formData.email.trim().toLowerCase();
       if (accountType === 'specialist') {
         const { error } = await supabase.from('sb1_specialist_registration_requests').insert({
           id: 'req-' + Date.now(), name: formData.name, email, phone: formData.phone,
-          specialty_id: formData.specialty || null, country_code: registrationCountry.code,
+          specialty_id: formData.specialty || null, age: age || null, parental_consent: Boolean(formData.parentalConsent), country_code: registrationCountry.code,
           language_code: lang, documents: { id: docUrls.id || null, certificate: docUrls.cert || null, license: docUrls.license || null },
           status: 'pending', created_at: new Date().toISOString()
         });
@@ -46,7 +46,7 @@ export default function RegisterPage() {
         setSuccess(true);
         return;
       }
-      const authResult = await supabase.auth.signUp({ email, password: formData.password, options: { data: { name: formData.name, role: accountType, country_code: registrationCountry.code, language_code: lang } } });
+      const authResult = await supabase.auth.signUp({ email, password: formData.password, options: { data: { name: formData.name, role: accountType, age: age || null, parental_consent: Boolean(formData.parentalConsent), country_code: registrationCountry.code, language_code: lang } } });
       if (authResult.error) throw authResult.error;
       if (accountType === 'client') {
         const { error } = await supabase.from('profiles').insert({ id: authResult.data.user?.id, name: formData.anonymous ? 'مجهول' : formData.name, email, phone: formData.phone, role: 'client', country_code: registrationCountry.code, language_code: lang, is_anonymous: formData.anonymous });
