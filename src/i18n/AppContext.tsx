@@ -113,7 +113,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [country, language]
   );
 
-  const isAnonymous = true; // No auth in this phase — all visitors are anonymous
+  const isAnonymous = typeof window === 'undefined' ? true : !localStorage.getItem('sb1_account_user_id') && !localStorage.getItem('sb1_account_email');
 
   const value: AppContextValue = {
     language,
