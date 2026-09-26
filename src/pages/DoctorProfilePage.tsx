@@ -163,10 +163,6 @@ export default function DoctorProfilePage({ id }: { id: string }) {
                 <button onClick={shareProfile} className="px-6 py-2.5 rounded-xl border border-teal-200 text-teal-700 bg-teal-50 font-semibold text-sm flex items-center justify-center gap-2">
                   <Share2 className="w-4 h-4" /> مشاركة صفحة SB1
                 </button>
-                </p>
-                    <p className="text-xs font-medium text-gray-600 flex items-center justify-center gap-1"><Phone className="w-3 h-3" />{doctor.phone_number}</p>
-                  </div>
-                )}
               </div>
             </div>
             {doctor.bio && <p className="text-sm text-gray-600 mt-4 leading-relaxed">{doctor.bio}</p>}
