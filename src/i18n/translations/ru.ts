@@ -175,6 +175,8 @@ const ru: TranslationData = {
     mauritania: 'Мавритания',
     sudan: 'Судан',
     somalia: 'Сомали',
+    comoros: 'Коморы',
+    djibouti: 'Джибути',
   },
   qa: {
     title: 'Медицинские вопросы и консультации',
