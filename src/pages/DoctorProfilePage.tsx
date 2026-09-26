@@ -114,6 +114,10 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     );
   }
 
+  if (doctor.is_virtual) {
+    return <div className="min-h-screen pt-24 pb-16 flex items-center justify-center bg-gray-50" dir={lang==='ar'?'rtl':'ltr'}><div className="mx-4 w-full max-w-xl rounded-3xl border bg-white p-10 text-center shadow-sm"><div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-gray-100"><img src={profileAvatar} alt={doctor.name} className="h-full w-full object-cover" onError={()=>setImgError(true)}/></div><h1 className="text-2xl font-extrabold text-gray-900">{doctor.name}</h1><p className="mt-3 text-lg font-bold text-amber-700">{lang==='ar'?'الطبيب غير متاح':lang==='ru'?'Врач недоступен':lang==='de'?'Arzt nicht verfügbar':lang==='hy'?'Բժիշկը հասանելի չէ':lang==='ka'?'ექიმი მიუწვდომელია':lang==='uz'?'Shifokor mavjud emas':lang==='uk'?'Лікар недоступний':'Doctor unavailable'}</p><button onClick={()=>navigate('/doctors')} className="mt-6 rounded-xl bg-teal-600 px-6 py-3 font-bold text-white">{t('common.back')}</button></div></div>;
+  }
+
   const tabs: { key: Tab; label: string; icon: typeof FileText }[] = [
     { key: 'posts', label: t('profile.posts'), icon: FileText },
     { key: 'reels', label: t('profile.reels'), icon: Video },
