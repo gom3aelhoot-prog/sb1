@@ -62,6 +62,8 @@ export function Header() {
     { label: labels[2], href: '/store' },
     { label: labels[3], href: '/referral' },
     { label: lang==='ar'?'الألعاب والتطبيقات':lang==='ru'?'Игры и приложения':lang==='de'?'Spiele & Apps':'Games & Apps', href: '/apps' },
+    { label: lang==='ar'?'جلسات الفيديو':lang==='ru'?'Видеосессии':lang==='de'?'Videositzungen':'Video Sessions', href: '/appointments' },
+    { label: lang==='ar'?'طلبات جلسات الأخصائي':lang==='ru'?'Заявки на сессии':lang==='de'?'Sitzungsanfragen':'Specialist Requests', href: '/specialist-appointments' },
   ];
   const navItems = [
     { label: t.nav.home, href: '/#home', icon: Home },
