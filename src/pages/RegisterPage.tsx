@@ -89,7 +89,7 @@ export default function RegisterPage() {
         }
       }
     } catch { /* ignore */ }
-    if (success || accountType) { localStorage.setItem('sb1_account_role', accountType || 'client'); localStorage.setItem('sb1_account_email', formData.email.trim().toLowerCase()); localStorage.setItem('sb1_account_key', formData.email.trim().toLowerCase()); if (authResult.data.user?.id) localStorage.setItem('sb1_account_user_id', authResult.data.user.id); }
+    if (success || accountType) { localStorage.removeItem('sb1_guest_client'); localStorage.setItem('sb1_account_role', accountType || 'client'); localStorage.setItem('sb1_account_email', formData.email.trim().toLowerCase()); localStorage.setItem('sb1_account_key', formData.email.trim().toLowerCase()); if (authResult.data.user?.id) localStorage.setItem('sb1_account_user_id', authResult.data.user.id); }
     setSubmitting(false);
   };
 
