@@ -273,7 +273,7 @@ export default function AskPage() {
             <div><label className="block text-sm font-semibold text-gray-700 mb-2">{t('ask.gender')}</label><select value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })} className="input-field cursor-pointer"><option value="ذكر">{t('ask.male')}</option><option value="أنثى">{t('ask.female')}</option></select></div>
           </div>
           <div><label className="block text-sm font-semibold text-gray-700 mb-2">{t('ask.title_label')} <span className="text-red-500">*</span></label><input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={t('ask.title_placeholder')} className="input-field" required /></div>
-          <div><label className="block text-sm font-semibold text-gray-700 mb-2">{t('ask.body_label')} <span className="text-red-500">*</span></label><textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder={t('ask.body_placeholder')} rows={10} className="input-field min-h-[240px] resize-y leading-7 required /></div>
+          <div><label className="block text-sm font-semibold text-gray-700 mb-2">{t('ask.body_label')} <span className="text-red-500">*</span></label><textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder={t('ask.body_placeholder')} rows={10} className="input-field min-h-[240px] resize-y leading-7" required /></div>
 
           {questionType === 'paid' && selectedTier && (
             <div className="rounded-2xl bg-teal-50 border border-teal-100 p-4 text-sm text-teal-800">
@@ -281,7 +281,7 @@ export default function AskPage() {
                 <span className="font-semibold">{lang === 'ar' ? 'المبلغ المستحق' : 'Amount due'}</span>
                 <span className="text-lg font-extrabold">{localAmount.toLocaleString(lang==='ar'?'ar-EG':'en-US',{maximumFractionDigits:2})} {questionBasePrice.currency_symbol}</span>
               </div>
-              <p className="mt-1 text-xs text-teal-700">{lang === 'ar' ? `مدة الطلب: ${selectedTier.duration_days} يوم · حتى ${selectedTier.specialists_notified} أخصائي · ${selectedTier.max_answers} إجابات. السعر حسب دولة ${country.code}.` : `Request: ${selectedTier.duration_days} days · up to ${selectedTier.specialists_notified} specialists · ${selectedTier.max_answers} answers. Price follows country ${country.code}.`}</p>
+              <p className="mt-1 text-xs text-teal-700">{lang === 'ar' ? `مدة الطلب: ${selectedTier.duration_days} يوم · حتى ${selectedTier.specialists_notified} أخصائي . السعر حسب دولة ${country.code}.` : `Request: ${selectedTier.duration_days} days · up to ${selectedTier.specialists_notified} specialists . Price follows country ${country.code}.`}</p>
             </div>
           )}
 
