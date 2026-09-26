@@ -1,0 +1,12 @@
+import { useEffect,useState } from 'react';
+import { MessageCircle,Send } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+
+export default function OwnerTeamChatPage(){
+ const [rooms,setRooms]=useState<any[]>([]); const [room,setRoom]=useState<any>(null); const [messages,setMessages]=useState<any[]>([]); const [text,setText]=useState('');
+ const load=async()=>{const {data}=await supabase.from('sb1_team_chat_rooms').select('*').order('created_at',{ascending:false});setRooms(data||[]);if(!room&&data?.[0])setRoom(data[0])};
+ useEffect(()=>{load()},[]);
+ useEffect(()=>{if(room)supabase.from('sb1_team_chat_messages').select('*').eq('room_id',room.id).order('created_at').then(({data})=>setMessages(data||[]))},[room]);
+ const send=async()=>{if(!room||!text.trim())return;await supabase.from('sb1_team_chat_messages').insert({room_id:room.id,body:text.trim(),sender_name:'فريق SB1'});setText('');supabase.from('sb1_team_chat_messages').select('*').eq('room_id',room.id).order('created_at').then(({data})=>setMessages(data||[]))};
+ return <div className="min-h-screen bg-slate-50 pt-24 pb-16"><div className="mx-auto max-w-6xl px-4"><h1 className="text-2xl font-extrabold">دردشة المالك والمشرفين</h1><p className="text-sm text-slate-500 mb-5">غرف خاصة يحدد المالك أعضاءها من المشرفين والأخصائيين.</p><div className="grid md:grid-cols-[260px_1fr] gap-4"><aside className="bg-white border rounded-2xl p-3 space-y-2">{rooms.map(r=><button key={r.id} onClick={()=>setRoom(r)} className={'w-full text-right rounded-xl p-3 '+(room?.id===r.id?'bg-teal-50':'hover:bg-slate-50')}>{r.name}</button>)}</aside><section className="bg-white border rounded-2xl min-h-[500px] flex flex-col">{room?<><div className="p-4 border-b font-bold flex gap-2"><MessageCircle/> {room.name}</div><div className="flex-1 p-4 space-y-3">{messages.map(m=><div key={m.id} className="rounded-xl bg-slate-100 p-3"><b>{m.sender_name||'عضو'}</b><p>{m.body}</p></div>)}</div><div className="p-3 border-t flex gap-2"><input value={text} onChange={e=>setText(e.target.value)} className="input-field flex-1"/><button onClick={send} className="rounded-xl bg-teal-600 text-white px-4"><Send/></button></div></>:<div className="m-auto text-slate-400">اختر غرفة</div>}</section></div></div></div>
+}
