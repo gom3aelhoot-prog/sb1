@@ -50,7 +50,7 @@ export default function AskPage() {
   const [specificDoctorId, setSpecificDoctorId] = useState<string | null>(null);
   const [specificDoctor, setSpecificDoctor] = useState<Doctor | null>(null);
   const [realDoctors, setRealDoctors] = useState<Doctor[]>([]);
-  const [questionBasePrice, setQuestionBasePrice] = useState<{price_usd:number;local_price:number;currency_code:string;currency_symbol:string}>({price_usd:9,local_price:9,currency_code:'USD',currency_symbol:'
+  const [questionBasePrice, setQuestionBasePrice] = useState<{price_usd:number;local_price:number;currency_code:string;currency_symbol:string}>({price_usd:9,local_price:9,currency_code:"USD",currency_symbol:"$"});
 
   useEffect(() => {
     (async () => {
