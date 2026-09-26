@@ -183,7 +183,7 @@ export function Hero() {
             </> : <>
               <button onClick={()=>navigate('/choose-doctor')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'اختار الطبيب':'Choose a doctor'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'اختر الطبيب وطريقة الاستشارة.':'Choose the doctor and consultation method.'}</p></button>
               <button onClick={()=>navigate('/choose-doctor?mode=request')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'طلب جلسة بمواصفاتك الخاصة':'Request a custom session'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'حدد التخصص والوقت والمواصفات.':'Specify specialty, time and requirements.'}</p></button>
-              <button onClick={()=>navigate('/sessions') className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'جلسة مجانية':'Free session'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'عرض الجلسات المجانية المتاحة.':'View available free sessions.'}</p></button>
+              <button onClick={()=>navigate('/sessions')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'جلسة مجانية':'Free session'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'عرض الجلسات المجانية المتاحة.':'View available free sessions.'}</p></button>
             </>}
           </div>
         </div>
