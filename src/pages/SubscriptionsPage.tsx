@@ -52,7 +52,7 @@ export default function SubscriptionsPage() {
             {plans.map((plan, i) => {
               const Icon = planIcons[i] || Sparkles;
               const color = planColors[i] || 'teal';
-              const features = (plan.features || '').split('،').filter(Boolean); const displayPrice = plan.price===0 ? 0 : subscriptionPrice*(plan.id.includes('pro')?2.5:plan.id.includes('plus')?1:1);
+              const features = (plan.features || '').split('،').filter(Boolean); const displayPrice = Number(plan.price||0);
               return (
                 <div key={plan.id} className={`card p-8 relative overflow-hidden ${i === 1 ? 'ring-2 ring-teal-500' : ''}`}>
                   {i === 1 && (
