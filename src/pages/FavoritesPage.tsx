@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Heart, Stethoscope, FileText, Video, Pill, Calculator, BookOpen } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Favorite } from '@/lib/supabase';
+import { getWishlist } from '@/lib/commerce';
 
 const itemIcons: Record<string, typeof Heart> = {
   doctor: Stethoscope,
@@ -21,7 +22,8 @@ export default function FavoritesPage() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from('favorites').select('*').order('created_at', { ascending: false });
-      setFavorites(data || []);
+      const local=getWishlist().map((x:any)=>({id:'local-'+x.item_type+'-'+x.item_id,item_type:x.item_type==='pharmacy'?'product':x.item_type,item_id:x.item_id,created_at:new Date().toISOString()} as any));
+      setFavorites([...(data||[]),...local]);
       setLoading(false);
     })();
   }, []);
