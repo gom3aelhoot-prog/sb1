@@ -155,7 +155,7 @@ export default function RegisterPage() {
               <p className="text-sm text-gray-500">عيادة، مختبر، أشعة، مستشفى، صيدلية أو مركز تأهيل</p>
             </button>
           </div>
-          </div>
+        </>
         ) : (
           <form onSubmit={handleSubmit} className="card p-6 space-y-4">
             <button type="button" onClick={() => setAccountType(null)} className="text-sm text-teal-600 hover:text-teal-700 flex items-center gap-1">
