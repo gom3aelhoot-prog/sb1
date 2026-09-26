@@ -17,14 +17,13 @@ type PricingTier = {
   description_ar: string;
   duration_days: number;
   specialists_notified: number;
-  min_answers: number;
-  max_answers: number;
   response_speed: 'standard' | 'fast' | 'instant';
   price_usd: number;
   is_featured: boolean;
+  price_sar: number;
 };
 
-const fallbackTiers: PricingTier[] = PAID_QUESTION_DURATIONS.map((x,i)=>({id:x.id,name:x.label_en,name_ar:x.label_ar,description:`Question active for ${x.days} days`,description_ar:`السؤال متاح لجميع أطباء التخصص لمدة ${x.days} أيام`,duration_days:x.days,specialists_notified:999,min_answers:0,max_answers:3,response_speed:'standard',price_usd:x.price_usd,is_featured:i===2}));
+const fallbackTiers: PricingTier[] = PAID_QUESTION_DURATIONS.map((x)=>({id:x.id,name:x.label_en,name_ar:x.label_ar,description:`Visible for ${x.days} days to up to ${x.specialists_limit} specialists`,description_ar:`يظهر الطلب ${x.days} أيام لعدد يصل إلى ${x.specialists_limit} أطباء وأخصائيين`,duration_days:x.days,specialists_notified:x.specialists_limit,response_speed:'standard',price_usd:x.price_usd,price_sar:x.price_sar,is_featured:x.featured}));
 
 const dataId = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `sb1-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
@@ -36,7 +35,7 @@ export default function AskPage() {
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [tiers, setTiers] = useState<PricingTier[]>(fallbackTiers);
   const [questionType, setQuestionType] = useState<'free' | 'paid'>('free');
-  const [selectedTierId, setSelectedTierId] = useState('q5');
+  const [selectedTierId, setSelectedTierId] = useState('basic');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [contentLanguage, setContentLanguage] = useState(lang);
   const [form, setForm] = useState({ author_name: '', age: '', gender: 'ذكر', title: '', body: '' });
@@ -127,7 +126,7 @@ export default function AskPage() {
       const id = dbQuestionId || questionId;
       const expiresAt = questionType === 'paid' && selectedTier ? new Date(Date.now() + selectedTier.duration_days * 86400000).toISOString() : null;
       try {
-        await supabase.from('consultation_requests').insert({ question_id: dbQuestionId || null, patient_name: form.author_name.trim(), specialty_id: spec?.id || fallbackSpec.id, country_code: country.code, language_code: contentLanguage, service_type: 'question', price_usd: selectedTier?.price_usd || 0, local_price: localAmount, currency_code: country.currency, duration_days: selectedTier?.duration_days || 0, specialists_limit: 999999, answers_limit: 3, response_speed: 'standard', status: questionType === 'paid' ? 'pending' : 'active', expires_at: expiresAt });
+        await supabase.from('consultation_requests').insert({ question_id: dbQuestionId || null, patient_name: form.author_name.trim(), specialty_id: spec?.id || fallbackSpec.id, country_code: country.code, language_code: contentLanguage, service_type: 'question', price_usd: selectedTier?.price_usd || 0, local_price: localAmount, currency_code: country.currency, duration_days: selectedTier?.duration_days || 0, specialists_limit: selectedTier?.specialists_notified || 10, response_speed: 'standard', status: questionType === 'paid' ? 'pending' : 'active', expires_at: expiresAt });
       } catch {}
       if (questionType === 'free') await recordUsage('question',1);\n      const localQuestion = {
         id, language: contentLanguage, specialty_id: fallbackSpec.id, author_name: form.author_name.trim(), title: form.title.trim(), body: form.body.trim(),
@@ -187,7 +186,7 @@ export default function AskPage() {
           <h2 className="text-lg font-extrabold text-blue-900 mb-2">{lang === 'ar' ? 'ما الذي تحصل عليه عند إرسال الطلب؟' : 'What you get with your request'}</h2>
           <div className="grid gap-3 sm:grid-cols-2 text-sm text-blue-900">
             <div>✓ {lang === 'ar' ? 'إرسال الطلب إلى أخصائيين في التخصص الذي تختاره' : 'Your request is routed to specialists in the selected specialty'}</div>
-            <div>✓ {lang === 'ar' ? 'تحدد أنت مدة بقاء الطلب وعدد الأخصائيين وعدد الإجابات' : 'You choose the active duration, specialist limit and answer limit'}</div>
+            <div>✓ {lang === 'ar' ? 'تحدد أنت مدة بقاء الطلب وعدد الأخصائيين المسموح لهم بفتح الطلب والرد عليك' : 'You choose the active duration and how many specialists may open the request and respond'}</div>
             <div>✓ {lang === 'ar' ? 'يمكنك قراءة كل إجابة والرد على الأخصائي وطرح سؤال متابعة' : 'Read every answer, reply to the specialist and ask a follow-up'}</div>
             <div>✓ {lang === 'ar' ? 'السعر يظهر بعملة الدولة التي اخترتها' : 'The price is shown in the currency of your selected country'}</div>
           </div>
