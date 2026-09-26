@@ -319,9 +319,8 @@ export function PharmacyStorePage({ pharmacyId, onNavigate }: { pharmacyId: stri
                   key={product.id}
                   className="group bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/5 hover:border-primary-200"
                 >
-                  <button onClick={() => setSelectedProduct(product)} className="absolute inset-0 z-10" aria-label={product.nameEn} />
                   {/* Product image */}
-                  <div className="relative aspect-square overflow-hidden bg-neutral-50">
+                  <div onClick={() => setSelectedProduct(product)} className="relative aspect-square overflow-hidden bg-neutral-50 cursor-pointer">
                     <img
                       src={product.image}
                       alt={product.nameEn}
@@ -342,7 +341,7 @@ export function PharmacyStorePage({ pharmacyId, onNavigate }: { pharmacyId: stri
 
                   {/* Product info */}
                   <div className="p-3">
-                    <p className="text-sm font-bold text-neutral-900 leading-tight">{product.nameEn}</p>
+                    <button onClick={()=>setSelectedProduct(product)} className="text-sm font-bold text-neutral-900 leading-tight text-start hover:text-primary-700">{product.nameEn}</button>
                     <p className="text-xs text-neutral-500 mt-0.5">{product.nameAr}</p>
                     <p className="text-[11px] text-neutral-400 mt-1">{product.doseEn}</p>
                     <p className="text-[11px] text-neutral-400">{product.doseAr}</p>
