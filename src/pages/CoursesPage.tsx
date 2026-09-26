@@ -147,9 +147,9 @@ export default function CoursesPage() {
                       <span className="text-2xl font-bold text-teal-600">{clientPrice(Number((course.price * (courseBasePrice.local_price / courseBasePrice.price_usd)).toFixed(2))).toLocaleString(lang==='ar'?'ar-EG':'en-US')} {courseBasePrice.currency_symbol}</span>
                       <div className="flex items-center gap-2">
                         <button onClick={() => navigate('/courses/'+course.id)} className="btn-secondary text-sm">تفاصيل</button>
-                        <button onClick={() => { setEnrollCourse(course); setEnrolled(false); }} className="btn-primary flex items-center gap-2 text-sm">
+                        <button onClick={() => navigate('/courses/'+course.id)} className="btn-primary flex items-center gap-2 text-sm">
                           <Check className="h-4 w-4" />
-                          {t('courses.enroll')}
+                          {Number(course.price)>0?'تفاصيل ودفع':'تفاصيل وتسجيل'}
                         </button>
                       </div>
                     </div>
