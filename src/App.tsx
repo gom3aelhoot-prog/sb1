@@ -80,6 +80,7 @@ import AppointmentsPage from '@/pages/AppointmentsPage';
 import VideoAppointmentDoctorPage from '@/pages/VideoAppointmentDoctorPage';
 import SpecialistFreeSessionsPage from '@/pages/SpecialistFreeSessionsPage';
 import PushNotifications from '@/components/PushNotifications';
+import JobsTicker from '@/components/JobsTicker';
 
 type HashView = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
 
@@ -200,6 +201,7 @@ function AppContent() {
             <HowItWorks />
             <BottomActionCards />
             <CTASection />
+            <JobsTicker />
           </>
         )}
         {isHome && localHashPage && state.view === 'specialists' && <SpecialistsPage onNavigate={navigate} />}
