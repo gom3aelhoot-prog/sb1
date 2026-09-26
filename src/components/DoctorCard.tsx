@@ -24,7 +24,6 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
 
   const expLabel: any = { ar:'سنة', en:'yrs', de:'Jahre', ru:'лет', uk:'років', uz:'yil', hy:'տարի', tg:'сол', az:'il', am:'ዓመት', ka:'წელი' }[lang] || 'yrs';
   const consultLabel: any = { ar:'استشارة', en:'consults', de:'Beratungen', ru:'консультаций', uk:'консультацій', uz:'maslahat', hy:'խորհրդատվություն', tg:'машварат', az:'məsləhət', am:'ምክክር', ka:'კონსულტაცია' }[lang] || 'consults';
-  const virtualLabel: any = { ar:'افتراضي', en:'Virtual', de:'Virtuell', ru:'Виртуальный', uk:'Віртуальний', uz:'Virtual', hy:'Վիրտուալ', tg:'Виртуалӣ', az:'Virtual', am:'ምናባዊ', ka:'ვირტუალური' }[lang] || 'Virtual';
   const fullProfileLabel: any = { ar:'عرض الصفحة الكاملة', en:'View full profile', de:'Profil öffnen', ru:'Открыть профиль', uk:'Відкрити профіль', uz:'To‘liq profil', hy:'Դիտել ամբողջական էջը', tg:'Кушодани профил', az:'Tam profili aç', am:'ሙሉ መገለጫ', ka:'სრული პროფილის ნახვა' }[lang] || 'View full profile';
   const sessionLabel: any = { ar:'طلب جلسة', en:'Session', de:'Sitzung', ru:'Сессия', uk:'Сесія', uz:'Sessiya', hy:'Նիստ', tg:'Ҷаласа', az:'Sessiya', am:'ክፍለ ጊዜ', ka:'სესია' }[lang] || 'Session';
   const askLabel: any = { ar:'طلب استشارة', en:'Ask a doctor', de:'Arzt fragen', ru:'Задать вопрос врачу', uk:'Запитати лікаря', uz:'Shifokordan so‘rash', hy:'Հարցնել բժշկին', tg:'Аз духтур пурсед', az:'Həkimdən soruş', am:'ሐኪምን ይጠይቁ', ka:'ჰკითხეთ ექიმს' }[lang] || 'Ask a doctor';
@@ -88,7 +87,7 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
           <div className="mb-2 flex items-center gap-2">
             <p className="text-sm font-bold text-gray-800">{name}</p>
             {doctor.is_verified && <BadgeCheck className="h-4 w-4 text-blue-600" />}
-            {doctor.is_virtual && <span className="badge bg-purple-100 text-purple-600 text-[10px]">{virtualLabel}</span>}
+
           </div>
           {doctor.specialty && <p className="mb-2 text-xs text-blue-700">{specialtyName(doctor.specialty)}</p>}
           {bio && <p className="mb-2 line-clamp-3 text-xs text-gray-500">{bio}</p>}
@@ -118,7 +117,7 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
           <Star className="h-3 w-3 fill-white text-white" />
           <span className="text-xs font-bold text-white">{Number(doctor.rating).toFixed(1)}</span>
         </div>
-        {doctor.is_virtual && <div className="absolute -end-1 -top-1 rounded-full bg-purple-500 p-1 shadow-sm"><Bot className="h-3.5 w-3.5 text-white" /></div>}
+
       </div>
 
       <h3 className="flex items-center gap-1.5 text-lg font-bold text-gray-800 transition-colors group-hover:text-teal-600">
