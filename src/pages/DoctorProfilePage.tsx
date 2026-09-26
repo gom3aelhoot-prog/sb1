@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, Phone, BadgeCheck, PenLine, Share2, ExternalLink, Copy } from 'lucide-react';
+import { ArrowRight, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, BadgeCheck, PenLine, Share2, ExternalLink, Copy } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Question, type SpecialistPost, type PostComment, type Article, type DoctorAudio } from '@/lib/supabase';
@@ -163,9 +163,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
                 <button onClick={shareProfile} className="px-6 py-2.5 rounded-xl border border-teal-200 text-teal-700 bg-teal-50 font-semibold text-sm flex items-center justify-center gap-2">
                   <Share2 className="w-4 h-4" /> مشاركة صفحة SB1
                 </button>
-                {doctor.phone_number && (
-                  <div className="text-center">
-                    <p className="text-[10px] text-gray-400">{t('profile.share_phone')}</p>
+                </p>
                     <p className="text-xs font-medium text-gray-600 flex items-center justify-center gap-1"><Phone className="w-3 h-3" />{doctor.phone_number}</p>
                   </div>
                 )}
@@ -185,7 +183,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               <div className="flex flex-wrap gap-2 mt-4">
                 <button onClick={shareProfile} className="rounded-xl bg-teal-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2"><Share2 className="w-4 h-4"/>مشاركة</button>
                 <button onClick={async()=>{await navigator.clipboard?.writeText(window.location.href);alert('تم نسخ رابط صفحة SB1')}} className="rounded-xl border bg-white px-4 py-2 text-sm font-semibold flex items-center gap-2"><Copy className="w-4 h-4"/>نسخ الرابط</button>
-                {doctor.phone_number && <a target="_blank" rel="noreferrer" href={`https://wa.me/${String(doctor.phone_number).replace(/[^0-9]/g,'')}?text=${encodeURIComponent('تابع صفحة '+doctor.name+' على SB1: '+window.location.origin+'/doctors/'+id)}`} className="rounded-xl border bg-white px-4 py-2 text-sm font-semibold flex items-center gap-2"><ExternalLink className="w-4 h-4"/>واتساب</a>}
+                
                 <a target="_blank" rel="noreferrer" href={`https://t.me/share/url?url=${encodeURIComponent(window.location.origin+'/doctors/'+id)}&text=${encodeURIComponent('تابع '+doctor.name+' على SB1')}`} className="rounded-xl border bg-white px-4 py-2 text-sm font-semibold flex items-center gap-2"><ExternalLink className="w-4 h-4"/>Telegram</a>
               </div>
             </div>
