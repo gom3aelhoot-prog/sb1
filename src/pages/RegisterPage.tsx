@@ -89,7 +89,7 @@ export default function RegisterPage() {
         }
       }
     } catch { /* ignore */ }
-    if (success || accountType) localStorage.setItem('sb1_account_role', accountType || 'client');
+    if (success || accountType) { localStorage.setItem('sb1_account_role', accountType || 'client'); localStorage.setItem('sb1_account_email', formData.email.trim().toLowerCase()); localStorage.setItem('sb1_account_key', formData.email.trim().toLowerCase()); }
     setSubmitting(false);
   };
 
