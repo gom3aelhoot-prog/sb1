@@ -175,6 +175,8 @@ const uk: TranslationData = {
     mauritania: 'Мавританія',
     sudan: 'Судан',
     somalia: 'Сомалі',
+    comoros: 'Коморські Острови',
+    djibouti: 'Джибуті',
   },
   qa: {
     title: 'Медичні питання та консультації',
