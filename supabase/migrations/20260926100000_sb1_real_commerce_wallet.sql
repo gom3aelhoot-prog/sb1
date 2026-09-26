@@ -178,3 +178,47 @@ begin
   values(p_account_key,floor(total)::integer,'Purchase reward','commerce_order',oid::text);
   return jsonb_build_object('ok',true,'order_id',oid,'balance',b,'rewards_points_added',floor(total)::integer);
 end $$;
+
+
+-- Harden financial data: browser users must be authenticated and can only access their own wallet records.
+revoke all on public.sb1_wallets, public.sb1_wallet_transactions, public.sb1_rewards_ledger, public.sb1_cart_items, public.sb1_wishlist_items, public.sb1_commerce_orders from anon;
+grant select,insert,update,delete on public.sb1_wallets, public.sb1_wallet_transactions, public.sb1_rewards_ledger, public.sb1_cart_items, public.sb1_wishlist_items, public.sb1_commerce_orders to authenticated;
+
+drop policy if exists "sb1 wallet public access" on public.sb1_wallets;
+create policy "sb1 wallet own" on public.sb1_wallets for all to authenticated using (account_key=(select auth.uid())::text) with check (account_key=(select auth.uid())::text);
+drop policy if exists "sb1 wallet transactions public access" on public.sb1_wallet_transactions;
+create policy "sb1 wallet transactions own" on public.sb1_wallet_transactions for select to authenticated using (account_key=(select auth.uid())::text);
+drop policy if exists "sb1 rewards public access" on public.sb1_rewards_ledger;
+create policy "sb1 rewards own" on public.sb1_rewards_ledger for select to authenticated using (account_key=(select auth.uid())::text);
+drop policy if exists "sb1 cart public access" on public.sb1_cart_items;
+create policy "sb1 cart own" on public.sb1_cart_items for all to authenticated using (account_key=(select auth.uid())::text) with check (account_key=(select auth.uid())::text);
+drop policy if exists "sb1 wishlist public access" on public.sb1_wishlist_items;
+create policy "sb1 wishlist own" on public.sb1_wishlist_items for all to authenticated using (account_key=(select auth.uid())::text) with check (account_key=(select auth.uid())::text);
+drop policy if exists "sb1 commerce orders public access" on public.sb1_commerce_orders;
+create policy "sb1 commerce orders own" on public.sb1_commerce_orders for select to authenticated using (account_key=(select auth.uid())::text);
+
+create or replace function public.sb1_wallet_checkout(p_account_key text,p_category text,p_items jsonb,p_subtotal numeric,p_delivery_fee numeric,p_currency text)
+returns jsonb language plpgsql security definer set search_path=public as $$
+declare total numeric; b numeric; oid uuid;
+begin
+ if (select auth.uid()) is null or p_account_key<>(select auth.uid())::text then raise exception 'not authorized'; end if;
+ total:=coalesce(p_subtotal,0)+coalesce(p_delivery_fee,0); if total<=0 then raise exception 'invalid total'; end if;
+ select balance into b from public.sb1_wallets where account_key=p_account_key for update;
+ if b is null then raise exception 'wallet not found'; end if;
+ if b<total then raise exception 'insufficient wallet balance'; end if;
+ update public.sb1_wallets set balance=balance-total,updated_at=now() where account_key=p_account_key returning balance into b;
+ insert into public.sb1_commerce_orders(account_key,category,status,payment_method,payment_status,subtotal,delivery_fee,total,currency_code,items)
+ values(p_account_key,p_category,'paid','wallet','paid',p_subtotal,p_delivery_fee,total,p_currency,p_items) returning id into oid;
+ insert into public.sb1_wallet_transactions(account_key,transaction_type,amount,currency_code,reference_type,reference_id,description)
+ values(p_account_key,'purchase',-total,p_currency,'commerce_order',oid::text,'SB1 purchase: '||p_category);
+ update public.sb1_wallets set rewards_points=rewards_points+floor(total)::integer,updated_at=now() where account_key=p_account_key;
+ insert into public.sb1_rewards_ledger(account_key,points,reason,reference_type,reference_id)
+ values(p_account_key,floor(total)::integer,'Purchase reward','commerce_order',oid::text);
+ return jsonb_build_object('ok',true,'order_id',oid,'balance',b,'rewards_points_added',floor(total)::integer);
+end $$;
+
+revoke execute on function public.sb1_wallet_checkout(text,text,jsonb,numeric,numeric,text) from anon;
+grant execute on function public.sb1_wallet_checkout(text,text,jsonb,numeric,numeric,text) to authenticated;
+revoke execute on function public.sb1_wallet_spend(text,numeric,text,text,text,text) from anon,authenticated;
+revoke execute on function public.sb1_wallet_reward(text,integer,text,text,text) from anon,authenticated;
+revoke execute on function public.sb1_wallet_credit(text,numeric,text,text,text,text) from anon,authenticated;
