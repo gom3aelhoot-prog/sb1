@@ -5,7 +5,7 @@ import {useI18n} from '@/lib/i18n';
 import {supabase} from '@/lib/supabase';
 import {specialtyCatalog,virtualDoctorsForSpecialty} from '@/lib/catalog';
 import {getAppointments,requestAppointment,requestBrowserNotifications} from '@/lib/appointments';
-import VideoSessionCountdown from '@/components/VideoSessionCountdown';
+
 
 export default function AppointmentBookingPage(){
  const {path}=useRouter();const q=parseQuery(path);const {lang,dir}=useI18n();const specs=useMemo(()=>specialtyCatalog(lang),[lang]);
@@ -20,6 +20,6 @@ export default function AppointmentBookingPage(){
  {sent?<div className="mt-5 rounded-2xl border bg-white p-10 text-center"><Hourglass className="mx-auto h-14 w-14 text-amber-500"/><h2 className="mt-4 text-2xl font-extrabold">تم إرسال طلب الجلسة</h2><p className="mt-2 text-gray-500">سيصل إليك إشعار عند قبول الطبيب. لن يبدأ عداد الجلسة قبل القبول.</p><a href="/appointments" className="mt-6 inline-block rounded-xl bg-teal-600 px-6 py-3 font-bold text-white">متابعة جلساتي</a></div>:
  <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_360px]"><div className="rounded-2xl border bg-white p-6"><h2 className="text-xl font-extrabold">المواعيد المتاحة</h2><div className="mt-4 grid gap-3 sm:grid-cols-2">{slots.map(s=><button key={s} disabled={existing.includes(s)} onClick={()=>{setSelectedSlot(s);setCustom('')}} className={'rounded-xl border p-3 text-start '+(selectedSlot===s?'border-teal-500 bg-teal-50':'hover:bg-gray-50')+(existing.includes(s)?' opacity-40':'')}><Calendar className="inline h-4 w-4 text-teal-600"/> {new Date(s).toLocaleString()}</button>)}</div><div className="mt-6 border-t pt-5"><label className="font-bold">أو اكتب الموعد المناسب لك</label><input type="datetime-local" value={custom} onChange={e=>{setCustom(e.target.value);setSelectedSlot('')}} className="mt-2 w-full rounded-xl border p-3"/></div></div>
  <div className="rounded-2xl border bg-white p-6"><h2 className="font-extrabold">تأكيد الطلب</h2><label className="mt-4 block text-sm font-bold">اسم المريض<input value={patient} onChange={e=>setPatient(e.target.value)} className="mt-2 w-full rounded-xl border p-3" placeholder="اكتب الاسم"/></label><label className="mt-4 block text-sm font-bold">مدة الجلسة<select value={duration} onChange={e=>setDuration(+e.target.value)} className="mt-2 w-full rounded-xl border p-3"><option value="30">30 دقيقة</option><option value="45">45 دقيقة</option><option value="60">60 دقيقة</option></select></label><div className="mt-4 rounded-xl bg-gray-50 p-4 text-sm"><UserRound className="inline h-4 w-4"/> {doctor?.name}<br/><Clock className="inline h-4 w-4 mt-2"/> {custom?new Date(custom).toLocaleString():selectedSlot?new Date(selectedSlot).toLocaleString():'لم تختَر موعداً'}</div><button onClick={submit} disabled={!patient.trim()||(!custom&&!selectedSlot)} className="mt-5 w-full rounded-xl bg-teal-600 py-3 font-bold text-white disabled:opacity-40"><Send className="inline h-4 w-4"/> إرسال طلب الحجز</button></div></div>}
- <VideoSessionCountdown/>
+ 
  </div></div>
 }
