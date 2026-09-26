@@ -42,7 +42,7 @@ export default function QuestionCard({ question, specialistView = false }: { que
         <span className="flex items-center gap-2"><img src={(question as any).author_avatar || `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(question.author_name)}`} className="h-7 w-7 rounded-full border object-cover"/><span>{question.author_name}</span></span><span className="flex items-center gap-2"><span className="relative inline-flex h-7 w-7 shrink-0"><img src={qDoctor?.photo_url || `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(qDoctor?.name||'specialist')}`} className="h-7 w-7 rounded-full border object-cover"/><span className={`absolute bottom-0 end-0 h-2.5 w-2.5 rounded-full border-2 border-white ${qDoctor?.is_online ? 'bg-emerald-500' : 'bg-gray-400'}`}></span></span><span className="text-teal-600">{qDoctor?.name || 'Specialist'}</span></span>
         <span className="flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" />{answerCount} {t('questions.answers')}</span>
         <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{question.views}</span>
-        <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{timeAgo(question.created_at, lang)}</span>
+        <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{timeAgo(question.created_at, lang)}</span>{specialistView&&marketStatus==='available'&&<span className="text-teal-600">{(question as any).question_duration_days||5} {lang==='ar'?'أيام':'days'}</span>}
       </div>
     </button>
   );
