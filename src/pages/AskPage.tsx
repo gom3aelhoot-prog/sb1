@@ -276,7 +276,7 @@ export default function AskPage() {
             <div className="rounded-2xl bg-teal-50 border border-teal-100 p-4 text-sm text-teal-800">
               <div className="flex items-center justify-between gap-3">
                 <span className="font-semibold">{lang === 'ar' ? 'المبلغ المستحق' : 'Amount due'}</span>
-                <span className="text-lg font-extrabold">{formatPrice(selectedTier.price_usd)}</span>
+                <span className="text-lg font-extrabold">{localAmount.toLocaleString(lang==='ar'?'ar-EG':'en-US',{maximumFractionDigits:2})} {questionBasePrice.currency_symbol}</span>
               </div>
               <p className="mt-1 text-xs text-teal-700">{lang === 'ar' ? `مدة الطلب: ${selectedTier.duration_days} يوم · حتى ${selectedTier.specialists_notified} أخصائي · ${selectedTier.max_answers} إجابات. السعر حسب دولة ${country.code}.` : `Request: ${selectedTier.duration_days} days · up to ${selectedTier.specialists_notified} specialists · ${selectedTier.max_answers} answers. Price follows country ${country.code}.`}</p>
             </div>
