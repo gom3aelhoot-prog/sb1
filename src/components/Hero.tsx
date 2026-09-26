@@ -93,7 +93,6 @@ export function Hero() {
               <button onClick={()=>navigate('/specialties')} className="btn-secondary flex items-center gap-2"><ListFilter className="h-4 w-4"/>{lang==='ar'?'التخصصات':lang==='ru'?'Специальности':lang==='de'?'Fachgebiete':'Specialties'}</button>
             </div>
           </div>
-          </div>
 
           {/* Visual */}
           <div className="relative hidden lg:block animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
