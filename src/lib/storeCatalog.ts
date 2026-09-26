@@ -1,5 +1,5 @@
 export type StoreAudience='all'|'specialist';
-export type StoreProductType='question_package'|'course'|'book'|'subscription'|'consultation'|'test'|'app'|'specialist_service'|'other';
+export type StoreProductType='question_package'|'course'|'book'|'subscription'|'consultation'|'test'|'app'|'specialist_service'|'ad_space'|'other';
 export type StoreProduct={id:string;name:string;description:string;image_url:string;price:number;currency:string;product_type:StoreProductType;audience:StoreAudience;language:string;active:boolean;stock:number|null;sort_order:number;created_at:string;updated_at:string};
 const now=new Date().toISOString();
 export const defaultStoreProducts:StoreProduct[]=[
