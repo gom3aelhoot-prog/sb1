@@ -32,7 +32,9 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreed) { alert(lang === 'ar' ? 'يجب قراءة وقبول العقد والقواعد قبل التسجيل.' : 'Please accept the agreement and rules before registration.'); return; }
-    const age=Number(formData.age||0);\n    if(age>0 && age<18 && !formData.parentalConsent){ alert(lang==='ar'?'يجب إرفاق موافقة كتابية من ولي الأمر لمن هو دون 18 عاماً.':'Written parental consent is required for users under 18.'); return; }\n    setSubmitting(true); setSuccess(false);
+    const age=Number(formData.age||0);
+    if(age>0 && age<18 && !formData.parentalConsent){ alert(lang==='ar'?'يجب إرفاق موافقة كتابية من ولي الأمر لمن هو دون 18 عاماً.':'Written parental consent is required for users under 18.'); return; }
+    setSubmitting(true); setSuccess(false);
     try {
       const email = formData.email.trim().toLowerCase();
       if (accountType === 'specialist') {
