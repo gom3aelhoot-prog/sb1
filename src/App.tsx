@@ -80,6 +80,7 @@ import SpecialistContentUploadPage from '@/pages/SpecialistContentUploadPage';
 import ContentModerationPage from '@/pages/ContentModerationPage';
 import AdminApprovalsPage from '@/pages/AdminApprovalsPage';
 import OwnerTeamChatPage from '@/pages/OwnerTeamChatPage';
+import QuestionAccountingPage from '@/pages/QuestionAccountingPage';
 import PediatricLibraryPage from '@/pages/PediatricLibraryPage';
 import ChooseDoctorPage from '@/pages/ChooseDoctorPage';
 import AppointmentBookingPage from '@/pages/AppointmentBookingPage';
@@ -134,6 +135,7 @@ function PlatformRoute() {
   if (route === '/admin/content') return <ContentModerationPage />;
   if (route === '/admin/approvals') return <AdminApprovalsPage />;
   if (route === '/admin/team-chat') return <OwnerTeamChatPage />;
+  if (route === '/admin/question-accounting') return <QuestionAccountingPage />;
   if (route === '/pediatric-library') return <PediatricLibraryPage />;
   if (route === '/articles') return <MediaHubPage />;
   if (route.startsWith('/articles/')) return <ArticleDetailPage id={route.split('/')[2]} />;
