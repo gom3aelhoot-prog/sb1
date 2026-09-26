@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { demoSpecialties, demoDoctors, demoArticles, demoVideos, demoAudio, demoCourses, demoClinics, demoLabs, demoRadiology, demoFacilities, demoProducts, demoLibrary, demoQuestions, demoAnswers } from '@/lib/demoData';
+import { defaultStoreProducts } from '@/lib/storeCatalog';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY;
@@ -28,6 +29,7 @@ const demoTables: Record<string, DemoRow[]> = {
   specialist_documents: [], specialist_posts: [], specialist_diary: [], post_comments: [], user_follows: [],
   medical_tests: [], test_results: [], ai_report_analysis: [], favorites: [], advertisements: [], jobs: [], job_applications: [], referral_rewards: [],
   country_pricing: [], institutions: [], delivery_workers: [], admin_chat_messages: [],
+  store_products: defaultStoreProducts, store_orders: [],
   signup_promotions: [{ id:'promo-demo', code:'SB1-FIRST-SIGNUP', discount_percent:10, is_active:true }],
 };
 
