@@ -10,6 +10,7 @@ import { HowItWorks } from '@/components/HowItWorks';
 import { BottomActionCards } from '@/components/BottomActionCards';
 import { CTASection } from '@/components/CTASection';
 import { DiscountBanner } from '@/components/DiscountBanner';
+import SiteAdSlots from '@/components/SiteAdSlots';
 import { SpecialistsPage } from '@/components/SpecialistsPage';
 import { DoctorVerificationPage } from '@/components/DoctorVerificationPage';
 import { FacilitiesPage as LocalFacilitiesPage } from '@/components/FacilitiesPage';
@@ -229,6 +230,7 @@ function AppContent() {
         {!isHome && <PlatformRoute />}
       </main>
       <Footer />
+      <SiteAdSlots />
       <DiscountBanner />
       <PushNotifications />
       <OnboardingTour />
