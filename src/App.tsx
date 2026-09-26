@@ -66,6 +66,7 @@ import NotificationsPage from '@/pages/NotificationsPage';
 import SettingsPage from '@/pages/SettingsPage';
 import MediaHubPage from '@/pages/MediaHubPage';
 import SpecialistStorePage from '@/pages/SpecialistStorePage';
+import StoreAdminPage from '@/pages/StoreAdminPage';
 import AppsPage from '@/pages/AppsPage';
 import PropertyListingsPage from '@/pages/PropertyListingsPage';
 import SpecialistContentUploadPage from '@/pages/SpecialistContentUploadPage';
@@ -108,6 +109,8 @@ function PlatformRoute() {
   if (route.startsWith('/facilities/')) return <InstitutionDetailPage kind="facility" />;
   if (route === '/media') return <MediaHubPage />;
   if (route === '/store') return <SpecialistStorePage />;
+  if (route === '/cart') return <SpecialistStorePage />;
+  if (route === '/admin/store') return <StoreAdminPage />;
   if (route === '/apps') return <AppsPage />;
   if (route === '/properties') return <PropertyListingsPage />;
   if (route === '/specialist/content') return <SpecialistContentUploadPage />;
