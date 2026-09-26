@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-  LayoutDashboard, Users, FileText, Video, Headphones, BookOpen,
+  LayoutDashboard, Users, FileText, Video, Headphones, BookOpen, ShoppingBag,
   MessageSquare, DollarSign, AlertTriangle, Settings, LogOut,
   Plus, Trash2, Edit, Stethoscope, Eye, Shield, TrendingUp, X
 } from 'lucide-react';
@@ -258,6 +258,7 @@ export default function AdminPage() {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="card p-3 sticky top-24">
+              <button onClick={() => window.location.href='/admin/store'} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-right text-sm font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 mb-2"><ShoppingBag className="w-5 h-5" />إدارة المتجر</button>
               {menuItems.map((item) => (
                 <button
                   key={item.key}
