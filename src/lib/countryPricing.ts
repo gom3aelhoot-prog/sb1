@@ -20,4 +20,4 @@ export async function getCountryServicePrice(country:CountryInfo,service:Service
  }catch{return fallback}
 }
 
-export function allCountryOptions(){return ARAB_COUNTRIES;}
+export function allCountryOptions(){return COUNTRY_OPTIONS;}
