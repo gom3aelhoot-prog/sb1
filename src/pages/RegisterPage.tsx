@@ -18,7 +18,8 @@ export default function RegisterPage() {
     showName: true, anonymous: false, institutionType: 'clinic', address: '', services: '',
   });
   const [docUrls, setDocUrls] = useState<{ id?: string; cert?: string; license?: string }>({});
-  const [registrationCountry, setRegistrationCountry] = useState(country);\n  const [submitting, setSubmitting] = useState(false);
+  const [registrationCountry, setRegistrationCountry] = useState(country);
+  const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
