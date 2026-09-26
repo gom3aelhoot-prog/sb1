@@ -140,7 +140,7 @@ export default function AskPage() {
       if (questionType === 'paid') {
         const payment = { id: dataId(), amount: Number(localAmount.toFixed(2)), currency: country.currency, reference_id: id, status: 'pending' };
         const payments = JSON.parse(localStorage.getItem('sb1_demo_payments') || '[]');
-        localStorage.setItem('sb1_demo_payments', JSON.stringify([payment, ...payments]));
+        localStorage.setItem('sb1_demo_payments', JSON.stringify([payment, ...payments]));\n        localStorage.setItem('sb1_question_paid_'+id, String(payment.amount));
         if (dbQuestionId) {
           const { error: paymentError } = await supabase.from('payments').insert({
             payer_email: '', payer_name: form.author_name.trim(), amount: payment.amount, currency: country.currency,
