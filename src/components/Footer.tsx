@@ -9,6 +9,8 @@ export function Footer() {
     { label: t.footer.bookAppointment, href: '/sessions' },
     { label: t.footer.pricing, href: '/subscriptions' },
     { label: t.footer.faq, href: '/questions' },
+    { label: 'البحث المتطور', href: '/search' },
+    { label: 'الدعم والشكاوى', href: '/support' },
   ];
 
   const doctorLinks = [
@@ -16,6 +18,9 @@ export function Footer() {
     { label: t.footer.doctorGuide, href: '/doctors' },
     { label: t.footer.about, href: '/#about' },
     { label: t.footer.blog, href: '/articles' },
+    { label: 'العقود والتوقيعات', href: '/contracts' },
+    { label: 'توصيل الصيدليات', href: '/delivery' },
+    { label: 'الوظائف الشاغرة', href: '/jobs' },
   ];
 
   const socialLinks = [
