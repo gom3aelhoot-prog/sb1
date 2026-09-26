@@ -128,7 +128,8 @@ export default function AskPage() {
       try {
         await supabase.from('consultation_requests').insert({ question_id: dbQuestionId || null, patient_name: form.author_name.trim(), specialty_id: spec?.id || fallbackSpec.id, country_code: country.code, language_code: contentLanguage, service_type: 'question', price_usd: selectedTier?.price_usd || 0, local_price: localAmount, currency_code: country.currency, duration_days: selectedTier?.duration_days || 0, specialists_limit: selectedTier?.specialists_notified || 10, response_speed: 'standard', status: questionType === 'paid' ? 'pending' : 'active', expires_at: expiresAt });
       } catch {}
-      if (questionType === 'free') await recordUsage('question',1);\n      const localQuestion = {
+      if (questionType === 'free') await recordUsage('question',1);
+      const localQuestion = {
         id, language: contentLanguage, specialty_id: fallbackSpec.id, author_name: form.author_name.trim(), title: form.title.trim(), body: form.body.trim(),
         age: form.age ? parseInt(form.age) : null, gender: form.gender, status: questionType === 'paid' ? 'pending_payment' : 'pending',
         views: 0, created_at: new Date().toISOString(), specialty: fallbackSpec, answers: [],
@@ -139,7 +140,8 @@ export default function AskPage() {
       if (questionType === 'paid') {
         const payment = { id: dataId(), amount: Number(localAmount.toFixed(2)), currency: country.currency, reference_id: id, status: 'pending' };
         const payments = JSON.parse(localStorage.getItem('sb1_demo_payments') || '[]');
-        localStorage.setItem('sb1_demo_payments', JSON.stringify([payment, ...payments]));\n        localStorage.setItem('sb1_question_paid_'+id, String(payment.amount));
+        localStorage.setItem('sb1_demo_payments', JSON.stringify([payment, ...payments]));
+        localStorage.setItem('sb1_question_paid_'+id, String(payment.amount));
         if (dbQuestionId) {
           const { error: paymentError } = await supabase.from('payments').insert({
             payer_email: '', payer_name: form.author_name.trim(), amount: payment.amount, currency: country.currency,
