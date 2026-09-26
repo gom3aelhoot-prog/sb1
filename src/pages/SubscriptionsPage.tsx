@@ -3,11 +3,15 @@ import { Check, Crown, Sparkles, TrendingUp } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type SubscriptionPlan } from '@/lib/supabase';
 import { useRouter } from '@/lib/router';
+import { getCountryServicePrice } from '@/lib/countryPricing';
+import { useApp } from '@/i18n/AppContext';
 
 export default function SubscriptionsPage() {
   const { t, lang } = useI18n();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const { country } = useApp();
+  const [subscriptionPrice, setSubscriptionPrice] = useState(9.99);
   const { navigate } = useRouter();
 
   useEffect(() => { getCountryServicePrice(country,'subscription').then(p=>setSubscriptionPrice(p.local_price)); }, [country.code]);
