@@ -11,7 +11,8 @@ export default function WalletPage(){
  const {lang,dir}=useI18n();const {formatPrice}=useApp();const {path}=useRouter();const q=parseQuery(path);
  const [wallet,setWallet]=useState<any>(null); const [credits,setCredits]=useState(creditsBalance());const [tx,setTx]=useState<any[]>([]);const [amount,setAmount]=useState('25');const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');
  const key=accountKey();
- const buyCredits=()=>{addCredits(100);setCredits(creditsBalance());};\n const load=async()=>{setWallet(await ensureWallet());const {data}=await supabase.from('sb1_wallet_transactions').select('*').eq('account_key',key).order('created_at',{ascending:false}).limit(30);setTx(data||[])};
+ const buyCredits=()=>{addCredits(100);setCredits(creditsBalance());};
+ const load=async()=>{setWallet(await ensureWallet());const {data}=await supabase.from('sb1_wallet_transactions').select('*').eq('account_key',key).order('created_at',{ascending:false}).limit(30);setTx(data||[])};
  useEffect(()=>{load()},[]);
  useEffect(()=>{if(q.topup==='success'&&q.session_id){setBusy(true);fetch('/api/wallet-confirm',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({session_id:q.session_id})}).then(r=>r.json()).then(x=>{if(x.ok)setMessage(lang==='ar'?'تم شحن المحفظة بنجاح.':'Wallet topped up successfully.');else setMessage(x.error||'Payment could not be verified.');return load()}).finally(()=>setBusy(false))}},[q.topup,q.session_id]);
  const topup=async()=>{const n=Number(amount);if(!n||n<=0)return;setBusy(true);try{const r=await fetch('/api/wallet-checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({amount:n,currency:(wallet?.currency_code||'USD').toLowerCase(),account_key:key})});const x=await r.json();if(!r.ok)throw new Error(x.error);location.href=x.url}catch(e){setMessage(e instanceof Error?e.message:'تعذر بدء الدفع')}finally{setBusy(false)}};
