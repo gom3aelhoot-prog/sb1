@@ -49,7 +49,7 @@ const demoTables: Record<string, DemoRow[]> = {
   ],
   site_settings: [{ id:1, site_name:'SB1', default_language:'ar', free_session_messages:3, video_session_price:25, currency:'USD', ai_moderation_enabled:true, stripe_enabled:false, updated_at:now }],
   admin_users: [],
-  payments: [], video_sessions: [], text_sessions: [], specialist_planner: [], planner_reminders: [], lab_bookings: [], radiology_bookings: [], clinic_bookings: [],
+  payments: [], course_chat_messages: [], course_enrollments: [], video_sessions: [], text_sessions: [], specialist_planner: [], planner_reminders: [], lab_bookings: [], radiology_bookings: [], clinic_bookings: [],
   specialist_documents: [], specialist_posts: [], specialist_diary: [], post_comments: [], user_follows: [],
   medical_tests: [], test_results: [], ai_report_analysis: [], favorites: [], advertisements: [], jobs: [], job_applications: [], referral_rewards: [],
   country_pricing: [], institutions: [], delivery_workers: [], admin_chat_messages: [],
@@ -254,6 +254,14 @@ export type Course = {
   rating: number;
   is_published: boolean;
   created_at: string;
+  is_free?: boolean;
+  platform_share_percent?: number;
+  specialist_share_percent?: number;
+  moderation_required?: boolean;
+  specialist_connect_account_id?: string | null;
+  free_seats?: number;
+  translations?: Record<string, {title?: string;description?: string}>;
+  doctor?: Doctor;
   specialty?: Specialty;
   doctor?: Doctor;
 };
