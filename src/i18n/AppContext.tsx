@@ -18,6 +18,7 @@ import {
   CURRENCY_RATES,
 } from '@/types/i18n';
 import { translations } from '@/i18n/translations';
+import { getDiscountConfig } from '@/lib/adConfig';
 
 interface AppContextValue {
   language: LanguageCode;
@@ -67,9 +68,11 @@ function getInitialDiscountDismissed(): boolean {
 export function AppProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<LanguageCode>(getInitialLanguage);
   const [country, setCountryState] = useState<CountryInfo>(getInitialCountry);
-  const [discountDismissed, setDiscountDismissed] = useState<boolean>(getInitialDiscountDismissed);
+  const [discountDismissedAt, setDiscountDismissedAt] = useState<number>(() => Number(localStorage.getItem('sb1_discount_dismissed_at') || 0));
+  const [discountConfig,setDiscountConfig]=useState(getDiscountConfig());
   const [showDiscount, setShowDiscount] = useState<boolean>(false);
 
+  useEffect(()=>{const sync=()=>setDiscountConfig(getDiscountConfig());window.addEventListener('sb1-ad-config-change',sync);return()=>window.removeEventListener('sb1-ad-config-change',sync)},[]);
   const direction: Direction = LANGUAGES[language].direction;
 
   useEffect(() => {
@@ -78,12 +81,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [language, direction]);
 
   useEffect(() => {
-    // Show discount banner after a short delay on first visit (only if not dismissed)
-    if (!discountDismissed) {
-      const timer = setTimeout(() => setShowDiscount(true), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [discountDismissed]);
+    if (!discountConfig.enabled) { setShowDiscount(false); return; }
+    const now=Date.now(), cooldown=Math.max(0,discountConfig.repeatAfterMinutes)*60000;
+    const remaining=Math.max(0,cooldown-(now-discountDismissedAt));
+    const delay=discountDismissedAt ? remaining : 2000;
+    const timer=setTimeout(()=>setShowDiscount(true),delay);
+    return()=>clearTimeout(timer);
+  }, [discountConfig.enabled,discountConfig.repeatAfterMinutes,discountDismissedAt]);
 
   const setLanguage = useCallback((lang: LanguageCode) => {
     setLanguageState(lang);
@@ -102,9 +106,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const dismissDiscount = useCallback(() => {
-    setDiscountDismissed(true);
+    const now=Date.now();
     setShowDiscount(false);
-    localStorage.setItem(STORAGE_KEYS.discountDismissed, 'true');
+    setDiscountDismissedAt(now);
+    localStorage.setItem('sb1_discount_dismissed_at',String(now));
+    localStorage.setItem(STORAGE_KEYS.discountDismissed,'true');
   }, []);
 
   const formatPrice = useCallback(
@@ -128,7 +134,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLanguage,
     t: translations[language],
     isAnonymous,
-    hasSeenDiscount: discountDismissed,
+    hasSeenDiscount: Boolean(discountDismissedAt),
     dismissDiscount,
     showDiscount,
     setShowDiscount,
