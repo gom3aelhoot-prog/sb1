@@ -10,6 +10,8 @@ export default function SubscriptionsPage() {
   const [loading, setLoading] = useState(true);
   const { navigate } = useRouter();
 
+  useEffect(() => { getCountryServicePrice(country,'subscription').then(p=>setSubscriptionPrice(p.local_price)); }, [country.code]);
+
   useEffect(() => {
     supabase.from('subscription_plans').select('*').eq('is_active', true).order('duration_months').then(({ data }) => {
       setPlans((data && data.length ? data : [
@@ -59,7 +61,7 @@ export default function SubscriptionsPage() {
                   </div>
                   <h3 className="text-lg font-bold text-gray-800 mb-1">{plan.name_ar || plan.name}</h3>
                   <div className="flex items-baseline gap-1 mb-4">
-                    <span className="text-3xl font-bold text-gray-800">${plan.price}</span>
+                    <span className="text-3xl font-bold text-gray-800">{plan.price===0?'0':subscriptionPrice.toLocaleString(lang==='ar'?'ar-EG':'en-US')}</span>
                     <span className="text-sm text-gray-400">{t('subs.per_month')}</span>
                   </div>
                   <ul className="space-y-2 mb-6">
@@ -70,7 +72,7 @@ export default function SubscriptionsPage() {
                       </li>
                     ))}
                   </ul>
-                  <button onClick={() => navigate(plan.price === 0 ? '/register' : `/payments?type=subscription&plan=${plan.id}&amount=${plan.price}`)} className={`btn-primary w-full ${i !== 1 ? 'btn-secondary' : ''}`}>
+                  <button onClick={() => navigate(plan.price === 0 ? '/register' : `/payments?type=subscription&plan=${plan.id}&amount=${plan.price===0?0:subscriptionPrice}`)} className={`btn-primary w-full ${i !== 1 ? 'btn-secondary' : ''}`}>
                     {t('subs.choose')}
                   </button>
                 </div>
