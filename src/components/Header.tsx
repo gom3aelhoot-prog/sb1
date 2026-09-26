@@ -23,6 +23,7 @@ import { MegaMenu } from '@/components/MegaMenu';
 import { LanguageSwitcher, MobileLanguageSwitcher } from '@/components/LanguageSwitcher';
 import { NotificationsPopover } from '@/components/NotificationsPopover';
 import { SPECIALTIES } from '@/types/i18n';
+import SessionNavCounter from '@/components/SessionNavCounter';
 
 export function Header() {
   const { t, isAnonymous } = useApp();
@@ -62,8 +63,6 @@ export function Header() {
     { label: labels[2], href: '/store' },
     { label: labels[3], href: '/referral' },
     { label: lang==='ar'?'الألعاب والتطبيقات':lang==='ru'?'Игры и приложения':lang==='de'?'Spiele & Apps':'Games & Apps', href: '/apps' },
-    { label: lang==='ar'?'جلسات الفيديو':lang==='ru'?'Видеосессии':lang==='de'?'Videositzungen':'Video Sessions', href: '/appointments' },
-    { label: lang==='ar'?'طلبات جلسات الأخصائي':lang==='ru'?'Заявки на сессии':lang==='de'?'Sitzungsanfragen':'Specialist Requests', href: '/specialist-appointments' },
     { label: lang==='ar'?'أماكن للبيع أو الإيجار':lang==='ru'?'Объекты для продажи или аренды':lang==='de'?'Objekte zum Verkauf oder zur Miete':lang==='en'?'Places for Sale or Rent':'Places for Sale or Rent', href: '/properties' },
   ];
   const navItems = [
@@ -120,15 +119,12 @@ export function Header() {
                 </a>
               ))}
               <MegaMenu />
-              {navItems.slice(3).map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-100 hover:text-primary-700"
-                  
-                >
-                  {item.label}
-                </a>
+              {navItems.slice(3, 6).map((item) => (
+                <a key={item.href} href={item.href} className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-100 hover:text-primary-700">{item.label}</a>
+              ))}
+              <SessionNavCounter />
+              {navItems.slice(6).map((item) => (
+                <a key={item.href} href={item.href} className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-100 hover:text-primary-700">{item.label}</a>
               ))}
             </nav>
 
