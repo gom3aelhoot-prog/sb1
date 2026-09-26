@@ -22,7 +22,7 @@ export default function SubscriptionsPage() {
         { id:'free', name:'Free', name_ar:'مجاني', duration_months:1, price:0, daily_questions_limit:10, weekly_questions_limit:null, free_courses_limit:0, free_books_limit:1, features:'10 أسئلة/شهر', is_active:true, created_at:new Date().toISOString() },
         { id:'pro', name:'Pro', name_ar:'Pro', duration_months:1, price:10, daily_questions_limit:500, weekly_questions_limit:null, free_courses_limit:2, free_books_limit:10, features:'500 سؤال + 50 صورة', is_active:true, created_at:new Date().toISOString() },
         { id:'business', name:'Business', name_ar:'Business', duration_months:1, price:30, daily_questions_limit:null, weekly_questions_limit:null, free_courses_limit:10, free_books_limit:50, features:'غير محدود', is_active:true, created_at:new Date().toISOString() },
-      ]) as SubscriptionPlan[]); as SubscriptionPlan[]);
+      ]) as SubscriptionPlan[]);
       setLoading(false);
     });
   }, []);
