@@ -1,0 +1,12 @@
+import { useEffect,useState } from 'react';
+import { FolderPlus,Heart,MessageCircle,Share2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+
+export default function PediatricLibraryPage(){
+ const [rooms,setRooms]=useState<any[]>([]);const [room,setRoom]=useState<any>(null);const [posts,setPosts]=useState<any[]>([]);
+ const load=async()=>{const {data}=await supabase.from('sb1_pediatric_library_rooms').select('*').eq('is_active',true).order('created_at');setRooms(data||[]);if(!room&&data?.[0])setRoom(data[0])};
+ useEffect(()=>{load()},[]);
+ useEffect(()=>{if(room)supabase.from('sb1_pediatric_library_posts').select('*').eq('room_id',room.id).order('created_at',{ascending:false}).then(({data})=>setPosts(data||[]))},[room]);
+ const createRoom=async()=>{await supabase.from('sb1_pediatric_library_rooms').insert({name:'غرفة أطفال جديدة',description:'غرفة يحدد اسمها وإعداداتها الأخصائي'});load()};
+ return <div className="min-h-screen bg-slate-50 pt-24 pb-16"><div className="mx-auto max-w-7xl px-4"><div className="rounded-3xl bg-white border p-6 mb-5 flex items-center justify-between"><div><h1 className="text-2xl font-extrabold">مكتبة أخصائيي الأطفال</h1><p className="text-slate-500 mt-1">غرف للصور والفيديو والملفات والتعليقات والإعجاب والمشاركة بين الأخصائيين.</p></div><button onClick={createRoom} className="rounded-xl bg-teal-600 text-white px-4 py-2 flex gap-2"><FolderPlus/>إنشاء غرفة</button></div><div className="grid md:grid-cols-[260px_1fr] gap-5"><aside className="bg-white border rounded-2xl p-3 space-y-2">{rooms.map(r=><button key={r.id} onClick={()=>setRoom(r)} className={'w-full text-right rounded-xl p-3 '+(room?.id===r.id?'bg-teal-50 text-teal-700':'hover:bg-slate-50')}>{r.name}</button>)}</aside><main>{room?<div className="space-y-4">{posts.map(p=><article key={p.id} className="bg-white border rounded-2xl p-5"><h3 className="font-bold">{p.title||'منشور مكتبة'}</h3><p className="mt-2 text-slate-600">{p.body}</p>{p.media_url&&<a className="text-teal-700 underline block mt-3" href={p.media_url}>فتح الملف</a>}<div className="flex gap-5 mt-4 text-slate-500"><span><Heart/> {p.likes_count||0}</span><span><MessageCircle/> {p.comments_count||0}</span><span><Share2/> {p.shares_count||0}</span></div></article>)}</div>:<div className="rounded-2xl bg-white border p-12 text-center text-slate-400">اختر غرفة</div>}</main></div></div></div>
+}
