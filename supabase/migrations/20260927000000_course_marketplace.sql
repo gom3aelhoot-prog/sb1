@@ -58,3 +58,13 @@ $$;
 update public.courses
 set platform_share_percent=50,specialist_share_percent=50,moderation_required=true
 where platform_share_percent is null or specialist_share_percent is null;
+
+
+create policy "course chat members can read" on public.course_chat_messages
+for select using (
+ exists(select 1 from public.course_enrollments e where e.course_id=course_chat_messages.course_id and e.payment_status in ('paid','free') and (e.user_id=auth.uid() or e.student_email=auth.jwt()->>'email'))
+);
+create policy "course chat members can write" on public.course_chat_messages
+for insert with check (
+ exists(select 1 from public.course_enrollments e where e.course_id=course_chat_messages.course_id and e.payment_status in ('paid','free') and (e.user_id=auth.uid() or e.student_email=auth.jwt()->>'email'))
+);
