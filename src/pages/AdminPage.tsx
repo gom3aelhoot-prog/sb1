@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import {
   LayoutDashboard, Users, FileText, Video, Headphones, BookOpen, ShoppingBag,
+  UserPlus,
   MessageSquare, DollarSign, AlertTriangle, Settings, LogOut,
   Plus, Trash2, Edit, Stethoscope, Eye, Shield, TrendingUp, X
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Question, type Article, type DoctorVideo, type DoctorAudio, type Course, type Payment, type AIViolation, type SiteSettings, type VideoSession, type TextSession, type Specialty } from '@/lib/supabase';
 
-type AdminSection = 'overview' | 'doctors' | 'questions' | 'articles' | 'videos' | 'audio' | 'courses' | 'sessions' | 'payments' | 'pricing' | 'violations' | 'settings';
+type AdminSection = 'overview' | 'doctors' | 'questions' | 'articles' | 'videos' | 'audio' | 'courses' | 'sessions' | 'payments' | 'pricing' | 'violations' | 'admins' | 'settings';
 
 function PricingRow({item,onSaved}:{item:any;onSaved:()=>void}){const [v,setV]=useState(item);return <tr className="border-b"><td className="p-3 font-bold">{v.name_ar||v.name||v.country_code||'قاعدة دولة'}</td><td className="p-3"><input className="input-field w-28" type="number" value={v.price_usd??v.base_price??0} onChange={e=>setV({...v,price_usd:Number(e.target.value),base_price:Number(e.target.value)})}/></td><td className="p-3"><input className="input-field w-20" type="number" value={v.duration_days??7} onChange={e=>setV({...v,duration_days:Number(e.target.value)})}/></td><td className="p-3"><input className="input-field w-20" type="number" value={v.specialists_notified??v.notification_reach??5} onChange={e=>setV({...v,specialists_notified:Number(e.target.value),notification_reach:Number(e.target.value)})}/></td><td className="p-3"><input className="input-field w-20" type="number" value={v.max_answers??3} onChange={e=>setV({...v,max_answers:Number(e.target.value)})}/></td><td className="p-3"><button className="btn-primary text-xs" onClick={async()=>{const payload={...v};delete payload.id;delete payload.name;delete payload.name_ar;delete payload.description;delete payload.description_ar;delete payload.sort_order;const {error}=await supabase.from(item.base_price!==undefined?'question_pricing_rules':'pricing_tiers').update(payload).eq('id',item.id);if(!error)onSaved()}}>حفظ</button></td></tr>}
 export default function AdminPage() {
@@ -34,6 +35,8 @@ export default function AdminPage() {
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(false);
+  const [admins, setAdmins] = useState<any[]>([]);
+  const [newAdmin, setNewAdmin] = useState({name:'',email:'',role:'moderator'});
 
   // Add modal
   const [showAdd, setShowAdd] = useState<AdminSection | null>(null);
@@ -144,6 +147,11 @@ export default function AdminPage() {
         setViolations(data || []);
         break;
       }
+      case 'admins': {
+        const { data } = await supabase.from('admin_users').select('*').order('created_at', { ascending: false });
+        setAdmins(data || []);
+        break;
+      }
       case 'settings': {
         const { data } = await supabase.from('site_settings').select('*').eq('id', 1).maybeSingle();
         setSettings(data);
@@ -238,6 +246,7 @@ export default function AdminPage() {
     { key: 'payments', label: t('admin.payments'), icon: DollarSign },
     { key: 'pricing', label: 'أسعار الأسئلة والدول', icon: DollarSign },
     { key: 'violations', label: t('admin.violations'), icon: AlertTriangle },
+    ...(adminRole === 'owner' ? [{ key: 'admins' as AdminSection, label: 'المشرفون', icon: UserPlus }] : []),
     { key: 'settings', label: t('admin.settings'), icon: Settings },
   ];
 
@@ -504,7 +513,27 @@ export default function AdminPage() {
                   {violations.length === 0 && <p className="text-center text-gray-400 py-8">لا توجد مخالفات</p>}
                 </div>
               </div>
-            ) : section === 'settings' ? (
+            ) : section === 'admins' ? (
+              <div>
+                <h2 className="text-xl font-bold text-gray-800 mb-4">إدارة المشرفين</h2>
+                {adminRole !== 'owner' ? <div className="card p-6 text-red-600">هذه الصفحة متاحة للمالك فقط.</div> : (
+                  <div className="space-y-5">
+                    <div className="card p-6">
+                      <h3 className="font-bold mb-4">إضافة مشرف جديد</h3>
+                      <div className="grid gap-3 md:grid-cols-3">
+                        <input className="input-field" placeholder="اسم المشرف" value={newAdmin.name} onChange={e=>setNewAdmin({...newAdmin,name:e.target.value})}/>
+                        <input className="input-field" type="email" placeholder="البريد الإلكتروني" value={newAdmin.email} onChange={e=>setNewAdmin({...newAdmin,email:e.target.value})}/>
+                        <select className="input-field" value={newAdmin.role} onChange={e=>setNewAdmin({...newAdmin,role:e.target.value})}><option value="moderator">مشرف</option><option value="content_manager">مشرف محتوى</option><option value="support">مشرف دعم</option></select>
+                      </div>
+                      <button className="btn-primary mt-4" onClick={async()=>{if(!newAdmin.name||!newAdmin.email)return;const {error}=await supabase.from('admin_users').insert({name:newAdmin.name,email:newAdmin.email.trim().toLowerCase(),role:newAdmin.role,is_active:true,created_at:new Date().toISOString()});if(!error){setNewAdmin({name:'',email:'',role:'moderator'});loadData('admins')}}}>إضافة المشرف</button>
+                    </div>
+                    <div className="card overflow-hidden">
+                      <div className="divide-y">{admins.map(a=><div key={a.id||a.email} className="p-4 flex items-center justify-between gap-4"><div><p className="font-bold">{a.name}</p><p className="text-sm text-gray-500">{a.email} · {a.role}</p></div><button className="text-red-600" onClick={async()=>{if(a.id){await supabase.from('admin_users').update({is_active:!a.is_active}).eq('id',a.id);loadData('admins')}}}>{a.is_active?'تعطيل':'تفعيل'}</button></div>)}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : section === 'settings' ?
               <div>
                 <h2 className="text-xl font-bold text-gray-800 mb-4">{t('admin.settings')}</h2>
                 {settings && (
