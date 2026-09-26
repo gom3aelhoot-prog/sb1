@@ -57,13 +57,14 @@ export function Header() {
     { label: platformT('nav.courses'), href: '/courses' },
     { label: lang==='ar'?'الجلسات المجانية':lang==='ru'?'Бесплатные сессии':lang==='de'?'Kostenlose Sitzungen':'Free Sessions', href: '/sessions' },
     { label: lang==='ar'?'اختار طبيبك':lang==='ru'?'Выберите врача':lang==='de'?'Arzt auswählen':'Choose your doctor', href: '/choose-doctor' },
-    { label: platformT('nav.facilities'), href: '/facilities' },
+    { label: lang==='ar'?'المرافق الطبية':lang==='ru'?'Медицинские учреждения':lang==='de'?'Medizinische Einrichtungen':lang==='en'?'Medical Facilities':'Medical Facilities', href: '/facilities' },
     { label: 'الاختبارات الطبية والنفسية', href: '/tests' },
     { label: labels[2], href: '/store' },
     { label: labels[3], href: '/referral' },
     { label: lang==='ar'?'الألعاب والتطبيقات':lang==='ru'?'Игры и приложения':lang==='de'?'Spiele & Apps':'Games & Apps', href: '/apps' },
     { label: lang==='ar'?'جلسات الفيديو':lang==='ru'?'Видеосессии':lang==='de'?'Videositzungen':'Video Sessions', href: '/appointments' },
     { label: lang==='ar'?'طلبات جلسات الأخصائي':lang==='ru'?'Заявки на сессии':lang==='de'?'Sitzungsanfragen':'Specialist Requests', href: '/specialist-appointments' },
+    { label: lang==='ar'?'أماكن للبيع أو الإيجار':lang==='ru'?'Объекты для продажи или аренды':lang==='de'?'Objekte zum Verkauf oder zur Miete':lang==='en'?'Places for Sale or Rent':'Places for Sale or Rent', href: '/properties' },
   ];
   const navItems = [
     { label: t.nav.home, href: '/#home', icon: Home },
