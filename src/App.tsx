@@ -69,6 +69,7 @@ import SpecialistStorePage from '@/pages/SpecialistStorePage';
 import SearchPage from '@/pages/SearchPage';
 import ContractsPage from '@/pages/ContractsPage';
 import DeliveryPage from '@/pages/DeliveryPage';
+import ServiceCenterPage from '@/pages/ServiceCenterPage';
 import StoreAdminPage from '@/pages/StoreAdminPage';
 import AppsPage from '@/pages/AppsPage';
 import SpecialistContentUploadPage from '@/pages/SpecialistContentUploadPage';
@@ -114,6 +115,7 @@ function PlatformRoute() {
   if (route === '/search') return <SearchPage />;
   if (route === '/contracts') return <ContractsPage />;
   if (route === '/delivery') return <DeliveryPage />;
+  if (route === '/support') return <ServiceCenterPage />;
   if (route === '/cart') return <SpecialistStorePage />;
   if (route === '/admin/store') return <StoreAdminPage />;
   if (route === '/apps') return <AppsPage />;
