@@ -1,13 +1,13 @@
 import {useEffect,useState} from 'react';
 import {CheckCircle2,XCircle,Calendar,Video,Clock,Save,Settings2} from 'lucide-react';
 import {useI18n} from '@/lib/i18n';
-import {getAppointments,acceptAppointment,rejectAppointment,rescheduleAppointment,canReschedule,type Appointment,formatRemaining} from '@/lib/appointments';
+import {getAppointments,acceptAppointment,rejectAppointment,rescheduleAppointment,canReschedule,type Appointment,formatRemaining,scheduleAppointmentReminders} from '@/lib/appointments';
 import {getDoctorSessionConfig,saveDoctorSessionConfig,formatDuration,type SessionOption} from '@/lib/appointmentConfig';
 import {virtualDoctorsForSpecialty} from '@/lib/catalog';
 
 export default function VideoAppointmentDoctorPage(){
  const{dir,lang}=useI18n();const[items,setItems]=useState<Appointment[]>([]);const[selected,setSelected]=useState<Appointment|null>(null);const[time,setTime]=useState('');const[reason,setReason]=useState('');const[now,setNow]=useState(Date.now());const[doctorId,setDoctorId]=useState('virtual-doctor-settings');const[options,setOptions]=useState<SessionOption[]>(getDoctorSessionConfig('virtual-doctor-settings').options);const[message,setMessage]=useState('');
- const refresh=()=>{setItems(getAppointments());setNow(Date.now())};
+ const refresh=()=>{const all=getAppointments();all.filter(a=>a.status==='accepted').forEach(scheduleAppointmentReminders);setItems(all);setNow(Date.now())};
  useEffect(()=>{refresh();const id=setInterval(refresh,1000);window.addEventListener('sb1-appointments-change',refresh);return()=>{clearInterval(id);window.removeEventListener('sb1-appointments-change',refresh)}},[]);
  const saveConfig=()=>{saveDoctorSessionConfig({doctorId,options,updatedAt:new Date().toISOString()});setMessage('تم حفظ مدد وأسعار الجلسات');};
  const addOption=()=>setOptions(x=>x.length>=6?x:[...x,{durationMinutes:90,price:60,enabled:true}]);
