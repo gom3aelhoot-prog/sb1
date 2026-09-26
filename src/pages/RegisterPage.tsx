@@ -32,59 +32,37 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreed) { alert(lang === 'ar' ? 'يجب قراءة وقبول العقد والقواعد قبل التسجيل.' : 'Please accept the agreement and rules before registration.'); return; }
-    setSubmitting(true);
+    setSubmitting(true); setSuccess(false);
     try {
-      const authResult = await supabase.auth.signUp({ email: formData.email.trim().toLowerCase(), password: formData.password, options: { data: { name: formData.name, role: accountType, country_code: registrationCountry.code, language_code: lang } } });
-      if (authResult.error) throw authResult.error;
-      if (accountType === 'client') {
-        const { error } = await supabase.from('profiles').insert({
-          id: authResult.data.user?.id,
-          name: formData.anonymous ? 'مجهول' : formData.name,
-          email: formData.email.trim().toLowerCase(),
-          phone: formData.phone,
-          role: 'client',
-          country_code: registrationCountry.code,
-          language_code: lang,
-          is_anonymous: formData.anonymous,
-        });
-        if (!error) setSuccess(true);
-      } else if (accountType === 'institution') {
-        const { error } = await supabase.from('institutions').insert({
-          name: formData.name,
-          type: formData.institutionType,
-          address: formData.address,
-          phone: formData.phone,
-          email: formData.email.trim().toLowerCase(),
-          service_info: formData.services,
-          schedule_info: formData.schedule,
-          documents_info: formData.documents,
-          delivery_enabled: formData.deliveryEnabled,
-          delivery_method: formData.deliveryMethod,
-          is_approved: false,
-          subscription_plan: 'free',
-          country_code: registrationCountry.code,
-          language_code: lang,
-        });
-        if (!error) setSuccess(true);
-      } else if (accountType === 'specialist') {
+      const email = formData.email.trim().toLowerCase();
+      if (accountType === 'specialist') {
         const { error } = await supabase.from('sb1_specialist_registration_requests').insert({
-          user_id: authResult.data.user?.id || null,
-          name: formData.name,
-          email: formData.email.trim().toLowerCase(),
-          phone: formData.phone,
-          specialty_id: formData.specialty || null,
-          country_code: registrationCountry.code,
-          language_code: lang,
-          documents: { id: docUrls.id || null, certificate: docUrls.cert || null, license: docUrls.license || null },
-          status: 'pending',
+          id: 'req-' + Date.now(), name: formData.name, email, phone: formData.phone,
+          specialty_id: formData.specialty || null, country_code: registrationCountry.code,
+          language_code: lang, documents: { id: docUrls.id || null, certificate: docUrls.cert || null, license: docUrls.license || null },
+          status: 'pending', created_at: new Date().toISOString()
         });
         if (error) throw error;
         setSuccess(true);
+        return;
       }
+      const authResult = await supabase.auth.signUp({ email, password: formData.password, options: { data: { name: formData.name, role: accountType, country_code: registrationCountry.code, language_code: lang } } });
+      if (authResult.error) throw authResult.error;
+      if (accountType === 'client') {
+        const { error } = await supabase.from('profiles').insert({ id: authResult.data.user?.id, name: formData.anonymous ? 'مجهول' : formData.name, email, phone: formData.phone, role: 'client', country_code: registrationCountry.code, language_code: lang, is_anonymous: formData.anonymous });
+        if (error) throw error;
+      } else if (accountType === 'institution') {
+        const { error } = await supabase.from('institutions').insert({ name: formData.name, type: formData.institutionType, address: formData.address, phone: formData.phone, email, service_info: formData.services, schedule_info: formData.schedule, documents_info: formData.documents, delivery_enabled: formData.deliveryEnabled, delivery_method: formData.deliveryMethod, is_approved: false, subscription_plan: 'free', country_code: registrationCountry.code, language_code: lang });
+        if (error) throw error;
       }
-    } catch { /* ignore */ }
-    if (success || accountType) { localStorage.removeItem('sb1_guest_client'); localStorage.setItem('sb1_account_role', accountType || 'client'); localStorage.setItem('sb1_account_email', formData.email.trim().toLowerCase()); localStorage.setItem('sb1_account_key', formData.email.trim().toLowerCase()); if (authResult.data.user?.id) localStorage.setItem('sb1_account_user_id', authResult.data.user.id); }
-    setSubmitting(false);
+      localStorage.removeItem('sb1_guest_client');
+      localStorage.setItem('sb1_account_role', accountType || 'client');
+      localStorage.setItem('sb1_account_email', email);
+      if (authResult.data.user?.id) localStorage.setItem('sb1_account_user_id', authResult.data.user.id);
+      setSuccess(true);
+    } catch (err: any) {
+      alert(err?.message || 'تعذر إرسال الطلب');
+    } finally { setSubmitting(false); }
   };
 
   if (success) {
@@ -96,7 +74,7 @@ export default function RegisterPage() {
           </div>
           <h2 className="text-xl font-bold text-gray-800 mb-2">{t('register.success')}</h2>
           {accountType === 'specialist' && (
-            <p className="text-sm text-gray-500 mb-4">{t('register.verify_note')}</p>
+            <p className="text-sm text-gray-500 mb-4">تم استلام طلب الأخصائي للمراجعة. لا يتم إنشاء أو تفعيل حساب أخصائي ولا يظهر للجمهور قبل موافقة المالك أو الإدارة.</p>
           )}
           <button onClick={() => navigate('/')} className="btn-primary">{t('common.back')}</button>
         </div>
