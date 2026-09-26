@@ -5,6 +5,8 @@ import { useRouter } from '@/lib/router';
 import { supabase, type LabCenter } from '@/lib/supabase';
 import { demoLabs } from '@/lib/demoData';
 import { virtualFacilities } from '@/lib/catalog';
+import { addCart,toggleWishlist,isWishlisted } from '@/lib/commerce';
+import { Heart,ShoppingCart } from 'lucide-react';
 
 export default function LabsPage() {
   const { t,lang } = useI18n();
@@ -65,7 +67,7 @@ export default function LabsPage() {
                   {c.services && <p className="text-xs text-gray-500 mb-2">{c.services}</p>}
                   {c.address && <p className="text-xs text-gray-500 flex items-center gap-1 mb-1"><MapPin className="w-3.5 h-3.5" />{c.address}</p>}
                   {c.phone && <p className="text-xs text-gray-500 flex items-center gap-1 mb-3"><Phone className="w-3.5 h-3.5" />{c.phone}</p>}
-                  <div className="mt-3 grid grid-cols-2 gap-2"><button onClick={() => navigate('/labs/'+c.id)} className="btn-secondary w-full text-sm">تفاصيل المؤسسة</button><button onClick={() => setBookingCenter(c)} className="btn-primary w-full text-sm flex items-center justify-center gap-2">
+                  <div className="mt-3 grid grid-cols-2 gap-2"><button onClick={() => navigate('/labs/'+c.id)} className="btn-secondary w-full text-sm">تفاصيل المؤسسة</button><button onClick={()=>{addCart({item_type:'lab',item_id:c.id,name:c.name,image_url:c.image_url,unit_price:15,currency_code:'USD',quantity:1,metadata:{service:c.services||'lab test'}})}} className="btn-primary w-full text-sm"><ShoppingCart className="inline w-4 h-4 me-1"/>إضافة للسلة</button><button onClick={() => setBookingCenter(c)} className="btn-primary w-full text-sm flex items-center justify-center gap-2">
                     <Calendar className="w-4 h-4" />
                     {t('labs.book')}
                   </button>
