@@ -15,6 +15,24 @@ export default function PaymentsPage() {
   const { lang } = useI18n();
   const { path, navigate } = useRouter();
   const query = parseQuery(path);
+  const isAppointmentCheckout = query.type === 'appointment' && !!query.reference;
+  const appointmentAmount = Number(query.amount || 0);
+  const completeAppointmentSandbox = () => {
+    if (!query.reference) return;
+    const draft = localStorage.getItem('sb1_pending_appointment_'+query.reference);
+    if (!draft) { setError(lang === 'ar' ? 'انتهت بيانات الحجز.' : 'Booking draft not found.'); return; }
+    localStorage.setItem('sb1_paid_appointment_'+query.reference, '1');
+    setPaid(true);
+    navigate('/appointments/book?'+new URLSearchParams({doctor:'',reference:query.reference,paid:'1'}).toString());
+  };
+  const startAppointmentCheckout = async () => {
+    setCheckoutLoading(true); setError('');
+    try {
+      const response = await fetch('/api/create-checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({amount:appointmentAmount,currency:query.currency||'usd',description:'SB1 video consultation',reference_id:query.reference})});
+      const data = await response.json(); if(!response.ok||!data.url) throw new Error(data.error||'Checkout unavailable'); window.location.href=data.url;
+    } catch { setError(lang==='ar'?'الدفع المباشر غير مفعّل على هذا النشر. يمكنك استخدام وضع الاختبار.':'Live checkout is not configured on this deployment. Use sandbox mode.'); }
+    finally { setCheckoutLoading(false); }
+  };
   const isQuestionCheckout = query.type === 'question' && !!query.reference;
   const [loading, setLoading] = useState(isQuestionCheckout);
   const [paying, setPaying] = useState(false);
@@ -114,6 +132,10 @@ export default function PaymentsPage() {
     setPaid(true);
     setPaying(false);
   };
+
+  if (isAppointmentCheckout) {
+    return <div className="min-h-screen pt-24 pb-16 bg-gray-50"><div className="max-w-2xl mx-auto px-4"><div className="card p-7"><div className="text-center"><CreditCard className="mx-auto w-14 h-14 text-teal-600"/><h1 className="mt-4 text-3xl font-extrabold">الدفع المسبق للجلسة</h1><p className="mt-2 text-gray-500">بعد الدفع فقط يتم إرسال طلب الحجز إلى الأخصائي.</p></div><div className="mt-6 rounded-2xl bg-teal-50 p-5 text-center"><p className="text-sm text-teal-700">قيمة الجلسة</p><p className="text-4xl font-extrabold text-teal-800">{appointmentAmount} {query.currency?.toUpperCase()||'USD'}</p></div>{error&&<p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}<button onClick={startAppointmentCheckout} disabled={checkoutLoading} className="btn-primary w-full mt-5">{checkoutLoading?'جاري فتح بوابة الدفع...':'فتح بوابة الدفع الآمن'}</button><button onClick={completeAppointmentSandbox} className="w-full mt-3 rounded-xl border py-3 text-sm font-bold text-gray-600">تأكيد الدفع التجريبي ثم إرسال الحجز</button><p className="mt-4 text-xs text-gray-400 text-center">وضع الاختبار لا يخصم أموالاً حقيقية.</p></div></div></div>;
+  }
 
   if (isQuestionCheckout) {
     return (
