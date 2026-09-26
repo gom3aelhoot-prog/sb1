@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, Phone, BadgeCheck, PenLine } from 'lucide-react';
+import { ArrowRight, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, Phone, BadgeCheck, PenLine, Share2, ExternalLink, Copy } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Question, type SpecialistPost, type PostComment, type Article, type DoctorAudio } from '@/lib/supabase';
@@ -160,6 +160,9 @@ export default function DoctorProfilePage({ id }: { id: string }) {
                 <button onClick={handleFollow} className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all ${isFollowing ? 'bg-gray-100 text-gray-600' : 'bg-teal-600 text-white hover:bg-teal-700'}`}>
                   {isFollowing ? t('profile.following') : t('profile.follow')}
                 </button>
+                <button onClick={shareProfile} className="px-6 py-2.5 rounded-xl border border-teal-200 text-teal-700 bg-teal-50 font-semibold text-sm flex items-center justify-center gap-2">
+                  <Share2 className="w-4 h-4" /> مشاركة صفحة SB1
+                </button>
                 {doctor.phone_number && (
                   <div className="text-center">
                     <p className="text-[10px] text-gray-400">{t('profile.share_phone')}</p>
@@ -169,6 +172,23 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               </div>
             </div>
             {doctor.bio && <p className="text-sm text-gray-600 mt-4 leading-relaxed">{doctor.bio}</p>}
+          </div>
+        </div>
+
+        {/* SB1 profile sharing / external social platforms */}
+        <div className="card p-5 mb-6 bg-gradient-to-l from-white to-teal-50">
+          <div className="flex items-start gap-3">
+            <div className="w-11 h-11 rounded-xl bg-teal-100 flex items-center justify-center shrink-0"><Share2 className="w-5 h-5 text-teal-700"/></div>
+            <div className="flex-1">
+              <h2 className="font-extrabold text-gray-800">تابع الأخصائي على SB1</h2>
+              <p className="text-sm text-gray-500 mt-1">يمكن للأخصائي مشاركة رابط صفحته على منصات التواصل الأخرى. لا نستخدم أو نقلد واجهات تلك المنصات ولا ننشر بالنيابة عنها.</p>
+              <div className="flex flex-wrap gap-2 mt-4">
+                <button onClick={shareProfile} className="rounded-xl bg-teal-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2"><Share2 className="w-4 h-4"/>مشاركة</button>
+                <button onClick={async()=>{await navigator.clipboard?.writeText(window.location.href);alert('تم نسخ رابط صفحة SB1')}} className="rounded-xl border bg-white px-4 py-2 text-sm font-semibold flex items-center gap-2"><Copy className="w-4 h-4"/>نسخ الرابط</button>
+                {doctor.phone_number && <a target="_blank" rel="noreferrer" href={`https://wa.me/${String(doctor.phone_number).replace(/[^0-9]/g,'')}?text=${encodeURIComponent('تابع صفحة '+doctor.name+' على SB1: '+window.location.origin+'/doctors/'+id)}`} className="rounded-xl border bg-white px-4 py-2 text-sm font-semibold flex items-center gap-2"><ExternalLink className="w-4 h-4"/>واتساب</a>}
+                <a target="_blank" rel="noreferrer" href={`https://t.me/share/url?url=${encodeURIComponent(window.location.origin+'/doctors/'+id)}&text=${encodeURIComponent('تابع '+doctor.name+' على SB1')}`} className="rounded-xl border bg-white px-4 py-2 text-sm font-semibold flex items-center gap-2"><ExternalLink className="w-4 h-4"/>Telegram</a>
+              </div>
+            </div>
           </div>
         </div>
 
