@@ -13,6 +13,8 @@ import {
   type TranslationData,
   LANGUAGES,
   ARAB_COUNTRIES,
+  COUNTRY_OPTIONS,
+  LANGUAGE_DEFAULT_COUNTRY,
   CURRENCY_RATES,
 } from '@/types/i18n';
 import { translations } from '@/i18n/translations';
@@ -48,10 +50,10 @@ function getInitialLanguage(): LanguageCode {
 }
 
 function getInitialCountry(): CountryInfo {
-  if (typeof window === 'undefined') return ARAB_COUNTRIES[0];
+  if (typeof window === 'undefined') return ARAB_COUNTRIES.find(c=>c.code==='EG') || ARAB_COUNTRIES[0];
   const stored = localStorage.getItem(STORAGE_KEYS.country);
   if (stored) {
-    const found = ARAB_COUNTRIES.find((c) => c.code === stored);
+    const found = COUNTRY_OPTIONS.find((c) => c.code === stored);
     if (found) return found;
   }
   return ARAB_COUNTRIES[0];
@@ -85,6 +87,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setLanguage = useCallback((lang: LanguageCode) => {
     setLanguageState(lang);
+    const defaultCountryCode = LANGUAGE_DEFAULT_COUNTRY[lang];
+    if (defaultCountryCode) {
+      const nextCountry = COUNTRY_OPTIONS.find(c=>c.code===defaultCountryCode);
+      if (nextCountry) { setCountryState(nextCountry); localStorage.setItem(STORAGE_KEYS.country,nextCountry.code); }
+    }
     localStorage.setItem(STORAGE_KEYS.language, lang);
     window.dispatchEvent(new CustomEvent('sb1-language-change', { detail: lang }));
   }, []);
