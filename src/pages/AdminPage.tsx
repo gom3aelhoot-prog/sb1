@@ -533,7 +533,7 @@ export default function AdminPage() {
                   </div>
                 )}
               </div>
-            ) : section === 'settings' ?
+            ) : section === 'settings' ? (
               <div>
                 <h2 className="text-xl font-bold text-gray-800 mb-4">{t('admin.settings')}</h2>
                 {settings && (
