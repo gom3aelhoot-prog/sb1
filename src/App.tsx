@@ -68,6 +68,7 @@ import MediaHubPage from '@/pages/MediaHubPage';
 import SpecialistStorePage from '@/pages/SpecialistStorePage';
 import WalletPage from '@/pages/WalletPage';
 import CartPage from '@/pages/CartPage';
+import MedicalSuppliesPage from '@/pages/MedicalSuppliesPage';
 import SearchPage from '@/pages/SearchPage';
 import ContractsPage from '@/pages/ContractsPage';
 import DeliveryPage from '@/pages/DeliveryPage';
@@ -116,6 +117,7 @@ function PlatformRoute() {
   if (route === '/media') return <MediaHubPage />;
   if (route === '/store') return <SpecialistStorePage />;
   if (route === '/wallet') return <WalletPage />;
+  if (route === '/medical-supplies') return <MedicalSuppliesPage />;
   if (route === '/cart') return <CartPage />;
   if (route === '/search') return <SearchPage />;
   if (route === '/contracts') return <ContractsPage />;
