@@ -65,7 +65,7 @@ export default function SubscriptionsPage() {
                   </div>
                   <h3 className="text-lg font-bold text-gray-800 mb-1">{plan.name_ar || plan.name}</h3>
                   <div className="flex items-baseline gap-1 mb-4">
-                    <span className="text-3xl font-bold text-gray-800">{plan.price===0?'0':subscriptionPrice.toLocaleString(lang==='ar'?'ar-EG':'en-US')}</span>
+                    <span className="text-3xl font-bold text-gray-800">{plan.price===0?'0':(subscriptionPrice*(plan.id.includes('pro')?2.5:plan.id.includes('plus')?1:1)).toLocaleString(lang==='ar'?'ar-EG':'en-US')}</span>
                     <span className="text-sm text-gray-400">{t('subs.per_month')}</span>
                   </div>
                   <ul className="space-y-2 mb-6">
