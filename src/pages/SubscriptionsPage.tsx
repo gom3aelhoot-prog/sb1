@@ -52,7 +52,7 @@ export default function SubscriptionsPage() {
             {plans.map((plan, i) => {
               const Icon = planIcons[i] || Sparkles;
               const color = planColors[i] || 'teal';
-              const features = (plan.features || '').split('،').filter(Boolean);
+              const features = (plan.features || '').split('،').filter(Boolean); const displayPrice = plan.price===0 ? 0 : subscriptionPrice*(plan.id.includes('pro')?2.5:plan.id.includes('plus')?1:1);
               return (
                 <div key={plan.id} className={`card p-8 relative overflow-hidden ${i === 1 ? 'ring-2 ring-teal-500' : ''}`}>
                   {i === 1 && (
@@ -65,7 +65,7 @@ export default function SubscriptionsPage() {
                   </div>
                   <h3 className="text-lg font-bold text-gray-800 mb-1">{plan.name_ar || plan.name}</h3>
                   <div className="flex items-baseline gap-1 mb-4">
-                    <span className="text-3xl font-bold text-gray-800">{plan.price===0?'0':(subscriptionPrice*(plan.id.includes('pro')?2.5:plan.id.includes('plus')?1:1)).toLocaleString(lang==='ar'?'ar-EG':'en-US')}</span>
+                    <span className="text-3xl font-bold text-gray-800">{displayPrice===0?'0':displayPrice.toLocaleString(lang==='ar'?'ar-EG':'en-US')} {country.currencySymbol}</span>
                     <span className="text-sm text-gray-400">{t('subs.per_month')}</span>
                   </div>
                   <ul className="space-y-2 mb-6">
@@ -76,7 +76,7 @@ export default function SubscriptionsPage() {
                       </li>
                     ))}
                   </ul>
-                  <button onClick={() => navigate(plan.price === 0 ? '/register' : `/payments?type=subscription&plan=${plan.id}&amount=${plan.price===0?0:subscriptionPrice}`)} className={`btn-primary w-full ${i !== 1 ? 'btn-secondary' : ''}`}>
+                  <button onClick={() => navigate(plan.price === 0 ? '/register' : `/payments?type=subscription&plan=${plan.id}&amount=${displayPrice}`)} className={`btn-primary w-full ${i !== 1 ? 'btn-secondary' : ''}`}>
                     {t('subs.choose')}
                   </button>
                 </div>
