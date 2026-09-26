@@ -1,0 +1,12 @@
+import { useEffect,useState } from 'react';
+import { Check,X,ShieldCheck } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+
+export default function AdminApprovalsPage(){
+ const [rows,setRows]=useState<any[]>([]);
+ const load=async()=>{const {data}=await supabase.from('sb1_specialist_registration_requests').select('*').eq('status','pending').order('created_at',{ascending:false});setRows(data||[])};
+ useEffect(()=>{load()},[]);
+ const approve=async(r:any)=>{const {error}=await supabase.from('doctors').insert({name:r.name,specialty_id:r.specialty_id,bio:'',education:'',experience_years:0,photo_url:'',city:'',native_language:r.language_code||'ar',is_online:false,is_verified:true,is_virtual:false,phone_number:r.phone,country_code:r.country_code,language_code:r.language_code,approval_status:'approved',follower_count:0}).select().single();if(error){alert(error.message);return}await supabase.from('sb1_specialist_registration_requests').update({status:'approved',reviewed_at:new Date().toISOString()}).eq('id',r.id);load()};
+ const reject=async(r:any)=>{const reason=prompt('سبب الرفض')||'Rejected by administration';await supabase.from('sb1_specialist_registration_requests').update({status:'rejected',rejection_reason:reason,reviewed_at:new Date().toISOString()}).eq('id',r.id);load()};
+ return <div className="min-h-screen bg-slate-50 pt-24 pb-16"><div className="mx-auto max-w-5xl px-4"><div className="rounded-3xl bg-white border p-6 mb-6"><div className="flex items-center gap-3"><ShieldCheck className="text-teal-600"/><div><h1 className="text-2xl font-extrabold">موافقات الأخصائيين</h1><p className="text-sm text-slate-500">لا يظهر الأخصائي للعملاء قبل موافقة الإدارة أو المالك.</p></div></div></div>{rows.length===0?<div className="rounded-2xl bg-white border p-10 text-center text-slate-500">لا توجد طلبات معلقة.</div>:<div className="space-y-4">{rows.map(r=><div key={r.id} className="rounded-2xl bg-white border p-5 flex flex-wrap justify-between gap-4"><div><h3 className="font-bold text-lg">{r.name}</h3><p className="text-sm text-slate-500">{r.email} · {r.phone||'—'}</p><p className="text-sm mt-2">اللغة: {r.language_code||'ar'} · الدولة: {r.country_code||'—'}</p></div><div className="flex gap-2"><button onClick={()=>approve(r)} className="rounded-xl bg-teal-600 text-white px-4 py-2 flex gap-2"><Check className="h-4 w-4"/>موافقة</button><button onClick={()=>reject(r)} className="rounded-xl bg-red-50 text-red-700 px-4 py-2 flex gap-2"><X className="h-4 w-4"/>رفض</button></div></div>)}</div>}</div></div>
+}
