@@ -4,9 +4,12 @@ import { useI18n } from '@/lib/i18n';
 import { useRouter } from '@/lib/router';
 import { supabase, type Specialty } from '@/lib/supabase';
 import { useEffect } from 'react';
+import { ARAB_COUNTRIES } from '@/types/i18n';
+import { useApp } from '@/i18n/AppContext';
 
 export default function RegisterPage() {
-  const { t, specialtyName } = useI18n();
+  const { t, specialtyName, lang } = useI18n();
+  const { country, setCountry } = useApp();
   const { navigate } = useRouter();
   const [accountType, setAccountType] = useState<'client' | 'specialist' | 'institution' | null>(null);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
@@ -15,7 +18,7 @@ export default function RegisterPage() {
     showName: true, anonymous: false, institutionType: 'clinic', address: '', services: '',
   });
   const [docUrls, setDocUrls] = useState<{ id?: string; cert?: string; license?: string }>({});
-  const [submitting, setSubmitting] = useState(false);
+  const [registrationCountry, setRegistrationCountry] = useState(country);\n  const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
@@ -26,7 +29,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const authResult = await supabase.auth.signUp({ email: formData.email.trim().toLowerCase(), password: formData.password, options: { data: { name: formData.name, role: accountType } } });
+      const authResult = await supabase.auth.signUp({ email: formData.email.trim().toLowerCase(), password: formData.password, options: { data: { name: formData.name, role: accountType, country_code: registrationCountry.code, language_code: lang } } });
       if (authResult.error) throw authResult.error;
       if (accountType === 'client') {
         const { error } = await supabase.from('profiles').insert({
@@ -35,6 +38,8 @@ export default function RegisterPage() {
           email: formData.email.trim().toLowerCase(),
           phone: formData.phone,
           role: 'client',
+          country_code: registrationCountry.code,
+          language_code: lang,
           is_anonymous: formData.anonymous,
         });
         if (!error) setSuccess(true);
@@ -48,6 +53,8 @@ export default function RegisterPage() {
           service_info: formData.services,
           is_approved: false,
           subscription_plan: 'free',
+          country_code: registrationCountry.code,
+          language_code: lang,
         });
         if (!error) setSuccess(true);
       } else if (accountType === 'specialist') {
@@ -62,6 +69,8 @@ export default function RegisterPage() {
           native_language: 'ar',
           is_verified: false,
           phone_number: formData.phone,
+          country_code: registrationCountry.code,
+          language_code: lang,
         }).select().single();
         if (!error && data) {
           if (docUrls.id) await supabase.from('specialist_documents').insert({ doctor_id: data.id, doc_type: 'id', doc_url: docUrls.id });
@@ -137,6 +146,13 @@ export default function RegisterPage() {
               {t('common.back')}
             </button>
 
+            <div className="rounded-2xl border-2 border-teal-100 bg-teal-50 p-4">
+              <label className="block text-sm font-bold text-teal-900 mb-2">{lang === 'ar' ? 'الدولة — أساسي لتحديد الأسعار والخدمات' : 'Country — required for pricing and services'}</label>
+              <select required value={registrationCountry.code} onChange={(e)=>{const next=ARAB_COUNTRIES.find(c=>c.code===e.target.value)||country;setRegistrationCountry(next);setCountry(next)}} className="input-field bg-white">
+                {ARAB_COUNTRIES.map(c=><option key={c.code} value={c.code}>{c.flag} {t.countries[c.nameKey]||c.nameKey} — {c.currencySymbol}</option>)}
+              </select>
+              <p className="mt-2 text-xs text-teal-700">{lang === 'ar' ? 'سيتم استخدام الدولة لتحديد عملة وأسعار الخدمات عند الدفع.' : 'This country determines the currency and country-specific service prices at checkout.'}</p>
+            </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">{t('register.name')}</label>
               <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="input-field" />
