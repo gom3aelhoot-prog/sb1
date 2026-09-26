@@ -16,6 +16,8 @@ import {
   Building2,
   Shield,
   ChevronDown,
+  Wallet,
+  ShoppingCart,
 } from 'lucide-react';
 import { useApp } from '@/i18n/AppContext';
 import { useI18n } from '@/lib/i18n';
@@ -145,6 +147,14 @@ export function Header() {
               </div>
 
               <LanguageSwitcher />
+
+              <a href="/wallet" className="hidden sm:flex items-center gap-1.5 rounded-xl border border-teal-100 bg-teal-50 px-3 py-2 text-sm font-bold text-teal-700 hover:bg-teal-100" title="المحفظة">
+                <Wallet className="h-4 w-4" />
+                <span className="hidden xl:inline">المحفظة</span>
+              </a>
+              <a href="/cart" className="relative flex h-10 w-10 items-center justify-center rounded-xl text-neutral-700 hover:bg-neutral-100" title="السلة">
+                <ShoppingCart className="h-5 w-5" />
+              </a>
 
               <NotificationsPopover />
 
