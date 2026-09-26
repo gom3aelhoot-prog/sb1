@@ -74,7 +74,6 @@ import ChooseDoctorPage from '@/pages/ChooseDoctorPage';
 import AppointmentBookingPage from '@/pages/AppointmentBookingPage';
 import AppointmentsPage from '@/pages/AppointmentsPage';
 import VideoAppointmentDoctorPage from '@/pages/VideoAppointmentDoctorPage';
-import VideoSessionCountdown from '@/components/VideoSessionCountdown';
 import SpecialistFreeSessionsPage from '@/pages/SpecialistFreeSessionsPage';
 import PushNotifications from '@/components/PushNotifications';
 
@@ -209,7 +208,6 @@ function AppContent() {
       <Footer />
       <DiscountBanner />
       <PushNotifications />
-      <VideoSessionCountdown />
       {!isHome && <AIChatWidget />}
     </div>
   );
