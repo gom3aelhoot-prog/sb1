@@ -1,22 +1,26 @@
-name: Package SB1 source
+name: Package SB1 ZIP
 on:
+  workflow_dispatch:
   push:
     branches: [main]
-  workflow_dispatch:
-permissions:
-  contents: read
-  actions: write
 jobs:
   package:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - name: Create source archive
-        run: |
-          git archive --format=zip --output=SB1-complete-source.zip HEAD
-      - name: Upload SB1 archive
-        uses: actions/upload-artifact@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          name: SB1-complete-source
-          path: SB1-complete-source.zip
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Package source and build
+        run: |
+          mkdir -p sb1-package
+          rsync -a --exclude='.git' --exclude='node_modules' --exclude='sb1-package' ./ sb1-package/
+          zip -r sb1-complete.zip sb1-package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sb1-complete
+          path: sb1-complete.zip
           retention-days: 30
