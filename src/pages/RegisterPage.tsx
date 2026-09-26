@@ -7,6 +7,8 @@ import { useEffect } from 'react';
 import { ARAB_COUNTRIES } from '@/types/i18n';
 import { useApp } from '@/i18n/AppContext';
 
+const countryLabels: Record<string,string> = {SA:'السعودية',AE:'الإمارات',EG:'مصر',IQ:'العراق',JO:'الأردن',KW:'الكويت',LB:'لبنان',LY:'ليبيا',MA:'المغرب',OM:'عمان',PS:'فلسطين',QA:'قطر',SY:'سوريا',TN:'تونس',YE:'اليمن',DZ:'الجزائر',BH:'البحرين',MR:'موريتانيا',SD:'السودان',SO:'الصومال',KM:'جزر القمر',DJ:'جيبوتي'};
+
 export default function RegisterPage() {
   const { t, specialtyName, lang } = useI18n();
   const { country, setCountry } = useApp();
@@ -150,7 +152,7 @@ export default function RegisterPage() {
             <div className="rounded-2xl border-2 border-teal-100 bg-teal-50 p-4">
               <label className="block text-sm font-bold text-teal-900 mb-2">{lang === 'ar' ? 'الدولة — أساسي لتحديد الأسعار والخدمات' : 'Country — required for pricing and services'}</label>
               <select required value={registrationCountry.code} onChange={(e)=>{const next=ARAB_COUNTRIES.find(c=>c.code===e.target.value)||country;setRegistrationCountry(next);setCountry(next)}} className="input-field bg-white">
-                {ARAB_COUNTRIES.map(c=><option key={c.code} value={c.code}>{c.flag} {t.countries[c.nameKey]||c.nameKey} — {c.currencySymbol}</option>)}
+                {ARAB_COUNTRIES.map(c=><option key={c.code} value={c.code}>{c.flag} {countryLabels[c.code] || c.nameKey} — {c.currencySymbol}</option>)}
               </select>
               <p className="mt-2 text-xs text-teal-700">{lang === 'ar' ? 'سيتم استخدام الدولة لتحديد عملة وأسعار الخدمات عند الدفع.' : 'This country determines the currency and country-specific service prices at checkout.'}</p>
             </div>
