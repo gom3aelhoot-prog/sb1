@@ -132,3 +132,24 @@ begin
   values(p_account_key,p_points,p_reason,p_reference_type,p_reference_id);
   return jsonb_build_object('ok',true);
 end $$;
+
+
+create or replace function public.sb1_wallet_credit(p_account_key text,p_amount numeric,p_currency text,p_reference_type text,p_reference_id text,p_description text)
+returns jsonb
+language plpgsql
+security definer
+as $$
+declare b numeric;
+begin
+  if p_amount <= 0 then raise exception 'amount must be positive'; end if;
+  if exists(select 1 from public.sb1_wallet_transactions where reference_type=p_reference_type and reference_id=p_reference_id and transaction_type='topup') then
+    select balance into b from public.sb1_wallets where account_key=p_account_key;
+    return jsonb_build_object('ok',true,'duplicate',true,'balance',coalesce(b,0));
+  end if;
+  insert into public.sb1_wallets(account_key,currency_code,balance,rewards_points) values(p_account_key,p_currency,0,0)
+  on conflict(account_key) do nothing;
+  update public.sb1_wallets set balance=balance+p_amount,currency_code=p_currency,updated_at=now() where account_key=p_account_key returning balance into b;
+  insert into public.sb1_wallet_transactions(account_key,transaction_type,amount,currency_code,reference_type,reference_id,description)
+  values(p_account_key,'topup',p_amount,p_currency,p_reference_type,p_reference_id,p_description);
+  return jsonb_build_object('ok',true,'balance',b,'amount',p_amount);
+end $$;
