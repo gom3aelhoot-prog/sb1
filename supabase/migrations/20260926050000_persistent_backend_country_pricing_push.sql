@@ -143,7 +143,36 @@ values
 ('DJ','question','DJF','Fdj',5,900),('DJ','session','DJF','Fdj',15,2700),('DJ','course','DJF','Fdj',12,2160),('DJ','test','DJF','Fdj',3,540),('DJ','subscription','DJF','Fdj',7,1260)
 on conflict(country_code,service_type) do update set currency_code=excluded.currency_code,currency_symbol=excluded.currency_symbol,price_usd=excluded.price_usd,local_price=excluded.local_price,updated_at=now();
 
-do $$
+
+do $
+declare
+  c record;
+  s record;
+begin
+  for c in select country_code,currency_code,currency_symbol,price_usd,local_price from public.country_service_prices where service_type='question' loop
+    for s in select * from (values
+      ('facility_booking',15::numeric),
+      ('pharmacy_delivery',4::numeric),
+      ('book',8::numeric),
+      ('audio',3::numeric),
+      ('video',6::numeric)
+    ) as v(service_type,base_usd) loop
+      insert into public.country_service_prices(country_code,service_type,currency_code,currency_symbol,price_usd,local_price)
+      values (
+        c.country_code,
+        s.service_type,
+        c.currency_code,
+        c.currency_symbol,
+        round((s.base_usd * c.price_usd / 9)::numeric,2),
+        round((s.base_usd * c.local_price / 9)::numeric,2)
+      )
+      on conflict(country_code,service_type) do update
+      set currency_code=excluded.currency_code,currency_symbol=excluded.currency_symbol,price_usd=excluded.price_usd,local_price=excluded.local_price,updated_at=now();
+    end loop;
+  end loop;
+end $;
+
+do $
 begin
   if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and tablename='consultation_requests') then alter publication supabase_realtime add table public.consultation_requests; end if;
   if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and tablename='consultation_request_messages') then alter publication supabase_realtime add table public.consultation_request_messages; end if;
