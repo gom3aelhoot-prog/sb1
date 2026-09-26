@@ -83,6 +83,7 @@ export default function RegisterPage() {
         }
       }
     } catch { /* ignore */ }
+    if (success || accountType) localStorage.setItem('sb1_account_role', accountType || 'client');
     setSubmitting(false);
   };
 
