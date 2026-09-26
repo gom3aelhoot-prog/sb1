@@ -1,88 +1,37 @@
-import { useEffect, useState } from 'react';
-import { BookOpen, Newspaper, Wrench, ExternalLink } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { BookOpen, Newspaper, Wrench, Heart, MessageCircle, Share2, ExternalLink, Search, Users } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useRouter, parseQuery } from '@/lib/router';
-import { supabase, type SpecialtyLibraryItem, type Specialty } from '@/lib/supabase';
-import { localizedField } from '@/lib/localizedContent';
-import { demoLibrary, demoSpecialties } from '@/lib/demoData';
+import { specialtyCatalog, virtualLibraryForSpecialty, virtualDoctorsForSpecialty } from '@/lib/catalog';
+import { supabase } from '@/lib/supabase';
 
-export default function LibraryPage() {
-  const { t, specialtyName, lang, dir } = useI18n();
-  const { path, navigate } = useRouter();
-  const query = parseQuery(path);
-  const [specialties, setSpecialties] = useState<Specialty[]>([]);
-  const [selectedSpec, setSelectedSpec] = useState<string>(query.specialty || '');
-  const [items, setItems] = useState<SpecialtyLibraryItem[]>([]);
-  const [filter, setFilter] = useState('all');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    supabase.from('specialties').select('*').order('name').then(({ data }) => setSpecialties((data && data.length ? data : demoSpecialties) as Specialty[])).catch(() => setSpecialties(demoSpecialties));
-  }, []);
-  useEffect(() => {
-    setLoading(true);
-    let q = supabase.from('specialty_library_items').select('*, specialty(*)').order('created_at', { ascending: false }).limit(50);
-    if (selectedSpec) q = q.eq('specialty_id', selectedSpec);
-    if (filter !== 'all') q = q.eq('item_type', filter);
-    q.then(({ data }) => { setItems((data && data.length ? data : demoLibrary) as SpecialtyLibraryItem[]); setLoading(false); }).catch(() => { setItems(demoLibrary); setLoading(false); });
-  }, [selectedSpec, filter]);
-
-  const typeIcons: Record<string, typeof BookOpen> = { news: Newspaper, book: BookOpen, service: Wrench, article: BookOpen };
-  const typeColors: Record<string, string> = { news: 'blue', book: 'teal', service: 'amber', article: 'gray' };
-
-  return (
-    <div className="min-h-screen pt-24 pb-16" dir={dir}>
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="mb-6 rounded-3xl border border-gray-100 bg-gradient-to-br from-teal-50 via-white to-white p-7 shadow-sm">
-          <h1 className="mb-2 text-3xl font-bold text-gray-800">{t('library.title')}</h1>
-          <p className="text-gray-500">{t('library.subtitle')}</p>
-        </div>
-
-        <div className="mb-6 flex flex-wrap gap-3">
-          <select value={selectedSpec} onChange={(e) => { setSelectedSpec(e.target.value); navigate(`/library?specialty=${e.target.value}`); }} className="input-field max-w-xs">
-            <option value="">{t('doctors.all_specialties')}</option>
-            {specialties.map((s) => <option key={s.id} value={s.id}>{specialtyName(s)}</option>)}
-          </select>
-          <div className="flex gap-2">
-            {['all', 'news', 'book', 'service'].map((f) => (
-              <button key={f} onClick={() => setFilter(f)} className={`rounded-xl px-4 py-2.5 text-sm font-medium transition ${filter === f ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-                {f === 'all' ? t('common.all') : f === 'news' ? t('library.news') : f === 'book' ? t('library.books') : t('library.services')}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {[1,2,3,4,5,6].map((i) => <div key={i} className="card animate-pulse p-5"><div className="mb-2 h-4 w-3/4 rounded bg-gray-100" /><div className="h-3 w-full rounded bg-gray-100" /></div>)}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {items.map((item) => {
-              const Icon = typeIcons[item.item_type] || BookOpen;
-              const color = typeColors[item.item_type] || 'gray';
-              const title = localizedField(item as unknown as Record<string, unknown>, 'title', lang, item.title);
-              const description = localizedField(item as unknown as Record<string, unknown>, 'description', lang, item.description || '');
-              const source = localizedField(item as unknown as Record<string, unknown>, 'source', lang, item.source || '');
-              return (
-                <div key={item.id} className="card p-5 transition hover:shadow-lg">
-                  <div className="mb-3 flex items-start gap-3">
-                    <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-${color}-100`}><Icon className={`h-5 w-5 text-${color}-600`} /></div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-sm font-semibold leading-snug text-gray-800">{title}</h3>
-                      {source && <p className="mt-0.5 text-xs text-gray-400">{source}</p>}
-                    </div>
-                  </div>
-                  {description && <p className="mb-3 line-clamp-2 text-sm text-gray-600">{description}</p>}
-                  {item.url && <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700">{t('library.read')} <ExternalLink className="h-3 w-3" /></a>}
-                  {item.specialty && <p className="mt-2 text-xs text-gray-300">{specialtyName(item.specialty)}</p>}
-                </div>
-              );
-            })}
-            {items.length === 0 && <p className="col-span-full py-8 text-center text-gray-400">{t('library.subtitle')}</p>}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+type FeedItem={id:string;specialty_slug:string;kind:string;title:string;summary?:string;source?:string;source_url?:string;language?:string;published_at?:string};
+const text:any={
+ ar:{title:'مكتبة التخصصات',sub:'أخبار وأبحاث وخدمات وكتب وتفاعلات الأخصائيين في صفحة واحدة.',news:'الأخبار والأبحاث',services:'الخدمات',books:'الكتب',interactions:'تفاعلات الأخصائيين',choose:'اختر التخصص',all:'كل التخصصات',open:'فتح المصدر',source:'المصدر',latest:'الأحدث',follow:'متابعة',comment:'تعليق',like:'إعجاب',empty:'لا يوجد محتوى بعد لهذا التخصص.'},
+ en:{title:'Specialty Library',sub:'News, research, services, books and specialist interactions in one feed.',news:'News & Research',services:'Services',books:'Books',interactions:'Specialist Activity',choose:'Choose specialty',all:'All specialties',open:'Open source',source:'Source',latest:'Latest',follow:'Follow',comment:'Comment',like:'Like',empty:'No content yet for this specialty.'},
+ ru:{title:'Библиотека специальностей',sub:'Новости, исследования, услуги, книги и активность специалистов в одной ленте.',news:'Новости и исследования',services:'Услуги',books:'Книги',interactions:'Активность специалистов',choose:'Выберите специальность',all:'Все специальности',open:'Источник',source:'Источник',latest:'Новое',follow:'Подписаться',comment:'Комментарий',like:'Нравится',empty:'Пока нет контента для этой специальности.'},
+ de:{title:'Fachbibliothek',sub:'Nachrichten, Forschung, Leistungen, Bücher und Aktivitäten von Fachärzten in einem Feed.',news:'News & Forschung',services:'Leistungen',books:'Bücher',interactions:'Aktivität der Spezialisten',choose:'Fachgebiet wählen',all:'Alle Fachgebiete',open:'Quelle öffnen',source:'Quelle',latest:'Neueste',follow:'Folgen',comment:'Kommentar',like:'Gefällt mir',empty:'Noch kein Inhalt für dieses Fachgebiet.'}
+};
+export default function LibraryPage(){
+ const {lang,dir}=useI18n(); const c=text[lang]||text.en; const {path}=useRouter(); const q=parseQuery(path);
+ const [tab,setTab]=useState(q.type||'news'); const [slug,setSlug]=useState(q.specialty||''); const [feed,setFeed]=useState<FeedItem[]>([]); const [posts,setPosts]=useState<any[]>([]);
+ const specs=useMemo(()=>specialtyCatalog(lang),[lang]); const selected=slug?specs.find(s=>s.slug===slug):null;
+ useEffect(()=>{fetch('/library-feed.json',{cache:'no-store'}).then(r=>r.json()).then(x=>setFeed(x.items||[])).catch(()=>setFeed([]));},[]);
+ useEffect(()=>{let active=true;(async()=>{try{const {data}=await supabase.from('specialist_posts').select('*, doctor(*)').order('created_at',{ascending:false}).limit(40);if(active&&data?.length)setPosts(data);}catch{} })();return()=>{active=false}},[]);
+ const news=feed.filter(x=>!slug||x.specialty_slug===slug).filter(x=>!x.language||x.language==='en'||x.language===lang).slice(0,80);
+ const books=slug?virtualLibraryForSpecialty(slug,lang,24):specs.slice(0,30).flatMap(s=>virtualLibraryForSpecialty(s.slug,lang,2));
+ const services=slug?Array.from({length:12},(_,i)=>({id:`service-${slug}-${i}`,name:lang==='ar'?`خدمة ${selected?.name||'طبية'} رقم ${i+1}`:lang==='ru'?`Услуга ${selected?.name||'медицина'} №${i+1}`:`${selected?.name||'Medical'} service ${i+1}`,description:lang==='ar'?'معلومات تجريبية عن الخدمة، السعر والمواعيد والحجز متاح من صفحة المؤسسة.':'Demo service information with price, schedule and booking from the institution page.',price:15+i*5})):specs.slice(0,24).map((s,i)=>({id:'service-'+s.slug,name:s.name,description:lang==='ar'?'خدمات ومرافق مرتبطة بهذا التخصص.':'Services and facilities related to this specialty.',price:20+i*3}));
+ const virtualInteractions=slug?virtualDoctorsForSpecialty(slug,lang,8).map((d:any,i)=>({id:d.id,name:d.name,specialty:d.specialty?.name||selected?.name,body:lang==='ar'?`نشر ${d.name} تحديثاً تعليمياً جديداً حول ${selected?.name}.`:`${d.name} shared a new educational update about ${selected?.name||'the specialty'}.`,likes:30+i*7,comments:4+i,created_at:new Date(Date.now()-i*3600000).toISOString(),image_url:d.avatar_url})):specs.slice(0,8).flatMap(s=>virtualDoctorsForSpecialty(s.slug,lang,1).map((d:any,i)=>({id:d.id,name:d.name,specialty:s.name,body:lang==='ar'?`مشاركة تعليمية جديدة من ${d.name} في ${s.name}.`:`${d.name} shared a new educational post in ${s.name}.`,likes:18+i*5,comments:2+i,created_at:new Date(Date.now()-i*7200000).toISOString(),image_url:d.avatar_url})));
+ const interactions=posts.length?posts.filter(p=>!slug||p.doctor?.specialty?.slug===slug).slice(0,40):virtualInteractions;
+ const time=(x:string)=>new Date(x).toLocaleString(lang==='ar'?'ar':lang,{dateStyle:'medium',timeStyle:'short'});
+ return <div className="min-h-screen bg-gray-50 pt-24 pb-16" dir={dir}><div className="mx-auto max-w-7xl px-4">
+  <div className="mb-5 rounded-3xl bg-gradient-to-br from-teal-700 to-cyan-600 p-7 text-white shadow"><h1 className="text-3xl font-extrabold">{c.title}</h1><p className="mt-2 text-white/85">{c.sub}</p></div>
+  <div className="mb-5 rounded-2xl border bg-white p-4"><div className="mb-2 flex items-center gap-2 font-bold"><Search className="h-4 w-4 text-teal-600"/>{c.choose}</div><select value={slug} onChange={e=>setSlug(e.target.value)} className="w-full rounded-xl border px-4 py-3"><option value="">{c.all}</option>{specs.map(s=><option key={s.slug} value={s.slug}>{s.name}</option>)}</select></div>
+  <div className="mb-5 grid grid-cols-2 gap-2 md:grid-cols-4">{[['news',Newspaper,c.news],['services',Wrench,c.services],['books',BookOpen,c.books],['interactions',Users,c.interactions]].map(([k,I,label]:any)=><button key={k} onClick={()=>setTab(k)} className={`rounded-xl px-4 py-3 font-bold ${tab===k?'bg-teal-600 text-white':'bg-white border text-gray-700'}`}><I className="mx-auto mb-1 h-5 w-5"/>{label}</button>)}</div>
+  {tab==='news'&&<div className="space-y-4">{news.map((n)=><article key={n.id} className="rounded-2xl border bg-white p-5 shadow-sm"><div className="flex items-start justify-between gap-3"><div><span className="text-xs font-semibold text-teal-600">{n.kind==='who-news'?'WHO':'Europe PMC'}</span><h2 className="mt-1 text-lg font-bold text-gray-900">{n.title}</h2></div><Newspaper className="h-6 w-6 text-teal-600"/></div><p className="mt-2 text-sm leading-7 text-gray-600">{n.summary||'Scientific update from the source.'}</p><div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-gray-400">{n.published_at&&<span>{time(n.published_at)}</span>}<span>{c.source}: {n.source}</span>{n.source_url&&<a href={n.source_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-teal-700 font-semibold">{c.open}<ExternalLink className="h-3 w-3"/></a>}</div></article>)}{!news.length&&<Empty text={c.empty}/>}</div>}
+  {tab==='services'&&<div className="grid gap-4 md:grid-cols-3">{services.map((s:any)=><div key={s.id} className="rounded-2xl border bg-white p-5"><Wrench className="h-7 w-7 text-amber-600"/><h3 className="mt-3 font-bold">{s.name}</h3><p className="mt-2 text-sm text-gray-500">{s.description}</p><div className="mt-4 flex items-center justify-between"><b>{s.price} USD</b><button className="rounded-xl bg-teal-50 px-4 py-2 text-teal-700">فتح</button></div></div>)}</div>}
+  {tab==='books'&&<div className="grid gap-4 md:grid-cols-3">{books.map((b:any)=><div key={b.id} className="rounded-2xl border bg-white p-5"><BookOpen className="h-7 w-7 text-indigo-600"/><h3 className="mt-3 font-bold">{b.title}</h3><p className="mt-2 text-sm text-gray-500">{b.description}</p><span className="mt-4 inline-block rounded-lg bg-indigo-50 px-3 py-1 text-xs text-indigo-700">{selected?.name||c.all}</span></div>)}</div>}
+  {tab==='interactions'&&<div className="mx-auto max-w-3xl space-y-4">{interactions.map((p:any)=><article key={p.id} className="rounded-2xl border bg-white p-5 shadow-sm"><div className="flex items-center gap-3">{p.image_url?<img src={p.image_url} className="h-11 w-11 rounded-full object-cover" alt=""/>:<div className="grid h-11 w-11 place-items-center rounded-full bg-teal-100 text-teal-700"><Heart className="h-5 w-5"/></div>}<div><b>{p.name||p.doctor?.name||'SB1 Specialist'}</b><p className="text-xs text-gray-400">{p.specialty||p.doctor?.specialty?.name||''} · {p.created_at?time(p.created_at):c.latest}</p></div></div><p className="mt-4 leading-7 text-gray-700">{p.body||p.content||'Educational specialist interaction.'}</p><div className="mt-4 flex gap-5 border-t pt-3 text-sm text-gray-500"><span className="inline-flex items-center gap-1"><Heart className="h-4 w-4"/> {p.likes||0} {c.like}</span><span className="inline-flex items-center gap-1"><MessageCircle className="h-4 w-4"/> {p.comments||p.comments_count||0} {c.comment}</span><span className="inline-flex items-center gap-1"><Share2 className="h-4 w-4"/> {c.latest}</span></div></article>)}</div>}
+ </div></div>
 }
+function Empty({text}:{text:string}){return <div className="rounded-2xl border bg-white p-12 text-center text-gray-400">{text}</div>}
