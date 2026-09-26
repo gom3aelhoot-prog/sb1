@@ -283,7 +283,7 @@ export default function AdminPage() {
             {section === 'pricing' ? (
               <div className="space-y-5"><div><h2 className="text-xl font-bold text-gray-800">أسعار الأسئلة والدول</h2><p className="text-sm text-gray-500 mt-1">يمكن للمالك ضبط السعر والمدة وعدد الأخصائيين وعدد الإجابات لكل باقة وقاعدة دولة.</p></div>
               <div className="overflow-x-auto card p-5"><table className="w-full text-sm"><thead><tr className="border-b text-right"><th className="p-3">الباقة/الدولة</th><th className="p-3">السعر USD</th><th className="p-3">الأيام</th><th className="p-3">الأخصائيون</th><th className="p-3">الإجابات</th><th className="p-3">حفظ</th></tr></thead><tbody>{pricingRules.map((x:any)=><PricingRow key={x.id} item={x} onSaved={()=>loadData('pricing')}/>)}</tbody></table></div></div>
-            ) : {loading ? (
+            ) : (loading ? (
               <div className="card p-8 animate-pulse">
                 <div className="h-6 bg-gray-100 rounded w-1/3 mb-4" />
                 <div className="h-4 bg-gray-100 rounded w-full mb-2" />
