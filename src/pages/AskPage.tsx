@@ -7,6 +7,7 @@ import { getCountryServicePrice } from '@/lib/countryPricing';
 import { supabase, type Specialty, type Doctor } from '@/lib/supabase';
 import DoctorCard from '@/components/DoctorCard';
 import { demoSpecialties, demoDoctors } from '@/lib/demoData';
+import { PAID_QUESTION_DURATIONS, moderateAndLog, recordUsage } from '@/lib/questionEconomy';
 
 type PricingTier = {
   id: string;
@@ -23,11 +24,7 @@ type PricingTier = {
   is_featured: boolean;
 };
 
-const fallbackTiers: PricingTier[] = [
-  { id: 'basic', name: 'Basic', name_ar: 'الأساسية', description: 'Standard response within 48 hours', description_ar: 'رد قياسي خلال 48 ساعة', duration_days: 7, specialists_notified: 10, min_answers: 1, max_answers: 3, response_speed: 'standard', price_usd: 9, is_featured: false },
-  { id: 'plus', name: 'Plus', name_ar: 'المعززة', description: 'Faster responses from more specialists', description_ar: 'ردود أسرع من عدد أكبر من الأخصائيين', duration_days: 14, specialists_notified: 25, min_answers: 2, max_answers: 5, response_speed: 'fast', price_usd: 19, is_featured: true },
-  { id: 'premium', name: 'Premium', name_ar: 'المميزة', description: 'Instant response and extended duration', description_ar: 'رد فوري ومدة ممتدة', duration_days: 30, specialists_notified: 50, min_answers: 3, max_answers: 10, response_speed: 'instant', price_usd: 39, is_featured: false },
-];
+const fallbackTiers: PricingTier[] = PAID_QUESTION_DURATIONS.map((x,i)=>({id:x.id,name:x.label_en,name_ar:x.label_ar,description:`Question active for ${x.days} days`,description_ar:`السؤال متاح لجميع أطباء التخصص لمدة ${x.days} أيام`,duration_days:x.days,specialists_notified:999,min_answers:0,max_answers:3,response_speed:'standard',price_usd:x.price_usd,is_featured:i===2}));
 
 const dataId = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `sb1-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
@@ -39,7 +36,7 @@ export default function AskPage() {
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [tiers, setTiers] = useState<PricingTier[]>(fallbackTiers);
   const [questionType, setQuestionType] = useState<'free' | 'paid'>('free');
-  const [selectedTierId, setSelectedTierId] = useState('plus');
+  const [selectedTierId, setSelectedTierId] = useState('q5');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [contentLanguage, setContentLanguage] = useState(lang);
   const [form, setForm] = useState({ author_name: '', age: '', gender: 'ذكر', title: '', body: '' });
@@ -60,7 +57,7 @@ export default function AskPage() {
           supabase.from('pricing_tiers').select('*').eq('is_active', true).order('sort_order'),
         ]);
         setSpecialties((specs && specs.length ? specs : demoSpecialties) as Specialty[]);
-        if (dbTiers?.length) setTiers(dbTiers as PricingTier[]);
+
       } catch {
         // Keep the page usable with the built-in pricing catalog when the database is unavailable.
       }
@@ -130,9 +127,9 @@ export default function AskPage() {
       const id = dbQuestionId || questionId;
       const expiresAt = questionType === 'paid' && selectedTier ? new Date(Date.now() + selectedTier.duration_days * 86400000).toISOString() : null;
       try {
-        await supabase.from('consultation_requests').insert({ question_id: dbQuestionId || null, patient_name: form.author_name.trim(), specialty_id: spec?.id || fallbackSpec.id, country_code: country.code, language_code: contentLanguage, service_type: 'question', price_usd: selectedTier?.price_usd || 0, local_price: localAmount, currency_code: country.currency, duration_days: selectedTier?.duration_days || 7, specialists_limit: selectedTier?.specialists_notified || 5, answers_limit: selectedTier?.max_answers || 3, response_speed: selectedTier?.response_speed || 'standard', status: questionType === 'paid' ? 'pending' : 'active', expires_at: expiresAt });
+        await supabase.from('consultation_requests').insert({ question_id: dbQuestionId || null, patient_name: form.author_name.trim(), specialty_id: spec?.id || fallbackSpec.id, country_code: country.code, language_code: contentLanguage, service_type: 'question', price_usd: selectedTier?.price_usd || 0, local_price: localAmount, currency_code: country.currency, duration_days: selectedTier?.duration_days || 0, specialists_limit: 999999, answers_limit: 3, response_speed: 'standard', status: questionType === 'paid' ? 'pending' : 'active', expires_at: expiresAt });
       } catch {}
-      const localQuestion = {
+      if (questionType === 'free') await recordUsage('question',1);\n      const localQuestion = {
         id, language: contentLanguage, specialty_id: fallbackSpec.id, author_name: form.author_name.trim(), title: form.title.trim(), body: form.body.trim(),
         age: form.age ? parseInt(form.age) : null, gender: form.gender, status: questionType === 'paid' ? 'pending_payment' : 'pending',
         views: 0, created_at: new Date().toISOString(), specialty: fallbackSpec, answers: [],
@@ -231,13 +228,13 @@ export default function AskPage() {
             </button>
             <button type="button" onClick={() => setQuestionType('paid')} className={`rounded-2xl border-2 p-4 text-start transition ${questionType === 'paid' ? 'border-teal-500 bg-teal-50' : 'border-gray-100'}`}>
               <div className="flex items-center gap-2 font-bold text-gray-800"><CreditCard className="w-4 h-4 text-teal-600" />{lang === 'ar' ? 'سؤال مدفوع' : 'Paid question'}</div>
-              <div className="text-xs text-gray-500 mt-1">{lang === 'ar' ? 'أولوية وإجابات أكثر' : 'Priority and more answers'}</div>
+              <div className="text-xs text-gray-500 mt-1">{lang === 'ar' ? 'متاح لجميع أطباء هذا التخصص خلال المدة المحددة' : 'Available to all doctors in this specialty for the selected duration'}</div>
             </button>
           </div>
         </div>
 
         {questionType === 'paid' && (
-          <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-3">
             {tiers.map((tier) => (
               <button key={tier.id} type="button" onClick={() => setSelectedTierId(tier.id)} className={`text-start rounded-2xl border-2 p-4 transition ${selectedTierId === tier.id ? 'border-teal-500 bg-teal-50 shadow-sm' : 'border-gray-100 bg-white'}`}>
                 {tier.is_featured && <span className="text-[10px] font-bold text-teal-700 bg-teal-100 rounded-full px-2 py-1">{lang === 'ar' ? 'الأكثر طلباً' : 'Featured'}</span>}
