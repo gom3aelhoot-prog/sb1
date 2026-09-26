@@ -117,6 +117,12 @@ export default function RegisterPage() {
         <p className="text-gray-500 text-center mb-8">{t('register.subtitle')}</p>
 
         {!accountType ? (
+          <>
+          <div className="mb-5 rounded-2xl border border-teal-200 bg-teal-50 p-5 text-center">
+            <h3 className="font-extrabold text-teal-900">عميل بدون إنشاء حساب</h3>
+            <p className="mt-1 text-sm text-teal-700">يمكن للعملاء فقط الدخول كزائر وتصفح الموقع وطرح الأسئلة العامة.</p>
+            <button type="button" onClick={()=>{localStorage.setItem('sb1_guest_client','true');localStorage.removeItem('sb1_account_role');window.location.href='/'}} className="btn-primary mt-3">الدخول كعميل بدون حساب</button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
               onClick={() => setAccountType('client')}
@@ -148,6 +154,7 @@ export default function RegisterPage() {
               <h3 className="text-lg font-bold text-gray-800 mb-1">تسجيل مؤسسة</h3>
               <p className="text-sm text-gray-500">عيادة، مختبر، أشعة، مستشفى، صيدلية أو مركز تأهيل</p>
             </button>
+          </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="card p-6 space-y-4">
