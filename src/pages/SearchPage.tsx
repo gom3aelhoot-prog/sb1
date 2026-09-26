@@ -2,11 +2,11 @@ import {useMemo,useState} from 'react';
 import {Search,MapPin,Star,Clock,CalendarDays,Stethoscope,Building2,Pill,BookOpen,PlayCircle} from 'lucide-react';
 import {useI18n} from '@/lib/i18n';
 import {virtualDoctorsForSpecialty,virtualFacilities,virtualArticlesForSpecialty,virtualVideosForSpecialty,specialtyCatalog,countriesForLanguage} from '@/lib/catalog';
-import {useRouter} from '@/lib/router';
+import {useRouter,parseQuery} from '@/lib/router';
 
 export default function SearchPage(){
- const {lang,dir}=useI18n(); const {navigate}=useRouter(); const countries=countriesForLanguage(lang);
- const [q,setQ]=useState(''); const [country,setCountry]=useState(countries[0]?.key||''); const [kind,setKind]=useState('all'); const [sort,setSort]=useState('rating');
+ const {lang,dir}=useI18n(); const {navigate,path}=useRouter(); const query=parseQuery(path); const countries=countriesForLanguage(lang);
+ const [q,setQ]=useState(query.q||''); const [country,setCountry]=useState(countries[0]?.key||''); const [kind,setKind]=useState('all'); const [sort,setSort]=useState('rating');
  const specialties=specialtyCatalog(lang).slice(0,35);
  const results=useMemo(()=>{
   const term=q.trim().toLowerCase(); const out:any[]=[];
