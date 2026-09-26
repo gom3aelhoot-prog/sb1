@@ -1,0 +1,22 @@
+name: Package SB1 source
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: write
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Create source archive
+        run: |
+          git archive --format=zip --output=SB1-complete-source.zip HEAD
+      - name: Upload SB1 archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: SB1-complete-source
+          path: SB1-complete-source.zip
+          retention-days: 30
