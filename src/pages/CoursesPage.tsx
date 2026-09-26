@@ -37,7 +37,7 @@ export default function CoursesPage() {
       }
       const { data } = await dbQuery.order('created_at', { ascending: false });
       const generated = selectedSpecialty ? virtualCoursesForSpecialty(selectedSpecialty, lang, 4) : comprehensiveSpecialties.flatMap(s => virtualCoursesForSpecialty(s.slug, lang, 2));
-      const localizedData=(data||[]).filter((x:any)=>!x.translations || x.translations?.[lang]).map((x:any)=>{const tr=x.translations?.[lang]||{};return {...x,title:tr.title||x.title,description:tr.description||x.description}}); setCourses((localizedData.length ? localizedData : (generated.length ? generated : demoCourses)) as Course[]);
+      const localizedData=(data||[]).filter((x:any)=>!x.translations || x.translations?.[lang]).map((x:any)=>{const tr=x.translations?.[lang]||{};return {...x,title:tr.title||x.title,description:tr.description||x.description}}); const existingIds=new Set(localizedData.map((x:any)=>x.id)); const merged=[...localizedData,...generated.filter((x:any)=>!existingIds.has(x.id))]; setCourses((merged.length ? merged : demoCourses) as Course[]);
       setLoading(false);
     })().catch(() => { setCourses(demoCourses); setLoading(false); });
   }, [selectedSpecialty, lang]);
