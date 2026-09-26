@@ -68,6 +68,7 @@ import MediaHubPage from '@/pages/MediaHubPage';
 import SpecialistStorePage from '@/pages/SpecialistStorePage';
 import AppsPage from '@/pages/AppsPage';
 import SpecialistContentUploadPage from '@/pages/SpecialistContentUploadPage';
+import ContentModerationPage from '@/pages/ContentModerationPage';
 import ChooseDoctorPage from '@/pages/ChooseDoctorPage';
 
 type HashView = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
@@ -103,6 +104,7 @@ function PlatformRoute() {
   if (route === '/store') return <SpecialistStorePage />;
   if (route === '/apps') return <AppsPage />;
   if (route === '/specialist/content') return <SpecialistContentUploadPage />;
+  if (route === '/admin/content') return <ContentModerationPage />;
   if (route === '/articles') return <MediaHubPage />;
   if (route.startsWith('/articles/')) return <ArticleDetailPage id={route.split('/')[2]} />;
   if (route === '/videos') return <MediaHubPage />;
