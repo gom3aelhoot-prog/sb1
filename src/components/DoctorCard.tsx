@@ -49,7 +49,7 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
             <div className="h-20 w-20 overflow-hidden rounded-2xl bg-gray-100 ring-2 ring-blue-100">
               {!imgError && imgSrc ? <img src={imgSrc} alt={name} className="h-full w-full object-cover" onError={() => { if (imgSrc !== fallbackAvatar) setImgSrc(fallbackAvatar); else setImgError(true); }} /> : <span className="flex h-full w-full items-center justify-center text-2xl font-bold text-blue-700">{name.replace(/^د\\. |^(Dr\\. |Доктор |Դոկտոր |დოქტორი )/,'').charAt(0)}</span>}
             </div>
-            <span className="absolute -bottom-1 -start-1 h-5 w-5 rounded-full border-2 border-white bg-green-500" />
+            <span className={"absolute -bottom-1 -start-1 h-5 w-5 rounded-full border-2 border-white "+(doctor.is_online?'bg-emerald-500':'bg-gray-400')} title={doctor.is_online?'Online':'Offline'} />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -65,7 +65,7 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
               <div className="rounded-xl bg-gray-50 p-2"><b className="block text-base text-gray-900">{(doctor.follower_count ? (doctor.follower_count/10).toFixed(1)+'k' : '3.9k')}</b><span className="text-xs text-gray-400">السمعة</span></div>
             </div>
             <div className="mt-3 flex items-center justify-between"><span className="text-xl font-extrabold text-emerald-700">{'75'} <small className="text-xs font-normal text-gray-400">ر.س/شهر</small></span><span className="text-xs text-gray-400"><Star className="inline h-3 w-3 fill-amber-400 text-amber-400" /> {Number(doctor.rating).toFixed(1)}</span></div>
-            <div className="mt-3 flex gap-2">
+            <div className="mt-2 flex items-center gap-2 text-xs"><span className={doctor.is_online?'text-emerald-600':'text-gray-400'}><span className={"me-1 inline-block h-2 w-2 rounded-full "+(doctor.is_online?'bg-emerald-500':'bg-gray-400')} />{doctor.is_online?'متصل الآن':'غير متصل'}</span></div><div className="mt-3 flex gap-2">
               <button onClick={handleSession} className="flex-1 rounded-xl border py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50"><Calendar className="inline h-4 w-4" /> حجز جلسة</button>
               <button onClick={handleConsult} className="flex-1 rounded-xl bg-blue-700 py-2.5 text-sm font-bold text-white hover:bg-blue-800"><MessageCircle className="inline h-4 w-4" /> متابعة</button>
             </div>
@@ -114,7 +114,7 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
             <span className="text-3xl font-bold text-teal-600">{name.replace('د. ', '').charAt(0)}</span>
           )}
         </div>
-        <div className="absolute -bottom-1 -start-1 flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 shadow-sm">
+        <div className={"absolute -bottom-1 -start-1 flex items-center gap-1 rounded-full px-2 py-0.5 shadow-sm "+(doctor.is_online?'bg-emerald-500':'bg-gray-400')}><span className="text-[10px] font-bold text-white">{doctor.is_online?'متصل':'غير متصل'}</span></div><div className="absolute -bottom-1 -start-1 translate-y-5 flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 shadow-sm">
           <Star className="h-3 w-3 fill-white text-white" />
           <span className="text-xs font-bold text-white">{Number(doctor.rating).toFixed(1)}</span>
         </div>
