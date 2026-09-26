@@ -1,4 +1,4 @@
-import { MessageCircle, Eye, Clock } from 'lucide-react';
+import { MessageCircle, Eye, Clock, AlertTriangle } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import type { Question } from '@/lib/supabase';
@@ -33,7 +33,7 @@ export default function QuestionCard({ question, specialistView = false }: { que
   return (
     <button onClick={() => navigate(`/questions/${question.id}`)} className="card card-hover w-full p-5 text-start" dir={dir}>
       <div className="mb-2 flex items-start justify-between gap-3">
-        <h3 className="line-clamp-2 text-base font-bold leading-snug text-gray-800">{title}</h3>
+        <div className="min-w-0 flex-1"><div className="mb-2 flex flex-wrap items-center gap-2">{(question as any).is_urgent && <span className="badge bg-red-50 text-red-700"><AlertTriangle className="inline h-3 w-3 me-1"/>مستعجل</span>}{(question as any).is_new && <span className="badge bg-blue-50 text-blue-700">جديد</span>}</div><h3 className="line-clamp-2 text-base font-bold leading-snug text-gray-800">{title}</h3></div>
         {question.specialty && <span className="badge shrink-0 whitespace-nowrap bg-teal-50 text-teal-700">{specialtyName(question.specialty)}</span>}
       </div>
       {specialistView && <div className="mb-3 flex flex-wrap gap-2">{marketStatus === 'closed' ? <span className="badge bg-gray-100 text-gray-600">مغلقة</span> : marketStatus === 'free' ? <span className="badge bg-emerald-50 text-emerald-700">مجانية</span> : <span className="badge bg-teal-50 text-teal-700">متاحة · {questionPrice} USD</span>}</div>}
