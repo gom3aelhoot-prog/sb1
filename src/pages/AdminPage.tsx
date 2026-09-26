@@ -7,8 +7,9 @@ import {
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Question, type Article, type DoctorVideo, type DoctorAudio, type Course, type Payment, type AIViolation, type SiteSettings, type VideoSession, type TextSession, type Specialty } from '@/lib/supabase';
 
-type AdminSection = 'overview' | 'doctors' | 'questions' | 'articles' | 'videos' | 'audio' | 'courses' | 'sessions' | 'payments' | 'violations' | 'settings';
+type AdminSection = 'overview' | 'doctors' | 'questions' | 'articles' | 'videos' | 'audio' | 'courses' | 'sessions' | 'payments' | 'pricing' | 'violations' | 'settings';
 
+function PricingRow({item,onSaved}:{item:any;onSaved:()=>void}){const [v,setV]=useState(item);return <tr className="border-b"><td className="p-3 font-bold">{v.name_ar||v.name||v.country_code||'قاعدة دولة'}</td><td className="p-3"><input className="input-field w-28" type="number" value={v.price_usd??v.base_price??0} onChange={e=>setV({...v,price_usd:Number(e.target.value),base_price:Number(e.target.value)})}/></td><td className="p-3"><input className="input-field w-20" type="number" value={v.duration_days??7} onChange={e=>setV({...v,duration_days:Number(e.target.value)})}/></td><td className="p-3"><input className="input-field w-20" type="number" value={v.specialists_notified??v.notification_reach??5} onChange={e=>setV({...v,specialists_notified:Number(e.target.value),notification_reach:Number(e.target.value)})}/></td><td className="p-3"><input className="input-field w-20" type="number" value={v.max_answers??3} onChange={e=>setV({...v,max_answers:Number(e.target.value)})}/></td><td className="p-3"><button className="btn-primary text-xs" onClick={async()=>{const payload={...v};delete payload.id;delete payload.name;delete payload.name_ar;delete payload.description;delete payload.description_ar;delete payload.sort_order;const {error}=await supabase.from(item.base_price!==undefined?'question_pricing_rules':'pricing_tiers').update(payload).eq('id',item.id);if(!error)onSaved()}}>حفظ</button></td></tr>}
 export default function AdminPage() {
   const { t, specialtyName } = useI18n();
   const [authed, setAuthed] = useState(false);
@@ -26,6 +27,7 @@ export default function AdminPage() {
   const [audios, setAudios] = useState<DoctorAudio[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [pricingRules, setPricingRules] = useState<any[]>([]);
   const [violations, setViolations] = useState<AIViolation[]>([]);
   const [videoSessions, setVideoSessions] = useState<VideoSession[]>([]);
   const [textSessions, setTextSessions] = useState<TextSession[]>([]);
@@ -131,6 +133,7 @@ export default function AdminPage() {
         setTextSessions(ts || []);
         break;
       }
+      case 'pricing': { const [{data:tiers},{data:rules}] = await Promise.all([supabase.from('pricing_tiers').select('*').order('sort_order'),supabase.from('question_pricing_rules').select('*').order('country_code')]); setPricingRules([...(tiers||[]),...(rules||[])]); break; }
       case 'payments': {
         const { data } = await supabase.from('payments').select('*').order('created_at', { ascending: false }).limit(50);
         setPayments(data || []);
@@ -233,6 +236,7 @@ export default function AdminPage() {
     { key: 'courses', label: t('admin.courses'), icon: BookOpen },
     { key: 'sessions', label: t('admin.sessions'), icon: Users },
     { key: 'payments', label: t('admin.payments'), icon: DollarSign },
+    { key: 'pricing', label: 'أسعار الأسئلة والدول', icon: DollarSign },
     { key: 'violations', label: t('admin.violations'), icon: AlertTriangle },
     { key: 'settings', label: t('admin.settings'), icon: Settings },
   ];
@@ -276,7 +280,10 @@ export default function AdminPage() {
 
           {/* Content */}
           <div className="lg:col-span-3">
-            {loading ? (
+            {section === 'pricing' ? (
+              <div className="space-y-5"><div><h2 className="text-xl font-bold text-gray-800">أسعار الأسئلة والدول</h2><p className="text-sm text-gray-500 mt-1">يمكن للمالك ضبط السعر والمدة وعدد الأخصائيين وعدد الإجابات لكل باقة وقاعدة دولة.</p></div>
+              <div className="overflow-x-auto card p-5"><table className="w-full text-sm"><thead><tr className="border-b text-right"><th className="p-3">الباقة/الدولة</th><th className="p-3">السعر USD</th><th className="p-3">الأيام</th><th className="p-3">الأخصائيون</th><th className="p-3">الإجابات</th><th className="p-3">حفظ</th></tr></thead><tbody>{pricingRules.map((x:any)=><PricingRow key={x.id} item={x} onSaved={()=>loadData('pricing')}/>)}</tbody></table></div></div>
+            ) : {loading ? (
               <div className="card p-8 animate-pulse">
                 <div className="h-6 bg-gray-100 rounded w-1/3 mb-4" />
                 <div className="h-4 bg-gray-100 rounded w-full mb-2" />
