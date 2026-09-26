@@ -153,3 +153,28 @@ begin
   values(p_account_key,'topup',p_amount,p_currency,p_reference_type,p_reference_id,p_description);
   return jsonb_build_object('ok',true,'balance',b,'amount',p_amount);
 end $$;
+
+
+create or replace function public.sb1_wallet_checkout(p_account_key text,p_category text,p_items jsonb,p_subtotal numeric,p_delivery_fee numeric,p_currency text)
+returns jsonb
+language plpgsql
+security definer
+as $$
+declare total numeric; b numeric; oid uuid;
+begin
+  total:=coalesce(p_subtotal,0)+coalesce(p_delivery_fee,0);
+  if total<=0 then raise exception 'invalid total'; end if;
+  select balance into b from public.sb1_wallets where account_key=p_account_key for update;
+  if b is null then raise exception 'wallet not found'; end if;
+  if b<total then raise exception 'insufficient wallet balance'; end if;
+  update public.sb1_wallets set balance=balance-total,updated_at=now() where account_key=p_account_key returning balance into b;
+  insert into public.sb1_commerce_orders(account_key,category,status,payment_method,payment_status,subtotal,delivery_fee,total,currency_code,items)
+  values(p_account_key,p_category,'paid','wallet','paid',p_subtotal,p_delivery_fee,total,p_currency,p_items)
+  returning id into oid;
+  insert into public.sb1_wallet_transactions(account_key,transaction_type,amount,currency_code,reference_type,reference_id,description)
+  values(p_account_key,'purchase',-total,p_currency,'commerce_order',oid::text,'SB1 purchase: '||p_category);
+  update public.sb1_wallets set rewards_points=rewards_points+floor(total)::integer,updated_at=now() where account_key=p_account_key;
+  insert into public.sb1_rewards_ledger(account_key,points,reason,reference_type,reference_id)
+  values(p_account_key,floor(total)::integer,'Purchase reward','commerce_order',oid::text);
+  return jsonb_build_object('ok',true,'order_id',oid,'balance',b,'rewards_points_added',floor(total)::integer);
+end $$;
