@@ -965,20 +965,6 @@ export const SPECIALTIES: SpecialtyCategory[] = [
     ],
   },
 ];
-, flag:'🇺🇸' },
-  { code:'DE', nameKey:'germany', currency:'EUR', currencySymbol:'€', flag:'🇩🇪' },
-  { code:'RU', nameKey:'russia', currency:'RUB', currencySymbol:'₽', flag:'🇷🇺' },
-  { code:'UZ', nameKey:'uzbekistan', currency:'UZS', currencySymbol:'soʻm', flag:'🇺🇿' },
-  { code:'AM', nameKey:'armenia', currency:'AMD', currencySymbol:'֏', flag:'🇦🇲' },
-  { code:'TJ', nameKey:'tajikistan', currency:'TJS', currencySymbol:'SM', flag:'🇹🇯' },
-  { code:'UA', nameKey:'ukraine', currency:'UAH', currencySymbol:'₴', flag:'🇺🇦' },
-  { code:'AZ', nameKey:'azerbaijan', currency:'AZN', currencySymbol:'₼', flag:'🇦🇿' },
-  { code:'GE', nameKey:'georgia', currency:'GEL', currencySymbol:'₾', flag:'🇬🇪' },
-  { code:'ET', nameKey:'ethiopia', currency:'ETB', currencySymbol:'Br', flag:'🇪🇹' },
-];
-export const COUNTRY_OPTIONS: CountryInfo[] = [...ARAB_COUNTRIES, ...INTERNATIONAL_COUNTRIES];
-export const LANGUAGE_DEFAULT_COUNTRY: Partial<Record<LanguageCode,string>> = { ar:'EG', en:'US', de:'DE', ru:'RU', uz:'UZ', hy:'AM', tg:'TJ', uk:'UA', az:'AZ', ka:'GE' };
-
 // Approximate USD exchange rates for pricing display
 export const CURRENCY_RATES: Record<string, number> = {
   USD: 1,
