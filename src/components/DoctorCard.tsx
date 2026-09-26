@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Star, MapPin, Clock, MessageCircle, Calendar, Stethoscope, BadgeCheck, Bot } from 'lucide-react';
+import { Star, MapPin, Clock, MessageCircle, Calendar, BadgeCheck, Bot } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import type { Doctor } from '@/lib/supabase';
@@ -96,7 +96,7 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
             {city && <p className="flex items-center gap-1"><MapPin className="h-3 w-3" />{city}</p>}
             <p className="flex items-center gap-1"><Clock className="h-3 w-3" />{doctor.experience_years} {expLabel}</p>
             <p className="flex items-center gap-1"><MessageCircle className="h-3 w-3" />{doctor.consultation_count} {consultLabel}</p>
-            {doctor.phone_number && !doctor.is_virtual && <p className="flex items-center gap-1 text-teal-600"><Stethoscope className="h-3 w-3" />{doctor.phone_number}</p>}
+
           </div>
           <button onClick={(e) => { e.stopPropagation(); navigate(`/doctors/${doctor.id}`); }} className="mt-2 text-xs font-medium text-teal-600 hover:text-blue-700">
             {fullProfileLabel}
