@@ -233,19 +233,24 @@ export default function AskPage() {
         </div>
 
         {questionType === 'paid' && (
-          <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-3">
-            {tiers.map((tier) => (
-              <button key={tier.id} type="button" onClick={() => setSelectedTierId(tier.id)} className={`text-start rounded-2xl border-2 p-4 transition ${selectedTierId === tier.id ? 'border-teal-500 bg-teal-50 shadow-sm' : 'border-gray-100 bg-white'}`}>
-                {tier.is_featured && <span className="text-[10px] font-bold text-teal-700 bg-teal-100 rounded-full px-2 py-1">{lang === 'ar' ? 'الأكثر طلباً' : 'Featured'}</span>}
-                <h3 className="mt-2 font-bold text-gray-800">{lang === 'ar' ? tier.name_ar : tier.name}</h3>
-                <div className="mt-1 text-xl font-extrabold text-teal-700">{Number((tier.price_usd * countryMultiplier).toFixed(2)).toLocaleString(lang === 'ar' ? 'ar-EG' : 'en-US')} {questionBasePrice.currency_symbol}</div>
-                <div className="mt-2 space-y-1 text-xs text-gray-500">
-                  <div className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{tier.duration_days} {lang === 'ar' ? 'يوم' : 'days'}</div>
-                  <div className="flex items-center gap-1"><Users className="w-3.5 h-3.5" />{tier.specialists_notified} {lang === 'ar' ? 'أطباء' : 'specialists'}</div>
-                  <div>{tier.min_answers}-{tier.max_answers} {lang === 'ar' ? 'إجابات' : 'answers'}</div>
-                </div>
-              </button>
-            ))}
+          <div className="mb-6">
+            <div className="card border border-blue-100 bg-blue-50 p-5 mb-4">
+              <h2 className="font-extrabold text-blue-900">{lang==='ar'?'كيف تعمل باقات طلب الجلسة؟':'How request plans work'}</h2>
+              <p className="mt-2 text-sm leading-7 text-blue-800">{lang==='ar'?'اختر كم يوماً يظهر طلبك للأطباء والأخصائيين. ثم اختر كم طبيباً أو أخصائياً يحق له فتح الطلب وترك رد. عند انتهاء المدة أو وصول الطلب إلى الحد المحدد من الأطباء يُغلق الطلب، وبعدها تقارن الردود وتختار الأخصائي الذي تريد حجز الجلسة معه. لا يوجد تصنيف حسب عدد الإجابات ولا يوجد ضمان لعدد إجابات معين.':'Choose how many days your request stays visible and how many specialists may open it and respond. When the duration ends or the specialist limit is reached, the request closes. You can then compare responses and choose the specialist for your session. There is no answer-count ranking or guaranteed answer count.'}</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {tiers.map((tier) => (
+                <button key={tier.id} type="button" onClick={() => setSelectedTierId(tier.id)} className={`text-start rounded-2xl border-2 p-5 transition ${selectedTierId === tier.id ? 'border-teal-500 bg-teal-50 shadow-sm' : 'border-gray-100 bg-white'}`}>
+                  {tier.is_featured && <span className="text-[10px] font-bold text-teal-700 bg-teal-100 rounded-full px-2 py-1">{lang === 'ar' ? 'الأكثر طلباً' : 'Most requested'}</span>}
+                  <h3 className="mt-2 text-lg font-extrabold text-gray-800">{lang === 'ar' ? tier.name_ar : tier.name}</h3>
+                  <div className="mt-1 text-2xl font-extrabold text-teal-700">{Number((tier.price_usd * countryMultiplier).toFixed(2)).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')} {questionBasePrice.currency_symbol}</div>
+                  <div className="mt-3 space-y-2 text-sm text-gray-600">
+                    <div className="flex items-center gap-2"><Clock className="w-4 h-4" />{tier.duration_days} {lang === 'ar' ? 'يوم ظهور الطلب' : 'days visible'}</div>
+                    <div className="flex items-center gap-2"><Users className="w-4 h-4" />{tier.specialists_notified} {lang === 'ar' ? 'أطباء/أخصائيين يمكنهم فتح الطلب والرد' : 'specialists may open and respond'}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
