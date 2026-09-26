@@ -892,6 +892,8 @@ export const ARAB_COUNTRIES: CountryInfo[] = [
   { code: 'DZ', nameKey: 'algeria', currency: 'DZD', currencySymbol: 'د.ج', flag: '🇩🇿' },
   { code: 'BH', nameKey: 'bahrain', currency: 'BHD', currencySymbol: 'د.ب', flag: '🇧🇭' },
   { code: 'MR', nameKey: 'mauritania', currency: 'MRU', currencySymbol: 'أ.م', flag: '🇲🇷' },
+  { code: 'KM', nameKey: 'comoros', currency: 'KMF', currencySymbol: 'CF', flag: '🇰🇲' },
+  { code: 'DJ', nameKey: 'djibouti', currency: 'DJF', currencySymbol: 'Fdj', flag: '🇩🇯' },
   { code: 'SD', nameKey: 'sudan', currency: 'SDG', currencySymbol: 'ج.س', flag: '🇸🇩' },
   { code: 'SO', nameKey: 'somalia', currency: 'SOS', currencySymbol: 'S.Sh', flag: '🇸🇴' },
 ];
@@ -919,6 +921,8 @@ export const CURRENCY_RATES: Record<string, number> = {
   MRU: 39.5,
   SDG: 550,
   SOS: 570,
+  KMF: 440,
+  DJF: 180,
 };
 
 export const SPECIALTIES: SpecialtyCategory[] = [
