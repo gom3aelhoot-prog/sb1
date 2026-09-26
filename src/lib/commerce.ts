@@ -4,7 +4,7 @@ export type CommerceItem={item_type:string;item_id:string;name:string;image_url?
 
 export function accountKey(){
  if(typeof window==='undefined') return 'guest';
- return localStorage.getItem('sb1_account_key')||localStorage.getItem('sb1_account_email')||'guest';
+ return localStorage.getItem('sb1_account_user_id')||localStorage.getItem('sb1_account_key')||'guest';
 }
 export function getLocalCart():CommerceItem[]{try{return JSON.parse(localStorage.getItem('sb1_commerce_cart')||'[]')}catch{return[]}}
 export function setLocalCart(v:CommerceItem[]){localStorage.setItem('sb1_commerce_cart',JSON.stringify(v));window.dispatchEvent(new Event('sb1-commerce-change'))}
