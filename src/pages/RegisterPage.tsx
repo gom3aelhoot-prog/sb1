@@ -67,26 +67,20 @@ export default function RegisterPage() {
         });
         if (!error) setSuccess(true);
       } else if (accountType === 'specialist') {
-        const { data, error } = await supabase.from('doctors').insert({
+        const { error } = await supabase.from('sb1_specialist_registration_requests').insert({
+          user_id: authResult.data.user?.id || null,
           name: formData.name,
+          email: formData.email.trim().toLowerCase(),
+          phone: formData.phone,
           specialty_id: formData.specialty || null,
-          bio: '',
-          education: '',
-          experience_years: 0,
-          photo_url: '',
-          city: '',
-          native_language: 'ar',
-          is_verified: false,
-          phone_number: formData.phone,
           country_code: registrationCountry.code,
           language_code: lang,
-        }).select().single();
-        if (!error && data) {
-          if (docUrls.id) await supabase.from('specialist_documents').insert({ doctor_id: data.id, doc_type: 'id', doc_url: docUrls.id });
-          if (docUrls.cert) await supabase.from('specialist_documents').insert({ doctor_id: data.id, doc_type: 'certificate', doc_url: docUrls.cert });
-          if (docUrls.license) await supabase.from('specialist_documents').insert({ doctor_id: data.id, doc_type: 'license', doc_url: docUrls.license });
-          setSuccess(true);
-        }
+          documents: { id: docUrls.id || null, certificate: docUrls.cert || null, license: docUrls.license || null },
+          status: 'pending',
+        });
+        if (error) throw error;
+        setSuccess(true);
+      }
       }
     } catch { /* ignore */ }
     if (success || accountType) { localStorage.removeItem('sb1_guest_client'); localStorage.setItem('sb1_account_role', accountType || 'client'); localStorage.setItem('sb1_account_email', formData.email.trim().toLowerCase()); localStorage.setItem('sb1_account_key', formData.email.trim().toLowerCase()); if (authResult.data.user?.id) localStorage.setItem('sb1_account_user_id', authResult.data.user.id); }
