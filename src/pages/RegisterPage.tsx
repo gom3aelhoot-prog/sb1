@@ -17,12 +17,13 @@ export default function RegisterPage() {
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', phone: '', specialty: '',
-    showName: true, anonymous: false, institutionType: 'clinic', address: '', services: '',
+    showName: true, anonymous: false, institutionType: 'clinic', address: '', services: '', deliveryEnabled: false, deliveryMethod: 'platform', schedule: '', documents: '',
   });
   const [docUrls, setDocUrls] = useState<{ id?: string; cert?: string; license?: string }>({});
   const [registrationCountry, setRegistrationCountry] = useState(country);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   useEffect(() => {
     supabase.from('specialties').select('*').order('name').then(({ data }) => setSpecialties(data || []));
@@ -30,6 +31,7 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!agreed) { alert(lang === 'ar' ? 'يجب قراءة وقبول العقد والقواعد قبل التسجيل.' : 'Please accept the agreement and rules before registration.'); return; }
     setSubmitting(true);
     try {
       const authResult = await supabase.auth.signUp({ email: formData.email.trim().toLowerCase(), password: formData.password, options: { data: { name: formData.name, role: accountType, country_code: registrationCountry.code, language_code: lang } } });
@@ -54,6 +56,10 @@ export default function RegisterPage() {
           phone: formData.phone,
           email: formData.email.trim().toLowerCase(),
           service_info: formData.services,
+          schedule_info: formData.schedule,
+          documents_info: formData.documents,
+          delivery_enabled: formData.deliveryEnabled,
+          delivery_method: formData.deliveryMethod,
           is_approved: false,
           subscription_plan: 'free',
           country_code: registrationCountry.code,
@@ -182,8 +188,11 @@ export default function RegisterPage() {
                     <option value="clinic">عيادة / مستشفى</option><option value="lab">مختبر</option><option value="radiology">مركز أشعة</option><option value="rehab">تأهيل</option><option value="pharmacy">صيدلية</option><option value="elderly">رعاية كبار السن</option><option value="addiction">علاج الإدمان</option>
                   </select>
                 </div>
-                <input placeholder="العنوان" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="input-field" />
+                                <input placeholder="العنوان" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="input-field" />
                 <textarea placeholder="الخدمات والأسعار والمواعيد" value={formData.services} onChange={(e) => setFormData({ ...formData, services: e.target.value })} className="input-field" rows={4} />
+                <textarea placeholder="الوثائق والتراخيص وأرقامها" value={formData.documents} onChange={(e) => setFormData({ ...formData, documents: e.target.value })} className="input-field" rows={3} />
+                <textarea placeholder="جدول المواعيد وساعات العمل" value={formData.schedule} onChange={(e) => setFormData({ ...formData, schedule: e.target.value })} className="input-field" rows={3} />
+                {formData.institutionType === 'pharmacy' && <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4 space-y-3"><label className="flex items-center gap-2 font-bold"><input type="checkbox" checked={formData.deliveryEnabled} onChange={e=>setFormData({...formData,deliveryEnabled:e.target.checked})}/> أريد خدمة التوصيل</label>{formData.deliveryEnabled&&<><select value={formData.deliveryMethod} onChange={e=>setFormData({...formData,deliveryMethod:e.target.value})} className="input-field bg-white"><option value="platform">التوصيل من خلال SB1</option><option value="self">التوصيل بواسطة الصيدلية</option></select>{formData.deliveryMethod==='platform'&&<p className="text-sm text-orange-800">سيتم إنشاء حسابات مستقلة للعاملين في التوصيل واستقبال إشعارات الطلبات.</p>}</>}</div>}
               </>
             )}
 
@@ -240,6 +249,7 @@ export default function RegisterPage() {
               </>
             )}
 
+            <div className="rounded-2xl border bg-gray-50 p-4"><label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={agreed} onChange={e=>setAgreed(e.target.checked)} className="mt-1"/><span>أقر بقراءة قواعد SB1 والعقد الخاص بدوري، وبصحة بياناتي ووثائقي، وأوافق على معالجة الطلبات والشكاوى والعقوبات وفق الشروط والقانون المعمول به. <a href="/contracts" className="text-teal-700 font-bold underline">عرض العقود</a></span></label></div>
             <button type="submit" disabled={submitting} className="btn-primary w-full flex items-center justify-center gap-2">
               {submitting ? t('register.submitting') : t('register.submit')}
             </button>
