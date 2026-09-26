@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Briefcase, MapPin, DollarSign, Send, X } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Job } from '@/lib/supabase';
+import { virtualFacilities } from '@/lib/catalog';
 
 export default function JobsPage() {
   const { t, lang } = useI18n();
@@ -15,7 +16,8 @@ export default function JobsPage() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from('jobs').select('*').eq('is_active', true).order('created_at', { ascending: false });
-      setJobs(data || []);
+      const demo = virtualFacilities(lang).slice(0,18).map((f:any,i)=>({id:'demo-job-'+i,title:lang==='ar'?['أخصائي تمريض','فني مختبر','صيدلي','أخصائي علاج طبيعي','موظف استقبال'][i%5]:['Nurse Specialist','Lab Technician','Pharmacist','Physiotherapist','Receptionist'][i%5],description:'وظيفة تجريبية منشورة من المؤسسة على SB1',location:f.city,job_type:i%2?'part_time':'full_time',salary_range:'حسب الخبرة',requirements:'المؤهلات والتراخيص المطلوبة حسب الوظيفة',is_active:true,created_at:new Date().toISOString()})) as Job[];
+      setJobs(data && data.length ? data : demo);
       setLoading(false);
     })();
   }, []);
