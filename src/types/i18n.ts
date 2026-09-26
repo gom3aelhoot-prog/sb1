@@ -903,40 +903,25 @@ export const ARAB_COUNTRIES: CountryInfo[] = [
 ];
 
 export const INTERNATIONAL_COUNTRIES: CountryInfo[] = [
-  { code:'US', nameKey:'unitedStates', currency:'USD', currencySymbol:'
+  { code:'US', nameKey:'unitedStates', currency:'USD', currencySymbol:'$', flag:'🇺🇸' },
+  { code:'DE', nameKey:'germany', currency:'EUR', currencySymbol:'€', flag:'🇩🇪' },
+  { code:'RU', nameKey:'russia', currency:'RUB', currencySymbol:'₽', flag:'🇷🇺' },
+  { code:'UZ', nameKey:'uzbekistan', currency:'UZS', currencySymbol:'soʻm', flag:'🇺🇿' },
+  { code:'AM', nameKey:'armenia', currency:'AMD', currencySymbol:'֏', flag:'🇦🇲' },
+  { code:'TJ', nameKey:'tajikistan', currency:'TJS', currencySymbol:'SM', flag:'🇹🇯' },
+  { code:'UA', nameKey:'ukraine', currency:'UAH', currencySymbol:'₴', flag:'🇺🇦' },
+  { code:'AZ', nameKey:'azerbaijan', currency:'AZN', currencySymbol:'₼', flag:'🇦🇿' },
+  { code:'GE', nameKey:'georgia', currency:'GEL', currencySymbol:'₾', flag:'🇬🇪' },
+  { code:'ET', nameKey:'ethiopia', currency:'ETB', currencySymbol:'Br', flag:'🇪🇹' },
+];
+
+export const COUNTRY_OPTIONS: CountryInfo[] = [...ARAB_COUNTRIES, ...INTERNATIONAL_COUNTRIES];
+export const LANGUAGE_DEFAULT_COUNTRY: Partial<Record<LanguageCode,string>> = { ar:'EG', en:'US', de:'DE', ru:'RU', uz:'UZ', hy:'AM', tg:'TJ', uk:'UA', az:'AZ', ka:'GE' };
+
 export const CURRENCY_RATES: Record<string, number> = {
-  USD: 1,
-  EUR: 0.85,
-  RUB: 90,
-  UZS: 12500,
-  AMD: 390,
-  TJS: 10.9,
-  UAH: 41,
-  AZN: 1.7,
-  GEL: 2.7,
-  ETB: 130,
-  SAR: 3.75,
-  AED: 3.67,
-  EGP: 48.5,
-  IQD: 1310,
-  JOD: 0.71,
-  KWD: 0.31,
-  LBP: 89500,
-  LYD: 4.85,
-  MAD: 9.95,
-  OMR: 0.39,
-  ILS: 3.7,
-  QAR: 3.64,
-  SYP: 13000,
-  TND: 3.1,
-  YER: 250,
-  DZD: 134,
-  BHD: 0.38,
-  MRU: 39.5,
-  SDG: 550,
-  SOS: 570,
-  KMF: 440,
-  DJF: 180,
+  USD: 1, EUR: 0.85, RUB: 90, UZS: 12500, AMD: 390, TJS: 10.9, UAH: 41, AZN: 1.7, GEL: 2.7, ETB: 130,
+  SAR: 3.75, AED: 3.67, EGP: 48.5, IQD: 1310, JOD: 0.71, KWD: 0.31, LBP: 89500, LYD: 4.85, MAD: 9.95, OMR: 0.39,
+  ILS: 3.7, QAR: 3.64, SYP: 13000, TND: 3.1, YER: 250, DZD: 134, BHD: 0.38, MRU: 39.5, SDG: 550, SOS: 570, KMF: 440, DJF: 180,
 };
 
 export const SPECIALTIES: SpecialtyCategory[] = [
