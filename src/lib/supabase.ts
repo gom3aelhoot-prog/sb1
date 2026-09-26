@@ -12,7 +12,31 @@ const demoTables: Record<string, DemoRow[]> = {
   courses: demoCourses, clinics: demoClinics, lab_centers: demoLabs, radiology_centers: demoRadiology,
   questions: demoQuestions, answers: demoAnswers,
   additional_facilities: demoFacilities, pharmacy_products: demoProducts, specialty_library_items: demoLibrary,
-  question_pricing_rules: [{ id:'pricing-demo', country_code:null, currency_code:'USD', base_price:9, duration_days:7, notification_reach:10, min_answers:1, max_answers:3, response_speed:'standard', is_active:true }],
+  sb1_specialist_registration_requests: [
+    {id:'req-demo-1',name:'أخصائي تجريبي',email:'pending@sb1.demo',phone:'',specialty_id:demoSpecialties[0]?.id||null,country_code:'SY',language_code:'ar',documents:{},status:'pending',created_at:now},
+  ],
+  sb1_team_chat_rooms: [
+    {id:'team-owner',name:'المالك + المشرفون',description:'مجموعة خاصة يحدد المالك أعضاءها',member_count:3,created_at:now,is_active:true},
+    {id:'team-pediatrics',name:'فريق الأطفال المختار',description:'غرفة خاصة لأخصائيي الأطفال المختارين',member_count:4,created_at:now,is_active:true},
+  ],
+  sb1_team_chat_messages: [
+    {id:'tm1',room_id:'team-owner',sender_name:'المالك',sender_role:'owner',body:'مرحباً بفريق الإدارة.',created_at:now},
+  ],
+  sb1_pediatric_library_rooms: [
+    {id:'p-room-1',name:'التقييم والتشخيص',description:'صور وفيديوهات وملفات تعليمية',owner_id:'owner',is_active:true,created_at:now},
+    {id:'p-room-2',name:'إعادة التأهيل للأطفال',description:'مواد تبادل الخبرات',owner_id:'owner',is_active:true,created_at:now},
+  ],
+  sb1_pediatric_library_posts: [
+    {id:'p-post-1',room_id:'p-room-1',title:'مثال تعليمي',body:'مادة تجريبية لتبادل الخبرة بين الأخصائيين.',media_url:'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',media_type:'video',author_name:'SB1',likes_count:4,comments_count:1,shares_count:2,created_at:now},
+  ],
+  sb1_pediatric_library_comments: [
+    {id:'p-comment-1',post_id:'p-post-1',author_name:'أخصائي تجريبي',body:'مفيد، شكراً.',created_at:now},
+  ],
+  sb1_team_chat_members: [
+    {id:'tmember-owner',room_id:'team-owner',member_name:'المالك',member_role:'owner',created_at:now},
+    {id:'tmember-mod',room_id:'team-owner',member_name:'مشرف SB1',member_role:'moderator',created_at:now},
+  ],
+    question_pricing_rules: [{ id:'pricing-demo', country_code:null, currency_code:'USD', base_price:9, duration_days:7, notification_reach:10, min_answers:1, max_answers:3, response_speed:'standard', is_active:true }],
   pricing_tiers: [
     { id:'basic', name:'Basic', name_ar:'الأساسية', description:'Standard response', description_ar:'رد قياسي', duration_days:7, specialists_notified:10, min_answers:1, max_answers:3, response_speed:'standard', price_usd:9, is_featured:false, is_active:true, sort_order:1 },
     { id:'plus', name:'Plus', name_ar:'المعززة', description:'Faster response', description_ar:'رد أسرع', duration_days:14, specialists_notified:25, min_answers:2, max_answers:5, response_speed:'fast', price_usd:19, is_featured:true, is_active:true, sort_order:2 },
