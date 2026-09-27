@@ -21,6 +21,7 @@ export default function CoursesPage() {
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
+  const [priceSort, setPriceSort] = useState('none');
   const [enrollCourse, setEnrollCourse] = useState<Course | null>(null);
   const [enrollForm, setEnrollForm] = useState({ name: '', email: '' });
   const [enrolling, setEnrolling] = useState(false);
@@ -52,6 +53,8 @@ export default function CoursesPage() {
       setLoading(false);
     })().catch(() => { setCourses(demoCourses); setLoading(false); });
   }, [selectedSpecialty, lang]);
+
+  const sortedCourses = [...courses].sort((a:any,b:any)=>priceSort==='low'?Number(a.price||0)-Number(b.price||0):priceSort==='high'?Number(b.price||0)-Number(a.price||0):0);
 
   const handleEnroll = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,7 +112,7 @@ export default function CoursesPage() {
             <option value="">{t('common.all')}</option>
             {specialties.map((spec) => <option key={spec.id} value={spec.slug}>{specialtyName(spec)}</option>)}
           </select>
-          <p className="mt-2 text-xs text-gray-400">{lang==='ar'?'اختر تخصصاً واحداً ثم ستظهر الدورات الخاصة به فقط.':'Choose one specialty to view only its courses.'}</p>
+          <div className="mt-3"><select value={priceSort} onChange={e=>setPriceSort(e.target.value)} className="input-field w-full"><option value="none">ترتيب حسب السعر</option><option value="low">الأقل سعراً أولاً</option><option value="high">الأعلى سعراً أولاً</option></select></div><p className="mt-2 text-xs text-gray-400">{lang==='ar'?'اختر تخصصاً واحداً ثم ستظهر الدورات الخاصة به فقط.':'Choose one specialty to view only its courses.'}</p>
         </div>
 
         {loading ? (
@@ -129,7 +132,7 @@ export default function CoursesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {courses.map((course) => {
+            {sortedCourses.map((course) => {
               const title = localizedField(course as unknown as Record<string, unknown>, 'title', lang, course.title);
               const description = localizedField(course as unknown as Record<string, unknown>, 'description', lang, course.description);
               return (
