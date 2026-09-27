@@ -1,102 +1,38 @@
-import { useState } from 'react';
-import { MessageCircle, Paperclip, Heart, Share2, Users, Search, Send, Image, FileText, Plus, UserRound } from 'lucide-react';
+import { useEffect,useMemo,useRef,useState } from 'react';
+import { MessageCircle,Paperclip,Heart,Share2,Users,Search,Send,Image as ImageIcon,FileText,Plus,UserRound,Smile,Pin,MoreHorizontal } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useRouter } from '@/lib/router';
-import { lt } from '@/lib/featureText';
+import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 
-const posts = [
-  { id: 1, name: 'Анна Петрова', role: 'student', avatar: 'АП', specialty: 'CBT', time: '12 мин', text: 'Кто изучает КПТ и хочет обмениваться конспектами и практическими заданиями?', likes: 18, comments: 6 },
-  { id: 2, name: 'Dr. Omar Hassan', role: 'specialist', avatar: 'OH', specialty: 'Neuropsychology', time: '1 ч', text: 'Поделился новой схемой оценки исполнительных функций для учебного обсуждения.', likes: 42, comments: 11 },
+type Msg={id:string;name:string;role:string;topic:string;text:string;image?:string;time:string;likes:number;};
+const seed:Msg[]=[
+{id:'m1',name:'SB1',role:'إدارة المجتمع',topic:'عام',text:'مرحباً بكم في مجتمع SB1. يمكنكم فتح نقاش عام أو اختيار تخصص ومناقشة موضوعاته مع الأعضاء.',time:'الآن',likes:12},
+{id:'m2',name:'أخصائي تجريبي',role:'أخصائي',topic:'الصحة النفسية',text:'نقاش تجريبي: ما أفضل طرق التثقيف النفسي التي يمكن مشاركتها مع المرضى؟',time:'منذ 15 دقيقة',likes:8},
+{id:'m3',name:'عضو تجريبي',role:'عميل',topic:'طب الأطفال',text:'أرغب في معرفة تجاربكم التعليمية حول متابعة صحة الأطفال.',time:'منذ 32 دقيقة',likes:5},
 ];
 
-export default function CommunityPage() {
-  const { lang } = useI18n();
-  const { navigate } = useRouter();
-  const [composer, setComposer] = useState('');
-
-  const title = lt(lang, { ar: 'المجتمع العلمي', ru: 'Научное сообщество', en: 'Academic Community', de: 'Akademische Community' });
-  const subtitle = lt(lang, { ar: 'تبادل الخبرات والملفات والنقاشات بين الطلاب والأخصائيين', ru: 'Обмен опытом, файлами и обсуждениями между студентами и специалистами', en: 'Exchange experience, files and discussions between students and specialists', de: 'Erfahrung, Dateien und Diskussionen zwischen Studierenden und Spezialisten teilen' });
-  const publish = lt(lang, { ar: 'نشر', ru: 'Опубликовать', en: 'Publish', de: 'Veröffentlichen' });
-  const rooms = lt(lang, { ar: 'غرف الأقسام', ru: 'Чаты направлений', en: 'Department Rooms', de: 'Fach-Chats' });
-
-  return (
-    <div className="min-h-screen pt-24 pb-16 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 rounded-3xl bg-gradient-to-br from-teal-700 to-cyan-600 p-8 text-white shadow-lg">
-          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-sm">
-                <Users className="w-4 h-4" />
-                {title}
-              </span>
-              <h1 className="mt-4 text-3xl md:text-4xl font-extrabold">{title}</h1>
-              <p className="mt-2 max-w-2xl text-teal-50">{subtitle}</p>
-            </div>
-            <button onClick={() => navigate('/chat')} className="rounded-xl bg-white px-5 py-3 font-bold text-teal-700 hover:bg-teal-50">
-              <MessageCircle className="inline w-4 h-4 ml-2" />{rooms}
-            </button>
-          </div>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-[1fr_330px]">
-          <main className="space-y-5">
-            <div className="card p-5">
-              <div className="flex gap-3">
-                <div className="w-11 h-11 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold">SB</div>
-                <div className="flex-1">
-                  <textarea value={composer} onChange={(e) => setComposer(e.target.value)} placeholder={lt(lang, { ar: 'شارك خبرة أو سؤالًا أو ملفًا مع المجتمع...', ru: 'Поделитесь опытом, вопросом или файлом...', en: 'Share an experience, question or file...', de: 'Teile eine Erfahrung, Frage oder Datei...' })} className="w-full resize-none rounded-2xl border border-gray-200 p-4 outline-none focus:border-teal-400 focus:ring-4 focus:ring-teal-50" rows={3} />
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex gap-2">
-                      <button className="rounded-xl bg-gray-50 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100"><Paperclip className="inline w-4 h-4 ml-1" />{lt(lang,{ar:'ملف',ru:'Файл',en:'File',de:'Datei'})}</button>
-                      <button className="rounded-xl bg-gray-50 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100"><Image className="inline w-4 h-4 ml-1" />{lt(lang,{ar:'صورة',ru:'Фото',en:'Photo',de:'Foto'})}</button>
-                    </div>
-                    <button onClick={() => setComposer('')} disabled={!composer.trim()} className="rounded-xl bg-teal-600 px-5 py-2.5 font-semibold text-white disabled:opacity-40 hover:bg-teal-700"><Send className="inline w-4 h-4 ml-1" />{publish}</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {posts.map((post) => (
-              <article key={post.id} className="card p-5">
-                <div className="flex gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 flex items-center justify-center font-bold text-teal-700">{post.avatar}</div>
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button onClick={() => navigate('/profile')} className="font-bold text-gray-800 hover:text-teal-700">{post.name}</button>
-                      <span className="rounded-full bg-teal-50 px-2 py-1 text-[11px] text-teal-700">{post.role === 'student' ? lt(lang,{ar:'طالب',ru:'Студент',en:'Student',de:'Student'}) : lt(lang,{ar:'أخصائي',ru:'Специалист',en:'Specialist',de:'Spezialist'})}</span>
-                      <span className="text-xs text-gray-400">{post.specialty} · {post.time}</span>
-                    </div>
-                    <p className="mt-3 text-gray-700 leading-relaxed">{post.text}</p>
-                    <div className="mt-4 flex items-center gap-5 border-t pt-3 text-sm text-gray-500">
-                      <button className="hover:text-rose-600"><Heart className="inline w-4 h-4 ml-1" />{post.likes}</button>
-                      <button className="hover:text-teal-600"><MessageCircle className="inline w-4 h-4 ml-1" />{post.comments}</button>
-                      <button className="hover:text-teal-600"><Share2 className="inline w-4 h-4 ml-1" />{lt(lang,{ar:'مشاركة',ru:'Поделиться',en:'Share',de:'Teilen'})}</button>
-                      <button className="mr-auto rounded-lg bg-gray-50 px-3 py-1.5 hover:bg-gray-100"><FileText className="inline w-4 h-4 ml-1" />PDF</button>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </main>
-
-          <aside className="space-y-5">
-            <div className="card p-5">
-              <div className="flex items-center justify-between mb-4"><h2 className="font-bold text-gray-800">{rooms}</h2><Plus className="w-5 h-5 text-teal-600" /></div>
-              <div className="space-y-2">
-                {['ABA / АВА', 'Нейропсихология', 'КПТ / CBT', 'Семейная психология', 'Арт-терапия', 'Аутизм'].map((room) => <button key={room} onClick={() => navigate('/chat')} className="w-full rounded-xl bg-gray-50 px-3 py-3 text-left text-sm text-gray-700 hover:bg-teal-50">{room}<span className="float-right text-xs text-gray-400">›</span></button>)}
-              </div>
-            </div>
-            <div className="card p-5">
-              <div className="flex items-center gap-3"><UserRound className="w-5 h-5 text-teal-600" /><h2 className="font-bold text-gray-800">{lt(lang,{ar:'أدوات المجتمع',ru:'Инструменты сообщества',en:'Community Tools',de:'Community-Tools'})}</h2></div>
-              <div className="mt-4 space-y-2">
-                <button onClick={() => navigate('/library')} className="w-full rounded-xl border px-3 py-2 text-left text-sm hover:bg-gray-50">{lt(lang,{ar:'مشاركة كتاب/مرجع',ru:'Поделиться книгой',en:'Share a book/reference',de:'Buch/Quelle teilen'})}</button>
-                <button onClick={() => navigate('/tests')} className="w-full rounded-xl border px-3 py-2 text-left text-sm hover:bg-gray-50">{lt(lang,{ar:'إنشاء اختبار تدريبي',ru:'Создать тренировочный тест',en:'Create practice test',de:'Übungstest erstellen'})}</button>
-                <button onClick={() => navigate('/academy')} className="w-full rounded-xl border px-3 py-2 text-left text-sm hover:bg-gray-50">{lt(lang,{ar:'استكشف الأكاديمية',ru:'Открыть академию',en:'Open academy',de:'Akademie öffnen'})}</button>
-              </div>
-            </div>
-          </aside>
-        </div>
-      </div>
-    </div>
-  );
+export default function CommunityPage(){
+ const {lang,dir}=useI18n(); const {navigate}=useRouter();
+ const [topic,setTopic]=useState('عام'); const [search,setSearch]=useState(''); const [text,setText]=useState(''); const [name,setName]=useState(()=>localStorage.getItem('sb1_chat_name')||'عضو SB1'); const [messages,setMessages]=useState<Msg[]>(()=>{try{return JSON.parse(localStorage.getItem('sb1_community_messages')||'null')||seed}catch{return seed}});
+ const [image,setImage]=useState<string>(''); const fileRef=useRef<HTMLInputElement>(null);
+ useEffect(()=>localStorage.setItem('sb1_community_messages',JSON.stringify(messages)),[messages]);
+ const labels:any={ar:{title:'مجتمع SB1',sub:'مجتمع مفتوح للعملاء والأخصائيين والأطباء والمؤسسات وكل أعضاء SB1. نقاشات عامة ونقاشات متخصصة مع صور وملفات وإيموجي.',general:'نقاش عام',specialty:'اختر التخصص',send:'إرسال',attach:'صورة / ملف',name:'اسمك في المجتمع',search:'ابحث في النقاشات...',rooms:'المناقشات',store:'المتجر',storeText:'هنا ستظهر منتجات وخدمات SB1: الدورات والكتب والاختبارات والاستشارات وخدمات الأخصائيين والمساحات الإعلانية. ويمكن لكل نوع حساب رؤية ما يخصه.',emoji:'إيموجي',join:'فتح المناقشة',pin:'مثبت',like:'إعجاب',reply:'رد',empty:'لا توجد نتائج.'},en:{title:'SB1 Community',sub:'A shared community for clients, specialists, doctors, institutions and every SB1 member. General and specialty discussions with photos, files and emoji.',general:'General discussion',specialty:'Choose specialty',send:'Send',attach:'Photo / file',name:'Your community name',search:'Search discussions...',rooms:'Discussions',store:'Store',storeText:'This is where SB1 products and services appear: courses, books, tests, consultations, specialist services and ad spaces. Each account sees what applies to it.',emoji:'Emoji',join:'Open discussion',pin:'Pinned',like:'Like',reply:'Reply',empty:'No results.'},ru:{title:'Сообщество SB1',sub:'Общее пространство для клиентов, специалистов, врачей, учреждений и всех участников SB1. Общие и профильные обсуждения с фото, файлами и эмодзи.',general:'Общее обсуждение',specialty:'Выберите специальность',send:'Отправить',attach:'Фото / файл',name:'Ваше имя',search:'Поиск обсуждений...',rooms:'Обсуждения',store:'Магазин',storeText:'Здесь появятся курсы, книги, тесты, консультации, услуги специалистов и рекламные места SB1.',emoji:'Эмодзи',join:'Открыть обсуждение',pin:'Закреплено',like:'Нравится',reply:'Ответить',empty:'Нет результатов.'}};
+ const L=labels[lang]||labels.en;
+ const topics=useMemo(()=>['عام',...comprehensiveSpecialties.slice(0,60).map((s:any)=>lang==='ar'?s.ar:s.en||s.ar)], [lang]);
+ const filtered=messages.filter(m=>(topic==='عام'?true:m.topic===topic)&&(m.text.toLowerCase().includes(search.toLowerCase())||m.name.toLowerCase().includes(search.toLowerCase())));
+ const publish=()=>{if(!text.trim()&&!image)return;const msg:Msg={id:'msg-'+Date.now(),name:name.trim()||'عضو SB1',role:'عضو',topic,text:text.trim(),image,time:'الآن',likes:0};setMessages(x=>[msg,...x]);setText('');setImage('');localStorage.setItem('sb1_chat_name',name.trim()||'عضو SB1')};
+ const onImage=(e:any)=>{const f=e.target.files?.[0];if(!f)return;if(f.size>4*1024*1024){alert(lang==='ar'?'الصورة أكبر من 4MB':'Image is larger than 4MB');return}const r=new FileReader();r.onload=()=>setImage(String(r.result));r.readAsDataURL(f)};
+ const addEmoji=(e:string)=>setText(x=>x+e);
+ return <div dir={dir} className="min-h-screen pt-24 pb-16 bg-slate-50"><div className="mx-auto max-w-7xl px-4">
+  <div className="rounded-3xl bg-gradient-to-br from-teal-700 to-cyan-600 p-7 md:p-9 text-white shadow-lg"><div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"><div><span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-sm"><Users className="h-4 w-4"/>{L.rooms}</span><h1 className="mt-3 text-3xl font-extrabold">{L.title}</h1><p className="mt-2 max-w-3xl text-teal-50">{L.sub}</p></div><button onClick={()=>navigate('/profile')} className="rounded-xl bg-white px-5 py-3 font-bold text-teal-700">صفحتي</button></div></div>
+  <div className="mt-6 grid gap-6 lg:grid-cols-[280px_1fr_320px]">
+   <aside className="rounded-3xl border bg-white p-4 h-fit"><div className="flex items-center justify-between"><h2 className="font-extrabold">{L.rooms}</h2><Plus className="h-5 w-5 text-teal-600"/></div><div className="mt-4 space-y-2"><button onClick={()=>setTopic('عام')} className={'w-full rounded-xl px-3 py-3 text-start font-bold '+(topic==='عام'?'bg-teal-600 text-white':'bg-slate-50')}>{L.general}</button>{topics.slice(1).map((x)=><button key={x} onClick={()=>setTopic(x)} className={'w-full rounded-xl px-3 py-2.5 text-start text-sm '+(topic===x?'bg-teal-50 text-teal-700 font-bold':'hover:bg-slate-50')}>{x}</button>)}</div></aside>
+   <main className="space-y-4">
+    <div className="rounded-3xl border bg-white p-4 shadow-sm"><div className="flex gap-3"><div className="h-11 w-11 rounded-full bg-teal-100 flex items-center justify-center font-bold text-teal-700">{name.charAt(0)}</div><div className="flex-1"><input value={name} onChange={e=>setName(e.target.value)} placeholder={L.name} className="mb-2 w-full rounded-xl border px-3 py-2 text-sm"/><textarea value={text} onChange={e=>setText(e.target.value)} placeholder={lang==='ar'?'اكتب رسالتك أو افتح نقاشاً جديداً...':'Write a message or start a discussion...'} className="w-full resize-none rounded-2xl border p-4 outline-none focus:border-teal-400" rows={3}/>{image&&<img src={image} alt="" className="mt-3 max-h-56 rounded-xl object-cover"/>}<div className="mt-3 flex flex-wrap items-center gap-2"><input ref={fileRef} type="file" accept="image/*" hidden onChange={onImage}/><button onClick={()=>fileRef.current?.click()} className="rounded-xl bg-slate-50 px-3 py-2 text-sm"><ImageIcon className="inline h-4 w-4 me-1"/>{L.attach}</button><div className="flex gap-1">{['😀','❤️','👍','👏','🩺','🧠','😂'].map(e=><button key={e} onClick={()=>addEmoji(e)} className="rounded-lg px-2 py-1 hover:bg-slate-100">{e}</button>)}</div><button onClick={publish} disabled={!text.trim()&&!image} className="ms-auto rounded-xl bg-teal-600 px-5 py-2.5 font-bold text-white disabled:opacity-40"><Send className="inline h-4 w-4 me-1"/>{L.send}</button></div></div></div></div>
+    <div className="rounded-2xl border bg-white p-3 flex items-center gap-2"><Search className="h-5 w-5 text-slate-400"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder={L.search} className="flex-1 outline-none"/></div>
+    {filtered.map((m,i)=><article key={m.id} className="rounded-3xl border bg-white p-5 shadow-sm"><div className="flex gap-3"><div className="h-11 w-11 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 flex items-center justify-center font-bold text-teal-700">{m.name.charAt(0)}</div><div className="flex-1"><div className="flex flex-wrap items-center gap-2"><b>{m.name}</b><span className="rounded-full bg-teal-50 px-2 py-1 text-[11px] text-teal-700">{m.role}</span><span className="text-xs text-slate-400">{m.topic} · {m.time}</span>{i===0&&<span className="rounded-full bg-amber-50 px-2 py-1 text-[11px] text-amber-700"><Pin className="inline h-3 w-3 me-1"/>{L.pin}</span>}</div>{m.text&&<p className="mt-3 leading-7 text-slate-700">{m.text}</p>}{m.image&&<img src={m.image} alt="" className="mt-3 max-h-96 rounded-2xl object-cover"/>}<div className="mt-4 flex items-center gap-5 border-t pt-3 text-sm text-slate-500"><button onClick={()=>setMessages(x=>x.map(v=>v.id===m.id?{...v,likes:v.likes+1}:v))}><Heart className="inline h-4 w-4 me-1"/>{m.likes}</button><button><MessageCircle className="inline h-4 w-4 me-1"/>{L.reply}</button><button><Share2 className="inline h-4 w-4 me-1"/>{lang==='ar'?'مشاركة':'Share'}</button><button className="ms-auto"><MoreHorizontal className="h-4 w-4"/></button></div></div></div></article>)}{!filtered.length&&<div className="rounded-3xl border bg-white p-10 text-center text-slate-400">{L.empty}</div>}
+   </main>
+   <aside className="space-y-4"><div className="rounded-3xl border bg-white p-5"><div className="flex items-center gap-2"><FileText className="h-5 w-5 text-indigo-600"/><h2 className="font-extrabold">{L.store}</h2></div><p className="mt-3 text-sm leading-7 text-slate-600">{L.storeText}</p><button onClick={()=>navigate('/store')} className="mt-4 rounded-xl bg-indigo-600 px-4 py-2.5 font-bold text-white">{lang==='ar'?'فتح المتجر':'Open Store'}</button></div><div className="rounded-3xl border bg-white p-5"><h2 className="font-extrabold">{L.specialty}</h2><p className="mt-2 text-sm text-slate-500">{topic}</p><button onClick={()=>setTopic('عام')} className="mt-4 rounded-xl border px-4 py-2 text-sm">{L.general}</button></div><div className="rounded-3xl border bg-white p-5"><UserRound className="h-6 w-6 text-teal-600"/><h2 className="mt-2 font-extrabold">مجتمع مفتوح</h2><p className="mt-1 text-sm text-slate-500">عميل · أخصائي · طبيب · مؤسسة · أي عضو مسجل في SB1.</p></div></aside>
+  </div>
+ </div></div>;
 }
