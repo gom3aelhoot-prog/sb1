@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, BadgeCheck, PenLine, Share2, ExternalLink, Copy, Briefcase as BriefcaseIcon, Settings as SettingsIcon, Bookmark, Archive, Coins, Wallet } from 'lucide-react';
+import { ArrowRight, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, BadgeCheck, PenLine, Share2, ExternalLink, Copy, Briefcase as BriefcaseIcon, Settings as SettingsIcon, Bookmark, Archive, Coins, Wallet, Bell, ShieldCheck } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Question, type SpecialistPost, type PostComment, type Article, type DoctorAudio } from '@/lib/supabase';
@@ -276,25 +276,12 @@ export default function DoctorProfilePage({ id }: { id: string }) {
 
         {activeTab === 'videos' && (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {posts.slice(0,5).map((p,i)=><button key={p.id} onClick={()=>setActiveTab('posts')} className="relative overflow-hidden rounded-2xl aspect-[3/5] bg-gradient-to-br from-teal-600 to-cyan-500 text-white p-4 text-start shadow-sm">
+            {posts.slice(0,5).map((p,i)=><button key={p.id} onClick={()=>setActiveTab('videos')} className="relative overflow-hidden rounded-2xl aspect-[3/5] bg-gradient-to-br from-teal-600 to-cyan-500 text-white p-4 text-start shadow-sm">
               {p.image_url&&<img src={p.image_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-70"/>}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"/>
               <span className="relative z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-teal-700 font-bold">{i+1}</span>
               <span className="absolute bottom-3 start-3 end-3 z-10 text-xs font-semibold">{p.body}</span>
             </button>)}
-          </div>
-        )}
-
-        {activeTab === 'questions' && (
-          <div className="space-y-4">
-            {diary.map((d) => (
-              <div key={d.id} className="card p-5">
-                {d.title && <h3 className="font-bold text-gray-800 mb-2">{d.title}</h3>}
-                <p className="text-sm text-gray-600 leading-relaxed">{d.body}</p>
-                <p className="text-xs text-gray-400 mt-2">{new Date(d.created_at).toLocaleDateString()}</p>
-              </div>
-            ))}
-            {diary.length === 0 && <p className="text-center text-gray-400 py-8">{t('common.loading')}</p>}
           </div>
         )}
 
@@ -325,22 +312,6 @@ export default function DoctorProfilePage({ id }: { id: string }) {
 
         {activeTab === 'control' && (
           <div className="grid gap-4 md:grid-cols-2"><a href="/notifications/private" className="card p-5"><Bell className="text-teal-600"/><b className="block mt-2">الإشعارات الخاصة</b></a><a href="/settings" className="card p-5"><SettingsIcon className="text-indigo-600"/><b className="block mt-2">إعدادات الحساب والتحكم</b></a><a href="/specialist/content" className="card p-5"><PenLine className="text-amber-600"/><b className="block mt-2">نشر وإدارة المحتوى</b></a><a href="/specialist/studio" className="card p-5"><ShieldCheck className="text-emerald-600"/><b className="block mt-2">الإيموجي والبادجات</b></a></div>
-        )}
-
-        {activeTab === 'portfolio' && (
-          <div className="space-y-3">
-            {audios.map((a) => (
-              <div key={a.id} className="card p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center"><MessageCircle className="w-5 h-5 text-teal-600" /></div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm text-gray-800">{a.title}</p>
-                  <p className="text-xs text-gray-400">{a.duration_seconds} {t('common.minutes')}</p>
-                </div>
-                {a.audio_url && <audio src={a.audio_url} controls className="h-8" />}
-              </div>
-            ))}
-            {audios.length === 0 && <p className="text-center text-gray-400 py-8">{t('common.loading')}</p>}
-          </div>
         )}
 
         {/* CTA */}
