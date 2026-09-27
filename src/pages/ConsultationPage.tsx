@@ -22,7 +22,7 @@ export default function ConsultationPage() {
           <h2 className="text-xl font-bold">جلسة شخصية بالفيديو</h2>
           <p className="mt-2 text-sm leading-7 text-gray-500">هذه ليست سؤالاً عاماً. إنها جلسة خاصة مع الطبيب عبر الفيديو، بسعر ومدة يحددهما الطبيب ضمن سياسات المنصة. يمكنك اختيار موعد جاهز، أو إرسال الأوقات المناسبة لك ليقترح الطبيب مواعيد متاحة.</p>
           <ul className="mt-4 space-y-2 text-sm text-gray-600"><li>• صفحة الطبيب الكاملة قبل الحجز</li><li>• جدول المواعيد أو طلب موعد مخصص</li><li>• دفع وحالة حجز واضحة</li><li>• رابط الجلسة يصل قبل الموعد</li></ul>
-          <button onClick={()=>navigate('/sessions')} className="btn-primary mt-6 w-full"><Video className="inline h-4 w-4"/> احجز جلسة فيديو</button>
+          <button onClick={()=>navigate('/choose-doctor?mode=video')} className="btn-primary mt-6 w-full"><Video className="inline h-4 w-4"/> افتح جلسات الفيديو واحجز</button>
         </article>
       </div>
       <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800"><ShieldCheck className="mb-2 h-5 w-5"/><b>تنبيه:</b> الاستشارات والجلسات لا تغني عن الطوارئ أو الفحص المباشر عند الحاجة، وتخضع لمراجعة وسياسات SB1.</div>
