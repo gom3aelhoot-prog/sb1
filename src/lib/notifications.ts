@@ -18,7 +18,7 @@ export function demoGlobalNotifications(lang:string):NotificationItem[]{
   {kind:'news' as const,title:tr(lang,{ar:'خبر طبي وصحي جديد اليوم',en:'New medical and health update today',ru:'Сегодня новое медицинское обновление',de:'Neue medizinische Gesundheitsmeldung heute'}),body:tr(lang,{ar:'تم تحديث موجز الأخبار الصحية في المنصة.',en:'The health news feed has been updated.',ru:'Лента медицинских новостей обновлена.',de:'Der Gesundheits-Newsfeed wurde aktualisiert.'}),href:'/media',mins:43},
   {kind:'community' as const,title:tr(lang,{ar:'نشاط جديد في مجتمع SB1',en:'New SB1 community activity',ru:'Новая активность сообщества SB1',de:'Neue SB1-Community-Aktivität'}),body:tr(lang,{ar:'انضمام أخصائيين ومحتوى جديد للقراءة والمشاهدة.',en:'New specialists and content are available.',ru:'Доступны новые специалисты и материалы.',de:'Neue Spezialisten und Inhalte sind verfügbar.'}),href:'/community',mins:78},
  ];
- return items.map((x,i)=>({id:`global-demo-${i}`,scope:'global',kind:x.kind,title:x.title,body:x.body,href:x.href,created_at:new Date(now-x.mins*60000).toISOString(),read:false,language_code:lang}));
+ return items.map((x,i)=>({id:`global-demo-${i}`,scope:'global',kind:x.kind,title:x.title,body:x.body,href:x.href,created_at:new Date(now-x.mins*60000).toISOString(),read:false,language_code:lang})) as NotificationItem[];
 }
 
 export function demoPrivateNotifications(lang:string,userId:string):NotificationItem[]{
