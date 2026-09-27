@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Calendar, CheckCircle2, Clock, MapPin, Phone, Star, ShoppingBag } from 'lucide-react';
-import { useRouter, getPathOnly } from '@/lib/router';
+import { useRouter, getPathOnly, parseQuery } from '@/lib/router';
 import { demoClinics, demoFacilities, demoLabs, demoProducts, demoRadiology } from '@/lib/demoData';
 import { supabase } from '@/lib/supabase';
 import { virtualFacilities, languageCountry, countriesForLanguage } from '@/lib/catalog';
 import { useI18n } from '@/lib/i18n';
 import { clientPrice, clientDiscountLabel } from '@/lib/pricing';
+import { recordCampaignEvent } from '@/lib/cityNotificationAds';
 
 type Kind = 'clinic'|'lab'|'radiology'|'facility';
 
@@ -13,6 +14,7 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
   const { path, navigate } = useRouter();
   const { lang } = useI18n();
   const id = getPathOnly(path).split('/')[2] || '';
+  const campaignQuery = parseQuery(path);
   const [booked, setBooked] = useState(false);
   const [date, setDate] = useState('');
   const [service, setService] = useState('');
@@ -69,6 +71,7 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
       const local=JSON.parse(localStorage.getItem('sb1_demo_bookings')||'[]');
       localStorage.setItem('sb1_demo_bookings',JSON.stringify([{...payload,id:`demo-booking-${Date.now()}`,institution_id:id,kind},...local]));
     }
+    if (campaignQuery.campaign_id && campaignQuery.delivery_id) { try { await recordCampaignEvent(campaignQuery.delivery_id,'purchase',`booking-${Date.now()}`); } catch {} }
     setBooked(true);
   };
 
