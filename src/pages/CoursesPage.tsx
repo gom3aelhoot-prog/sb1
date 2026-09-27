@@ -128,7 +128,7 @@ export default function CoursesPage() {
               const title = localizedField(course as unknown as Record<string, unknown>, 'title', lang, course.title);
               const description = localizedField(course as unknown as Record<string, unknown>, 'description', lang, course.description);
               return (
-                <div key={course.id} className="card card-hover group flex flex-col overflow-hidden">
+                <div key={course.id} onClick={()=>navigate("/content/"+course.id)} className="card card-hover group flex flex-col overflow-hidden cursor-pointer">
                   <div className="relative h-40 overflow-hidden bg-gradient-to-br from-teal-100 to-teal-50">
                     {course.image_url && <img src={course.image_url} alt={title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
                     {course.specialty && <span className="absolute end-3 top-3 badge bg-white/90 text-teal-700 shadow-sm">{specialtyName(course.specialty)}</span>}
