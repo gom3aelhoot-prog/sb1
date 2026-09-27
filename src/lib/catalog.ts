@@ -222,3 +222,17 @@ const facilityNames:Record<string,Record<string,string>>={
 export function virtualFacilities(lang:string,countryKey?:string):AdditionalFacility[]{const p=languageCountry(lang);const choices=countriesForLanguage(lang);const key=countryKey&&countryData[countryKey]?countryKey:(choices[0]?.key||'syria');const c=countryData[key]||countryData.syria;const countryName=c.names[lang]||c.names.en;return facilityKinds.flatMap(([kind])=>Array.from({length:3},(_,i)=>({id:`catalog-fac-${lang}-${key}-${kind}-${i+1}`,facility_type:kind,name:`${facilityNames[lang]?.[kind]||facilityNames.en[kind]} ${countryName} ${i+1}`,description:`${L(lang).articleIntro} — ${countryName}`,address:`${c.city} · SB1 Health District`,city:c.city,country:countryName,phone:null,email:null,logo_url:null,services:'Appointments · services · prices · schedules',gallery_urls:[`https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80`,`https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80`,`https://images.unsplash.com/photo-1580281658223-9b93f18ae9ae?auto=format&fit=crop&w=1200&q=80`],video_url:'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',property_mode:kind==='property'?(i%2?'rent':'sale'):null,schedule:{sun:'09:00-18:00',mon:'09:00-18:00',tue:'09:00-18:00',wed:'09:00-18:00',thu:'09:00-18:00'},rating:4.6+(i/10),is_active:true,created_at:new Date(2026,0,1+i).toISOString()} as any)));}
 
 export function languageContentSummary(lang:string){return {language:languageCountry(lang).native,country:languageCountry(lang).country,doctorsPerSpecialty:'5–25 virtual demo profiles',questionsPerSpecialty:'50 demo questions',answersPerQuestion:'5–20 demo answers',articlesPerSpecialty:'50 educational articles',videos:lang==='ar'||lang==='ru'||lang==='en'||lang==='ka'||lang==='hy'||lang==='uz'?'2 demo videos':'not currently seeded',audio:'300 demo audio items',books:'1000 demo library books',courses:'4 demo courses'};}
+
+
+export function virtualContentById(id:string){
+ const m=id.match(/^catalog-(art|vid|audio|book|course)-(.+)-([0-9]+)$/); if(!m)return null;
+ const kind=m[1], rest=m[2], n=Number(m[3]); const langs=Object.keys(LANGUAGE_PROFILES);
+ for(const lang of langs){const prefix=lang+'-';if(!rest.startsWith(prefix))continue;const slug=rest.slice(prefix.length);if(!comprehensiveSpecialties.some(s=>s.slug===slug))continue;
+  if(kind==='art')return virtualArticlesForSpecialty(slug,lang,n).slice(-1)[0]||null;
+  if(kind==='vid')return virtualVideosForSpecialty(slug,lang,n).slice(-1)[0]||null;
+  if(kind==='audio')return virtualAudioForSpecialty(slug,lang,n).slice(-1)[0]||null;
+  if(kind==='book')return virtualLibraryForSpecialty(slug,lang,n).slice(-1)[0]||null;
+  if(kind==='course')return virtualCoursesForSpecialty(slug,lang,Math.max(4,n)).find((x:any)=>x.id===id)||null;
+ }
+ return null;
+}
