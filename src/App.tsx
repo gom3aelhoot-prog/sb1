@@ -113,6 +113,7 @@ import SpecialistPackagesPage from '@/pages/SpecialistPackagesPage';
 import SpecialistStudioPage from '@/pages/SpecialistStudioPage';
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
 import { getSanction } from '@/lib/safetyModeration';
+import RoleGate from '@/components/RoleGate';
 import { getRole, routeAllowed, roleLabel } from '@/lib/access';
 
 type HashView = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
@@ -257,7 +258,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1"><RoleGate path={platformRoute}>{
         {isHome && !localHashPage && (
           <>
             <Hero />
@@ -279,7 +280,7 @@ function AppContent() {
         {isHome && localHashPage && state.view === 'dictionary' && <MedicalDictionaryPage onNavigate={navigate} />}
         {isHome && localHashPage && state.view === 'reels' && <MediaReelsPage onNavigate={navigate} />}
         {!isHome && <PlatformRoute />}
-      </main>
+      }}</RoleGate></main>
       <Footer />
       <SiteAdSlots />
       <DiscountBanner />
