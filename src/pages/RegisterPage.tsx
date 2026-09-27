@@ -44,14 +44,14 @@ export default function RegisterPage() {
         const { error } = await supabase.from('sb1_specialist_registration_requests').insert({
           id: 'req-' + Date.now(), name: formData.name, email, phone: formData.phone,
           specialty_id: formData.specialty || null, age: age || null, parental_consent: Boolean(formData.parentalConsent), country_code: registrationCountry.code,
-          language_code: lang, documents: { id: docUrls.id || null, certificate: docUrls.cert || null, license: docUrls.license || null },
+          language_code: lang, city: formData.city, documents: { id: docUrls.id || null, certificate: docUrls.cert || null, license: docUrls.license || null },
           status: 'pending', created_at: new Date().toISOString()
         });
         if (error) throw error;
         setSuccess(true);
         return;
       }
-      const authResult = await supabase.auth.signUp({ email, password: formData.password, options: { data: { name: formData.name, role: accountType, age: age || null, parental_consent: Boolean(formData.parentalConsent), country_code: registrationCountry.code, language_code: lang } } });
+      const authResult = await supabase.auth.signUp({ email, password: formData.password, options: { data: { name: formData.name, role: accountType, age: age || null, parental_consent: Boolean(formData.parentalConsent), country_code: registrationCountry.code, language_code: lang, city: formData.city } } });
       if (authResult.error) throw authResult.error;
       try {
         let parentId:any = null;
@@ -62,12 +62,13 @@ export default function RegisterPage() {
       try { await supabase.from('newsletter_subscribers').upsert({email,name:formData.name,language_code:lang,country_code:registrationCountry.code,is_active:true},{onConflict:'email'}); } catch {}
       if (accountType === 'delivery_worker') { const { error } = await supabase.from('sb1_delivery_workers').insert({name:formData.name,phone:formData.phone,city:formData.address||'',status:'pending',documents:{files:institutionFiles},country_code:registrationCountry.code,language_code:lang}); if(error) throw error; }
       if (accountType === 'client') {
-        const { error } = await supabase.from('profiles').insert({ id: authResult.data.user?.id, name: formData.anonymous ? 'مجهول' : formData.name, email, phone: formData.phone, role: 'client', country_code: registrationCountry.code, language_code: lang, is_anonymous: formData.anonymous });
+        const { error } = await supabase.from('profiles').insert({ id: authResult.data.user?.id, name: formData.anonymous ? 'مجهول' : formData.name, email, phone: formData.phone, role: 'client', country_code: registrationCountry.code, language_code: lang, is_anonymous: formData.anonymous, city: formData.city, last_seen_at: new Date().toISOString() });
         if (error) throw error;
       } else if (accountType === 'institution') {
-        const { error } = await supabase.from('institutions').insert({ name: formData.name, type: formData.institutionType, address: formData.address, phone: formData.phone, email, service_info: formData.services, schedule_info: formData.schedule, documents_info: formData.documents, document_files: institutionFiles, delivery_enabled: formData.deliveryEnabled, delivery_method: formData.deliveryMethod, delivery_worker_policy: formData.deliveryMethod==='platform'?'all':'institution_workers', is_approved: false, subscription_plan: 'free', country_code: registrationCountry.code, language_code: lang });
+        const { error } = await supabase.from('institutions').insert({ name: formData.name, type: formData.institutionType, address: formData.address, phone: formData.phone, email, service_info: formData.services, schedule_info: formData.schedule, documents_info: formData.documents, document_files: institutionFiles, delivery_enabled: formData.deliveryEnabled, delivery_method: formData.deliveryMethod, delivery_worker_policy: formData.deliveryMethod==='platform'?'all':'institution_workers', is_approved: false, subscription_plan: 'free', country_code: registrationCountry.code, language_code: lang, city: formData.city, owner_user_id: authResult.data.user?.id || null });
         if (error) throw error;
       }
+      try { await supabase.from('sb1_audience_profiles').insert({user_id:authResult.data.user?.id||null,name:formData.name,email,role:accountType||'client',country_code:registrationCountry.code,city:formData.city,language_code:lang,last_seen_at:new Date().toISOString(),notification_enabled:true}); } catch {}
       localStorage.removeItem('sb1_guest_client');
       localStorage.setItem('sb1_account_role', accountType || 'client');
       localStorage.setItem('sb1_account_email', email);
@@ -172,14 +173,14 @@ export default function RegisterPage() {
               <input type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="input-field" />
             </div>
 
-            {accountType === 'delivery_worker' && <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">المدينة</label>
-              <select required value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value, address: e.target.value })} className="input-field bg-white">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">المدينة — تُستخدم لتخصيص الخدمات والإعلانات المحلية</label>
+              <select required value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value, address: accountType==='delivery_worker'?e.target.value:formData.address })} className="input-field bg-white">
                 <option value="">اختر المدينة</option>
                 {citiesForCountry(registrationCountry.code, lang).map((x:any)=><option key={x.key} value={x.key}>{x.name}</option>)}
               </select>
-              <p className="mt-1 text-xs text-gray-500">المدينة فقط؛ لا يتم طلب عنوان المنزل أو الشارع.</p>
-            </div>}
+              <p className="mt-1 text-xs text-gray-500">يتم حفظ المدينة فقط ولا نطلب عنوان المنزل أو الشارع.</p>
+            </div>
             {accountType === 'institution' && (
               <>
                 <div>
