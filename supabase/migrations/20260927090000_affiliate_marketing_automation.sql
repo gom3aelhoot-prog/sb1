@@ -120,3 +120,6 @@ DO $$ DECLARE t text; BEGIN
    EXECUTE format('CREATE POLICY "sb1_public_update_%s" ON %I FOR UPDATE TO anon,authenticated USING (true) WITH CHECK (true)',t,t);
  END LOOP;
 END $$;
+
+INSERT INTO marketing_connections(provider,enabled) VALUES ('telegram',false),('whatsapp',false),('instagram',false),('facebook',false)
+ON CONFLICT(provider) DO NOTHING;
