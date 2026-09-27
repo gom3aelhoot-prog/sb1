@@ -120,7 +120,6 @@ export default function CoursesPage() {
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="card overflow-hidden animate-pulse">
                 <div className="h-40 bg-gray-100" />
-                <div className="px-5 pt-3"><ShareButtons compact title={course.title} url={window.location.origin + '/courses/' + course.id} /></div>
           <div className="p-5"><div className="mb-2 h-5 w-3/4 rounded bg-gray-100" /><div className="h-4 w-1/2 rounded bg-gray-100" /></div>
               </div>
             ))}
