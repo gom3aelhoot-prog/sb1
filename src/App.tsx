@@ -81,6 +81,7 @@ import DeliveryPage from '@/pages/DeliveryPage';
 import ServiceCenterPage from '@/pages/ServiceCenterPage';
 import StoreAdminPage from '@/pages/StoreAdminPage';
 import AppsPage from '@/pages/AppsPage';
+import RegistrationContractsPage from '@/pages/RegistrationContractsPage';
 import DailyNewsPage from '@/pages/DailyNewsPage';
 import BooksPage from '@/pages/BooksPage';
 import SurgicalVideoLibraryPage from '@/pages/SurgicalVideoLibraryPage';
@@ -160,6 +161,7 @@ function PlatformRoute() {
   if (route === '/support') return <ServiceCenterPage />;
   if (route === '/admin/store') return <StoreAdminPage />;
   if (route === '/apps') return <AppsPage />;
+  if (route === '/register/contracts') return <RegistrationContractsPage />;
   if (route === '/news') return <DailyNewsPage />;
   if (route === '/books') return <BooksPage />;
   if (route === '/surgical-videos') return <SurgicalVideoLibraryPage />;
