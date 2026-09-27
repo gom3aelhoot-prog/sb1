@@ -103,6 +103,7 @@ import AppointmentsPage from '@/pages/AppointmentsPage';
 import VideoAppointmentDoctorPage from '@/pages/VideoAppointmentDoctorPage';
 import SpecialistFreeSessionsPage from '@/pages/SpecialistFreeSessionsPage';
 import PushNotifications from '@/components/PushNotifications';
+import PresenceHeartbeat from '@/components/PresenceHeartbeat';
 import CapacityGuard from '@/components/CapacityGuard';
 import JobsTicker from '@/components/JobsTicker';
 import OnboardingTour from '@/components/OnboardingTour';
@@ -296,7 +297,7 @@ function AppContent() {
       <DiscountBanner />
       <SB1Watermark />
       {/* watermark appears only inside paid content pages */}
-        <PushNotifications />
+        <><PushNotifications /><PresenceHeartbeat /></>
       <CapacityGuard />
       <OnboardingTour />
       {!isHome && <AIChatWidget />}
