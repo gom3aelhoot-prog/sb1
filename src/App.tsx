@@ -23,6 +23,7 @@ import { CompounderPage } from '@/components/CompounderPage';
 import { MedicalDictionaryPage } from '@/components/MedicalDictionaryPage';
 import { MediaReelsPage } from '@/components/MediaReelsPage';
 import AIChatWidget from '@/components/AIChatWidget';
+import SB1Watermark from '@/components/SB1Watermark';
 
 import DoctorsPage from '@/pages/DoctorsPage';
 import DoctorProfilePage from '@/pages/DoctorProfilePage';
@@ -280,7 +281,8 @@ function AppContent() {
       <Footer />
       <SiteAdSlots />
       <DiscountBanner />
-      <PushNotifications />
+      <SB1Watermark />
+        <PushNotifications />
       <CapacityGuard />
       <OnboardingTour />
       {!isHome && <AIChatWidget />}
