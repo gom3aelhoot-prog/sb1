@@ -5,6 +5,8 @@ import { useI18n } from '@/lib/i18n';
 import { specialtyCatalog } from '@/lib/catalog';
 import { moderateAndLog } from '@/lib/questionEconomy';
 
+const fileAsDataUrl = (file: File) => new Promise<string>((resolve,reject)=>{ const r=new FileReader(); r.onload=()=>resolve(String(r.result||'')); r.onerror=reject; r.readAsDataURL(file); });
+
 export default function SpecialistContentUploadPage() {
   const { lang, dir } = useI18n();
   const [type, setType] = useState('article');
@@ -56,7 +58,7 @@ export default function SpecialistContentUploadPage() {
       })));
     };
     loadCovers();
-  }, [specialty, coverSearch, lang]);
+  }, [specialty, coverSearch, contentLanguage]);
 
 
   const mediaImages = Array.from({length: 72}, (_, i) => ({ id: 'bank-' + (i + 1), title: 'Medical Media ' + (i + 1), image_url: 'https://images.unsplash.com/photo-' + ['1576091160399-112ba8d25d1d','1579684385127-1ef15d508118','1584982751601-97dcc096659c','1532938911079-1b06ac7ceec7','1584515933487-779824d29309','1559757175-0eb30cd8c063'][i % 6] + '?auto=format&fit=crop&w=1200&q=90', search_text: 'medical health ' + i }));
@@ -79,6 +81,8 @@ export default function SpecialistContentUploadPage() {
 
       let filePath: string | null = null;
       let coverPath: string | null = null;
+      let demoFileUrl: string | null = null;
+      let demoCoverUrl: string | null = null;
 
       if (file) {
         const max = type === 'video' ? 20 * 1024 * 1024 * 1024 : type === 'audio' ? 5 * 1024 * 1024 * 1024 : 10 * 1024 * 1024 * 1024;
@@ -91,17 +95,31 @@ export default function SpecialistContentUploadPage() {
         };
         const bucket = bucketMap[type] || 'specialist-content';
         filePath = (userId || 'anonymous') + '/' + Date.now() + '-' + file.name;
-        let uploaded = await supabase.storage.from(bucket).upload(filePath, file, { upsert: false, contentType: file.type || undefined });
-        if (uploaded.error && bucket !== 'specialist-content') {
-          uploaded = await supabase.storage.from('specialist-content').upload(filePath, file, { upsert: false, contentType: file.type || undefined });
+        if (supabase.storage?.from) {
+          let uploaded = await supabase.storage.from(bucket).upload(filePath, file, { upsert: false, contentType: file.type || undefined });
+          if (uploaded.error && bucket !== 'specialist-content') uploaded = await supabase.storage.from('specialist-content').upload(filePath, file, { upsert: false, contentType: file.type || undefined });
+          if (uploaded.error) {
+            if (file.size <= 5 * 1024 * 1024) demoFileUrl = await fileAsDataUrl(file);
+            else throw new Error('تعذر رفع الملف إلى التخزين. جرّب ملفاً أصغر أو تأكد من إعداد مخزن الملفات في Supabase.');
+          }
+        } else if (file.size <= 5 * 1024 * 1024) {
+          demoFileUrl = await fileAsDataUrl(file);
+        } else {
+          throw new Error('وضع العرض التجريبي يقبل ملفات حتى 5MB فقط.');
         }
-        if (uploaded.error) throw uploaded.error;
       }
 
       if (cover) {
         coverPath = (userId || 'anonymous') + '/covers-' + Date.now() + '-' + cover.name;
-        const uploadedCover = await supabase.storage.from('specialist-content').upload(coverPath, cover, { upsert: false, contentType: cover.type || undefined });
-        if (uploadedCover.error) throw uploadedCover.error;
+        if (supabase.storage?.from) {
+          const uploadedCover = await supabase.storage.from('specialist-content').upload(coverPath, cover, { upsert: false, contentType: cover.type || undefined });
+          if (uploadedCover.error) {
+            if (cover.size <= 5 * 1024 * 1024) demoCoverUrl = await fileAsDataUrl(cover);
+            else throw new Error('تعذر رفع صورة الغلاف. جرّب صورة أصغر.');
+          }
+        } else if (cover.size <= 5 * 1024 * 1024) {
+          demoCoverUrl = await fileAsDataUrl(cover);
+        }
       }
 
       const selected = specialtyCatalog(lang).find(x => x.slug === specialty);
@@ -118,7 +136,8 @@ export default function SpecialistContentUploadPage() {
         platform_share: 50,
         specialist_share: 50,
         file_path: filePath,
-        cover_path: coverPath || selectedCover?.image_url || null,
+        cover_path: coverPath || demoCoverUrl || selectedCover?.image_url || null,
+        file_url: demoFileUrl,
         status: 'pending',
       };
 
@@ -186,7 +205,7 @@ export default function SpecialistContentUploadPage() {
             <textarea value={description} onChange={e => setDescription(e.target.value)} className="input-field w-full min-h-28" placeholder="الوصف" />
 
             <div><label className="text-sm font-bold">لغة المحتوى</label><select required value={contentLanguage} onChange={e=>{setContentLanguage(e.target.value as typeof lang);setSpecialty(specialtyCatalog(e.target.value)[0]?.slug||'')}} className="input-field w-full mt-1">{[['ar','العربية'],['en','English'],['ru','Русский'],['de','Deutsch'],['uk','Українська'],['uz','O‘zbekcha'],['hy','Հայերեն'],['tg','Тоҷикӣ'],['az','Azərbaycanca'],['am','አማርኛ'],['ka','ქართული']].map(([v,l])=><option key={v} value={v}>{l}</option>)}</select><p className="mt-1 text-xs text-gray-500">سيظهر المحتوى للمستخدمين الذين اختاروا هذه اللغة.</p></div><select required value={specialty} onChange={e => setSpecialty(e.target.value)} className="input-field w-full">
-              {specialtyCatalog(lang).map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+              {specialtyCatalog(contentLanguage).map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
             </select>
 
             <div className="grid md:grid-cols-2 gap-3">
