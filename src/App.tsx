@@ -148,6 +148,7 @@ function PlatformRoute() {
   if (route === '/questions') return <QuestionsPage />;
   if (route.startsWith('/questions/')) return <QuestionDetailPage id={route.split('/')[2]} />;
   if (route === '/ask') return <AskPage />;
+  if (route === '/paid-question') return <AskPage />;
   if (route === '/consult') return <ConsultationPage />;
   if (route.startsWith('/specialties/')) return <SpecialtyHubPage />;
   if (route.startsWith('/clinics/')) return <InstitutionDetailPage kind="clinic" />;
