@@ -89,6 +89,7 @@ import ComplaintsPage from '@/pages/ComplaintsPage';
 import ComplaintsAdminPage from '@/pages/ComplaintsAdminPage';
 import ReferralTreePage from '@/pages/ReferralTreePage';
 import MarketingCenterPage from '@/pages/MarketingCenterPage';
+import CityNotificationAdsPage from '@/pages/CityNotificationAdsPage';
 import SpecialistContentUploadPage from '@/pages/SpecialistContentUploadPage';
 import ContentModerationPage from '@/pages/ContentModerationPage';
 import AdminApprovalsPage from '@/pages/AdminApprovalsPage';
@@ -209,6 +210,7 @@ function PlatformRoute() {
   if (route === '/referral') return <ReferralPage />;
   if (route === '/referral/tree') return <ReferralTreePage />;
   if (route === '/owner/marketing') return <MarketingCenterPage />;
+  if (route === '/ads/city-notifications') return <CityNotificationAdsPage />;
   if (route === '/ai-reader') return <AIReaderPage />;
   if (route === '/favorites') return <FavoritesPage />;
   if (route === '/community') return <CommunityPage />;
