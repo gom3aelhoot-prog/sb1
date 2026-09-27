@@ -30,7 +30,7 @@ export function demoPrivateNotifications(lang:string,userId:string):Notification
   {id:`private-${userId}-1`,scope:'private',kind:'wallet',title:text.wallet,body:lang==='ar'?'تم تسجيل العملية في سجل المحفظة.': 'The transaction was recorded in your wallet ledger.',created_at:new Date(now-8*60000).toISOString(),read:false,href:'/wallet',user_id:userId},
   {id:`private-${userId}-2`,scope:'private',kind:'booking',title:text.booking,body:lang==='ar'?'اليوم · 18:30 · جلسة فيديو خاصة.': 'Today · 18:30 · Private video session.',created_at:new Date(now-31*60000).toISOString(),read:false,href:'/specialist-appointments',user_id:userId},
   {id:`private-${userId}-3`,scope:'private',kind:'account',title:text.account,body:lang==='ar'?'يمكنك مراجعة سجل الأمان من مركز الأمان.':'Review the security history in Safety Center.',created_at:new Date(now-3*3600000).toISOString(),read:true,href:'/safety',user_id:userId},
- ].map(x=>({...x,language_code:lang}));
+ ].map(x=>({...x,language_code:lang})) as NotificationItem[];
 }
 
 export async function loadGlobalNotifications(lang:string){
