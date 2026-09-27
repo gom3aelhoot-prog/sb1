@@ -20,7 +20,7 @@ function MapCard({order}:{order:Order}){const steps=[['created','المؤسسة'
 
 export default function DeliveryPage(){
  const{lang,dir}=useI18n(); const{path}=useRouter();
- const [role,setRole]=useState<Role>(()=>(localStorage.getItem('sb1_preview_role')||localStorage.getItem('sb1_account_role') as Role)||'client');
+ const [role,setRole]=useState<Role>(()=>((localStorage.getItem('sb1_preview_role')||localStorage.getItem('sb1_account_role')||'client') as Role));
  const [orders,setOrders]=useState<Order[]>(()=>read(KEY,[]));
  const [workers,setWorkers]=useState<any[]>(()=>read(WORKERS_KEY,seedWorkers));
  const [tab,setTab]=useState('orders');
