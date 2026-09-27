@@ -104,6 +104,9 @@ import OwnerCommandCenterPage from '@/pages/OwnerCommandCenterPage';
 import OwnerIntegrationsPage from '@/pages/OwnerIntegrationsPage';
 import OwnerSovereigntyPage from '@/pages/OwnerSovereigntyPage';
 import SafetyCenterPage from '@/pages/SafetyCenterPage';
+import SpecialistPackagesPage from '@/pages/SpecialistPackagesPage';
+import SpecialistStudioPage from '@/pages/SpecialistStudioPage';
+import ClientDashboardPage from '@/pages/ClientDashboardPage';
 import { getSanction } from '@/lib/safetyModeration';
 
 type HashView = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
@@ -149,6 +152,9 @@ function PlatformRoute() {
   if (route === '/complaints') return <ComplaintsPage />;
   if (route === '/admin/complaints') return <ComplaintsAdminPage />;
   if (route === '/specialist/content') return <SpecialistContentUploadPage />;
+  if (route === '/specialist/packages') return <SpecialistPackagesPage />;
+  if (route === '/specialist/studio') return <SpecialistStudioPage />;
+  if (route === '/dashboard') return <ClientDashboardPage />;
   if (route === '/specialist/dashboard') return <SpecialistContentUploadPage />;
   if (route === '/admin/content') return <ContentModerationPage />;
   if (route === '/admin/approvals') return <AdminApprovalsPage />;
