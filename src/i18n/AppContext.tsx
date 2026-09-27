@@ -78,13 +78,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = language;
+    document.body.classList.add('sb1-compact');
     document.documentElement.dir = direction;
   }, [language, direction]);
 
   useEffect(() => {
     if (!discountConfig.enabled) { setShowDiscount(false); return; }
     const now=Date.now();
-    const cooldownMinutes = discountDismissedAt ? (discountCloseCount <= 1 ? 30 : 60) : 0;
+    const cooldownMinutes = discountDismissedAt ? (discountCloseCount <= 1 ? Math.max(1,discountConfig.repeatAfterMinutes || 30) : 60) : 0;
     const cooldown=cooldownMinutes*60000;
     const remaining=Math.max(0,cooldown-(now-discountDismissedAt));
     const delay=discountDismissedAt ? remaining : 2000;
