@@ -18,12 +18,15 @@ import {
   ChevronDown,
   Wallet,
   ShoppingCart,
+  Globe2,
+  LockKeyhole,
 } from 'lucide-react';
 import { useApp } from '@/i18n/AppContext';
 import { useI18n } from '@/lib/i18n';
 import { MegaMenu } from '@/components/MegaMenu';
 import { LanguageSwitcher, MobileLanguageSwitcher } from '@/components/LanguageSwitcher';
 import { NotificationsPopover } from '@/components/NotificationsPopover';
+import PrivateNotificationsPopover from '@/components/PrivateNotificationsPopover';
 import { SPECIALTIES } from '@/types/i18n';
 import SessionNavCounter from '@/components/SessionNavCounter';
 
@@ -157,7 +160,8 @@ export function Header() {
                 <ShoppingCart className="h-5 w-5" />
               </a>
 
-              <NotificationsPopover />
+              <a href="/notifications/global" className="relative flex h-10 w-10 items-center justify-center rounded-xl text-sky-700 hover:bg-sky-50" title="الإشعارات العامة"><Globe2 className="h-5 w-5"/></a>
+              <PrivateNotificationsPopover />
 
               {/* Auth buttons */}
               <div className="hidden md:flex items-center gap-2">
