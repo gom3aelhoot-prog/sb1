@@ -10,7 +10,7 @@ type Order={id:string;institution:string;institutionAddress:string;customer:stri
 
 const KEY='sb1_delivery_system_v3';
 const WORKERS_KEY='sb1_delivery_workers_v3';
-const roleLabels:any={ar:{client:'عميل',institution:'مؤسسة',delivery_worker:'عامل توصيل'},en:{client:'Client',institution:'Institution',delivery_worker:'Delivery worker'},ru:{client:'Клиент',institution:'Учреждение',delivery_worker:'Курьер'},de:{client:'Kunde',institution:'Einrichtung',delivery_worker:'Lieferfahrer'}};
+const roleLabels:any={ar:{client:'عميل',institution:'مؤسسة',delivery_worker:'عامل توصيل',owner:'مالك'},en:{client:'Client',institution:'Institution',delivery_worker:'Delivery worker'},ru:{client:'Клиент',institution:'Учреждение',delivery_worker:'Курьер'},de:{client:'Kunde',institution:'Einrichtung',delivery_worker:'Lieferfahrer'}};
 const statusLabels:any={created:'تم إنشاء الطلب',accepted:'قبله عامل التوصيل',picked_up:'استلم الطلب من المؤسسة',on_route:'في الطريق إلى العميل',delivered:'تم التسليم',disputed:'معلّق للتحقيق',cancelled:'ملغي'};
 const read=<T,>(key:string,fallback:T):T=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch{return fallback}};
 const write=(key:string,v:any)=>localStorage.setItem(key,JSON.stringify(v));
@@ -32,7 +32,7 @@ export default function DeliveryPage(){
  const [notice,setNotice]=useState('');
  const current=orders[0];
 
- useEffect(()=>{const r=(localStorage.getItem('sb1_account_role') as Role)||'client';setRole(['client','institution','delivery_worker','owner'].includes(r)?r:'client')},[path]);
+ useEffect(()=>{const r=(localStorage.getItem('sb1_preview_role')||localStorage.getItem('sb1_account_role')||'client') as Role;setRole(['client','institution','delivery_worker','owner'].includes(r)?r:'client')},[path]);
  useEffect(()=>write(KEY,orders),[orders]);
 
  const total=Number(subtotal||0)+Number(deliveryFee||0);
