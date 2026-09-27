@@ -1,5 +1,6 @@
 import type { Doctor, Specialty, Question, Answer, Article, DoctorVideo, DoctorAudio, SpecialtyLibraryItem, AdditionalFacility, Course } from '@/lib/supabase';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
+import { ARAB_COUNTRIES } from '@/types/i18n';
 
 export const LANGUAGE_PROFILES: Record<string,{country:string;city:string;native:string;names:string[];hospital?:string;rental?:string;sale?:string}> = {
  ar:{country:'سوريا',city:'دمشق',native:'العربية',names:['د. جمال نادي','د. أحمد خالد','د. سامر محمود','د. ياسر حسن','د. كريم علي','د. عمر يوسف','د. رامي أسعد','د. مازن خليل','د. خالد منصور','د. وليد عادل','د. حسام نجيب','د. طارق عبد الله']},
@@ -40,8 +41,10 @@ const countryData:Record<string,{city:string;names:Record<string,string>}> = {
  canada:{city:'Toronto',names:{ar:'كندا',en:'Canada',de:'Kanada',ru:'Канада',uk:'Канада',uz:'Kanada',hy:'Կանադա',tg:'Канада',az:'Kanada',am:'ካናዳ',ka:'კანადა'}},
 };
 
+const arabCountryNames:Record<string,string>={SA:'السعودية',AE:'الإمارات',EG:'مصر',IQ:'العراق',JO:'الأردن',KW:'الكويت',LB:'لبنان',LY:'ليبيا',MA:'المغرب',OM:'عُمان',PS:'فلسطين',QA:'قطر',SY:'سوريا',TN:'تونس',YE:'اليمن',DZ:'الجزائر',BH:'البحرين',MR:'موريتانيا',KM:'جزر القمر',DJ:'جيبوتي',SD:'السودان',SO:'الصومال'};
 export function countriesForLanguage(lang:string){
- const preferred=lang==='ar'?['syria','saudi','uae','egypt','jordan','lebanon']:lang==='ru'?['russia','ukraine','kazakhstan' in countryData?'kazakhstan':'russia']:lang==='hy'?['armenia','georgia','russia']:lang==='ka'?['georgia','armenia','turkey' in countryData?'turkey':'georgia']:lang==='uz'?['uzbekistan','kazakhstan' in countryData?'kazakhstan':'russia']:lang==='de'?['germany','austria','switzerland']:['uk','usa','canada'];
+ if(lang==='ar') return ARAB_COUNTRIES.map(c=>({key:c.code,name:arabCountryNames[c.code]||c.code,city:''}));
+ const preferred=lang==='ru'?['russia','ukraine']:lang==='hy'?['armenia','georgia','russia']:lang==='ka'?['georgia','armenia']:lang==='uz'?['uzbekistan','russia']:lang==='de'?['germany','austria','switzerland']:['uk','usa','canada'];
  return preferred.map(k=>({key:k,name:countryData[k]?.names[lang]||countryData[k]?.names.en||k,city:countryData[k]?.city||''}));
 }
 
@@ -87,10 +90,11 @@ const doctorPhotoPool=[
 ];
 export function virtualDoctorsForSpecialty(slug:string,lang:string,count=10,countryKey?:string):Doctor[]{
  const s=spec(slug);if(!s)return[];const specialty=sp(lang,slug);const base=countryKey&&countryData[countryKey]?countryData[countryKey]:null;
- const p=base?{country:base.names[lang]||base.names.en,city:base.city,native:LANGUAGE_PROFILES[lang]?.native||'English'}:languageCountry(lang);const names=namesFor(lang);
+ const arab=countryKey&&arabCountryNames[countryKey]?arabCountryNames[countryKey]:null;
+ const p=base?{country:base.names[lang]||base.names.en,city:base.city,native:LANGUAGE_PROFILES[lang]?.native||'English'}:arab?{country:arab,city:'',native:LANGUAGE_PROFILES[lang]?.native||'العربية'}:languageCountry(lang);const names=namesFor(lang);
  return Array.from({length:Math.max(5,Math.min(25,count))},(_,i)=>({id:`catalog-doctor-${lang}-${slug}-${i+1}`,name:(slug==='clinical-psychology'&&i===0)?names[0]:names[(i+1)%names.length],specialty_id:specialty.id,
  bio:i===0?(lang==='ar'?'طبيب نفسي، أخصائي نفسي، أخصائي علم الجنس، أخصائي نفسي عصبي وABA · خبرة 17 سنة · متابعون كثيرون. ملف تجريبي تعليمي.':lang==='ru'?'Психиатр, психолог, сексолог, нейропсихолог и специалист ABA · 17 лет опыта · много подписчиков. Учебный демонстрационный профиль.':lang==='de'?'Psychiater, Psychologe, Sexualtherapeut, Neuropsychologe und ABA-Spezialist · 17 Jahre Erfahrung · viele Follower. Demo-Lernprofil.':lang==='en'?'Psychiatrist, psychologist, sexologist, neuropsychologist and ABA specialist · 17 years of experience · many followers. Educational demo profile.':'17 years of experience · multidisciplinary mental-health specialist · educational demo profile.'):(L(lang).virtual+' في '+localizedSpecialty(s,lang)+'. '+(lang==='ar'?'ملف افتراضي تعليمي وليس شخصاً حقيقياً ولا يمثل ترخيصاً مهنياً.':'Educational virtual profile, not a real person and not a professional license.')),
- education:'SB1 Virtual Specialist Program',experience_years:i===0?17:5+(i%18),photo_url:(slug==='clinical-psychology'&&i===0)?'/jamal-james.jpg':doctorPhotoPool[(i+1)%doctorPhotoPool.length],city:p.city,rating:4.5+(i%5)/10,consultation_count:120+i*31,age:30+(i%21),native_language:lang,is_online:i%3!==0,is_verified:false,is_virtual:true,phone_number:null,consultation_price:15+(i%6)*10,session_price:35+(i%8)*10,
+ education:'SB1 Virtual Specialist Program',experience_years:i===0?17:5+(i%18),photo_url:(slug==='clinical-psychology'&&i===0)?'/jamal-james.jpg':doctorPhotoPool[(i+1)%doctorPhotoPool.length],city:p.city,rating:4.5+(i%5)/10,consultation_count:120+i*31,age:30+(i%21),gender:i%2===0?'male':'female',native_language:lang,is_online:i%3!==0,is_verified:false,is_virtual:true,phone_number:null,consultation_price:15+(i%6)*10,session_price:35+(i%8)*10,
  follower_count:i===0?98500:500+i*77,nationality:p.country,created_at:new Date(2026,0,1+i).toISOString(),specialty} as Doctor));
 }
 export function bookableDemoDoctorsForSpecialty(slug:string,lang:string,count=10,countryKey?:string):Doctor[]{
