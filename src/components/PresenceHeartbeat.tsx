@@ -1,0 +1,2 @@
+import {useEffect} from 'react';import {supabase} from '@/lib/supabase';
+export default function PresenceHeartbeat(){useEffect(()=>{const userId=localStorage.getItem('sb1_account_user_id');if(!userId)return;const touch=async()=>{const now=new Date().toISOString();try{await supabase.from('profiles').update({last_seen_at:now}).eq('id',userId)}catch{}try{await supabase.from('sb1_audience_profiles').update({last_seen_at:now}).eq('user_id',userId)}catch{}};touch();const id=window.setInterval(touch,5*60*1000);return()=>window.clearInterval(id)},[]);return null}
