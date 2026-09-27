@@ -84,6 +84,10 @@ as $$
 declare v_id uuid;
 begin
   if public.sb1_admin_role() not in ('owner','moderator') then raise exception 'ADMIN_FORBIDDEN'; end if;
+  if public.sb1_is_owner_restored_content(p_content_type,p_content_id) then
+    select id into v_id from public.sb1_banned_backups_registry where content_type=p_content_type and content_id=p_content_id and restored=true order by restored_at desc limit 1;
+    return v_id;
+  end if;
   insert into public.sb1_banned_backups_registry(content_type,content_id,source_table,source_file_path,snapshot,screenshot_data_url,block_reason,blocked_by)
   values(p_content_type,p_content_id,p_source_table,p_source_file_path,coalesce(p_snapshot,'{}'),p_screenshot_data_url,p_block_reason,coalesce(p_blocked_by,'smart-moderation'))
   returning id into v_id;
@@ -215,3 +219,25 @@ begin
   return v_report;
 end $$;
 grant execute on function public.sb1_capacity_snapshot(numeric,numeric) to authenticated;
+
+
+create or replace function public.sb1_owner_restore_submission_row()
+returns trigger language plpgsql security definer set search_path=public
+as $$
+begin
+  if new.status in ('rejected','deleted') and exists(
+    select 1 from public.sb1_banned_backups_registry b
+    where b.content_type=new.content_type and b.content_id=new.id::text
+      and b.restored=true and b.owner_override=true and b.automated_moderation_exempt=true
+  ) then
+    new.status:='approved';
+    new.rejection_reason:=null;
+    new.reviewed_at:=now();
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists trg_sb1_owner_restore_submission_row on public.content_submissions;
+create trigger trg_sb1_owner_restore_submission_row
+before update of status on public.content_submissions
+for each row execute function public.sb1_owner_restore_submission_row();
