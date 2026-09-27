@@ -4,6 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import { useRouter, parseQuery } from '@/lib/router';
 import { supabase } from '@/lib/supabase';
 import { lt } from '@/lib/featureText';
+import { AD_PACKAGES } from '@/lib/adMarketplace';
 
 const providers = [
   { name: 'العالم العربي', items: ['بطاقة بنكية', 'تحويل مصرفي', 'محافظ إلكترونية'] },
@@ -17,6 +18,8 @@ export default function PaymentsPage() {
   const query = parseQuery(path);
   const isAppointmentCheckout = query.type === 'appointment' && !!query.reference;
   const isRequestCheckout = query.type === 'request' && !!query.reference;
+  const isAdCheckout = query.type === 'ad' && !!query.package;
+  const adPackage = AD_PACKAGES.find(x=>x.id===query.package) || AD_PACKAGES[0];
   const requestAmount = Number(query.amount || 0);
   const appointmentAmount = Number(query.amount || 0);
   const completeAppointmentSandbox = () => {
@@ -134,6 +137,15 @@ export default function PaymentsPage() {
     setPaid(true);
     setPaying(false);
   };
+
+  if (isAdCheckout) {
+    const completeAdSandbox=()=>{localStorage.setItem('sb1_paid_ad_package',adPackage.id);localStorage.setItem('sb1_paid_ad_until',new Date(Date.now()+adPackage.days*86400000).toISOString());navigate('/ads/dashboard?package='+adPackage.id+'&paid=1')};
+    const startAdCheckout=async()=>{setCheckoutLoading(true);setError('');try{const reference='ad-'+adPackage.id+'-'+Date.now();const response=await fetch('/api/create-checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({amount:adPackage.price,currency:'usd',description:'SB1 advertising package '+adPackage.name,reference_id:reference,success_url:window.location.origin+'/payments?type=ad&package='+adPackage.id+'&paid=1',cancel_url:window.location.origin+'/payments?type=ad&package='+adPackage.id})});const data=await response.json();if(!response.ok||!data.url)throw new Error(data.error||'Checkout unavailable');window.location.href=data.url}catch(e){setError(lang==='ar'?'الدفع المباشر غير مفعّل على هذا النشر. استخدم الدفع التجريبي.':'Live checkout is not configured on this deployment. Use sandbox mode.')}finally{setCheckoutLoading(false)}};
+    if(query.paid==='1') localStorage.setItem('sb1_paid_ad_package',adPackage.id);
+    const paid=localStorage.getItem('sb1_paid_ad_package')===adPackage.id;
+    if(paid)return <div className="min-h-screen pt-24 pb-16 bg-gray-50"><div className="max-w-2xl mx-auto px-4"><div className="card p-8 text-center"><CheckCircle2 className="mx-auto w-16 h-16 text-green-500"/><h1 className="mt-4 text-3xl font-extrabold">تم تأكيد باقة الإعلان</h1><p className="mt-2 text-gray-500">{adPackage.name} · {adPackage.price} USD · {adPackage.days} يوم</p><button onClick={()=>navigate('/ads/dashboard?package='+adPackage.id+'&paid=1')} className="btn-primary mt-6">فتح لوحة مشتري الإعلان</button></div></div></div>;
+    return <div className="min-h-screen pt-24 pb-16 bg-gray-50"><div className="max-w-2xl mx-auto px-4"><div className="card p-8 text-center"><CreditCard className="mx-auto w-14 h-14 text-teal-600"/><h1 className="mt-4 text-3xl font-extrabold">شراء باقة إعلانية</h1><p className="mt-2 text-gray-500">{adPackage.name}</p><div className="mt-6 rounded-2xl bg-teal-50 p-5"><p className="text-sm text-teal-700">القيمة</p><p className="text-4xl font-extrabold text-teal-800">{adPackage.price} USD</p><p className="text-sm text-teal-700 mt-1">{adPackage.days} يوم · {adPackage.placement}</p></div>{error&&<p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}<button onClick={startAdCheckout} disabled={checkoutLoading} className="btn-primary w-full mt-5">{checkoutLoading?'جاري فتح بوابة الدفع...':'فتح بوابة الدفع الآمن'}</button><button onClick={completeAdSandbox} className="w-full mt-3 rounded-xl border py-3 font-bold">تأكيد الدفع التجريبي</button><p className="mt-4 text-xs text-gray-400">الدفع التجريبي لا يخصم أموالاً حقيقية.</p></div></div></div>;
+  }
 
   if (isRequestCheckout) {
     const completeRequestSandbox = () => {
