@@ -11,6 +11,7 @@ import { supabase, type Specialty, type Doctor, type Question, type Article, typ
 import DoctorCard from '@/components/DoctorCard';
 import QuestionCard from '@/components/QuestionCard';
 import ArticleCard from '@/components/ArticleCard';
+import AdvancedSearchBar from '@/components/AdvancedSearchBar';
 
 const iconMap: Record<string, typeof Stethoscope> = {
   'heart-pulse': HeartPulse,
@@ -123,24 +124,8 @@ export default function HomePage() {
                 {t('hero.subtitle')}
               </p>
 
-              <form onSubmit={handleSearch} className="mx-auto mt-8 max-w-2xl lg:mx-0">
-                <div className="relative">
-                  <Search className="pointer-events-none absolute start-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={t('hero.search_placeholder')}
-                    className="w-full rounded-2xl border border-gray-200 bg-white py-4 ps-12 pe-28 text-sm shadow-lg shadow-gray-900/5 outline-none transition focus:border-primary-500 focus:ring-4 focus:ring-primary-100"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute end-2 top-1/2 -translate-y-1/2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-700"
-                  >
-                    {t('common.search')}
-                  </button>
-                </div>
-              </form>
+              <AdvancedSearchBar compact />
+
 
               <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
                 <button onClick={() => navigate('/ask')} className="btn-primary flex items-center gap-2">
