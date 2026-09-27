@@ -6,6 +6,7 @@ import { supabase, type Specialty } from '@/lib/supabase';
 import { useEffect } from 'react';
 import { COUNTRY_OPTIONS } from '@/types/i18n';
 import { useApp } from '@/i18n/AppContext';
+import { citiesForCountry } from '@/lib/catalog';
 
 const countryLabels: Record<string,string> = {SA:'السعودية',AE:'الإمارات',EG:'مصر',IQ:'العراق',JO:'الأردن',KW:'الكويت',LB:'لبنان',LY:'ليبيا',MA:'المغرب',OM:'عمان',PS:'فلسطين',QA:'قطر',SY:'سوريا',TN:'تونس',YE:'اليمن',DZ:'الجزائر',BH:'البحرين',MR:'موريتانيا',SD:'السودان',SO:'الصومال',KM:'جزر القمر',DJ:'جيبوتي',US:'United States',DE:'Deutschland',RU:'Россия',UZ:'Oʻzbekiston',AM:'Հայաստան',TJ:'Тоҷикистон',UA:'Україна',AZ:'Azərbaycan',GE:'საქართველო',ET:'ኢትዮጵያ'};
 
@@ -17,7 +18,7 @@ export default function RegisterPage() {
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', phone: '', age: '', parentalConsent: false, specialty: '',
-    showName: true, anonymous: false, institutionType: 'clinic', address: '', services: '', deliveryEnabled: false, deliveryMethod: 'platform', schedule: '', documents: '',
+    showName: true, anonymous: false, institutionType: 'clinic', address: '', city: '', services: '', deliveryEnabled: false, deliveryMethod: 'platform', schedule: '', documents: '',
   });
   const [docUrls, setDocUrls] = useState<{ id?: string; cert?: string; license?: string }>({});
   const [institutionFiles, setInstitutionFiles] = useState<string[]>([]);
@@ -179,7 +180,14 @@ export default function RegisterPage() {
                     <option value="clinic">عيادة / مستشفى</option><option value="lab">مختبر</option><option value="radiology">مركز أشعة</option><option value="rehab">تأهيل</option><option value="pharmacy">صيدلية</option><option value="elderly">رعاية كبار السن</option><option value="addiction">علاج الإدمان</option>
                   </select>
                 </div>
-                                <input placeholder="العنوان" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="input-field" />
+                                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">المدينة</label>
+                  <select required value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value, address: e.target.value })} className="input-field bg-white">
+                    <option value="">اختر المدينة</option>
+                    {citiesForCountry(registrationCountry.code, lang).map((x:any)=><option key={x.key} value={x.key}>{x.name}</option>)}
+                  </select>
+                  <p className="mt-1 text-xs text-gray-500">يتم حفظ المدينة فقط في بيانات المؤسسة لاستخدامها كتصنيف للبحث. لا يتم طلب عنوان الشارع.</p>
+                </div>
                 <textarea placeholder="الخدمات والأسعار والمواعيد" value={formData.services} onChange={(e) => setFormData({ ...formData, services: e.target.value })} className="input-field" rows={4} />
                 <textarea placeholder="الوثائق والتراخيص وأرقامها" value={formData.documents} onChange={(e) => setFormData({ ...formData, documents: e.target.value })} className="input-field" rows={3} />
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4"><label className="block text-sm font-bold text-gray-700 mb-2">إرفاق وثائق المؤسسة</label><input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={e=>setInstitutionFiles(Array.from(e.target.files||[]).map(f=>f.name))} className="block w-full text-sm"/><p className="mt-2 text-xs text-gray-500">يتم تسجيل أسماء الملفات مع طلب المؤسسة. التخزين الآمن الفعلي للملفات يحتاج مساحة تخزين خاصة بالمشروع.</p>{institutionFiles.length>0&&<div className="mt-2 text-xs text-teal-700">{institutionFiles.join(' · ')}</div>}</div>
