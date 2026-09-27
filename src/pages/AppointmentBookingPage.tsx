@@ -3,14 +3,14 @@ import {Calendar,Clock,Video,CheckCircle2,UserRound,CreditCard,ShieldCheck} from
 import {useRouter,parseQuery} from '@/lib/router';
 import {useI18n} from '@/lib/i18n';
 import {supabase} from '@/lib/supabase';
-import {specialtyCatalog,virtualDoctorsForSpecialty} from '@/lib/catalog';
+import {specialtyCatalog,bookableDemoDoctorsForSpecialty} from '@/lib/catalog';
 import {getAppointments,requestAppointment,requestBrowserNotifications} from '@/lib/appointments';
 import {getSessionOptions,formatDuration,sessionPrice} from '@/lib/appointmentConfig';
 
 export default function AppointmentBookingPage(){
  const {path,navigate}=useRouter();const q=parseQuery(path);const {lang,dir}=useI18n();const specs=useMemo(()=>specialtyCatalog(lang),[lang]);
  const [doctor,setDoctor]=useState<any>(null);const [patient,setPatient]=useState('');const [selectedSlot,setSelectedSlot]=useState('');const [custom,setCustom]=useState('');const [duration,setDuration]=useState(60);const [paid,setPaid]=useState(false);const [done,setDone]=useState(false);
- useEffect(()=>{requestBrowserNotifications();const load=async()=>{let d:any=null;if(q.doctor){try{const r=await supabase.from('doctors').select('*, specialty(*)').eq('id',q.doctor).single();d=r.data}catch{}}if(!d&&q.specialty)d=virtualDoctorsForSpecialty(q.specialty,lang,1)[0];if(!d)d=virtualDoctorsForSpecialty(specs[0]?.slug||'',lang,1)[0];setDoctor(d);};load();},[q.doctor,q.specialty,lang,specs]);
+ useEffect(()=>{requestBrowserNotifications();const load=async()=>{let d:any=null;if(q.doctor){try{const r=await supabase.from('doctors').select('*, specialty(*)').eq('id',q.doctor).single();d=r.data}catch{}}if(!d&&q.specialty)d=bookableDemoDoctorsForSpecialty(q.specialty,lang,1)[0];if(!d)d=bookableDemoDoctorsForSpecialty(specs[0]?.slug||'',lang,1)[0];setDoctor(d);};load();},[q.doctor,q.specialty,lang,specs]);
  useEffect(()=>{if(q.paid!=='1'||!q.ref)return;const draft=localStorage.getItem('sb1_pending_appointment_'+q.ref);if(!draft)return;try{const d=JSON.parse(draft);const existing=getAppointments().find(a=>a.paymentReference===q.ref);if(!existing){requestAppointment({...d,paymentStatus:'paid',paymentReference:q.ref});}localStorage.removeItem('sb1_pending_appointment_'+q.ref);setPaid(true);setDone(true);}catch{}},[q.paid,q.ref]);
  const options=useMemo(()=>doctor?getSessionOptions(doctor.id):[],[doctor]);
  const slots=useMemo(()=>{const out:string[]=[];for(let day=1;day<=10;day++){for(const h of [10,12,14,16,18,20]){const d=new Date();d.setDate(d.getDate()+day);d.setHours(h,0,0,0);out.push(d.toISOString())}}return out},[]);
