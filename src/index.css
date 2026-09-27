@@ -94,3 +94,6 @@ html,body,#root{max-width:100%;overflow-x:hidden;} @media (min-width:1024px){bod
   .sb1-compact .gap-8 { gap: 1.5rem !important; }
   .sb1-compact section + section { margin-top: 0 !important; }
 }
+
+
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
