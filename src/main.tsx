@@ -12,6 +12,10 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
 
   componentDidCatch(error: unknown, info: ErrorInfo) {
     console.error('SB1 runtime error', error, info);
+    try {
+      const payload = JSON.stringify({type:'react_error_boundary',message:error instanceof Error?error.message:String(error),stack:error instanceof Error?error.stack:'',url:window.location.href});
+      navigator.sendBeacon?.('/api/monitor', new Blob([payload], {type:'application/json'}));
+    } catch {}
   }
 
   render() {
@@ -33,6 +37,15 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
     }
     return this.props.children;
   }
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (event) => {
+    try { navigator.sendBeacon?.('/api/monitor', new Blob([JSON.stringify({type:'window_error',message:event.message,stack:event.error?.stack||'',url:window.location.href})], {type:'application/json'})); } catch {}
+  });
+  window.addEventListener('unhandledrejection', (event) => {
+    try { navigator.sendBeacon?.('/api/monitor', new Blob([JSON.stringify({type:'unhandled_rejection',message:event.reason?.message||String(event.reason),stack:event.reason?.stack||'',url:window.location.href})], {type:'application/json'})); } catch {}
+  });
 }
 
 createRoot(document.getElementById('root')!).render(
