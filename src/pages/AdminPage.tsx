@@ -318,7 +318,7 @@ export default function AdminPage() {
           <div className="lg:col-span-3">
                         {section === 'ads' ? (
               <div className="space-y-6">
-                <div><h2 className="text-xl font-bold text-gray-800">الإعلانات والعروض</h2><p className="mt-1 text-sm text-gray-500">تحكم كامل في الإعلان: الصورة، النص، السعر، المدة، الصفحات، المكان، الإغلاق والتكرار. كما يمكنك إنشاء مساحات إعلانية إضافية. التغييرات تحفظ في إعدادات المتصفح الحالي.</p></div>
+                <div><div className="flex flex-wrap gap-2"><a href="/admin/ads" className="btn-primary">مراجعة الإعلانات واعتمادها</a><a href="/ads/packages" className="rounded-xl border bg-white px-4 py-2 font-bold">باقات الإعلانات</a><a href="/ads/dashboard" className="rounded-xl border bg-white px-4 py-2 font-bold">لوحة المشتري</a></div><h2 className="text-xl font-bold text-gray-800 mt-4">الإعلانات والعروض</h2><p className="mt-1 text-sm text-gray-500">تحكم كامل في المساحات والإعلان والصورة والفيديو والسعر والمدة والصفحات والربط.</p></div>
                 <div className="card p-6 space-y-5">
                   <h3 className="text-lg font-extrabold">عرض خصم 10% — دكتور جمال نادي</h3>
                   <div className="grid md:grid-cols-2 gap-4">
