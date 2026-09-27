@@ -8,6 +8,7 @@ import { moderateAndLog } from '@/lib/questionEconomy';
 export default function SpecialistContentUploadPage() {
   const { lang, dir } = useI18n();
   const [type, setType] = useState('article');
+  const [contentLanguage, setContentLanguage] = useState(lang);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [specialty, setSpecialty] = useState('');
@@ -32,7 +33,7 @@ export default function SpecialistContentUploadPage() {
     const loadCovers = async () => {
       try {
         let q: any = supabase.from('content_image_library').select('*').limit(48);
-        const selected = specialtyCatalog(lang).find(x => x.slug === specialty);
+        const selected = specialtyCatalog(contentLanguage).find(x => x.slug === specialty);
         if (selected?.id) q = q.eq('specialty_id', selected.id);
         if (coverSearch) q = q.ilike('search_text', '%' + coverSearch.replace(/[%_]/g, '') + '%');
         const { data } = await q;
@@ -93,7 +94,7 @@ export default function SpecialistContentUploadPage() {
         title,
         description,
         specialty_id: selected?.id || null,
-        language: lang,
+        language: contentLanguage,
         price: Number(price) || 0,
         offer_duration_days: Number(offerDays) || 30,
         cover_library_id: selectedCover?.id || null,
@@ -150,7 +151,7 @@ export default function SpecialistContentUploadPage() {
             <input required value={title} onChange={e => setTitle(e.target.value)} className="input-field w-full" placeholder="عنوان المحتوى" />
             <textarea value={description} onChange={e => setDescription(e.target.value)} className="input-field w-full min-h-28" placeholder="الوصف" />
 
-            <select required value={specialty} onChange={e => setSpecialty(e.target.value)} className="input-field w-full">
+            <div><label className="text-sm font-bold">لغة المحتوى</label><select required value={contentLanguage} onChange={e=>{setContentLanguage(e.target.value);setSpecialty(specialtyCatalog(e.target.value)[0]?.slug||'')}} className="input-field w-full mt-1">{[['ar','العربية'],['en','English'],['ru','Русский'],['de','Deutsch'],['uk','Українська'],['uz','O‘zbekcha'],['hy','Հայերեն'],['tg','Тоҷикӣ'],['az','Azərbaycanca'],['am','አማርኛ'],['ka','ქართული']].map(([v,l])=><option key={v} value={v}>{l}</option>)}</select><p className="mt-1 text-xs text-gray-500">سيظهر المحتوى للمستخدمين الذين اختاروا هذه اللغة.</p></div><select required value={specialty} onChange={e => setSpecialty(e.target.value)} className="input-field w-full">
               {specialtyCatalog(lang).map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
             </select>
 
