@@ -10,7 +10,7 @@ export default function SearchPage(){
  const specialties=specialtyCatalog(lang).slice(0,35);
  const results=useMemo(()=>{
   const term=q.trim().toLowerCase(); const out:any[]=[];
-  specialties.forEach(s=>virtualDoctorsForSpecialty(s.slug,lang,3,country).forEach((d:any)=>out.push({id:d.id,kind:'doctor',title:d.name,subtitle:d.specialty?.name||s.name,location,age:d.age||0,specialty:s.slug,:d.city||'',rating:d.rating||4.7,fastest:d.experience_years||10,available:true,href:'/doctors/'+d.id})));
+  specialties.forEach(s=>virtualDoctorsForSpecialty(s.slug,lang,3,country).forEach((d:any)=>out.push({id:d.id,kind:'doctor',title:d.name,subtitle:d.specialty?.name||s.name,location,age:d.age||0,specialty:s.slug,location:d.city||'',rating:d.rating||4.7,fastest:d.experience_years||10,available:true,href:'/doctors/'+d.id})));
   virtualFacilities(lang,country).forEach((f:any)=>out.push({id:f.id,kind:f.facility_type==='pharmacy'?'pharmacy':'facility',title:f.name,subtitle:f.services,location:f.city,rating:f.rating||4.6,fastest:15,available:true,href:'/facilities/'+f.id}));
   specialties.slice(0,12).forEach(s=>virtualArticlesForSpecialty(s.slug,lang,2).forEach((a:any)=>out.push({id:a.id,kind:'article',title:a.title,subtitle:a.description,location:'',rating:4.8,fastest:0,available:true,href:'/articles/'+a.id})));
   specialties.slice(0,8).forEach(s=>virtualVideosForSpecialty(s.slug,lang,1).forEach((v:any)=>out.push({id:v.id,kind:'video',title:v.title,subtitle:v.description,location:'',rating:4.8,fastest:0,available:true,href:'/videos'})));
