@@ -39,6 +39,8 @@ export default function AskPage() {
   const [selectedTierId, setSelectedTierId] = useState('basic');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>(query.specialty ? [query.specialty] : []);
+  const [specialtySearch, setSpecialtySearch] = useState('');
+  const [showSpecialtyPicker, setShowSpecialtyPicker] = useState(false);
   const [contentLanguage, setContentLanguage] = useState(lang);
   const [form, setForm] = useState({ author_name: '', age: '', gender: 'ذكر', title: '', body: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -226,7 +228,24 @@ export default function AskPage() {
           </div>
         )}
 
-        <div className="card p-5 mb-6"><label className="block text-sm font-bold text-gray-700 mb-2">{lang==='ar'?'التخصصات التي سيظهر فيها السؤال':'Specialties that will receive this question'}</label><div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{specialties.map((spec:any)=><label key={spec.id} className="flex items-center gap-2 rounded-xl border p-3"><input type="checkbox" checked={selectedSpecialties.includes(spec.slug)} onChange={e=>{const v=e.target.checked?[...selectedSpecialties,spec.slug]:selectedSpecialties.filter(x=>x!==spec.slug);if(v.length<=5){setSelectedSpecialties(v);setSelectedSpecialty(v[0]||'')}}}/><span>{specialtyName(spec)}</span></label>)}</div><p className="mt-2 text-xs text-gray-500">{lang==='ar'?'حتى 5 تخصصات، وكل تخصص إضافي يزيد السعر.':'Up to 5 specialties; each additional specialty increases the price.'}</p></div>
+        <div className="card p-5 mb-6">
+  <div className="flex items-center justify-between gap-3 mb-3">
+    <div>
+      <label className="block text-sm font-bold text-gray-700">{lang==='ar'?'التخصصات التي سيظهر فيها السؤال':'Specialties that will receive this question'}</label>
+      <p className="mt-1 text-xs text-gray-500">{lang==='ar'?'اضغط زر البحث واختر حتى 5 تخصصات فقط.':'Use search and select up to 5 specialties.'}</p>
+    </div>
+    <button type="button" onClick={()=>setShowSpecialtyPicker(v=>!v)} className="shrink-0 rounded-xl bg-teal-600 px-5 py-3 text-white font-bold shadow-sm hover:bg-teal-700">{lang==='ar'?'🔎 بحث عن تخصص':'🔎 Search specialty'}</button>
+  </div>
+  {selectedSpecialties.length>0 && <div className="flex flex-wrap gap-2 mb-3">{selectedSpecialties.map(slug=>{const spec:any=specialties.find((s:any)=>s.slug===slug);return <button type="button" key={slug} onClick={()=>{const v=selectedSpecialties.filter(x=>x!==slug);setSelectedSpecialties(v);setSelectedSpecialty(v[0]||'')}} className="rounded-full bg-teal-50 border border-teal-200 px-3 py-1.5 text-sm text-teal-800 hover:bg-red-50 hover:text-red-700">{spec?specialtyName(spec):slug} ×</button>})}</div>}
+  {showSpecialtyPicker && <div className="rounded-2xl border bg-white p-4 shadow-sm">
+    <input autoFocus value={specialtySearch} onChange={e=>setSpecialtySearch(e.target.value)} placeholder={lang==='ar'?'اكتب اسم التخصص للبحث...':'Type a specialty to search...'} className="input-field mb-3"/>
+    <div className="max-h-72 overflow-y-auto space-y-1">
+      {specialties.filter((spec:any)=>!selectedSpecialties.includes(spec.slug) && (!specialtySearch.trim() || specialtyName(spec).toLowerCase().includes(specialtySearch.toLowerCase()) || String(spec.slug).toLowerCase().includes(specialtySearch.toLowerCase()))).slice(0,30).map((spec:any)=><button type="button" key={spec.id} onClick={()=>{if(selectedSpecialties.length<5){const v=[...selectedSpecialties,spec.slug];setSelectedSpecialties(v);setSelectedSpecialty(v[0]||spec.slug);setSpecialtySearch('');if(v.length===5)setShowSpecialtyPicker(false)}}} className="w-full text-start rounded-xl border border-gray-100 px-4 py-3 hover:bg-teal-50">{specialtyName(spec)}</button>)}
+      {specialties.filter((spec:any)=>!selectedSpecialties.includes(spec.slug) && (!specialtySearch.trim() || specialtyName(spec).toLowerCase().includes(specialtySearch.toLowerCase()) || String(spec.slug).toLowerCase().includes(specialtySearch.toLowerCase()))).length===0 && <p className="py-4 text-center text-sm text-gray-500">{lang==='ar'?'لا توجد نتائج':'No results'}</p>}
+    </div>
+    <p className="mt-3 text-xs text-gray-500">{lang==='ar' ? ('تم اختيار '+selectedSpecialties.length+' من 5.') : (selectedSpecialties.length+' of 5 selected.')}</p>
+  </div>}
+</div>
 <div className="card p-5 mb-6"><label className="block text-sm font-bold text-gray-700 mb-2">{lang==='ar'?'لغة السؤال والمحتوى':'Question language'}</label><select value={contentLanguage} onChange={e=>setContentLanguage(e.target.value as typeof lang)} className="input-field mb-5"><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
           <div className="grid grid-cols-2 gap-3">
             <button type="button" onClick={() => setQuestionType('free')} className={`rounded-2xl border-2 p-4 text-start transition ${questionType === 'free' ? 'border-teal-500 bg-teal-50' : 'border-gray-100'}`}>
