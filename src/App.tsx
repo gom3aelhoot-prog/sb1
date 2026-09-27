@@ -271,6 +271,7 @@ function AppContent() {
           <>
             <Hero />
             <Features />
+            <section className="mx-auto w-full max-w-7xl px-4 py-12" dir="rtl"><div className="rounded-3xl border bg-white p-6 shadow-sm"><div className="flex items-center justify-between gap-4"><div><h2 className="text-2xl font-extrabold">الأخبار الطبية اليومية</h2><p className="mt-1 text-gray-500">تحديثات وموجزات طبية تعليمية باللغة المختارة.</p></div><a href="/news" className="rounded-xl bg-teal-700 px-5 py-3 font-bold text-white">عرض الأخبار</a></div><div className="mt-5 grid gap-4 md:grid-cols-3"><div className="rounded-2xl bg-slate-50 p-5"><b>الصحة النفسية</b><p className="mt-2 text-sm text-gray-600">أحدث التحديثات التعليمية عن النوم والقلق والوسواس.</p></div><div className="rounded-2xl bg-slate-50 p-5"><b>القلب والأوعية</b><p className="mt-2 text-sm text-gray-600">محتوى يومي عن الوقاية والمتابعة وصحة القلب.</p></div><div className="rounded-2xl bg-slate-50 p-5"><b>الأطفال</b><p className="mt-2 text-sm text-gray-600">موجزات تعليمية عن النمو والتغذية والتقييم.</p></div></div></div></section>
             <HowItWorks />
             <BottomActionCards />
             <CTASection />
