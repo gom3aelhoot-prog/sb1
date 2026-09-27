@@ -124,12 +124,11 @@ drop policy if exists "public store tiers" on public.specialist_content_store_ti
 create policy "public store tiers" on public.specialist_content_store_tiers for select using (active=true);
 
 insert into public.content_image_library (specialty_id,language_code,image_url,title,search_text,image_number)
-select s.id, l.lang,
+select s.id, 'multi',
   'https://loremflickr.com/900/600/medical,health,'||replace(s.name,' ','-')||'?lock='||((row_number() over())::bigint),
   'SB1 cover '||s.name||' #'||g.n,
   lower(coalesce(s.name,'medical')||' medical health cover '||g.n),
   g.n
 from public.specialties s
 cross join generate_series(1,500) g(n)
-cross join (values ('ar'),('en'),('de'),('ru'),('uk'),('uz'),('hy'),('tg'),('az'),('am'),('ka')) l(lang)
 on conflict (specialty_id,image_number,language_code) do nothing;
