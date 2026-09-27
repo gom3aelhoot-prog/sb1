@@ -181,9 +181,9 @@ export function Hero() {
               <button onClick={()=>navigate('/ask?mode=free')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'مجاني':'Free'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'طرح سؤال مجاني.':'Ask a free question.'}</p></button>
               <button onClick={()=>navigate('/ask?mode=paid')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'مدفوع':'Paid'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'سؤال مدفوع يصل إلى الأخصائيين حسب التخصص.':'A paid question routed by specialty.'}</p></button>
             </> : <>
-              <button onClick={()=>navigate('/specialist-sessions')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'اختار الطبيب':'Choose a doctor'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'اختر الطبيب وطريقة الاستشارة.':'Choose the doctor and consultation method.'}</p></button>
+              <button onClick={()=>navigate('/sessions')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'اختار الطبيب':'Choose a doctor'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'اختر الطبيب وطريقة الاستشارة.':'Choose the doctor and consultation method.'}</p></button>
               <button onClick={()=>navigate('/requests')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'طلب جلسة بمواصفاتك الخاصة':'Request a custom session'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'حدد التخصص والوقت والمواصفات.':'Specify specialty, time and requirements.'}</p></button>
-              <button onClick={()=>navigate('/sessions')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'جلسة مجانية':'Free session'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'عرض الجلسات المجانية المتاحة.':'View available free sessions.'}</p></button>
+              <button onClick={()=>navigate('/specialist-sessions')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'جلسة مجانية':'Free session'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'عرض الجلسات المجانية المتاحة.':'View available free sessions.'}</p></button>
             </>}
           </div>
         </div>
