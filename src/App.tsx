@@ -31,6 +31,7 @@ import QuestionDetailPage from '@/pages/QuestionDetailPage';
 import AskPage from '@/pages/AskPage';
 import ArticlesPage from '@/pages/ArticlesPage';
 import ArticleDetailPage from '@/pages/ArticleDetailPage';
+import ContentDetailPage from '@/pages/ContentDetailPage';
 import VideosPage from '@/pages/VideosPage';
 import AudioPage from '@/pages/AudioPage';
 import CoursesPage from '@/pages/CoursesPage';
@@ -140,6 +141,7 @@ function PlatformRoute() {
   if (route === '/pediatric-library') return <PediatricLibraryPage />;
   if (route === '/articles') return <MediaHubPage />;
   if (route.startsWith('/articles/')) return <ArticleDetailPage id={route.split('/')[2]} />;
+  if (route.startsWith('/content/')) return <ContentDetailPage id={route.split('/')[2]} />;
   if (route === '/videos') return <MediaHubPage />;
   if (route === '/audio') return <MediaHubPage />;
   if (route === '/courses') return <CoursesPage />;
