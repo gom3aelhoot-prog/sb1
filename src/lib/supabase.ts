@@ -181,6 +181,8 @@ export type Doctor = {
   city: string;
   rating: number;
   consultation_count: number;
+  session_price?: number;
+  consultation_price?: number;
   native_language: string | null;
   is_online: boolean;
   is_verified: boolean;
