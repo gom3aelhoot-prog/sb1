@@ -94,6 +94,7 @@ import JobsTicker from '@/components/JobsTicker';
 import OnboardingTour from '@/components/OnboardingTour';
 import OwnerCommandCenterPage from '@/pages/OwnerCommandCenterPage';
 import OwnerIntegrationsPage from '@/pages/OwnerIntegrationsPage';
+import OwnerSovereigntyPage from '@/pages/OwnerSovereigntyPage';
 import SafetyCenterPage from '@/pages/SafetyCenterPage';
 import { getSanction } from '@/lib/safetyModeration';
 
@@ -187,6 +188,7 @@ function PlatformRoute() {
   if (route === '/admin-dashboard') return <AdminDashboardPage />;
   if (route === '/owner/commands') return <OwnerCommandCenterPage />;
   if (route === '/owner/integrations') return <OwnerIntegrationsPage />;
+  if (route === '/owner/sovereignty') return <OwnerSovereigntyPage />;
   if (route === '/safety') return <SafetyCenterPage />;
   if (route === '/admin') return <AdminPage />;
   return null;
