@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Clock, Users, Star, DollarSign, Check } from 'lucide-react';
+import { BookOpen, Clock, Users, Star, DollarSign, Check, Search, SlidersHorizontal } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Course, type Specialty } from '@/lib/supabase';
@@ -22,6 +22,8 @@ export default function CoursesPage() {
   const [loading, setLoading] = useState(true);
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [priceSort, setPriceSort] = useState('none');
+  const [search, setSearch] = useState('');
+  const [priceFilter, setPriceFilter] = useState<'all'|'free'|'paid'>('all');
   const [enrollCourse, setEnrollCourse] = useState<Course | null>(null);
   const [enrollForm, setEnrollForm] = useState({ name: '', email: '' });
   const [enrolling, setEnrolling] = useState(false);
@@ -48,13 +50,21 @@ export default function CoursesPage() {
         if (spec) dbQuery = dbQuery.eq('specialty_id', spec.id);
       }
       const { data } = await dbQuery.order('created_at', { ascending: false });
-      const generated = selectedSpecialty ? virtualCoursesForSpecialty(selectedSpecialty, lang, 4) : comprehensiveSpecialties.flatMap(s => virtualCoursesForSpecialty(s.slug, lang, 2));
+      const generated = selectedSpecialty ? virtualCoursesForSpecialty(selectedSpecialty, lang, 8) : comprehensiveSpecialties.flatMap(s => virtualCoursesForSpecialty(s.slug, lang, 2));
       const localizedData=(data||[]).filter((x:any)=>!x.translations || x.translations?.[lang]).map((x:any)=>{const tr=x.translations?.[lang]||{};return {...x,title:tr.title||x.title,description:tr.description||x.description}}); const existingIds=new Set(localizedData.map((x:any)=>x.id)); const merged=[...localizedData,...generated.filter((x:any)=>!existingIds.has(x.id))]; setCourses((merged.length ? merged : demoCourses) as Course[]);
       setLoading(false);
     })().catch(() => { setCourses(demoCourses); setLoading(false); });
   }, [selectedSpecialty, lang]);
 
-  const sortedCourses = [...courses].sort((a:any,b:any)=>priceSort==='low'?Number(a.price||0)-Number(b.price||0):priceSort==='high'?Number(b.price||0)-Number(a.price||0):0);
+  const filteredCourses = courses.filter((course:any) => {
+    const title = localizedField(course as unknown as Record<string, unknown>, 'title', lang, course.title);
+    const haystack = String(title || '').toLowerCase();
+    const q = search.trim().toLowerCase();
+    const matchesName = !q || haystack.includes(q);
+    const matchesPrice = priceFilter === 'all' || (priceFilter === 'free' ? Number(course.price || 0) === 0 : Number(course.price || 0) > 0);
+    return matchesName && matchesPrice;
+  });
+  const sortedCourses = [...filteredCourses].sort((a:any,b:any)=>priceSort==='low'?Number(a.price||0)-Number(b.price||0):priceSort==='high'?Number(b.price||0)-Number(a.price||0):0);
 
   const handleEnroll = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,21 +108,33 @@ export default function CoursesPage() {
   return (
     <div className="min-h-screen pt-24 pb-16" dir={dir}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 rounded-3xl border border-gray-100 bg-gradient-to-br from-amber-50 via-white to-white p-7 text-center shadow-sm">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100">
-            <BookOpen className="h-7 w-7 text-amber-600" />
+        <div className="mb-5 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+            <div className="shrink-0">
+              <h1 className="text-2xl font-extrabold text-gray-800">{t('courses.title')}</h1>
+              <p className="mt-1 text-xs text-gray-500">{lang==='ar'?'الدورات الطبية والنفسية حسب اللغة والتخصص.':'Medical and psychology courses by language and specialty.'}</p>
+            </div>
+            <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="relative">
+                <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"/>
+                <input value={search} onChange={e=>setSearch(e.target.value)} className="input-field h-11 w-full ps-9" placeholder={lang==='ar'?'ابحث باسم الدورة':'Search course name'} />
+              </div>
+              <select value={selectedSpecialty} onChange={e=>setSelectedSpecialty(e.target.value)} className="input-field h-11">
+                <option value="">{lang==='ar'?'كل التخصصات':'All specialties'}</option>
+                {specialties.map((spec) => <option key={spec.id} value={spec.slug}>{specialtyName(spec)}</option>)}
+              </select>
+              <select value={priceFilter} onChange={e=>setPriceFilter(e.target.value as any)} className="input-field h-11">
+                <option value="all">{lang==='ar'?'مجاني ومدفوع':'Free & paid'}</option>
+                <option value="free">{lang==='ar'?'مجاني فقط':'Free only'}</option>
+                <option value="paid">{lang==='ar'?'مدفوع فقط':'Paid only'}</option>
+              </select>
+              <select value={priceSort} onChange={e=>setPriceSort(e.target.value)} className="input-field h-11">
+                <option value="none">{lang==='ar'?'بدون ترتيب سعر':'No price sort'}</option>
+                <option value="low">{lang==='ar'?'الأقل سعراً':'Lowest price'}</option>
+                <option value="high">{lang==='ar'?'الأعلى سعراً':'Highest price'}</option>
+              </select>
+            </div>
           </div>
-          <h1 className="mb-2 text-3xl font-bold text-gray-800">{t('courses.title')}</h1>
-          <p className="text-gray-500">{t('courses.subtitle')}</p><div className="mt-4 text-xs text-gray-500">{lang==='ar'?`أكثر من 150 دورة · حق المنصة: دورة مجانية لكل ${learningRevenueDefaults.free_course_every} اشتراكات مدفوعة · نسبة المالك قابلة للتغيير من لوحة التحكم.`:`160+ courses · platform entitlement: one free course per ${learningRevenueDefaults.free_course_every} paid enrollments · owner-controlled revenue split.`}</div>
-        </div>
-
-        <div className="mb-8 mx-auto max-w-2xl rounded-2xl bg-white border border-gray-100 p-5 shadow-sm">
-          <label className="mb-2 block text-sm font-bold text-gray-700">{lang==='ar'?'اختار التخصص':'Choose specialty'}</label>
-          <select value={selectedSpecialty} onChange={e=>setSelectedSpecialty(e.target.value)} className="input-field w-full">
-            <option value="">{t('common.all')}</option>
-            {specialties.map((spec) => <option key={spec.id} value={spec.slug}>{specialtyName(spec)}</option>)}
-          </select>
-          <div className="mt-3"><select value={priceSort} onChange={e=>setPriceSort(e.target.value)} className="input-field w-full"><option value="none">ترتيب حسب السعر</option><option value="low">الأقل سعراً أولاً</option><option value="high">الأعلى سعراً أولاً</option></select></div><p className="mt-2 text-xs text-gray-400">{lang==='ar'?'اختر تخصصاً واحداً ثم ستظهر الدورات الخاصة به فقط.':'Choose one specialty to view only its courses.'}</p>
         </div>
 
         {loading ? (
@@ -135,7 +157,7 @@ export default function CoursesPage() {
               const title = localizedField(course as unknown as Record<string, unknown>, 'title', lang, course.title);
               const description = localizedField(course as unknown as Record<string, unknown>, 'description', lang, course.description);
               return (
-                <div key={course.id} onClick={()=>navigate("/content/"+course.id)} className="card card-hover group flex flex-col overflow-hidden cursor-pointer">
+                <div key={course.id} className="card card-hover group flex flex-col overflow-hidden">
                   <div className="relative h-40 overflow-hidden bg-gradient-to-br from-teal-100 to-teal-50">
                     {course.image_url && <img src={course.image_url} alt={title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
                     {course.specialty && <span className="absolute end-3 top-3 badge bg-white/90 text-teal-700 shadow-sm">{specialtyName(course.specialty)}</span>}
@@ -153,7 +175,7 @@ export default function CoursesPage() {
                     <div className="mb-4 rounded-xl bg-gray-50 p-3 text-xs text-gray-600">{lang==='ar'?'طريقة الاستلام: اختر بين الدروس أونلاين أو ملف الدورة للتحميل.':'Delivery: choose online lessons or a downloadable course file.'}<div className="mt-2 flex gap-2"><button type="button" onClick={()=>setDeliveryMode('online')} className={`rounded-lg px-3 py-1 ${deliveryMode==='online'?'bg-teal-600 text-white':'bg-white border'}`}>Online</button><button type="button" onClick={()=>setDeliveryMode('download')} className={`rounded-lg px-3 py-1 ${deliveryMode==='download'?'bg-teal-600 text-white':'bg-white border'}`}>Download</button></div></div><div className="flex items-center justify-between border-t border-gray-100 pt-4">
                       <span className="text-2xl font-bold text-teal-600">{clientPrice(Number((course.price * (courseBasePrice.local_price / courseBasePrice.price_usd)).toFixed(2))).toLocaleString(lang==='ar'?'ar-EG':'en-US')} {courseBasePrice.currency_symbol}</span>
                       <div className="flex items-center gap-2">
-                        <button onClick={() => navigate('/courses/'+course.id)} className="btn-secondary text-sm">تفاصيل</button>
+                        <button onClick={(e) => { e.stopPropagation(); navigate('/courses/'+course.id); }} className="btn-secondary text-sm">تفاصيل</button>
                         <button onClick={() => { setEnrollCourse(course); setEnrolled(false); }} className="btn-primary flex items-center gap-2 text-sm">
                           <Check className="h-4 w-4" />
                           {t('courses.enroll')}
