@@ -11,6 +11,7 @@ import { clientPrice, clientDiscountLabel } from '@/lib/pricing';
 import { getCountryServicePrice } from '@/lib/countryPricing';
 import { useApp } from '@/i18n/AppContext';
 import ShareButtons from '@/components/ShareButtons';
+import { learningRevenueDefaults } from '@/lib/learningCommerce';
 
 export default function CoursesPage() {
   const { navigate } = useRouter();
@@ -24,7 +25,7 @@ export default function CoursesPage() {
   const [enrollForm, setEnrollForm] = useState({ name: '', email: '' });
   const [enrolling, setEnrolling] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
-  const [courseBasePrice, setCourseBasePrice] = useState({price_usd:19,local_price:19,currency_symbol:"$"});
+  const [contractAccepted,setContractAccepted]=useState(false);\n  const [deliveryMode,setDeliveryMode]=useState<'online'|'download'>('online');\n  const [courseBasePrice, setCourseBasePrice] = useState({price_usd:19,local_price:19,currency_symbol:"$"});
 
   useEffect(() => { getCountryServicePrice(country,'course').then(p=>setCourseBasePrice(p)); }, [country.code]);
 
@@ -52,7 +53,7 @@ export default function CoursesPage() {
 
   const handleEnroll = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!enrollCourse || !enrollForm.name.trim() || !enrollForm.email.trim()) return;
+    if (!enrollCourse || !enrollForm.name.trim() || !enrollForm.email.trim() || !contractAccepted) return;
     setEnrolling(true);
     const { error } = await supabase.from('course_enrollments').insert({
       course_id: enrollCourse.id,
@@ -69,7 +70,7 @@ export default function CoursesPage() {
     setEnrolling(false);
     setEnrolled(true);
     setTimeout(() => {
-      setEnrollCourse(null); setEnrolled(false); setEnrollForm({ name: '', email: '' });
+      setEnrollCourse(null); setEnrolled(false); setEnrollForm({ name: '', email: '' }); setContractAccepted(false); setDeliveryMode('online');
     }, 2500);
   };
 
@@ -97,7 +98,7 @@ export default function CoursesPage() {
             <BookOpen className="h-7 w-7 text-amber-600" />
           </div>
           <h1 className="mb-2 text-3xl font-bold text-gray-800">{t('courses.title')}</h1>
-          <p className="text-gray-500">{t('courses.subtitle')}</p>
+          <p className="text-gray-500">{t('courses.subtitle')}</p><div className="mt-4 text-xs text-gray-500">{lang==='ar'?`أكثر من 150 دورة · حق المنصة: دورة مجانية لكل ${learningRevenueDefaults.free_course_every} اشتراكات مدفوعة · نسبة المالك قابلة للتغيير من لوحة التحكم.`:`160+ courses · platform entitlement: one free course per ${learningRevenueDefaults.free_course_every} paid enrollments · owner-controlled revenue split.`}</div>
         </div>
 
         <div className="mb-8 mx-auto max-w-2xl rounded-2xl bg-white border border-gray-100 p-5 shadow-sm">
@@ -145,7 +146,7 @@ export default function CoursesPage() {
                       <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{course.enrolled_count}</span>
                       <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />{Number(course.rating).toFixed(1)}</span>
                     </div>
-                    <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+                    <div className="mb-4 rounded-xl bg-gray-50 p-3 text-xs text-gray-600">{lang==='ar'?'طريقة الاستلام: اختر بين الدروس أونلاين أو ملف الدورة للتحميل.':'Delivery: choose online lessons or a downloadable course file.'}<div className="mt-2 flex gap-2"><button type="button" onClick={()=>setDeliveryMode('online')} className={`rounded-lg px-3 py-1 ${deliveryMode==='online'?'bg-teal-600 text-white':'bg-white border'}`}>Online</button><button type="button" onClick={()=>setDeliveryMode('download')} className={`rounded-lg px-3 py-1 ${deliveryMode==='download'?'bg-teal-600 text-white':'bg-white border'}`}>Download</button></div></div><div className="flex items-center justify-between border-t border-gray-100 pt-4">
                       <span className="text-2xl font-bold text-teal-600">{clientPrice(Number((course.price * (courseBasePrice.local_price / courseBasePrice.price_usd)).toFixed(2))).toLocaleString(lang==='ar'?'ar-EG':'en-US')} {courseBasePrice.currency_symbol}</span>
                       <div className="flex items-center gap-2">
                         <button onClick={() => navigate('/courses/'+course.id)} className="btn-secondary text-sm">تفاصيل</button>
@@ -191,7 +192,7 @@ export default function CoursesPage() {
                     <span className="font-medium text-gray-600">{t('courses.price')}</span>
                     <span className="text-2xl font-bold text-teal-600">{Number((enrollCourse.price * (courseBasePrice.local_price / courseBasePrice.price_usd)).toFixed(2)).toLocaleString(lang==='ar'?'ar-EG':'en-US')} {courseBasePrice.currency_symbol}</span>
                   </div>
-                  <button type="submit" disabled={enrolling} className="btn-primary flex w-full items-center justify-center gap-2 disabled:opacity-50">
+                  <label className="flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-900"><input type="checkbox" checked={contractAccepted} onChange={e=>setContractAccepted(e.target.checked)} className="mt-0.5"/><span>أوافق قبل الدفع على عقد المحتوى الإلكتروني: SB1 وسيط تقني، ومقدم الدورة مسؤول عن المحتوى والخدمة، مع بقاء الحقوق والالتزامات الإلزامية حسب القانون.</span></label><button type="submit" disabled={enrolling || !contractAccepted} className="btn-primary flex w-full items-center justify-center gap-2 disabled:opacity-50">
                     {enrolling ? t('sessions.booking') : <><DollarSign className="h-5 w-5" />{payLabel}</>}
                   </button>
                 </form>
