@@ -113,6 +113,7 @@ import SpecialistPackagesPage from '@/pages/SpecialistPackagesPage';
 import SpecialistStudioPage from '@/pages/SpecialistStudioPage';
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
 import { getSanction } from '@/lib/safetyModeration';
+import { getRole, routeAllowed, roleLabel } from '@/lib/access';
 
 type HashView = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
 
@@ -231,6 +232,7 @@ function AppContent() {
   if(suspension){return <div dir="rtl" className="min-h-screen grid place-items-center bg-slate-50 p-6"><div className="max-w-xl rounded-3xl bg-white border shadow-xl p-8 text-center"><div className="text-4xl">⛔</div><h1 className="text-2xl font-extrabold mt-4">تم إيقاف الحساب مؤقتاً</h1><p className="text-gray-600 mt-3">سبب الإيقاف: {suspension.reason}</p><p className="font-bold text-red-700 mt-3">{suspension.permanent?'إيقاف دائم حتى المراجعة الإدارية':'ينتهي الإيقاف في '+new Date(suspension.until).toLocaleString()}</p><a href="/safety" className="inline-block mt-6 rounded-xl bg-teal-700 text-white px-5 py-3">مركز الأمان</a></div></div>}
   const { path } = useRouter();
   const platformRoute = getPathOnly(path);
+  const role = getRole();
 
   useEffect(() => {
     const onHash = () => { setState(getHashView()); window.scrollTo(0, 0); };
@@ -281,7 +283,7 @@ function AppContent() {
       <Footer />
       <SiteAdSlots />
       <DiscountBanner />
-      <SB1Watermark />
+      {/* watermark appears only inside paid content pages */}
         <PushNotifications />
       <CapacityGuard />
       <OnboardingTour />
