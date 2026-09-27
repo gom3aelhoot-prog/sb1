@@ -1,0 +1,37 @@
+import { useMemo, useState } from 'react';
+import { Ambulance, Building2, Home, KeyRound, MapPin, Phone, PlusCircle, ShieldCheck, Store, Truck, Wrench } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
+import { useRouter } from '@/lib/router';
+
+type Listing={id:string;kind:string;title:string;description:string;country:string;city:string;phone:string;price:number;currency:string;duration:string;owner:string;createdAt:string};
+
+const kinds=[
+ {id:'clinic-rent',ar:'عيادات ومراكز للبيع أو للإيجار',en:'Clinics & Centers for Sale or Rent',icon:Building2},
+ {id:'medical-place-sale',ar:'أماكن طبية للبيع',en:'Medical Places for Sale',icon:Store},
+ {id:'medical-place-rent',ar:'أماكن طبية للإيجار',en:'Medical Places for Rent',icon:Home},
+ {id:'ambulance',ar:'خدمات الإسعاف والنقل الطبي',en:'Ambulance & Medical Transport',icon:Ambulance},
+ {id:'home-care',ar:'الرعاية المنزلية والتمريض',en:'Home Care & Nursing',icon:ShieldCheck},
+ {id:'medical-equipment',ar:'الأدوات والمعدات الطبية',en:'Medical Equipment',icon:Wrench},
+ {id:'delivery',ar:'التوصيل والخدمات المساندة',en:'Delivery & Support Services',icon:Truck},
+ {id:'other',ar:'خدمات طبية أخرى',en:'Other Medical Services',icon:PlusCircle},
+];
+
+const feeKey='sb1_platform_fee_percent';
+const listingKey='sb1_service_listings';
+const getListings=():Listing[]=>{try{return JSON.parse(localStorage.getItem(listingKey)||'[]')}catch{return[]}};
+
+export default function OtherServicesPage(){
+ const {lang,dir}=useI18n();const {navigate}=useRouter();const ar=lang==='ar';
+ const [kind,setKind]=useState('clinic-rent');const [mode,setMode]=useState<'browse'|'publish'>('browse');const [country,setCountry]=useState(ar?'السعودية':'Saudi Arabia');const [city,setCity]=useState('');const [listings,setListings]=useState<Listing[]>(getListings);
+ const [form,setForm]=useState({title:'',description:'',phone:'',price:'',duration:'30 يوم',owner:''});
+ const visible=useMemo(()=>listings.filter(x=>x.kind===kind&&(!country||x.country===country)),[listings,kind,country]);
+ const publish=()=>{const price=Number(form.price)||0;const item:Listing={id:'listing-'+Date.now(),kind,title:form.title||kinds.find(x=>x.id===kind)?.ar||'خدمة',description:form.description,country,city,phone:form.phone,price,currency:'USD',duration:form.duration,owner:form.owner,createdAt:new Date().toISOString()};const next=[item,...listings];localStorage.setItem(listingKey,JSON.stringify(next));setListings(next);setMode('browse');setForm({title:'',description:'',phone:'',price:'',duration:'30 يوم',owner:''});};
+ return <div className="min-h-screen bg-gray-50 pt-24 pb-16" dir={dir}><div className="mx-auto max-w-7xl px-4">
+  <div className="rounded-3xl bg-gradient-to-br from-indigo-700 to-teal-600 p-8 text-white"><h1 className="text-3xl font-extrabold">{ar?'الخدمات الأخرى':'Other Services'}</h1><p className="mt-2 opacity-90">{ar?'بيع أو إيجار الأماكن الطبية وخدمات الإسعاف والخدمات المساندة، مع باقات لعرض الإعلان.':'Medical places, ambulance and support services with paid listing packages.'}</p></div>
+  <div className="mt-5 flex gap-2 overflow-x-auto rounded-2xl bg-white border p-3">{kinds.map(k=>{const I=k.icon;return <button key={k.id} onClick={()=>setKind(k.id)} className={'min-w-max rounded-xl px-4 py-3 flex items-center gap-2 font-bold '+(kind===k.id?'bg-teal-600 text-white':'bg-gray-50 text-gray-700')}><I className="h-4 w-4"/>{ar?k.ar:k.en}</button>})}</div>
+  <div className="mt-4 flex flex-wrap gap-3 items-center"><select value={country} onChange={e=>setCountry(e.target.value)} className="rounded-xl border bg-white px-4 py-3"><option>السعودية</option><option>الإمارات</option><option>مصر</option><option>الأردن</option><option>سوريا</option><option>روسيا</option><option>أرمينيا</option><option>جورجيا</option><option>أوزبكستان</option><option>Germany</option><option>United Kingdom</option></select><button onClick={()=>setMode(mode==='browse'?'publish':'browse')} className="rounded-xl bg-indigo-600 px-5 py-3 font-bold text-white">{mode==='browse'?(ar?'أضف إعلاناً':'Publish listing'):(ar?'العودة للإعلانات':'Back to listings')}</button></div>
+  {mode==='publish'?<div className="mt-6 max-w-3xl rounded-2xl bg-white border p-6"><h2 className="text-xl font-extrabold">{ar?'إضافة مكان أو خدمة':'Publish a place or service'}</h2><div className="grid gap-4 md:grid-cols-2 mt-5"><input className="input-field" placeholder={ar?'عنوان الإعلان':'Listing title'} value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/><input className="input-field" placeholder={ar?'اسم المعلن':'Owner name'} value={form.owner} onChange={e=>setForm({...form,owner:e.target.value})}/><input className="input-field" placeholder={ar?'المدينة':'City'} value={city} onChange={e=>setCity(e.target.value)}/><input className="input-field" placeholder={ar?'رقم الهاتف':'Phone'} value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})}/><input className="input-field" type="number" placeholder={ar?'سعر الباقة بالدولار':'Package price USD'} value={form.price} onChange={e=>setForm({...form,price:e.target.value})}/><select className="input-field" value={form.duration} onChange={e=>setForm({...form,duration:e.target.value})}><option>7 أيام</option><option>30 يوم</option><option>90 يوم</option><option>180 يوم</option><option>365 يوم</option></select></div><textarea className="input-field mt-4" rows={5} placeholder={ar?'تفاصيل المكان أو الخدمة، المساحة، التجهيزات، الموقع...':'Details, equipment, location...'} value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/><div className="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-800">{ar?'سيتم احتساب عمولة المنصة الافتراضية 30% من المعاملة، ويمكن للمالك تعديل النسبة من الإدارة.':'Default platform fee is 30%; the owner can change it from admin settings.'}</div><button onClick={publish} disabled={!form.title||!form.price||!form.phone} className="mt-5 rounded-xl bg-teal-600 px-6 py-3 font-bold text-white disabled:opacity-40">{ar?'حفظ الإعلان والدفع':'Save listing & pay'}</button></div>
+  :<div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{visible.length?visible.map(x=><div key={x.id} className="rounded-2xl bg-white border p-6"><div className="flex items-start gap-3"><MapPin className="h-5 w-5 text-teal-600"/><div><h3 className="font-extrabold">{x.title}</h3><p className="text-sm text-gray-500">{x.city} — {x.country}</p></div></div><p className="mt-4 text-sm text-gray-600">{x.description}</p><div className="mt-4 flex items-center gap-2 text-sm"><Phone className="h-4 w-4"/>{x.phone}</div><div className="mt-4 flex justify-between items-center"><b>{x.price} {x.currency}</b><span className="text-xs text-gray-500">{x.duration}</span></div></div>):<div className="md:col-span-2 lg:col-span-3 rounded-2xl bg-white border p-10 text-center text-gray-500">{ar?'لا توجد إعلانات بعد لهذا النوع والبلد.':'No listings yet for this category and country.'}</div>}</div>}
+  <div className="mt-8 rounded-2xl bg-white border p-6"><h3 className="font-extrabold">{ar?'باقات عرض مستمر':'Continuous listing packages'}</h3><div className="grid gap-3 md:grid-cols-4 mt-4">{[['7 أيام',10],['30 يوم',30],['90 يوم',75],['365 يوم',250]].map(p=><div key={p[0]} className="rounded-xl bg-gray-50 p-4 text-center"><b>{p[0]}</b><div className="mt-1 text-teal-700 font-bold">{p[1]} USD</div></div>)}</div></div>
+ </div></div>;
+}
