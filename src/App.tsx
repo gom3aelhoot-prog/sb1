@@ -82,6 +82,7 @@ import StoreAdminPage from '@/pages/StoreAdminPage';
 import AppsPage from '@/pages/AppsPage';
 import BooksPage from '@/pages/BooksPage';
 import SurgicalVideoLibraryPage from '@/pages/SurgicalVideoLibraryPage';
+import LearningAdminPage from '@/pages/LearningAdminPage';
 import ComplaintsPage from '@/pages/ComplaintsPage';
 import ComplaintsAdminPage from '@/pages/ComplaintsAdminPage';
 import ReferralTreePage from '@/pages/ReferralTreePage';
@@ -153,6 +154,7 @@ function PlatformRoute() {
   if (route === '/apps') return <AppsPage />;
   if (route === '/books') return <BooksPage />;
   if (route === '/surgical-videos') return <SurgicalVideoLibraryPage />;
+  if (route === '/admin/learning') return <LearningAdminPage />;
   if (route === '/complaints') return <ComplaintsPage />;
   if (route === '/admin/complaints') return <ComplaintsAdminPage />;
   if (route === '/specialist/content') return <SpecialistContentUploadPage />;
