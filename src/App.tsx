@@ -56,6 +56,7 @@ import LabsPage from '@/pages/LabsPage';
 import PolicyPage from '@/pages/PolicyPage';
 import TestsPage from '@/pages/TestsPage';
 import JobsPage from '@/pages/JobsPage';
+import JobManagementPage from '@/pages/JobManagementPage';
 import ReferralPage from '@/pages/ReferralPage';
 import AIReaderPage from '@/pages/AIReaderPage';
 import FavoritesPage from '@/pages/FavoritesPage';
@@ -225,6 +226,7 @@ function PlatformRoute() {
   if (route === '/tests') return <TestsPage />;
   if (route === '/facilities') return <FacilitiesPage />;
   if (route === '/jobs') return <JobsPage />;
+  if (route === '/jobs/manage') return <JobManagementPage />;
   if (route === '/referral') return <ReferralPage />;
   if (route === '/referral/tree') return <ReferralTreePage />;
   if (route === '/owner/marketing') return <MarketingCenterPage />;
