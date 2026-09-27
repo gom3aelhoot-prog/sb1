@@ -38,7 +38,7 @@ export default function DoctorCard({ doctor, directory = false }: { doctor: Doct
 
   const handleSession = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/appointments/book?doctor=${doctor.id}&specialty=${doctor.specialty?.slug || ''}`);
+    navigate(`/sessions?doctor=${encodeURIComponent(doctor.id)}&specialty=${encodeURIComponent(doctor.specialty?.slug || '')}`);
   };
 
   if (directory) {
