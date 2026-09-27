@@ -25,7 +25,9 @@ export default function CoursesPage() {
   const [enrollForm, setEnrollForm] = useState({ name: '', email: '' });
   const [enrolling, setEnrolling] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
-  const [contractAccepted,setContractAccepted]=useState(false);\n  const [deliveryMode,setDeliveryMode]=useState<'online'|'download'>('online');\n  const [courseBasePrice, setCourseBasePrice] = useState({price_usd:19,local_price:19,currency_symbol:"$"});
+  const [contractAccepted,setContractAccepted]=useState(false);
+  const [deliveryMode,setDeliveryMode]=useState<'online'|'download'>('online');
+  const [courseBasePrice, setCourseBasePrice] = useState({price_usd:19,local_price:19,currency_symbol:"$"});
 
   useEffect(() => { getCountryServicePrice(country,'course').then(p=>setCourseBasePrice(p)); }, [country.code]);
 
