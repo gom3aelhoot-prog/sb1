@@ -137,6 +137,7 @@ function PlatformRoute() {
   if (route === '/admin/store') return <StoreAdminPage />;
   if (route === '/apps') return <AppsPage />;
   if (route === '/specialist/content') return <SpecialistContentUploadPage />;
+  if (route === '/specialist/dashboard') return <SpecialistContentUploadPage />;
   if (route === '/admin/content') return <ContentModerationPage />;
   if (route === '/admin/approvals') return <AdminApprovalsPage />;
   if (route === '/admin/team-chat') return <OwnerTeamChatPage />;
