@@ -69,6 +69,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<LanguageCode>(getInitialLanguage);
   const [country, setCountryState] = useState<CountryInfo>(getInitialCountry);
   const [discountDismissedAt, setDiscountDismissedAt] = useState<number>(() => Number(localStorage.getItem('sb1_discount_dismissed_at') || 0));
+  const [discountCloseCount, setDiscountCloseCount] = useState<number>(() => Number(localStorage.getItem('sb1_discount_close_count') || 0));
   const [discountConfig,setDiscountConfig]=useState(getDiscountConfig());
   const [showDiscount, setShowDiscount] = useState<boolean>(false);
 
@@ -82,12 +83,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!discountConfig.enabled) { setShowDiscount(false); return; }
-    const now=Date.now(), cooldown=Math.max(0,discountConfig.repeatAfterMinutes)*60000;
+    const now=Date.now();
+    const cooldownMinutes = discountDismissedAt ? (discountCloseCount <= 1 ? 30 : 60) : 0;
+    const cooldown=cooldownMinutes*60000;
     const remaining=Math.max(0,cooldown-(now-discountDismissedAt));
     const delay=discountDismissedAt ? remaining : 2000;
     const timer=setTimeout(()=>setShowDiscount(true),delay);
     return()=>clearTimeout(timer);
-  }, [discountConfig.enabled,discountConfig.repeatAfterMinutes,discountDismissedAt]);
+  }, [discountConfig.enabled,discountDismissedAt,discountCloseCount]);
 
   const setLanguage = useCallback((lang: LanguageCode) => {
     setLanguageState(lang);
@@ -108,8 +111,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const dismissDiscount = useCallback(() => {
     const now=Date.now();
     setShowDiscount(false);
+    const nextCount=discountCloseCount+1;
     setDiscountDismissedAt(now);
+    setDiscountCloseCount(nextCount);
     localStorage.setItem('sb1_discount_dismissed_at',String(now));
+    localStorage.setItem('sb1_discount_close_count',String(nextCount));
     localStorage.setItem(STORAGE_KEYS.discountDismissed,'true');
   }, []);
 
