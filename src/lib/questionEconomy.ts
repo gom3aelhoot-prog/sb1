@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { registerViolation, getSanction } from '@/lib/safetyModeration';
 
 export const PAID_QUESTION_DURATIONS = [
   { id:'basic', days:7, price_sar:33.75, price_usd:9, specialists_limit:10, label_ar:'الأساسية', label_en:'Basic', featured:false },
@@ -62,7 +63,10 @@ export function moderateText(text:string){
  return {allowed:hits.length===0,violations:hits,severity:hits.length?hits.includes('pornography')?'high':'medium':'none'};
 }
 export async function moderateAndLog(sourceType:string,sourceId:string,text:string,userName=''){
+ const existing=getSanction(userName||undefined);
+ if(existing) return {allowed:false,violations:['account_suspended'],severity:'high' as const,sanction:existing};
  const result=moderateText(text);
- try{await supabase.from('sb1_moderation_events').insert({source_type:sourceType,source_id:sourceId,user_name:userName,content_snippet:text.slice(0,240),violations:result.violations,severity:result.severity,status:result.allowed?'allowed':'blocked',created_at:new Date().toISOString()});}catch{}
+ if(!result.allowed){const sanction=registerViolation(userName||'guest',result.violations.join(', '));(result as any).sanction=sanction}
+ try{await supabase.from('sb1_moderation_events').insert({source_type:sourceType,source_id:sourceId,user_name:userName,content_snippet:text.slice(0,240),violations:result.violations,severity:result.severity,status:result.allowed?'allowed':'blocked',created_at:new Date().toISOString(),sanction:((result as any).sanction)||null});}catch{}
  return result;
 }
