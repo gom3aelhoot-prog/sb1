@@ -2,6 +2,7 @@ import {useEffect,useMemo,useState} from 'react';
 import {Bike,MapPin,PackageCheck,ShieldCheck,WalletCards,FileText,AlertTriangle,Navigation,Clock3,CheckCircle2,Store,UserRound,Truck,LockKeyhole} from 'lucide-react';
 import {useI18n} from '@/lib/i18n';
 import {useRouter} from '@/lib/router';
+import {supabase} from '@/lib/supabase';
 
 type Role='client'|'institution'|'delivery_worker';
 type Status='created'|'accepted'|'picked_up'|'on_route'|'delivered'|'disputed'|'cancelled';
