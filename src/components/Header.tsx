@@ -60,34 +60,31 @@ export function Header() {
 
   const labels:any = { ar:['الأخصائيون والأطباء','المحتوى الطبي والمكتبة','المتجر','المكافآت'], en:['Specialists & Doctors','Medical Content & Library','Store','Rewards'], de:['Fachärzte & Ärzte','Medizinische Inhalte & Bibliothek','Facharzt-Shop','Belohnungen'], ru:['Специалисты и врачи','Медицинский контент и библиотека','Магазин','Награды'], uk:['Спеціалісти та лікарі','Медичний контент і бібліотека','Магазин спеціалістів','Нагороди'], uz:['Mutaxassislar va shifokorlar','Tibbiy kontent va kutubxona','Mutaxassislar do‘koni','Mukofotlar'], hy:['Մասնագետներ և բժիշկներ','Բժշկական բովանդակություն և գրադարան','Մասնագետների խանութ','Պարգևներ'], tg:['Мутахассисон ва табибон','Мундариҷаи тиббӣ ва китобхона','Дӯкони мутахассисон','Мукофотҳо'], az:['Mütəxəssislər və həkimlər','Tibbi məzmun və kitabxana','Mütəxəssis mağazası','Mükafatlar'], am:['ስፔሻሊስቶች እና ሐኪሞች','የሕክምና ይዘት እና ቤተ-መጽሐፍት','የስፔሻሊስቶች መደብር','ሽልማቶች'], ka:['სპეციალისტები და ექიმები','სამედიცინო კონტენტი და ბიბლიოთეკა','სპეციალისტების მაღაზია','ჯილდოები']}[lang] || ['Specialists & Doctors','Medical Content & Library','Store','Rewards'];
   const platformSections = [
-    { label: labels[0], href: '/doctors' },
+    { label: lang==='ar'?'الأخصائيون والأطباء':lang==='ru'?'Специалисты и врачи':lang==='de'?'Fachärzte & Ärzte':'Specialists & Doctors', href: '/doctors' },
     { label: platformT('nav.questions'), href: '/questions' },
+    { label: lang==='ar'?'جلسات الفيديو':lang==='ru'?'Видеосессии':lang==='de'?'Videositzungen':'Video Sessions', href: '/choose-doctor' },
+    { label: lang==='ar'?'الجلسات المجانية':lang==='ru'?'Бесплатные сессии':lang==='de'?'Kostenlose Sitzungen':'Free Sessions', href: '/sessions' },
     { label: labels[1], href: '/media' },
     { label: platformT('nav.courses'), href: '/courses' },
-    { label: lang==='ar'?'الجلسات المجانية':lang==='ru'?'Бесплатные сессии':lang==='de'?'Kostenlose Sitzungen':'Free Sessions', href: '/sessions' },
-    { label: lang==='ar'?'اختار طبيبك':lang==='ru'?'Выберите врача':lang==='de'?'Arzt auswählen':'Choose your doctor', href: '/choose-doctor' },
-    { label: lang==='ar'?'المرافق الطبية':lang==='ru'?'Медицинские учреждения':lang==='de'?'Medizinische Einrichtungen':lang==='en'?'Medical Facilities':'Medical Facilities', href: '/facilities' },
-    { label: 'الاختبارات الطبية والنفسية', href: '/tests' },
-    { label: 'المتجر', href: '/store' },
-    { label: labels[3], href: '/referral' },
-    { label: lang==='ar'?'التوصيل والخرائط':lang==='ru'?'Доставка и карты':lang==='de'?'Lieferung & Karten':'Delivery & Maps', href: '/delivery' },
-    { label: 'الشكاوى', href: '/complaints' },
+    { label: lang==='ar'?'المرافق الطبية':lang==='ru'?'Медицинские учреждения':lang==='de'?'Medizinische Einrichtungen':'Medical Facilities', href: '/facilities' },
+    { label: lang==='ar'?'الاختبارات الطبية والنفسية':lang==='ru'?'Медицинские и психологические тесты':lang==='de'?'Medizinische & psychologische Tests':'Medical & Psychological Tests', href: '/tests' },
     { label: lang==='ar'?'الألعاب والتطبيقات':lang==='ru'?'Игры и приложения':lang==='de'?'Spiele & Apps':'Games & Apps', href: '/apps' },
-    { label: lang==='ar'?'لوحة العميل':'Client Dashboard', href: '/dashboard' },
-    { label: lang==='ar'?'استوديو الأخصائي':'Specialist Studio', href: '/specialist/studio' },
-    { label: lang==='ar'?'باقات المتابعة':'Long-term Packages', href: '/specialist/packages' },
-
-  ].filter(item=>isPrivate(item.href));
+    { label: lang==='ar'?'المتجر':lang==='ru'?'Магазин':lang==='de'?'Shop':'Store', href: '/store' },
+    { label: labels[3], href: '/referral' },
+    ...[
+      { label: lang==='ar'?'التوصيل والخرائط':'Delivery & Maps', href:'/delivery' },
+      { label: lang==='ar'?'الشكاوى':'Complaints', href:'/complaints' },
+      { label: lang==='ar'?'لوحة العميل':'Client Dashboard', href:'/dashboard' },
+      { label: lang==='ar'?'استوديو الأخصائي':'Specialist Studio', href:'/specialist/studio' },
+      { label: lang==='ar'?'باقات المتابعة':'Long-term Packages', href:'/specialist/packages' },
+    ].filter(item=>isPrivate(item.href))
+  ];
   const navItems = [
     { label: t.nav.home, href: '/#home', icon: Home },
-    { label: lang==='ar' ? 'الأخصائيون والأطباء' : lang==='ru' ? 'Специалисты и врачи' : lang==='de' ? 'Fachärzte & Ärzte' : 'Specialists & Doctors', href: '/doctors', icon: Stethoscope },
-    { label: t.facilities.title, href: '/facilities', icon: Building2 },
     { label: t.nav.howItWorks, href: '/#how-it-works', icon: HelpCircle },
     { label: t.nav.about, href: '/#about', icon: Info },
-    { label: t.nav.blog, href: '/library', icon: BookOpen },
     { label: t.nav.contact, href: '/#contact', icon: Phone },
   ];
-
   return (
     <>
       <header
@@ -110,35 +107,12 @@ export function Header() {
               </div>
             </a>
 
-            {/* Desktop Nav */}
-            <nav className="hidden lg:flex items-center gap-1">
-              {navItems.slice(0, 1).map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-100 hover:text-primary-700"
-                  
-                >
-                  {item.label}
-                </a>
-              ))}
-              {navItems.slice(1, 3).map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-100 hover:text-primary-700"
-                >
-                  {item.label}
-                </a>
-              ))}
-              <MegaMenu />
-              {navItems.slice(3, 6).map((item) => (
-                <a key={item.href} href={item.href} className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-100 hover:text-primary-700">{item.label}</a>
-              ))}
-              <SessionNavCounter />
-              {navItems.slice(6).map((item) => (
-                <a key={item.href} href={item.href} className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-100 hover:text-primary-700">{item.label}</a>
-              ))}
+            {/* Desktop Nav: compact core links only; platform sections are in the full-width row below */}
+            <nav className="hidden lg:flex min-w-0 items-center gap-0.5">
+              <a href="/#home" className="rounded-lg px-2 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">{t.nav.home}</a>
+              <a href="/#how-it-works" className="rounded-lg px-2 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">{t.nav.howItWorks}</a>
+              <a href="/#about" className="rounded-lg px-2 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">{t.nav.about}</a>
+              <a href="/#contact" className="rounded-lg px-2 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">{t.nav.contact}</a>
             </nav>
 
             {/* Right actions */}
@@ -198,15 +172,14 @@ export function Header() {
           </div>
         </div>
         <div className="hidden lg:block border-t border-neutral-100">
-          <div className="container-x flex items-center gap-1 overflow-x-auto py-1.5 scrollbar-thin">
-            {platformSections.map((item) => (
-              <a key={item.href} href={item.href}
-                className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-primary-50 hover:text-primary-700 transition-colors">
+          <div className="container-x grid grid-cols-10 gap-1 py-1.5">
+            {platformSections.slice(0,10).map((item) => (
+              <a key={item.href} href={item.href} className="min-w-0 rounded-lg px-1 py-2 text-center text-[11px] font-bold leading-tight text-neutral-600 hover:bg-primary-50 hover:text-primary-700 transition-colors">
                 {item.label}
               </a>
             ))}
           </div>
-        </div>
+        </div>        </div>
       </header>
 
       {/* Mobile drawer */}
