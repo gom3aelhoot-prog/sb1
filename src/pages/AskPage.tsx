@@ -47,6 +47,7 @@ export default function AskPage() {
   const [specificDoctorId, setSpecificDoctorId] = useState<string | null>(null);
   const [specificDoctor, setSpecificDoctor] = useState<Doctor | null>(null);
   const [realDoctors, setRealDoctors] = useState<Doctor[]>([]);
+  const ownerMode = typeof window !== 'undefined' && localStorage.getItem('sb1_account_role')==='owner' && localStorage.getItem('sb1_preview_role')==='client';
   const [questionBasePrice, setQuestionBasePrice] = useState<{price_usd:number;local_price:number;currency_code:string;currency_symbol:string}>({price_usd:9,local_price:9,currency_code:"USD",currency_symbol:"$"});
 
   useEffect(() => {
@@ -93,7 +94,7 @@ export default function AskPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!form.author_name.trim() || !form.title.trim() || !form.body.trim() || selectedSpecialties.length===0) {
+    if ((!ownerMode && !form.author_name.trim()) || !form.title.trim() || !form.body.trim() || selectedSpecialties.length===0) {
       setError(t('ask.required'));
       return;
     }
@@ -113,7 +114,7 @@ export default function AskPage() {
       try {
         const { data, error: insertError } = await supabase.from('questions').insert({
           specialty_id: spec?.id || fallbackSpec.id,
-          author_name: form.author_name.trim(),
+          author_name: ownerMode ? 'عضو مجهول' : form.author_name.trim(),
           title: form.title.trim(),
           body: form.body.trim(),
           age: form.age ? parseInt(form.age) : null,
@@ -129,11 +130,11 @@ export default function AskPage() {
       const id = dbQuestionId || questionId;
       const expiresAt = questionType === 'paid' && selectedTier ? new Date(Date.now() + selectedTier.duration_days * 86400000).toISOString() : null;
       try {
-        await supabase.from('consultation_requests').insert({ question_id: dbQuestionId || null, patient_name: form.author_name.trim(), specialty_id: spec?.id || fallbackSpec.id, country_code: country.code, language_code: contentLanguage, service_type: 'question', price_usd: (selectedTier?.price_usd || 0) + Math.max(0,selectedSpecialties.length-1)*5, local_price: localAmount, currency_code: country.currency, duration_days: selectedTier?.duration_days || 0, specialists_limit: 0, response_speed: 'standard', status: questionType === 'paid' ? 'pending' : 'active', expires_at: expiresAt });
+        await supabase.from('consultation_requests').insert({ question_id: dbQuestionId || null, patient_name: ownerMode ? 'عضو مجهول' : form.author_name.trim(), specialty_id: spec?.id || fallbackSpec.id, country_code: country.code, language_code: contentLanguage, service_type: 'question', price_usd: (selectedTier?.price_usd || 0) + Math.max(0,selectedSpecialties.length-1)*5, local_price: localAmount, currency_code: country.currency, duration_days: selectedTier?.duration_days || 0, specialists_limit: 0, response_speed: 'standard', status: questionType === 'paid' ? 'pending' : 'active', expires_at: expiresAt });
       } catch {}
       if (questionType === 'free') await recordUsage('question',1);
       const localQuestion = {
-        id, language: contentLanguage, specialty_id: fallbackSpec.id, author_name: form.author_name.trim(), title: form.title.trim(), body: form.body.trim(),
+        id, language: contentLanguage, specialty_id: fallbackSpec.id, author_name: ownerMode ? 'عضو مجهول' : form.author_name.trim(), title: form.title.trim(), body: form.body.trim(),
         age: form.age ? parseInt(form.age) : null, gender: form.gender, status: questionType === 'paid' ? 'pending_payment' : 'pending',
         views: 0, created_at: new Date().toISOString(), specialty: fallbackSpec, answers: [],
       };
@@ -147,7 +148,7 @@ export default function AskPage() {
         localStorage.setItem('sb1_question_paid_'+id, String(payment.amount));
         if (dbQuestionId) {
           const { error: paymentError } = await supabase.from('payments').insert({
-            payer_email: '', payer_name: form.author_name.trim(), amount: payment.amount, currency: country.currency,
+            payer_email: '', payer_name: ownerMode ? 'عضو مجهول' : form.author_name.trim(), amount: payment.amount, currency: country.currency,
             payment_type: 'question', reference_id: id, status: 'pending',
           });
           if (paymentError) throw paymentError;
