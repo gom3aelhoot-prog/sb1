@@ -14,7 +14,11 @@ export default function RegisterPage() {
   const { t, specialtyName, lang } = useI18n();
   const { country, setCountry } = useApp();
   const { navigate } = useRouter();
-  const [accountType, setAccountType] = useState<'client' | 'specialist' | 'institution' | 'delivery_worker' | null>(null);
+  const queryParams = new URLSearchParams(window.location.search);
+  const initialType = queryParams.get('type') as 'client' | 'specialist' | 'institution' | 'delivery_worker' | null;
+  const registrationStep = queryParams.get('step') || 'type';
+  const [accountType, setAccountType] = useState<'client' | 'specialist' | 'institution' | 'delivery_worker' | null>(initialType);
+  const chooseAccountType = (type:'client'|'specialist'|'institution'|'delivery_worker') => { localStorage.setItem('sb1_pending_registration', JSON.stringify({...formData, country_code: registrationCountry.code, language_code: lang})); navigate('/register/contracts?type='+encodeURIComponent(type)); };
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', phone: '', age: '', parentalConsent: false, specialty: '',
@@ -102,7 +106,7 @@ export default function RegisterPage() {
         <h1 className="text-2xl font-bold text-gray-800 mb-2 text-center">{t('register.title')}</h1>
         <p className="text-gray-500 text-center mb-8">{t('register.subtitle')}</p>
 
-        {!accountType ? (
+        {!accountType && registrationStep !== 'identity' ? (
           <>
           <div className="mb-5 rounded-2xl border border-teal-200 bg-teal-50 p-5 text-center">
             <h3 className="font-extrabold text-teal-900">عميل بدون إنشاء حساب</h3>
@@ -111,7 +115,7 @@ export default function RegisterPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
-              onClick={() => setAccountType('client')}
+              onClick={() => chooseAccountType('client')}
               className="card p-8 text-center hover:shadow-lg transition-all group"
             >
               <div className="w-16 h-16 rounded-2xl bg-teal-100 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
@@ -121,7 +125,7 @@ export default function RegisterPage() {
               <p className="text-sm text-gray-500">{t('register.client_desc')}</p>
             </button>
             <button
-              onClick={() => setAccountType('specialist')}
+              onClick={() => chooseAccountType('specialist')}
               className="card p-8 text-center hover:shadow-lg transition-all group"
             >
               <div className="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
@@ -131,7 +135,7 @@ export default function RegisterPage() {
               <p className="text-sm text-gray-500">{t('register.specialist_desc')}</p>
             </button>
             <button
-              onClick={() => setAccountType('institution')}
+              onClick={() => chooseAccountType('institution')}
               className="card p-8 text-center hover:shadow-lg transition-all group"
             >
               <div className="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
@@ -140,7 +144,7 @@ export default function RegisterPage() {
               <h3 className="text-lg font-bold text-gray-800 mb-1">تسجيل مؤسسة</h3>
               <p className="text-sm text-gray-500">عيادة، مختبر، أشعة، مستشفى، صيدلية أو مركز تأهيل</p>
             </button>
-          <button onClick={() => setAccountType('delivery_worker')} className="card p-8 text-center hover:shadow-lg transition-all group"><div className="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"><Bike className="w-8 h-8 text-orange-600" /></div><h3 className="text-lg font-bold text-gray-800 mb-1">تسجيل عامل توصيل</h3><p className="text-sm text-gray-500">حساب مستقل لاستلام طلبات التوصيل وإشعاراتها.</p></button></div>
+          <button onClick={() => chooseAccountType('delivery_worker')} className="card p-8 text-center hover:shadow-lg transition-all group"><div className="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"><Bike className="w-8 h-8 text-orange-600" /></div><h3 className="text-lg font-bold text-gray-800 mb-1">تسجيل عامل توصيل</h3><p className="text-sm text-gray-500">حساب مستقل لاستلام طلبات التوصيل وإشعاراتها.</p></button></div>
         </>
         ) : (
           <form onSubmit={handleSubmit} className="card p-6 space-y-4">
