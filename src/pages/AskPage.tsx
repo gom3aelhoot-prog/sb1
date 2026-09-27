@@ -21,6 +21,7 @@ type PricingTier = {
   price_usd: number;
   is_featured: boolean;
   price_sar: number;
+  selectedSpecialties?: string[];
 };
 
 const fallbackTiers: PricingTier[] = PAID_QUESTION_DURATIONS.map((x)=>({id:x.id,name:x.label_en,name_ar:x.label_ar,description:`Visible for ${x.days} days to up to ${x.specialists_limit} specialists`,description_ar:`يظهر الطلب ${x.days} أيام لعدد يصل إلى ${x.specialists_limit} أطباء وأخصائيين`,duration_days:x.days,specialists_notified:x.specialists_limit,response_speed:'standard',price_usd:x.price_usd,price_sar:x.price_sar,is_featured:x.featured}));
