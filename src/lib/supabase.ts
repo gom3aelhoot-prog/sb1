@@ -51,6 +51,17 @@ const demoTables: Record<string, DemoRow[]> = {
   admin_users: [],
   complaints: [],
   provider_wallets: [],
+  sb1_session_packages: [
+    {id:'pkg-demo-1',specialist_id:null,title:'باقة متابعة 6 جلسات',description:'متابعة ممتدة مع سعر مخفض لكل جلسة.',session_count:6,regular_price:300,package_price:240,discount_percent:20,duration_days:60,currency_code:'USD',is_active:true,created_at:now},
+    {id:'pkg-demo-2',specialist_id:null,title:'باقة متابعة 12 جلسة',description:'خطة متابعة طويلة المدى قابلة للتخصيص.',session_count:12,regular_price:600,package_price:450,discount_percent:25,duration_days:120,currency_code:'USD',is_active:true,created_at:now},
+  ],
+  sb1_session_package_quotes: [],
+  sb1_social_saves: [],
+  sb1_social_likes: [],
+  sb1_social_comments: [],
+  sb1_social_archive: [],
+  sb1_profile_follows: [],
+  sb1_profile_privacy: [],
   provider_sanctions: [],
   session_holds: [],
   sanction_rules: [
