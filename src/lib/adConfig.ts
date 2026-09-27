@@ -6,7 +6,7 @@ export const DEFAULT_AD_SLOTS:AdSlot[]=[
 {id:'home-side',name:'إعلان جانبي',position:'الشريط الجانبي',size:'300x250',mediaType:'image',mediaUrl:'',title:'مساحة إعلان — نص / صورة',description:'مكان مخصص لإعلان نصي أو صورة.',pricePerDay:35,durationDays:1,enabled:false,fixed:false,dismissible:true,autoCloseMinutes:0},
 {id:'content-bottom',name:'إعلان أسفل المحتوى',position:'أسفل المحتوى',size:'728x180',mediaType:'video',mediaUrl:'',title:'مساحة إعلان — فيديو',description:'مكان مخصص لفيديو إعلاني يضاف من مركز الإعلانات.',pricePerDay:40,durationDays:1,enabled:false,fixed:false,dismissible:true,autoCloseMinutes:0}
 ];
-const DISCOUNT_KEY='sb1_discount_config_v2',SLOTS_KEY='sb1_ad_slots_v3';
+const DISCOUNT_KEY='sb1_discount_config_v3',SLOTS_KEY='sb1_ad_slots_v3';
 export function getDiscountConfig():DiscountConfig{try{return {...DEFAULT_DISCOUNT,...JSON.parse(localStorage.getItem(DISCOUNT_KEY)||'{}')}}catch{return DEFAULT_DISCOUNT}}
 export function saveDiscountConfig(v:DiscountConfig){localStorage.setItem(DISCOUNT_KEY,JSON.stringify(v));window.dispatchEvent(new Event('sb1-ad-config-change'))}
 export function getAdSlots():AdSlot[]{try{const v=JSON.parse(localStorage.getItem(SLOTS_KEY)||'null');return Array.isArray(v)&&v.length?v:DEFAULT_AD_SLOTS}catch{return DEFAULT_AD_SLOTS}}
