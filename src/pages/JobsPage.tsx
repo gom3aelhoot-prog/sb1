@@ -1,126 +1,31 @@
-import { useState, useEffect } from 'react';
-import { Briefcase, MapPin, DollarSign, Send, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Briefcase, MapPin, DollarSign, Send, X, FileText, Plus, Building2 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Job } from '@/lib/supabase';
 import { virtualFacilities } from '@/lib/catalog';
+import { getRole, type SB1Role } from '@/lib/access';
 
-export default function JobsPage() {
-  const { t, lang } = useI18n();
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [applyingJob, setApplyingJob] = useState<Job | null>(null);
-  const [form, setForm] = useState({ applicant_name: '', applicant_email: '', applicant_phone: '', cover_letter: '' });
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+const canPost=(r:SB1Role)=>['institution','specialist','moderator','owner'].includes(r);
+const readLocal=(k:string)=>{try{return JSON.parse(localStorage.getItem(k)||'[]')}catch{return []}};
+const writeLocal=(k:string,v:any)=>localStorage.setItem(k,JSON.stringify(v));
 
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase.from('jobs').select('*').eq('is_active', true).order('created_at', { ascending: false });
-      const demo = virtualFacilities(lang).slice(0,18).map((f:any,i)=>({id:'demo-job-'+i,title:lang==='ar'?['أخصائي تمريض','فني مختبر','صيدلي','أخصائي علاج طبيعي','موظف استقبال'][i%5]:['Nurse Specialist','Lab Technician','Pharmacist','Physiotherapist','Receptionist'][i%5],description:'وظيفة تجريبية منشورة من المؤسسة على SB1',location:f.city,job_type:i%2?'part_time':'full_time',salary_range:'حسب الخبرة',requirements:'المؤهلات والتراخيص المطلوبة حسب الوظيفة',is_active:true,created_at:new Date().toISOString()})) as Job[];
-      setJobs(data && data.length ? data : demo);
-      setLoading(false);
-    })();
-  }, []);
-
-  const handleApply = async () => {
-    if (!applyingJob || !form.applicant_name || !form.applicant_email) return;
-    setSubmitting(true);
-    await supabase.from('job_applications').insert({ ...form, job_id: applyingJob.id });
-    setSubmitting(false);
-    setSubmitted(true);
-    setTimeout(() => {
-      setApplyingJob(null);
-      setSubmitted(false);
-      setForm({ applicant_name: '', applicant_email: '', applicant_phone: '', cover_letter: '' });
-    }, 2000);
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 pt-24 pb-12">
-      <div className="max-w-5xl mx-auto px-4">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('jobs.title')}</h1>
-          <p className="text-gray-500">{t('jobs.subtitle')}</p>
-        </div>
-
-        {loading ? (
-          <p className="text-center text-gray-500">{t('common.loading')}</p>
-        ) : jobs.length === 0 ? (
-          <p className="text-center text-gray-400 py-20">{t('jobs.no_jobs')}</p>
-        ) : (
-          <div className="space-y-4">
-            {jobs.map((job) => (
-              <div key={job.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center flex-shrink-0">
-                      <Briefcase className="w-6 h-6 text-teal-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-800 text-lg">{job.title}</h3>
-                      {job.description && <p className="text-sm text-gray-500 mt-1">{job.description}</p>}
-                      <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-400">
-                        {job.location && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {job.location}</span>}
-                        {job.job_type && <span className="flex items-center gap-1">{job.job_type === 'full_time' ? t('jobs.full_time') : job.job_type === 'part_time' ? t('jobs.part_time') : t('jobs.contract')}</span>}
-                        {job.salary_range && <span className="flex items-center gap-1"><DollarSign className="w-4 h-4" /> {job.salary_range}</span>}
-                      </div>
-                      {job.requirements && <p className="text-sm text-gray-400 mt-2">{job.requirements}</p>}
-                    </div>
-                  </div>
-                  <button onClick={() => setApplyingJob(job)} className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-5 py-2.5 rounded-xl transition-colors text-sm whitespace-nowrap">
-                    {t('jobs.apply')}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {applyingJob && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setApplyingJob(null)}>
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8" onClick={(e) => e.stopPropagation()}>
-            {submitted ? (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center mx-auto mb-4">
-                  <Send className="w-8 h-8 text-teal-600" />
-                </div>
-                <p className="text-lg font-bold text-gray-800">{t('jobs.submitted')}</p>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-800">{applyingJob.title}</h2>
-                  <button onClick={() => setApplyingJob(null)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <X className="w-5 h-5 text-gray-400" />
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('jobs.applicant_name')} *</label>
-                    <input value={form.applicant_name} onChange={(e) => setForm({ ...form, applicant_name: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('jobs.applicant_email')} *</label>
-                    <input type="email" value={form.applicant_email} onChange={(e) => setForm({ ...form, applicant_email: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('jobs.applicant_phone')}</label>
-                    <input value={form.applicant_phone} onChange={(e) => setForm({ ...form, applicant_phone: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('jobs.cover_letter')}</label>
-                    <textarea rows={4} value={form.cover_letter} onChange={(e) => setForm({ ...form, cover_letter: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none resize-none" />
-                  </div>
-                  <button onClick={handleApply} disabled={submitting || !form.applicant_name || !form.applicant_email} className="w-full bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors">
-                    {submitting ? '...' : t('jobs.submit')}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+export default function JobsPage(){
+ const {t,lang}=useI18n(); const role=getRole();
+ const [jobs,setJobs]=useState<Job[]>([]); const [loading,setLoading]=useState(true); const [detail,setDetail]=useState<Job|null>(null); const [applyingJob,setApplyingJob]=useState<Job|null>(null); const [posting,setPosting]=useState(false);
+ const [form,setForm]=useState({applicant_name:'',applicant_email:'',applicant_phone:'',cover_letter:'',cv_url:''});
+ const [jobForm,setJobForm]=useState({title:'',description:'',location:'',job_type:'full_time',salary_range:'',requirements:''});
+ const [submitted,setSubmitted]=useState(false); const [submitting,setSubmitting]=useState(false);
+ const demo=useMemo(()=>virtualFacilities(lang).slice(0,18).map((f:any,i)=>({id:'demo-job-'+i,title:lang==='ar'?['أخصائي تمريض','فني مختبر','صيدلي','أخصائي علاج طبيعي','موظف استقبال'][i%5]:['Nurse Specialist','Lab Technician','Pharmacist','Physiotherapist','Receptionist'][i%5],description:lang==='ar'?'وظيفة منشورة من المؤسسة على SB1':'Position published on SB1',location:f.city,job_type:i%2?'part_time':'full_time',salary_range:lang==='ar'?'حسب الخبرة':'Based on experience',requirements:lang==='ar'?'المؤهلات والتراخيص المطلوبة حسب الوظيفة':'Required qualifications and licenses',is_active:true,created_at:new Date().toISOString(),employer_name:f.name,employer_id:'demo-employer-'+i})) as Job[],[lang]);
+ useEffect(()=>{(async()=>{const {data}=await supabase.from('jobs').select('*').eq('is_active',true).order('created_at',{ascending:false});const local=readLocal('sb1_jobs');setJobs(local.length?local:(data&&data.length?data:demo));setLoading(false)})()},[demo]);
+ const submitApplication=async()=>{if(!applyingJob||!form.applicant_name||!form.applicant_email)return;setSubmitting(true);const app={id:'job-app-'+Date.now(),...form,job_id:applyingJob.id,job_title:applyingJob.title,employer_id:(applyingJob as any).employer_id||'owner',employer_name:(applyingJob as any).employer_name||'صاحب العمل',created_at:new Date().toISOString(),status:'new'};const old=readLocal('sb1_job_applications');writeLocal('sb1_job_applications',[app,...old]);writeLocal('sb1_job_notifications',[{id:'job-notify-'+Date.now(),employer_id:app.employer_id,job_id:app.job_id,job_title:app.job_title,applicant_name:app.applicant_name,message:'متقدم جديد على وظيفة',created_at:app.created_at,read:false},...readLocal('sb1_job_notifications')]);try{await supabase.from('job_applications').insert(app)}catch{}setSubmitting(false);setSubmitted(true);setTimeout(()=>{setApplyingJob(null);setSubmitted(false);setForm({applicant_name:'',applicant_email:'',applicant_phone:'',cover_letter:'',cv_url:''})},1500)};
+ const createJob=async()=>{if(!jobForm.title||!jobForm.location)return;const job:any={id:'job-'+Date.now(),...jobForm,is_active:true,created_at:new Date().toISOString(),employer_id:role==='owner'?'owner':localStorage.getItem('sb1_user_id')||role,employer_name:role==='institution'?'المؤسسة المسجلة':role==='specialist'?'الأخصائي':'إدارة SB1'};const next=[job,...readLocal('sb1_jobs')];writeLocal('sb1_jobs',next);try{await supabase.from('jobs').insert(job)}catch{}setJobs(next);setPosting(false);setJobForm({title:'',description:'',location:'',job_type:'full_time',salary_range:'',requirements:''})};
+ return <div className="min-h-screen bg-gray-50 pt-24 pb-12"><div className="max-w-6xl mx-auto px-4">
+  <div className="text-center mb-8"><h1 className="text-3xl font-bold text-gray-800 mb-2">{t('jobs.title')}</h1><p className="text-gray-500">{t('jobs.subtitle')}</p></div>
+  <div className="flex flex-wrap gap-3 justify-end mb-5">{canPost(role)&&<><button onClick={()=>setPosting(true)} className="inline-flex items-center gap-2 bg-teal-700 text-white px-5 py-3 rounded-xl font-bold"><Plus className="w-5 h-5"/>نشر وظيفة شاغرة</button><a href="/jobs/manage" className="inline-flex items-center gap-2 bg-slate-900 text-white px-5 py-3 rounded-xl font-bold">طلبات التوظيف</a></>}</div>
+  {loading?<p className="text-center text-gray-500">{t('common.loading')}</p>:<div className="space-y-4">{jobs.map(job=><div key={job.id} className="bg-white rounded-2xl shadow-sm border p-6"><div className="flex flex-col md:flex-row items-start justify-between gap-5"><div className="flex items-start gap-4"><div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center"><Briefcase className="w-6 h-6 text-teal-600"/></div><div><h3 className="font-bold text-gray-800 text-lg">{job.title}</h3><p className="text-sm text-gray-500 mt-1">{job.description}</p><div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-400"><span className="flex items-center gap-1"><MapPin className="w-4 h-4"/>{job.location}</span><span>{job.job_type==='full_time'?t('jobs.full_time'):job.job_type==='part_time'?t('jobs.part_time'):t('jobs.contract')}</span>{job.salary_range&&<span className="flex items-center gap-1"><DollarSign className="w-4 h-4"/>{job.salary_range}</span>}</div></div></div><div className="flex gap-2"><button onClick={()=>setDetail(job)} className="border border-teal-200 text-teal-700 px-4 py-2.5 rounded-xl font-semibold">تفاصيل العمل</button><button onClick={()=>setApplyingJob(job)} className="bg-teal-600 text-white px-5 py-2.5 rounded-xl font-bold">{t('jobs.apply')}</button></div></div></div>)}</div>}
+ </div>
+ {detail&&<div className="fixed inset-0 bg-black/50 z-50 p-4 grid place-items-center" onClick={()=>setDetail(null)}><div className="bg-white rounded-3xl max-w-2xl w-full p-7" onClick={e=>e.stopPropagation()}><div className="flex justify-between"><h2 className="text-2xl font-extrabold">{detail.title}</h2><button onClick={()=>setDetail(null)}><X/></button></div><div className="mt-5 space-y-3 text-gray-600"><p><b>تفاصيل العمل:</b> {detail.description||'لا توجد تفاصيل إضافية.'}</p><p><b>المكان:</b> {detail.location}</p><p><b>نوع العمل:</b> {detail.job_type}</p><p><b>الراتب:</b> {detail.salary_range||'حسب الاتفاق'}</p><p><b>المؤهلات والمتطلبات:</b> {detail.requirements||'تحددها الجهة المعلنة.'}</p></div><button onClick={()=>{setDetail(null);setApplyingJob(detail)}} className="mt-6 w-full bg-teal-700 text-white rounded-xl py-3 font-bold">التقدم لهذه الوظيفة</button></div></div>}
+ {applyingJob&&<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={()=>setApplyingJob(null)}><div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-7" onClick={e=>e.stopPropagation()}>{submitted?<div className="text-center py-8"><Send className="w-10 h-10 text-teal-600 mx-auto"/><p className="text-lg font-bold mt-3">{t('jobs.submitted')}</p></div>:<><div className="flex items-center justify-between mb-5"><div><h2 className="text-xl font-bold">{applyingJob.title}</h2><p className="text-xs text-gray-500">يمكن التقديم دون إنشاء حساب</p></div><button onClick={()=>setApplyingJob(null)}><X/></button></div><div className="space-y-4">{[['applicant_name','الاسم الكامل'],['applicant_email','البريد الإلكتروني'],['applicant_phone','الهاتف']].map(([k,l])=><div key={k}><label className="block text-sm font-semibold mb-1">{l}</label><input value={(form as any)[k]} onChange={e=>setForm({...form,[k]:e.target.value})} className="w-full px-4 py-3 rounded-xl border"/></div>)}<div><label className="block text-sm font-semibold mb-1">السيرة الذاتية / رابط الملف</label><input value={form.cv_url} onChange={e=>setForm({...form,cv_url:e.target.value})} className="w-full px-4 py-3 rounded-xl border"/></div><div><label className="block text-sm font-semibold mb-1">{t('jobs.cover_letter')}</label><textarea rows={4} value={form.cover_letter} onChange={e=>setForm({...form,cover_letter:e.target.value})} className="w-full px-4 py-3 rounded-xl border"/></div><button onClick={submitApplication} disabled={submitting||!form.applicant_name||!form.applicant_email} className="w-full bg-teal-700 disabled:opacity-50 text-white rounded-xl py-3 font-bold">{submitting?'...':'إرسال طلب التوظيف'}</button></div></>}</div></div>}
+ {posting&&<div className="fixed inset-0 bg-black/50 z-50 p-4 grid place-items-center"><div className="bg-white rounded-3xl max-w-2xl w-full p-7"><div className="flex justify-between"><h2 className="text-xl font-extrabold">نشر وظيفة شاغرة</h2><button onClick={()=>setPosting(false)}><X/></button></div><div className="grid gap-4 mt-5">{[['title','المسمى الوظيفي'],['location','المدينة / الدولة'],['salary_range','الراتب'],['requirements','المؤهلات المطلوبة']].map(([k,l])=><input key={k} value={(jobForm as any)[k]} onChange={e=>setJobForm({...jobForm,[k]:e.target.value})} placeholder={l} className="w-full px-4 py-3 rounded-xl border"/>) }<textarea value={jobForm.description} onChange={e=>setJobForm({...jobForm,description:e.target.value})} placeholder="تفاصيل العمل والمهام" rows={5} className="w-full px-4 py-3 rounded-xl border"/><button onClick={createJob} className="bg-teal-700 text-white rounded-xl py-3 font-bold">نشر الوظيفة</button></div></div></div>}
+ </div>
 }
