@@ -8,10 +8,10 @@ import { useEffect } from 'react';
 export default function RegisterPage() {
   const { t, specialtyName } = useI18n();
   const { navigate } = useRouter();
-  const [accountType, setAccountType] = useState<'client' | 'specialist' | 'institution' | null>(null);
+  const [accountType, setAccountType] = useState<'client' | 'specialist' | 'institution' | 'other_services' | null>(null);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [formData, setFormData] = useState({
-    name: '', email: '', password: '', phone: '', specialty: '',
+    name: '', email: '', password: '', phone: '', specialty: '', otherServiceType: 'clinic-rent', listingMode: 'rent', listingPrice: '', listingDuration: '30 يوم', listingDetails: '',
     showName: true, anonymous: false, institutionType: 'clinic', address: '', services: '',
   });
   const [docUrls, setDocUrls] = useState<{ id?: string; cert?: string; license?: string }>({});
@@ -50,6 +50,9 @@ export default function RegisterPage() {
           subscription_plan: 'free',
         });
         if (!error) setSuccess(true);
+      } else if (accountType === 'other_services') {
+        localStorage.setItem('sb1_pending_service_registration', JSON.stringify({ ...formData, accountType, createdAt: new Date().toISOString() }));
+        setSuccess(true);
       } else if (accountType === 'specialist') {
         const { data, error } = await supabase.from('doctors').insert({
           name: formData.name,
@@ -129,6 +132,16 @@ export default function RegisterPage() {
               <h3 className="text-lg font-bold text-gray-800 mb-1">تسجيل مؤسسة</h3>
               <p className="text-sm text-gray-500">عيادة، مختبر، أشعة، مستشفى، صيدلية أو مركز تأهيل</p>
             </button>
+            <button
+              onClick={() => setAccountType('other_services')}
+              className="card p-8 text-center hover:shadow-lg transition-all group md:col-span-2"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Building2 className="w-8 h-8 text-orange-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">تسجيل كخدمات أخرى</h3>
+              <p className="text-sm text-gray-500">أماكن للبيع أو الإيجار، إسعاف، رعاية منزلية، أدوات طبية وخدمات مساندة</p>
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="card p-6 space-y-4">
@@ -153,6 +166,24 @@ export default function RegisterPage() {
               <label className="block text-sm font-semibold text-gray-700 mb-2">{t('register.phone')}</label>
               <input type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="input-field" />
             </div>
+
+            {accountType === 'other_services' && (
+              <>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">نوع الخدمة</label>
+                  <select value={formData.otherServiceType} onChange={(e) => setFormData({ ...formData, otherServiceType: e.target.value })} className="input-field">
+                    <option value="clinic-rent">عيادة أو مركز للإيجار</option><option value="medical-place-sale">مكان طبي للبيع</option><option value="medical-place-rent">مكان طبي للإيجار</option><option value="ambulance">إسعاف ونقل طبي</option><option value="home-care">رعاية منزلية وتمريض</option><option value="medical-equipment">أدوات ومعدات طبية</option><option value="delivery">توصيل وخدمات مساندة</option><option value="other">خدمة طبية أخرى</option>
+                  </select>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <select value={formData.listingMode} onChange={(e) => setFormData({ ...formData, listingMode: e.target.value })} className="input-field"><option value="rent">للإيجار</option><option value="sale">للبيع</option><option value="service">خدمة</option></select>
+                  <select value={formData.listingDuration} onChange={(e) => setFormData({ ...formData, listingDuration: e.target.value })} className="input-field"><option>7 أيام</option><option>30 يوم</option><option>90 يوم</option><option>180 يوم</option><option>365 يوم</option></select>
+                </div>
+                <input type="number" placeholder="سعر باقة العرض بالدولار" value={formData.listingPrice} onChange={(e) => setFormData({ ...formData, listingPrice: e.target.value })} className="input-field" required />
+                <textarea placeholder="تفاصيل المكان أو الخدمة ورقم الهاتف والموقع" value={formData.listingDetails} onChange={(e) => setFormData({ ...formData, listingDetails: e.target.value })} className="input-field" rows={4} />
+                <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">نسبة المنصة الافتراضية 30% ويمكن التحكم بها من الإدارة.</div>
+              </>
+            )}
 
             {accountType === 'institution' && (
               <>
