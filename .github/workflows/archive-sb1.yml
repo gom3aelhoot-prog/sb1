@@ -1,0 +1,23 @@
+name: SB1 Archive
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create SB1 source archive
+        run: |
+          rm -rf .git node_modules
+          find . -type f \( -name '.env' -o -name '.env.*' \) -not -name '.env.example' -delete
+          zip -r ../SB1-complete-source.zip . -x '*.DS_Store'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SB1-complete-source
+          path: SB1-complete-source.zip
+          retention-days: 30
