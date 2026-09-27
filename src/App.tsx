@@ -289,6 +289,7 @@ function AppContent() {
       <Footer />
       <SiteAdSlots />
       <DiscountBanner />
+      <SB1Watermark />
       {/* watermark appears only inside paid content pages */}
         <PushNotifications />
       <CapacityGuard />
