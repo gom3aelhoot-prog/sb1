@@ -31,7 +31,7 @@ export default function ReferralPage() {
           <p className="text-gray-500">{t('referral.subtitle')}</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
+        <div className="mb-5 flex flex-wrap gap-2"><a href="/referral/tree" className="rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white">فتح شجرة الإحالات التفاعلية</a><a href="/owner/marketing" className="rounded-xl bg-indigo-50 px-4 py-3 text-sm font-bold text-indigo-700">مركز التسويق للمالك</a></div><div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
           <label className="block text-sm font-medium text-gray-600 mb-3">{t('referral.your_link')}</label>
           <div className="flex gap-3">
             <input readOnly value={referralLink} className="flex-1 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-600 text-sm" />
