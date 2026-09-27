@@ -37,7 +37,8 @@ export default function RegisterPage() {
   useEffect(() => {
     supabase.from('specialties').select('*').order('name').then(({ data }) => setSpecialties(data || []));
     if (registrationStep === 'identity' && queryParams.get('oauth') === '1') {
-      supabase.auth.getUser().then(({data}:any)=>{const u=data?.user;if(u){setOauthUserId(u.id||'');setOauthProvider(localStorage.getItem('sb1_oauth_provider')||u.user_metadata?.provider||'');setFormData(v=>({...v,name:v.name||u.user_metadata?.full_name||u.user_metadata?.name||'',email:v.email||u.email||''}));}});
+      let pending:any={}; try{pending=JSON.parse(localStorage.getItem('sb1_pending_registration')||'{}')}catch{}
+      supabase.auth.getUser().then(({data}:any)=>{const u=data?.user;if(u){setOauthUserId(u.id||'');setOauthProvider(localStorage.getItem('sb1_oauth_provider')||u.user_metadata?.provider||'');setFormData(v=>({...v,...pending,name:v.name||u.user_metadata?.full_name||u.user_metadata?.name||pending.name||'',email:v.email||u.email||pending.email||'',phone:v.phone||pending.phone||'',city:v.city||pending.city||'',address:v.address||pending.address||''}));}});
     }
   }, []);
 
