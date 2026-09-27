@@ -82,6 +82,8 @@ import StoreAdminPage from '@/pages/StoreAdminPage';
 import AppsPage from '@/pages/AppsPage';
 import ComplaintsPage from '@/pages/ComplaintsPage';
 import ComplaintsAdminPage from '@/pages/ComplaintsAdminPage';
+import ReferralTreePage from '@/pages/ReferralTreePage';
+import MarketingCenterPage from '@/pages/MarketingCenterPage';
 import SpecialistContentUploadPage from '@/pages/SpecialistContentUploadPage';
 import ContentModerationPage from '@/pages/ContentModerationPage';
 import AdminApprovalsPage from '@/pages/AdminApprovalsPage';
@@ -182,6 +184,8 @@ function PlatformRoute() {
   if (route === '/facilities') return <FacilitiesPage />;
   if (route === '/jobs') return <JobsPage />;
   if (route === '/referral') return <ReferralPage />;
+  if (route === '/referral/tree') return <ReferralTreePage />;
+  if (route === '/owner/marketing') return <MarketingCenterPage />;
   if (route === '/ai-reader') return <AIReaderPage />;
   if (route === '/favorites') return <FavoritesPage />;
   if (route === '/community') return <CommunityPage />;
