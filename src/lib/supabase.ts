@@ -152,6 +152,7 @@ const demoClient={
       if(saved){const parsed=JSON.parse(saved); if(parsed.user?.email===email) return {data:{user:parsed.user,session:{user:parsed.user}},error:null};}
       return {data:{user:{id:makeId('user'),email},session:{user:{id:makeId('user'),email}}},error:null};
     },
+    signInWithOAuth:async({provider,options}:{provider:string;options?:any})=>{const user={id:makeId('oauth-user'),email:'oauth-user@sb1.demo',user_metadata:{provider}};if(typeof window!=='undefined'){window.localStorage.setItem('sb1_demo_auth',JSON.stringify({user}));window.localStorage.setItem('sb1_oauth_provider',provider);if(options?.redirectTo) window.history.replaceState({},'',options.redirectTo)}return {data:{provider,url:null},error:null};},
     signOut:async()=>{if(typeof window!=='undefined')window.localStorage.removeItem('sb1_demo_auth');return {error:null};},
     getUser:async()=>{try{const saved=typeof window!=='undefined'?window.localStorage.getItem('sb1_demo_auth'):null;return {data:{user:saved?JSON.parse(saved).user:null},error:null};}catch{return {data:{user:null},error:null};}}
   }
