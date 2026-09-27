@@ -291,7 +291,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               <div key={a.id} className="card p-5 hover:shadow-lg transition-all cursor-pointer" onClick={() => navigate(`/articles/${a.id}`)}>
                 {a.image_url && <img src={a.image_url} alt="" className="w-full h-32 rounded-xl object-cover mb-3" />}
                 <h3 className="font-bold text-gray-800 text-sm mb-1">{a.title}</h3>
-                <p className="text-xs text-gray-500 line-clamp-2">{a.excerpt}</p>
+                <p className="text-xs text-gray-500 line-clamp-2">{a.excerpt}</p><button onClick={(e)=>{e.stopPropagation();toggleSaved({id:a.id,kind:'article',title:a.title,body:a.excerpt,author:doctor.name,created_at:a.created_at})}} className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs"><Bookmark className="inline h-4 w-4 me-1"/>{isSaved(a.id)?'محفوظ':'حفظ المقال'}</button>
               </div>
             ))}
             {articles.length === 0 && <p className="text-center text-gray-400 py-8 col-span-full">{t('common.loading')}</p>}
