@@ -24,6 +24,7 @@ export default function RegisterPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const referralCode = new URLSearchParams(window.location.search).get('ref') || '';
 
   useEffect(() => {
     supabase.from('specialties').select('*').order('name').then(({ data }) => setSpecialties(data || []));
@@ -50,6 +51,13 @@ export default function RegisterPage() {
       }
       const authResult = await supabase.auth.signUp({ email, password: formData.password, options: { data: { name: formData.name, role: accountType, age: age || null, parental_consent: Boolean(formData.parentalConsent), country_code: registrationCountry.code, language_code: lang } } });
       if (authResult.error) throw authResult.error;
+      try {
+        let parentId:any = null;
+        if (referralCode) { const p = await supabase.from('affiliate_members').select('id,level').eq('referral_code',referralCode).maybeSingle(); parentId = p.data?.id || null; }
+        const parentLevel = parentId ? Number((await supabase.from('affiliate_members').select('level').eq('id',parentId).maybeSingle()).data?.level || 0) : -1;
+        await supabase.from('affiliate_members').insert({user_id:authResult.data.user?.id||null,name:formData.name,email,member_type:accountType||'client',referral_code:'SB1-'+Date.now().toString(36).toUpperCase(),parent_id:parentId,level:parentId?parentLevel+1:0,country_code:registrationCountry.code,language_code:lang,points:0,wallet_balance:0,total_sales:0,status:'active'});
+      } catch {}
+      try { await supabase.from('newsletter_subscribers').upsert({email,name:formData.name,language_code:lang,country_code:registrationCountry.code,is_active:true},{onConflict:'email'}); } catch {}
       if (accountType === 'delivery_worker') { const { error } = await supabase.from('sb1_delivery_workers').insert({name:formData.name,phone:formData.phone,city:formData.address||'',status:'pending'}); if(error) throw error; }
       if (accountType === 'client') {
         const { error } = await supabase.from('profiles').insert({ id: authResult.data.user?.id, name: formData.anonymous ? 'مجهول' : formData.name, email, phone: formData.phone, role: 'client', country_code: registrationCountry.code, language_code: lang, is_anonymous: formData.anonymous });
