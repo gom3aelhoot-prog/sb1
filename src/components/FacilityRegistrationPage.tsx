@@ -325,24 +325,6 @@ export function FacilityRegistrationPage({ onNavigate }: { onNavigate: (view: st
                     </div>
                   </div>
 
-                  {/* Liability highlights */}
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <div className="rounded-xl bg-red-50 border border-red-100 p-4">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <AlertTriangle className="h-4 w-4 text-red-600" />
-                        <span className="text-sm font-bold text-red-700">{t.facilityRegistration.absoluteLiability}</span>
-                      </div>
-                      <p className="text-xs text-neutral-500 leading-relaxed">{t.facilityRegistration.absoluteLiabilityDesc}</p>
-                    </div>
-                    <div className="rounded-xl bg-primary-50 border border-primary-100 p-4">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <Lock className="h-4 w-4 text-primary-600" />
-                        <span className="text-sm font-bold text-primary-700">{t.facilityRegistration.documentAuthenticity}</span>
-                      </div>
-                      <p className="text-xs text-neutral-500 leading-relaxed">{t.facilityRegistration.documentAuthenticityDesc}</p>
-                    </div>
-                  </div>
-
                   {/* Accept checkbox */}
                   <label className="flex items-start gap-2.5 cursor-pointer">
                     <div className="relative flex items-center mt-0.5">
