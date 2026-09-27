@@ -18,12 +18,13 @@ export default function SubscriptionsPage() {
 
   useEffect(() => {
     supabase.from('subscription_plans').select('*').eq('is_active', true).order('duration_months').then(({ data }) => {
-      setPlans((data && data.length ? data : [
-        { id:'free', name:'Free', name_ar:'مجاني', duration_months:1, price:0, daily_questions_limit:10, weekly_questions_limit:null, free_courses_limit:0, free_books_limit:1, features:'10 أسئلة/شهر', is_active:true, created_at:new Date().toISOString() },
-        { id:'pro', name:'Pro', name_ar:'Pro', duration_months:1, price:10, daily_questions_limit:500, weekly_questions_limit:null, free_courses_limit:2, free_books_limit:10, features:'500 سؤال + 50 صورة', is_active:true, created_at:new Date().toISOString() },
-        { id:'business', name:'Business', name_ar:'Business', duration_months:1, price:30, daily_questions_limit:null, weekly_questions_limit:null, free_courses_limit:10, free_books_limit:50, features:'غير محدود', is_active:true, created_at:new Date().toISOString() },
-      ]) as SubscriptionPlan[]);
-      setLoading(false);
+      const fallback:any[]=[
+        {id:'monthly',name:'Monthly',name_ar:'شهري',duration_months:1,price:9.99,features:'3 أسئلة يومياً، 1 كتاب، 1 ندوة، 1 دورة، 60 دقيقة فيديو'},
+        {id:'quarterly',name:'Quarterly',name_ar:'3 أشهر',duration_months:3,price:24.99,features:'5 أسئلة يومياً، 3 كتب، 3 ندوات، دورتان، 180 دقيقة فيديو'},
+        {id:'half_year',name:'Half Year',name_ar:'6 أشهر',duration_months:6,price:44.99,features:'8 أسئلة يومياً، 6 كتب، 6 ندوات، 4 دورات، 360 دقيقة فيديو'},
+        {id:'yearly',name:'Yearly',name_ar:'سنوي',duration_months:12,price:79.99,features:'12 سؤالاً يومياً، 12 كتاباً، 12 ندوة، 8 دورات، 720 دقيقة فيديو'}
+      ];
+      setPlans((data && data.length ? data : fallback) as SubscriptionPlan[]);setLoading(false);
     });
   }, []);
 
@@ -66,7 +67,7 @@ export default function SubscriptionsPage() {
                   <h3 className="text-lg font-bold text-gray-800 mb-1">{plan.name_ar || plan.name}</h3>
                   <div className="flex items-baseline gap-1 mb-4">
                     <span className="text-3xl font-bold text-gray-800">{displayPrice===0?'0':displayPrice.toLocaleString(lang==='ar'?'ar-EG':'en-US')} {country.currencySymbol}</span>
-                    <span className="text-sm text-gray-400">{t('subs.per_month')}</span>
+                    <span className="text-sm text-gray-400">{plan.duration_months===1?'شهرياً':`كل ${plan.duration_months} أشهر`}</span>
                   </div>
                   <ul className="space-y-2 mb-6">
                     {features.map((f, fi) => (
