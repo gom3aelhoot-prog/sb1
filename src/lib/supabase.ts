@@ -80,6 +80,9 @@ const demoTables: Record<string, DemoRow[]> = {
   signup_promotions: [{ id:'promo-demo', code:'SB1-FIRST-SIGNUP', discount_percent:10, is_active:true }],
   question_pricing_durations: [3,5,10,15].map((days,i)=>({id:`q-duration-${days}`,days,price_usd:[3,5,9,12][i],is_active:true})),
   question_answer_selections: [], question_answer_ratings: [], question_earnings: [], question_accounting_reports: [], question_report_shares: [], sb1_notifications: [], sb1_moderation_events: [], sb1_credit_transactions: [],
+  sb1_audience_profiles: Array.from({length:180},(_,i)=>{const cities=[['DE','Frankfurt'],['DE','Berlin'],['RU','Moscow'],['AM','Yerevan'],['GE','Tbilisi'],['UZ','Tashkent'],['SY','Damascus'],['SA','Riyadh'],['AE','Dubai'],['EG','Cairo']];const [country,city]=cities[i%cities.length];return {id:'aud-demo-'+i,user_id:'demo-user-'+i,name:'مستخدم تجريبي '+(i+1),email:'user'+i+'@sb1.demo',role:['client','specialist','institution'][i%3],country_code:country,city,language_code:{DE:'de',RU:'ru',AM:'hy',GE:'ka',UZ:'uz',SY:'ar',SA:'ar',AE:'ar',EG:'ar'}[country]||'en',last_seen_at:i%4===0?new Date(Date.now()-45*86400000).toISOString():new Date(Date.now()-i%10*86400000).toISOString(),notification_enabled:true,created_at:new Date(Date.now()-i*86400000).toISOString()};}),
+  sb1_notification_campaigns: [],
+  sb1_notification_deliveries: [],
   sb1_credit_wallets: [], sb1_subscription_usage: [],
 };
 
