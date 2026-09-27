@@ -73,6 +73,7 @@ import CartPage from '@/pages/CartPage';
 import MedicalSuppliesPage from '@/pages/MedicalSuppliesPage';
 import SearchPage from '@/pages/SearchPage';
 import ContractsPage from '@/pages/ContractsPage';
+import ContractsCenterPage from '@/pages/ContractsCenterPage';
 import DeliveryPage from '@/pages/DeliveryPage';
 import ServiceCenterPage from '@/pages/ServiceCenterPage';
 import StoreAdminPage from '@/pages/StoreAdminPage';
@@ -142,6 +143,7 @@ function PlatformRoute() {
   if (route === '/admin/approvals') return <AdminApprovalsPage />;
   if (route === '/admin/team-chat') return <OwnerTeamChatPage />;
   if (route === '/admin/question-accounting') return <QuestionAccountingPage />;
+  if (route === '/admin/contracts-center') return <ContractsCenterPage />;
   if (route === '/pediatric-library') return <PediatricLibraryPage />;
   if (route === '/articles') return <MediaHubPage />;
   if (route.startsWith('/articles/')) return <ArticleDetailPage id={route.split('/')[2]} />;
