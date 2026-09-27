@@ -106,6 +106,7 @@ import OnboardingTour from '@/components/OnboardingTour';
 import OwnerCommandCenterPage from '@/pages/OwnerCommandCenterPage';
 import OwnerIntegrationsPage from '@/pages/OwnerIntegrationsPage';
 import OwnerSovereigntyPage from '@/pages/OwnerSovereigntyPage';
+import OwnerGovernancePage from '@/pages/OwnerGovernancePage';
 import SafetyCenterPage from '@/pages/SafetyCenterPage';
 import SpecialistPackagesPage from '@/pages/SpecialistPackagesPage';
 import SpecialistStudioPage from '@/pages/SpecialistStudioPage';
@@ -216,6 +217,7 @@ function PlatformRoute() {
   if (route === '/owner/commands') return <OwnerCommandCenterPage />;
   if (route === '/owner/integrations') return <OwnerIntegrationsPage />;
   if (route === '/owner/sovereignty') return <OwnerSovereigntyPage />;
+  if (route === '/owner/governance') return <OwnerGovernancePage />;
   if (route === '/safety') return <SafetyCenterPage />;
   if (route === '/admin') return <AdminPage />;
   return null;
