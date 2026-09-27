@@ -16,6 +16,8 @@ export default function PaymentsPage() {
   const { path, navigate } = useRouter();
   const query = parseQuery(path);
   const isAppointmentCheckout = query.type === 'appointment' && !!query.reference;
+  const isRequestCheckout = query.type === 'request' && !!query.reference;
+  const requestAmount = Number(query.amount || 0);
   const appointmentAmount = Number(query.amount || 0);
   const completeAppointmentSandbox = () => {
     if (!query.reference) return;
@@ -132,6 +134,27 @@ export default function PaymentsPage() {
     setPaid(true);
     setPaying(false);
   };
+
+  if (isRequestCheckout) {
+    const completeRequestSandbox = () => {
+      const raw = localStorage.getItem('sb1_pending_request_'+query.reference);
+      if (!raw) { setError(lang === 'ar' ? 'انتهت بيانات الطلب.' : 'Request draft not found.'); return; }
+      const row = JSON.parse(raw); row.status = 'open';
+      const current = JSON.parse(localStorage.getItem('sb1_open_requests') || '[]');
+      localStorage.setItem('sb1_open_requests', JSON.stringify([row, ...current]));
+      localStorage.removeItem('sb1_pending_request_'+query.reference);
+      navigate('/requests?paid=1');
+    };
+    const startRequestCheckout = async () => {
+      setCheckoutLoading(true); setError('');
+      try {
+        const response = await fetch('/api/create-checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({amount:requestAmount,currency:(query.currency||'USD').toLowerCase(),description:'SB1 video request listing',reference_id:query.reference})});
+        const data = await response.json(); if(!response.ok||!data.url) throw new Error(data.error||'Checkout unavailable'); window.location.href=data.url;
+      } catch { setError(lang==='ar'?'بوابة الدفع المباشر غير مفعلة على هذا النشر. استخدم وضع الاختبار.':'Live checkout is not configured on this deployment. Use sandbox mode.'); }
+      finally { setCheckoutLoading(false); }
+    };
+    return <div className="min-h-screen pt-24 pb-16 bg-gray-50"><div className="max-w-2xl mx-auto px-4"><div className="card p-7 text-center"><CreditCard className="mx-auto w-14 h-14 text-teal-600"/><h1 className="mt-4 text-3xl font-extrabold">دفع نشر طلب الفيديو</h1><p className="mt-2 text-gray-500">يتم نشر الطلب بعد تأكيد الدفع فقط.</p><div className="mt-6 rounded-2xl bg-teal-50 p-5"><p className="text-sm text-teal-700">قيمة النشر</p><p className="text-4xl font-extrabold text-teal-800">{requestAmount} {query.currency||'USD'}</p></div>{error&&<p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}<button onClick={startRequestCheckout} disabled={checkoutLoading} className="btn-primary w-full mt-5">{checkoutLoading?'جاري فتح بوابة الدفع...':'فتح بوابة الدفع الآمن'}</button><button onClick={completeRequestSandbox} className="w-full mt-3 rounded-xl border py-3 font-bold">تأكيد الدفع التجريبي ثم نشر الطلب</button><p className="mt-4 text-xs text-gray-400">وضع الاختبار لا يخصم أموالاً حقيقية.</p></div></div></div>;
+  }
 
   if (isAppointmentCheckout) {
     return <div className="min-h-screen pt-24 pb-16 bg-gray-50"><div className="max-w-2xl mx-auto px-4"><div className="card p-7"><div className="text-center"><CreditCard className="mx-auto w-14 h-14 text-teal-600"/><h1 className="mt-4 text-3xl font-extrabold">الدفع المسبق للجلسة</h1><p className="mt-2 text-gray-500">بعد الدفع فقط يتم إرسال طلب الحجز إلى الأخصائي.</p></div><div className="mt-6 rounded-2xl bg-teal-50 p-5 text-center"><p className="text-sm text-teal-700">قيمة الجلسة</p><p className="text-4xl font-extrabold text-teal-800">{appointmentAmount} {query.currency?.toUpperCase()||'USD'}</p></div>{error&&<p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}<button onClick={startAppointmentCheckout} disabled={checkoutLoading} className="btn-primary w-full mt-5">{checkoutLoading?'جاري فتح بوابة الدفع...':'فتح بوابة الدفع الآمن'}</button><button onClick={completeAppointmentSandbox} className="w-full mt-3 rounded-xl border py-3 text-sm font-bold text-gray-600">تأكيد الدفع التجريبي ثم إرسال الحجز</button><p className="mt-4 text-xs text-gray-400 text-center">وضع الاختبار لا يخصم أموالاً حقيقية.</p></div></div></div>;
