@@ -80,3 +80,17 @@
 }
 
 html,body,#root{max-width:100%;overflow-x:hidden;} @media (min-width:1024px){body{min-width:0;}}
+
+@layer utilities {
+  .sb1-compact .py-20 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
+  .sb1-compact .py-16 { padding-top: 2.5rem !important; padding-bottom: 2.5rem !important; }
+  .sb1-compact .py-14 { padding-top: 2.25rem !important; padding-bottom: 2.25rem !important; }
+  .sb1-compact .py-12 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
+  .sb1-compact .py-10 { padding-top: 1.75rem !important; padding-bottom: 1.75rem !important; }
+  .sb1-compact .my-12 { margin-top: 2rem !important; margin-bottom: 2rem !important; }
+  .sb1-compact .mt-12 { margin-top: 2rem !important; }
+  .sb1-compact .mb-12 { margin-bottom: 2rem !important; }
+  .sb1-compact .gap-10 { gap: 1.75rem !important; }
+  .sb1-compact .gap-8 { gap: 1.5rem !important; }
+  .sb1-compact section + section { margin-top: 0 !important; }
+}
