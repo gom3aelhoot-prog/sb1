@@ -263,7 +263,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
-      <main className="flex-1"><RoleGate path={platformRoute}>{
+      <main className="flex-1"><RoleGate path={platformRoute}>
         {isHome && !localHashPage && (
           <>
             <Hero />
@@ -285,7 +285,7 @@ function AppContent() {
         {isHome && localHashPage && state.view === 'dictionary' && <MedicalDictionaryPage onNavigate={navigate} />}
         {isHome && localHashPage && state.view === 'reels' && <MediaReelsPage onNavigate={navigate} />}
         {!isHome && <PlatformRoute />}
-      }}</RoleGate></main>
+      </RoleGate></main>
       <Footer />
       <SiteAdSlots />
       <DiscountBanner />
