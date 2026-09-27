@@ -72,7 +72,6 @@ export function Header() {
     { label: labels[3], href: '/referral' },
     { label: lang==='ar'?'التوصيل والخرائط':lang==='ru'?'Доставка и карты':lang==='de'?'Lieferung & Karten':'Delivery & Maps', href: '/delivery' },
     { label: 'الشكاوى', href: '/complaints' },
-    { label: lang==='ar'?'سلة المشتريات':lang==='ru'?'Корзина':lang==='de'?'Warenkorb':'Cart', href: '/cart' },
     { label: lang==='ar'?'الألعاب والتطبيقات':lang==='ru'?'Игры и приложения':lang==='de'?'Spiele & Apps':'Games & Apps', href: '/apps' },
     { label: lang==='ar'?'لوحة العميل':'Client Dashboard', href: '/dashboard' },
     { label: lang==='ar'?'استوديو الأخصائي':'Specialist Studio', href: '/specialist/studio' },
@@ -163,8 +162,9 @@ export function Header() {
                 <Wallet className="h-4 w-4" />
                 <span className="hidden xl:inline">المحفظة</span>
               </a>
-              <a href="/cart" className="relative flex h-10 w-10 items-center justify-center rounded-xl text-neutral-700 hover:bg-neutral-100" title="السلة">
+              <a href="/cart" className="group relative flex min-w-10 flex-col items-center justify-center rounded-xl px-1 py-1 text-neutral-700 hover:bg-neutral-100" title="سلة المشتريات">
                 <ShoppingCart className="h-5 w-5" />
+                <span className="mt-0.5 text-[9px] font-bold leading-none text-neutral-500">{lang==='ar'?'سلة المشتريات':lang==='ru'?'Корзина':lang==='de'?'Warenkorb':'Cart'}</span>
               </a>
 
               <a href="/notifications/global" className="relative flex h-10 w-10 items-center justify-center rounded-xl text-sky-700 hover:bg-sky-50" title="الإشعارات العامة"><Globe2 className="h-5 w-5"/></a>
