@@ -263,6 +263,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
+      <SiteAdSlots />
       <main className="flex-1"><RoleGate path={platformRoute}>
         {isHome && !localHashPage && (
           <>
@@ -287,7 +288,6 @@ function AppContent() {
         {!isHome && <PlatformRoute />}
       </RoleGate></main>
       <Footer />
-      <SiteAdSlots />
       <DiscountBanner />
       <SB1Watermark />
       {/* watermark appears only inside paid content pages */}
