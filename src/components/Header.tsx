@@ -77,7 +77,6 @@ export function Header() {
     { label: lang==='ar'?'لوحة العميل':'Client Dashboard', href: '/dashboard' },
     { label: lang==='ar'?'استوديو الأخصائي':'Specialist Studio', href: '/specialist/studio' },
     { label: lang==='ar'?'باقات المتابعة':'Long-term Packages', href: '/specialist/packages' },
-    { label: lang==='ar'?'الأمان والبلاغات':'Safety & Reports', href: '/safety' },
 
   ].filter(item=>isPrivate(item.href));
   const navItems = [
