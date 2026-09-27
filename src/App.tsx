@@ -92,6 +92,8 @@ import PushNotifications from '@/components/PushNotifications';
 import JobsTicker from '@/components/JobsTicker';
 import OnboardingTour from '@/components/OnboardingTour';
 import OwnerCommandCenterPage from '@/pages/OwnerCommandCenterPage';
+import SafetyCenterPage from '@/pages/SafetyCenterPage';
+import { getSanction } from '@/lib/safetyModeration';
 
 type HashView = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
 
@@ -180,12 +182,16 @@ function PlatformRoute() {
   if (route === '/settings') return <SettingsPage />;
   if (route === '/admin-dashboard') return <AdminDashboardPage />;
   if (route === '/owner/commands') return <OwnerCommandCenterPage />;
+  if (route === '/safety') return <SafetyCenterPage />;
   if (route === '/admin') return <AdminPage />;
   return null;
 }
 
 function AppContent() {
   const [state, setState] = useState(getHashView);
+  const [suspension,setSuspension]=useState<any>(()=>getSanction());
+  useEffect(()=>{const t=window.setInterval(()=>setSuspension(getSanction()),1000);return()=>window.clearInterval(t)},[]);
+  if(suspension){return <div dir="rtl" className="min-h-screen grid place-items-center bg-slate-50 p-6"><div className="max-w-xl rounded-3xl bg-white border shadow-xl p-8 text-center"><div className="text-4xl">⛔</div><h1 className="text-2xl font-extrabold mt-4">تم إيقاف الحساب مؤقتاً</h1><p className="text-gray-600 mt-3">سبب الإيقاف: {suspension.reason}</p><p className="font-bold text-red-700 mt-3">{suspension.permanent?'إيقاف دائم حتى المراجعة الإدارية':'ينتهي الإيقاف في '+new Date(suspension.until).toLocaleString()}</p><a href="/safety" className="inline-block mt-6 rounded-xl bg-teal-700 text-white px-5 py-3">مركز الأمان</a></div></div>}
   const { path } = useRouter();
   const platformRoute = getPathOnly(path);
 
