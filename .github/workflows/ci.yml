@@ -17,3 +17,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Package full SB1 source
+        run: zip -r SB1-complete-source.zip . -x '.git/*' 'node_modules/*' '.env' '.env.*'
+      - name: Upload SB1 source ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: SB1-complete-source
+          path: SB1-complete-source.zip
+          retention-days: 30
