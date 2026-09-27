@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Check, Crown, Sparkles, TrendingUp } from 'lucide-react';
+import { Check, Crown, Sparkles, TrendingUp, Info } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type SubscriptionPlan } from '@/lib/supabase';
 import { useRouter } from '@/lib/router';
@@ -21,7 +21,6 @@ export default function SubscriptionsPage() {
       const fallback:any[]=[
         {id:'monthly',name:'Monthly',name_ar:'شهري',duration_months:1,price:9.99,features:'3 أسئلة يومياً، 1 كتاب، 1 ندوة، 1 دورة، 60 دقيقة فيديو'},
         {id:'quarterly',name:'Quarterly',name_ar:'3 أشهر',duration_months:3,price:24.99,features:'5 أسئلة يومياً، 3 كتب، 3 ندوات، دورتان، 180 دقيقة فيديو'},
-        {id:'half_year',name:'Half Year',name_ar:'6 أشهر',duration_months:6,price:44.99,features:'8 أسئلة يومياً، 6 كتب، 6 ندوات، 4 دورات، 360 دقيقة فيديو'},
         {id:'yearly',name:'Yearly',name_ar:'سنوي',duration_months:12,price:79.99,features:'12 سؤالاً يومياً، 12 كتاباً، 12 ندوة، 8 دورات، 720 دقيقة فيديو'}
       ];
       setPlans((data && data.length ? data : fallback) as SubscriptionPlan[]);setLoading(false);
@@ -37,20 +36,25 @@ export default function SubscriptionsPage() {
         <h1 className="text-3xl font-bold text-gray-800 text-center mb-2">{t('subs.title')}</h1>
         <p className="text-gray-500 text-center mb-10">{t('subs.subtitle')}</p>
 
-        <section className="mb-10 rounded-3xl border bg-white p-6">
-          <h2 className="text-2xl font-black">{lang==='ar'?'باقات VIP المجمعة':'VIP Bundles'}</h2>
-          <p className="mt-1 text-sm text-gray-500">{lang==='ar'?'باقات تجمع عدة خدمات في اشتراك واحد.':'Bundles combining several services.'}</p>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {[['VIP المعرفة','كتب + دورات + مكتبة طبية','39.99'],['VIP المحتوى','أسئلة + مقالات + فيديوهات + تسجيلات صوتية','29.99'],['VIP الشامل','كتب + دورات + أسئلة + محتوى + فيديوهات','59.99']].map(([name,desc,price])=><div key={name} className="rounded-2xl border p-5"><Crown className="h-7 w-7 text-amber-500"/><h3 className="mt-3 font-extrabold">{name}</h3><p className="mt-2 text-sm text-gray-500">{desc}</p><b className="mt-4 block text-xl">{price} {country.currencySymbol}</b><button onClick={()=>navigate('/payments?type=vip&amount='+price)} className="mt-4 w-full rounded-xl bg-teal-700 px-4 py-3 font-bold text-white">{lang==='ar'?'اشترك الآن':'Subscribe'}</button></div>)}
-          </div>
-        </section>
-        <section className="mb-10 rounded-3xl border bg-slate-50 p-6">
-          <h2 className="text-2xl font-black">{lang==='ar'?'باقات الأخصائيين':'Specialist Bundles'}</h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {[['باقة النمو','صفحة احترافية + نشر محتوى + أدوات تواصل','49.99'],['باقة التدريب','دورة + غرفة اجتماعات + دردشة الدورة','69.99'],['باقة العيادة','خدمات المؤسسة + محتوى + عروض للمرضى','89.99']].map(([name,desc,price])=><div key={name} className="rounded-2xl bg-white border p-5"><h3 className="font-extrabold">{name}</h3><p className="mt-2 text-sm text-gray-500">{desc}</p><b className="mt-4 block text-xl">{price} {country.currencySymbol}</b><button onClick={()=>navigate('/payments?type=specialist_bundle&amount='+price)} className="mt-4 w-full rounded-xl bg-indigo-700 px-4 py-3 font-bold text-white">{lang==='ar'?'عرض الباقة':'View bundle'}</button></div>)}
-          </div>
-        </section>
         {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1,2,3].map(i=><div key={i} className="card p-5 animate-pulse"><div className="h-8 bg-gray-100 rounded w-1/2 mb-3"/><div className="h-4 bg-gray-100 rounded w-full mb-2"/><div className="h-4 bg-gray-100 rounded w-3/4"/></div>)}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {plans.slice(0,3).map((plan, i) => {
+              const Icon = [Sparkles, TrendingUp, Crown][i];
+              const features = (plan.features || '').split('،').filter(Boolean);
+              const displayPrice = Number(plan.price||0);
+              return <div key={plan.id} className="card p-5 relative overflow-hidden">
+                <div className="flex items-start justify-between gap-3"><div><div className="flex items-center gap-2"><Icon className="w-6 h-6 text-teal-600"/><h3 className="text-lg font-bold text-gray-800">{plan.name_ar || plan.name}</h3></div><div className="mt-2 text-2xl font-black text-gray-800">{displayPrice===0?'0':displayPrice.toLocaleString(lang==='ar'?'ar-EG':'en-US')} {country.currencySymbol}</div><div className="text-xs text-gray-400">{plan.duration_months===1?'شهرياً':`كل ${plan.duration_months} أشهر`}</div></div></div>
+                <p className="mt-3 text-sm leading-6 text-gray-600">{features.slice(0,3).join(' · ')}</p>
+                <details className="mt-3 rounded-xl bg-gray-50 p-3"><summary className="cursor-pointer text-sm font-bold text-teal-700"><Info className="inline h-4 w-4 me-1"/>تفاصيل الباقة</summary><ul className="mt-3 space-y-2">{features.map((f,fi)=><li key={fi} className="flex items-start gap-2 text-xs text-gray-600"><Check className="w-4 h-4 text-teal-500 flex-shrink-0"/><span>{f.trim()}</span></li>)}</ul></details>
+                <button onClick={() => navigate(plan.price === 0 ? '/register' : `/payments?type=subscription&plan=${plan.id}&amount=${displayPrice}`)} className="btn-primary w-full mt-4 py-2.5">{t('subs.choose')}</button>
+              </div>;
+            })}
+          </div>
+        )}        {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="card p-8 animate-pulse">
