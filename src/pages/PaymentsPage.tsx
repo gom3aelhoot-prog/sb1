@@ -216,6 +216,27 @@ export default function PaymentsPage() {
     );
   }
 
+  const isContentCheckout = query.type === 'content' && !!query.reference;
+  const contentAmount = Number(query.amount || 0);
+  const completeContentSandbox = () => {
+    if (!query.reference) return;
+    localStorage.setItem('sb1_paid_content_'+query.reference, '1');
+    setPaid(true);
+  };
+  const startContentCheckout = async () => {
+    setCheckoutLoading(true); setError('');
+    try {
+      const response = await fetch('/api/create-checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({amount:contentAmount,currency:(query.currency||'usd').toLowerCase(),description:query.title||'SB1 digital content',reference_id:query.reference,success_url:window.location.origin+'/payments?type=content&reference='+encodeURIComponent(query.reference)+'&amount='+contentAmount+'&title='+encodeURIComponent(query.title||'')+'&paid=1',cancel_url:window.location.origin+'/payments?type=content&reference='+encodeURIComponent(query.reference)+'&amount='+contentAmount})});
+      const data=await response.json(); if(!response.ok||!data.url) throw new Error(data.error||'Checkout unavailable'); window.location.href=data.url;
+    } catch { setError(lang==='ar'?'بوابة الدفع المباشر غير مفعّلة على هذا النشر. استخدم وضع الاختبار.':'Live checkout is not configured on this deployment. Use sandbox mode.'); }
+    finally { setCheckoutLoading(false); }
+  };
+  if (isContentCheckout) {
+    const isPaid = paid || query.paid === '1' || localStorage.getItem('sb1_paid_content_'+query.reference)==='1';
+    if (isPaid) return <div className="min-h-screen pt-24 pb-16 bg-gray-50"><div className="max-w-2xl mx-auto px-4"><div className="card p-8 text-center"><CheckCircle2 className="mx-auto h-16 w-16 text-green-500"/><h1 className="mt-4 text-3xl font-extrabold">{lang==='ar'?'تم تأكيد الدفع':'Payment confirmed'}</h1><p className="mt-2 text-gray-500">{query.title||'SB1 content'}</p><button onClick={()=>navigate('/library')} className="btn-primary mt-6">{lang==='ar'?'العودة للمحتوى':'Back to content'}</button></div></div></div>;
+    return <div className="min-h-screen pt-24 pb-16 bg-gray-50"><div className="max-w-2xl mx-auto px-4"><div className="card p-8"><div className="text-center"><CreditCard className="mx-auto h-14 w-14 text-teal-600"/><h1 className="mt-4 text-3xl font-extrabold">{lang==='ar'?'الدفع الآمن للمحتوى':'Secure content checkout'}</h1><p className="mt-2 text-gray-500">{query.title||'SB1 content'}</p></div><div className="mt-6 rounded-2xl bg-teal-50 p-5 text-center"><p className="text-sm text-teal-700">{lang==='ar'?'القيمة':'Amount'}</p><p className="text-4xl font-extrabold text-teal-800">{contentAmount} {query.currency||'USD'}</p></div>{error&&<p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}<button onClick={startContentCheckout} disabled={checkoutLoading} className="btn-primary mt-5 w-full">{checkoutLoading?(lang==='ar'?'جاري فتح الدفع...':'Opening checkout...'):(lang==='ar'?'الدفع الآمن عبر مزود الدفع':'Pay securely')}</button><button onClick={completeContentSandbox} className="mt-3 w-full rounded-xl border py-3 font-bold">{lang==='ar'?'تأكيد الدفع التجريبي':'Confirm sandbox payment'}</button></div></div></div>;
+  }
+
   const subscriptionAmount = Number(query.amount || 0);
   const isSubscriptionCheckout = query.type === 'subscription' && subscriptionAmount > 0;
 
