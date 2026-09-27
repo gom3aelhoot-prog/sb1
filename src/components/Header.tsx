@@ -69,6 +69,8 @@ export function Header() {
 
   const labels:any = { ar:['الأخصائيون والأطباء','المحتوى الطبي والمكتبة','المتجر','المكافآت'], en:['Specialists & Doctors','Medical Content & Library','Store','Rewards'], de:['Fachärzte & Ärzte','Medizinische Inhalte & Bibliothek','Facharzt-Shop','Belohnungen'], ru:['Специалисты и врачи','Медицинский контент и библиотека','Магазин','Награды'], uk:['Спеціалісти та лікарі','Медичний контент і бібліотека','Магазин спеціалістів','Нагороди'], uz:['Mutaxassislar va shifokorlar','Tibbiy kontent va kutubxona','Mutaxassislar do‘koni','Mukofotlar'], hy:['Մասնագետներ և բժիշկներ','Բժշկական բովանդակություն և գրադարան','Մասնագետների խանութ','Պարգևներ'], tg:['Мутахассисон ва табибон','Мундариҷаи тиббӣ ва китобхона','Дӯкони мутахассисон','Мукофотҳо'], az:['Mütəxəssislər və həkimlər','Tibbi məzmun və kitabxana','Mütəxəssis mağazası','Mükafatlar'], am:['ስፔሻሊስቶች እና ሐኪሞች','የሕክምና ይዘት እና ቤተ-መጽሐፍት','የስፔሻሊስቶች መደብር','ሽልማቶች'], ka:['სპეციალისტები და ექიმები','სამედიცინო კონტენტი და ბიბლიოთეკა','სპეციალისტების მაღაზია','ჯილდოები']}[lang] || ['Specialists & Doctors','Medical Content & Library','Store','Rewards'];
   const platformSections = [
+    { label: lang==='ar'?'صفحتي':lang==='ru'?'Моя страница':lang==='de'?'Meine Seite':lang==='en'?'My Page':lang==='uk'?'Моя сторінка':lang==='uz'?'Mening sahifam':lang==='hy'?'Իմ էջը':lang==='tg'?'Саҳифаи ман':lang==='az'?'Səhifəm':lang==='am'?'ገጼ':lang==='ka'?'ჩემი გვერდი':'My Page', href: '/profile' },
+    { label: lang==='ar'?'المجتمع':lang==='ru'?'Сообщество':lang==='de'?'Community':'Community', href: '/community' },
     { label: lang==='ar'?'الأخصائيون والأطباء':lang==='ru'?'Специалисты и врачи':lang==='de'?'Fachärzte & Ärzte':'Specialists & Doctors', href: '/doctors' },
     { label: platformT('nav.questions'), href: '/questions' },
     { label: lang==='ar'?'جلسات الفيديو':lang==='ru'?'Видеосессии':lang==='de'?'Videositzungen':'Video Sessions', href: '/choose-doctor' },
@@ -184,7 +186,7 @@ export function Header() {
         </div>
         <div className="hidden lg:block border-t border-neutral-100">
           <div className="container-x grid grid-cols-[repeat(11,minmax(0,1fr))] gap-1 py-1.5">
-            {platformSections.slice(0,11).map((item) => (
+            {platformSections.slice(0,13).map((item) => (
               <a key={item.href} href={item.href} className="min-w-0 rounded-lg px-1 py-2 text-center text-[11px] font-bold leading-tight text-neutral-600 hover:bg-primary-50 hover:text-primary-700 transition-colors">
                 {item.label}
               </a>
