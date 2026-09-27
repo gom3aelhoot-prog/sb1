@@ -90,6 +90,7 @@ import AppointmentsPage from '@/pages/AppointmentsPage';
 import VideoAppointmentDoctorPage from '@/pages/VideoAppointmentDoctorPage';
 import SpecialistFreeSessionsPage from '@/pages/SpecialistFreeSessionsPage';
 import PushNotifications from '@/components/PushNotifications';
+import CapacityGuard from '@/components/CapacityGuard';
 import JobsTicker from '@/components/JobsTicker';
 import OnboardingTour from '@/components/OnboardingTour';
 import OwnerCommandCenterPage from '@/pages/OwnerCommandCenterPage';
@@ -252,6 +253,7 @@ function AppContent() {
       <SiteAdSlots />
       <DiscountBanner />
       <PushNotifications />
+      <CapacityGuard />
       <OnboardingTour />
       {!isHome && <AIChatWidget />}
     </div>
