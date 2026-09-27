@@ -37,6 +37,7 @@ export default function AskPage() {
   const [questionType, setQuestionType] = useState<'free' | 'paid'>('free');
   const [selectedTierId, setSelectedTierId] = useState('basic');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>(query.specialty ? [query.specialty] : []);
   const [contentLanguage, setContentLanguage] = useState(lang);
   const [form, setForm] = useState({ author_name: '', age: '', gender: 'ذكر', title: '', body: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -60,7 +61,7 @@ export default function AskPage() {
       } catch {
         // Keep the page usable with the built-in pricing catalog when the database is unavailable.
       }
-      if (query.specialty) setSelectedSpecialty(query.specialty);
+      if (query.specialty) { setSelectedSpecialty(query.specialty); setSelectedSpecialties([query.specialty]); }
       if (query.virtual === '1') setIsVirtual(true);
       if (query.doctor) setSpecificDoctorId(query.doctor);
     })();
@@ -85,17 +86,18 @@ export default function AskPage() {
 
   const selectedTier = tiers.find((tier) => tier.id === selectedTierId) || tiers[0];
   const countryMultiplier = questionBasePrice.price_usd > 0 ? questionBasePrice.local_price / questionBasePrice.price_usd : 1;
-  const localAmount = selectedTier ? Number((selectedTier.price_usd * countryMultiplier).toFixed(2)) : 0;
+  const localAmount = selectedTier ? Number(((selectedTier.price_usd + Math.max(0,selectedSpecialties.length-1)*5) * countryMultiplier).toFixed(2)) : 0;
 
   useEffect(() => { getCountryServicePrice(country,'question').then(setQuestionBasePrice); }, [country.code]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!form.author_name.trim() || !form.title.trim() || !form.body.trim() || !selectedSpecialty) {
+    if (!form.author_name.trim() || !form.title.trim() || !form.body.trim() || selectedSpecialties.length===0) {
       setError(t('ask.required'));
       return;
     }
+    if (selectedSpecialties.length>5) { setError(lang==='ar'?'يمكن اختيار حتى 5 تخصصات فقط.':'You can choose up to 5 specialties.'); return; }
     if (questionType === 'paid' && !selectedTier) {
       setError(lang === 'ar' ? 'اختر باقة مدفوعة أولاً' : 'Please select a paid plan first.');
       return;
@@ -103,8 +105,9 @@ export default function AskPage() {
 
     setSubmitting(true);
     try {
-      const { data: spec } = await supabase.from('specialties').select('id').eq('slug', selectedSpecialty).maybeSingle();
-      const fallbackSpec = demoSpecialties.find((item) => item.slug === selectedSpecialty) || demoSpecialties[0];
+      const primarySpecialty = selectedSpecialties[0] || selectedSpecialty;
+      const { data: spec } = await supabase.from('specialties').select('id').eq('slug', primarySpecialty).maybeSingle();
+      const fallbackSpec = demoSpecialties.find((item) => item.slug === primarySpecialty) || demoSpecialties[0];
       const questionId = dataId();
       let dbQuestionId = '';
       try {
@@ -126,7 +129,7 @@ export default function AskPage() {
       const id = dbQuestionId || questionId;
       const expiresAt = questionType === 'paid' && selectedTier ? new Date(Date.now() + selectedTier.duration_days * 86400000).toISOString() : null;
       try {
-        await supabase.from('consultation_requests').insert({ question_id: dbQuestionId || null, patient_name: form.author_name.trim(), specialty_id: spec?.id || fallbackSpec.id, country_code: country.code, language_code: contentLanguage, service_type: 'question', price_usd: selectedTier?.price_usd || 0, local_price: localAmount, currency_code: country.currency, duration_days: selectedTier?.duration_days || 0, specialists_limit: selectedTier?.specialists_notified || 10, response_speed: 'standard', status: questionType === 'paid' ? 'pending' : 'active', expires_at: expiresAt });
+        await supabase.from('consultation_requests').insert({ question_id: dbQuestionId || null, patient_name: form.author_name.trim(), specialty_id: spec?.id || fallbackSpec.id, country_code: country.code, language_code: contentLanguage, service_type: 'question', price_usd: (selectedTier?.price_usd || 0) + Math.max(0,selectedSpecialties.length-1)*5, local_price: localAmount, currency_code: country.currency, duration_days: selectedTier?.duration_days || 0, specialists_limit: 0, response_speed: 'standard', status: questionType === 'paid' ? 'pending' : 'active', expires_at: expiresAt });
       } catch {}
       if (questionType === 'free') await recordUsage('question',1);
       const localQuestion = {
@@ -221,7 +224,8 @@ export default function AskPage() {
           </div>
         )}
 
-        <div className="card p-5 mb-6"><label className="block text-sm font-bold text-gray-700 mb-2">{lang==='ar'?'لغة السؤال والمحتوى':'Question language'}</label><select value={contentLanguage} onChange={e=>setContentLanguage(e.target.value as typeof lang)} className="input-field mb-5"><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
+        <div className="card p-5 mb-6"><label className="block text-sm font-bold text-gray-700 mb-2">{lang==='ar'?'التخصصات التي سيظهر فيها السؤال':'Specialties that will receive this question'}</label><div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{specialties.map((spec:any)=><label key={spec.id} className="flex items-center gap-2 rounded-xl border p-3"><input type="checkbox" checked={selectedSpecialties.includes(spec.slug)} onChange={e=>{const v=e.target.checked?[...selectedSpecialties,spec.slug]:selectedSpecialties.filter(x=>x!==spec.slug);if(v.length<=5){setSelectedSpecialties(v);setSelectedSpecialty(v[0]||'')}}}/><span>{specialtyName(spec)}</span></label>)}</div><p className="mt-2 text-xs text-gray-500">{lang==='ar'?'حتى 5 تخصصات، وكل تخصص إضافي يزيد السعر.':'Up to 5 specialties; each additional specialty increases the price.'}</p></div>
+<div className="card p-5 mb-6"><label className="block text-sm font-bold text-gray-700 mb-2">{lang==='ar'?'لغة السؤال والمحتوى':'Question language'}</label><select value={contentLanguage} onChange={e=>setContentLanguage(e.target.value as typeof lang)} className="input-field mb-5"><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
           <div className="grid grid-cols-2 gap-3">
             <button type="button" onClick={() => setQuestionType('free')} className={`rounded-2xl border-2 p-4 text-start transition ${questionType === 'free' ? 'border-teal-500 bg-teal-50' : 'border-gray-100'}`}>
               <div className="font-bold text-gray-800">{lang === 'ar' ? 'سؤال مجاني' : 'Free question'}</div>
@@ -248,7 +252,7 @@ export default function AskPage() {
                   <div className="mt-1 text-2xl font-extrabold text-teal-700">{Number((tier.price_usd * countryMultiplier).toFixed(2)).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')} {questionBasePrice.currency_symbol}</div>
                   <div className="mt-3 space-y-2 text-sm text-gray-600">
                     <div className="flex items-center gap-2"><Clock className="w-4 h-4" />{tier.duration_days} {lang === 'ar' ? 'يوم ظهور الطلب' : 'days visible'}</div>
-                    <div className="flex items-center gap-2"><Users className="w-4 h-4" />{tier.specialists_notified} {lang === 'ar' ? 'أطباء/أخصائيين يمكنهم فتح الطلب والرد' : 'specialists may open and respond'}</div>
+                    <div className="flex items-center gap-2"><Users className="w-4 h-4" />{tier.selectedSpecialties.length} {lang === 'ar' ? 'تخصصات مختارة' : 'selected specialties'}</div>
                   </div>
                 </button>
               ))}
