@@ -1,0 +1,18 @@
+name: SB1 source package
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create source ZIP
+        run: |
+          zip -r sb1-source-${GITHUB_SHA::12}.zip . -x ".git/*" "node_modules/*" "dist/*" ".vercel/*"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sb1-source-${GITHUB_SHA::12}
+          path: sb1-source-${GITHUB_SHA::12}.zip
+          retention-days: 30
