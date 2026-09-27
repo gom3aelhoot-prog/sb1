@@ -70,6 +70,7 @@ export function Header() {
     { label: 'الاختبارات الطبية والنفسية', href: '/tests' },
     { label: 'المتجر', href: '/store' },
     { label: labels[3], href: '/referral' },
+    { label: lang==='ar'?'التوصيل والخرائط':lang==='ru'?'Доставка и карты':lang==='de'?'Lieferung & Karten':'Delivery & Maps', href: '/delivery' },
     { label: 'الشكاوى', href: '/complaints' },
     { label: lang==='ar'?'سلة المشتريات':lang==='ru'?'Корзина':lang==='de'?'Warenkorb':'Cart', href: '/cart' },
     { label: lang==='ar'?'الألعاب والتطبيقات':lang==='ru'?'Игры и приложения':lang==='de'?'Spiele & Apps':'Games & Apps', href: '/apps' },
