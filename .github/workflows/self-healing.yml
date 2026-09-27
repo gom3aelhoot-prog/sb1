@@ -32,9 +32,10 @@ jobs:
           SB1_IDENTITY_FALLBACK_URL: ${{ secrets.SB1_IDENTITY_FALLBACK_URL }}
         run: node scripts/self-healing.mjs
       - name: Create diagnostic issue on monitor failure
-        if: failure() && ${{ secrets.SB1_AI_REPAIR_ENABLED == 'true' }}
+        if: failure() && env.SB1_AI_REPAIR_ENABLED == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          SB1_AI_REPAIR_ENABLED: ${{ secrets.SB1_AI_REPAIR_ENABLED }}
         run: |
           gh issue create --title "SB1 self-healing alert $(date -u +%Y-%m-%dT%H:%M:%SZ)" --body "The automated health monitor detected a failure. Review provider health, deployment logs, and recent commits before approving any repair."
       - name: Build safety gate
