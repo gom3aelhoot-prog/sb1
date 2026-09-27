@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Stethoscope, Upload, Check, FileText, Shield, UserCircle, ArrowRight } from 'lucide-react';
+import { User, Stethoscope, Upload, Check, FileText, Shield, UserCircle, ArrowRight, Building2 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useRouter } from '@/lib/router';
 import { supabase, type Specialty } from '@/lib/supabase';
