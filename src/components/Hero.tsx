@@ -175,15 +175,15 @@ export function Hero() {
       </div>
       {modal && <div className="fixed inset-0 z-[90] grid place-items-center bg-black/50 p-4" onClick={()=>setModal(null)}>
         <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl" onClick={e=>e.stopPropagation()}>
-          <div className="flex items-center justify-between"><h2 className="text-xl font-extrabold">{modal==='ask'?(lang==='ar'?'كيف تريد طرح السؤال؟':'How would you like to ask?'):(lang==='ar'?'اختر طريقة الاستشارة':'Choose consultation type')}</h2><button onClick={()=>setModal(null)} className="rounded-xl p-2 hover:bg-gray-100"><X className="h-5 w-5"/></button></div>
+          <div className="flex items-center justify-between"><h2 className="text-xl font-extrabold">{modal==='ask'?(lang==='ar'?'كيف تريد طرح السؤال؟':'How would you like to ask?'):(lang==='ar'?'جلسات الفيديو المدفوعة':'Paid video sessions')}</h2><button onClick={()=>setModal(null)} className="rounded-xl p-2 hover:bg-gray-100"><X className="h-5 w-5"/></button></div>
           <div className="mt-5 grid gap-3">
             {modal==='ask' ? <>
               <button onClick={()=>navigate('/ask?mode=free')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'مجاني':'Free'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'طرح سؤال مجاني.':'Ask a free question.'}</p></button>
               <button onClick={()=>navigate('/ask?mode=paid')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'مدفوع':'Paid'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'سؤال مدفوع يصل إلى الأخصائيين حسب التخصص.':'A paid question routed by specialty.'}</p></button>
             </> : <>
-              <button onClick={()=>navigate('/sessions')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'اختار الطبيب':'Choose a doctor'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'اختر الطبيب وطريقة الاستشارة.':'Choose the doctor and consultation method.'}</p></button>
+              <button onClick={()=>navigate('/choose-doctor')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'اختار الطبيب':'Choose a doctor'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'اختر الطبيب وطريقة الاستشارة.':'Choose the doctor and consultation method.'}</p></button>
               <button onClick={()=>navigate('/requests')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'طلب جلسة بمواصفاتك الخاصة':'Request a custom session'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'حدد التخصص والوقت والمواصفات.':'Specify specialty, time and requirements.'}</p></button>
-              <button onClick={()=>navigate('/specialist-sessions')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'جلسة مجانية':'Free session'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'عرض الجلسات المجانية المتاحة.':'View available free sessions.'}</p></button>
+              <button onClick={()=>navigate('/sessions')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'جلسة مجانية':'Free session'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'عرض الجلسات المجانية المتاحة.':'View available free sessions.'}</p></button>
             </>}
           </div>
         </div>
