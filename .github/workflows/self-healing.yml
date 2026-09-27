@@ -1,0 +1,42 @@
+name: SB1 AI Self-Healing & Webhook Monitor
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Health and fallback monitor
+        env:
+          SB1_PUBLIC_URL: ${{ secrets.SB1_PUBLIC_URL }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_HEALTH_URL: ${{ secrets.STRIPE_HEALTH_URL }}
+          SB1_PAYMENT_FALLBACK_URL: ${{ secrets.SB1_PAYMENT_FALLBACK_URL }}
+          SB1_AVATAR_API_URL: ${{ secrets.SB1_AVATAR_API_URL }}
+          SB1_AVATAR_FALLBACK_URL: ${{ secrets.SB1_AVATAR_FALLBACK_URL }}
+          SB1_IDENTITY_API_URL: ${{ secrets.SB1_IDENTITY_API_URL }}
+          SB1_IDENTITY_FALLBACK_URL: ${{ secrets.SB1_IDENTITY_FALLBACK_URL }}
+        run: node scripts/self-healing.mjs
+      - name: Create diagnostic issue on monitor failure
+        if: failure() && ${{ secrets.SB1_AI_REPAIR_ENABLED == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --title "SB1 self-healing alert $(date -u +%Y-%m-%dT%H:%M:%SZ)" --body "The automated health monitor detected a failure. Review provider health, deployment logs, and recent commits before approving any repair."
+      - name: Build safety gate
+        if: always()
+        run: npm run typecheck && npm run build
