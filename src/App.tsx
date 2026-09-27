@@ -92,6 +92,7 @@ import PushNotifications from '@/components/PushNotifications';
 import JobsTicker from '@/components/JobsTicker';
 import OnboardingTour from '@/components/OnboardingTour';
 import OwnerCommandCenterPage from '@/pages/OwnerCommandCenterPage';
+import OwnerIntegrationsPage from '@/pages/OwnerIntegrationsPage';
 import SafetyCenterPage from '@/pages/SafetyCenterPage';
 import { getSanction } from '@/lib/safetyModeration';
 
@@ -182,6 +183,7 @@ function PlatformRoute() {
   if (route === '/settings') return <SettingsPage />;
   if (route === '/admin-dashboard') return <AdminDashboardPage />;
   if (route === '/owner/commands') return <OwnerCommandCenterPage />;
+  if (route === '/owner/integrations') return <OwnerIntegrationsPage />;
   if (route === '/safety') return <SafetyCenterPage />;
   if (route === '/admin') return <AdminPage />;
   return null;
