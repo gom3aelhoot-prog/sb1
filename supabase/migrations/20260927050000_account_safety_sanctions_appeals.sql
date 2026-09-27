@@ -94,6 +94,7 @@ declare
   v_permanent boolean;
   v_sanction_id uuid;
 begin
+  if public.sb1_admin_role() not in ('owner','moderator') then raise exception 'ADMIN_FORBIDDEN'; end if;
   if p_user_key is null or length(trim(p_user_key))=0 then raise exception 'USER_REQUIRED'; end if;
   select coalesce(max(strike),0)+1 into v_strike from public.sb1_safety_sanctions where user_key=p_user_key;
   v_permanent := v_strike >= 4;
@@ -159,3 +160,23 @@ begin
     values('safety_appeal_reviewed',v_user,coalesce(p_note,''),p_decision);
   return jsonb_build_object('ok',true,'user_key',v_user,'decision',p_decision);
 end $$;
+
+
+create or replace function public.sb1_submit_violation_report(
+  p_user_key text,
+  p_reason text,
+  p_evidence_image text default null
+) returns uuid
+language plpgsql security definer set search_path=public
+as $$
+declare v_id uuid;
+begin
+  insert into public.sb1_owner_alerts(alert_type,user_key,reason,level,evidence_image)
+  values('safety_report',p_user_key,p_reason,'report_pending',p_evidence_image)
+  returning id into v_id;
+  return v_id;
+end $$;
+
+revoke execute on function public.sb1_record_violation(text,text,text) from anon,authenticated;
+grant execute on function public.sb1_record_violation(text,text,text) to authenticated;
+grant execute on function public.sb1_submit_violation_report(text,text,text) to authenticated;
