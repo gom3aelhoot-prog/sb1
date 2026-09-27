@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Stethoscope, Upload, Check, FileText, Shield, UserCircle, ArrowRight } from 'lucide-react';
+import { User, Stethoscope, Upload, Check, FileText, Shield, UserCircle, ArrowRight, Bike } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useRouter } from '@/lib/router';
 import { supabase, type Specialty } from '@/lib/supabase';
@@ -13,7 +13,7 @@ export default function RegisterPage() {
   const { t, specialtyName, lang } = useI18n();
   const { country, setCountry } = useApp();
   const { navigate } = useRouter();
-  const [accountType, setAccountType] = useState<'client' | 'specialist' | 'institution' | null>(null);
+  const [accountType, setAccountType] = useState<'client' | 'specialist' | 'institution' | 'delivery_worker' | null>(null);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', phone: '', age: '', parentalConsent: false, specialty: '',
@@ -50,6 +50,7 @@ export default function RegisterPage() {
       }
       const authResult = await supabase.auth.signUp({ email, password: formData.password, options: { data: { name: formData.name, role: accountType, age: age || null, parental_consent: Boolean(formData.parentalConsent), country_code: registrationCountry.code, language_code: lang } } });
       if (authResult.error) throw authResult.error;
+      if (accountType === 'delivery_worker') { const { error } = await supabase.from('sb1_delivery_workers').insert({name:formData.name,phone:formData.phone,city:formData.address||'',status:'pending'}); if(error) throw error; }
       if (accountType === 'client') {
         const { error } = await supabase.from('profiles').insert({ id: authResult.data.user?.id, name: formData.anonymous ? 'مجهول' : formData.name, email, phone: formData.phone, role: 'client', country_code: registrationCountry.code, language_code: lang, is_anonymous: formData.anonymous });
         if (error) throw error;
@@ -128,7 +129,7 @@ export default function RegisterPage() {
               <h3 className="text-lg font-bold text-gray-800 mb-1">تسجيل مؤسسة</h3>
               <p className="text-sm text-gray-500">عيادة، مختبر، أشعة، مستشفى، صيدلية أو مركز تأهيل</p>
             </button>
-          </div>
+          <button onClick={() => setAccountType('delivery_worker')} className="card p-8 text-center hover:shadow-lg transition-all group"><div className="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"><Bike className="w-8 h-8 text-orange-600" /></div><h3 className="text-lg font-bold text-gray-800 mb-1">تسجيل عامل توصيل</h3><p className="text-sm text-gray-500">حساب مستقل لاستلام طلبات التوصيل وإشعاراتها.</p></button></div>
         </>
         ) : (
           <form onSubmit={handleSubmit} className="card p-6 space-y-4">
@@ -177,6 +178,7 @@ export default function RegisterPage() {
               </>
             )}
 
+            {(accountType === 'institution' || accountType === 'specialist' || accountType === 'delivery_worker') && <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-900"><b>قواعد الخدمة والمخالفات:</b><p className="mt-1">يلتزم مقدم الخدمة بالمواعيد، صحة الوثائق، احترام العميل، حماية بياناته، والإبلاغ عن أي تعارض. التأخير أو الإلغاء غير المبرر أو الشكاوى المثبتة قد تؤدي إلى رسوم أو تعليق أو تصعيد وفق العقد والقانون.</p><a href="/contracts" className="inline-block mt-2 font-bold underline">قراءة العقود والتعهدات</a></div>}
             {accountType === 'client' && (
               <div className="space-y-2">
                 <label className="flex items-center gap-2 cursor-pointer">
