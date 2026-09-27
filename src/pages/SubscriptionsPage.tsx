@@ -37,6 +37,19 @@ export default function SubscriptionsPage() {
         <h1 className="text-3xl font-bold text-gray-800 text-center mb-2">{t('subs.title')}</h1>
         <p className="text-gray-500 text-center mb-10">{t('subs.subtitle')}</p>
 
+        <section className="mb-10 rounded-3xl border bg-white p-6">
+          <h2 className="text-2xl font-black">{lang==='ar'?'باقات VIP المجمعة':'VIP Bundles'}</h2>
+          <p className="mt-1 text-sm text-gray-500">{lang==='ar'?'باقات تجمع عدة خدمات في اشتراك واحد.':'Bundles combining several services.'}</p>
+          <div className="mt-5 grid gap-4 md:grid-cols-3">
+            {[['VIP المعرفة','كتب + دورات + مكتبة طبية','39.99'],['VIP المحتوى','أسئلة + مقالات + فيديوهات + تسجيلات صوتية','29.99'],['VIP الشامل','كتب + دورات + أسئلة + محتوى + فيديوهات','59.99']].map(([name,desc,price])=><div key={name} className="rounded-2xl border p-5"><Crown className="h-7 w-7 text-amber-500"/><h3 className="mt-3 font-extrabold">{name}</h3><p className="mt-2 text-sm text-gray-500">{desc}</p><b className="mt-4 block text-xl">{price} {country.currencySymbol}</b><button onClick={()=>navigate('/payments?type=vip&amount='+price)} className="mt-4 w-full rounded-xl bg-teal-700 px-4 py-3 font-bold text-white">{lang==='ar'?'اشترك الآن':'Subscribe'}</button></div>)}
+          </div>
+        </section>
+        <section className="mb-10 rounded-3xl border bg-slate-50 p-6">
+          <h2 className="text-2xl font-black">{lang==='ar'?'باقات الأخصائيين':'Specialist Bundles'}</h2>
+          <div className="mt-5 grid gap-4 md:grid-cols-3">
+            {[['باقة النمو','صفحة احترافية + نشر محتوى + أدوات تواصل','49.99'],['باقة التدريب','دورة + غرفة اجتماعات + دردشة الدورة','69.99'],['باقة العيادة','خدمات المؤسسة + محتوى + عروض للمرضى','89.99']].map(([name,desc,price])=><div key={name} className="rounded-2xl bg-white border p-5"><h3 className="font-extrabold">{name}</h3><p className="mt-2 text-sm text-gray-500">{desc}</p><b className="mt-4 block text-xl">{price} {country.currencySymbol}</b><button onClick={()=>navigate('/payments?type=specialist_bundle&amount='+price)} className="mt-4 w-full rounded-xl bg-indigo-700 px-4 py-3 font-bold text-white">{lang==='ar'?'عرض الباقة':'View bundle'}</button></div>)}
+          </div>
+        </section>
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
