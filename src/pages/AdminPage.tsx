@@ -280,7 +280,7 @@ export default function AdminPage() {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="card p-3 sticky top-24">
-              <button onClick={() => window.location.href='/admin/store'} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-right text-sm font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 mb-2"><ShoppingBag className="w-5 h-5" />إدارة المتجر</button><button onClick={() => window.location.href='/admin/contracts-center'} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-right text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 mb-2"><FileSignature className="w-5 h-5" />مركز العقود والاستمارات</button>
+              <button onClick={() => window.location.href='/admin/store'} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-right text-sm font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 mb-2"><ShoppingBag className="w-5 h-5" />إدارة المتجر</button><button onClick={() => window.location.href='/admin/contracts-center'} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-right text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 mb-2"><FileSignature className="w-5 h-5" />مركز العقود والاستمارات</button><button onClick={() => window.location.href='/admin/complaints'} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-right text-sm font-bold text-red-700 bg-red-50 hover:bg-red-100 mb-2"><AlertTriangle className="w-5 h-5" />الرقابة والجزاءات والشكاوى</button>
               {menuItems.map((item) => (
                 <button
                   key={item.key}
