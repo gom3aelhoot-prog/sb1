@@ -30,9 +30,11 @@ import PrivateNotificationsPopover from '@/components/PrivateNotificationsPopove
 import { SPECIALTIES } from '@/types/i18n';
 import SessionNavCounter from '@/components/SessionNavCounter';
 import { getRole } from '@/lib/access';
+import { supabase } from '@/lib/supabase';
+import { COUNTRY_OPTIONS } from '@/types/i18n';
 
 export function Header() {
-  const { t, isAnonymous } = useApp();
+  const { t, isAnonymous, setCountry } = useApp();
   const { t: platformT, lang } = useI18n();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -40,6 +42,13 @@ export function Header() {
   const isPrivate=(href:string)=>{if(['/dashboard'].includes(href))return ['client','owner'].includes(role);if(href.startsWith('/specialist'))return ['specialist','owner'].includes(role);if(href==='/delivery')return ['institution','delivery_worker','owner'].includes(role);if(href==='/complaints'||href==='/safety')return !['guest'].includes(role);if(href.startsWith('/owner')||href.startsWith('/admin'))return ['owner','moderator'].includes(role);return true};
   const [mobileSection, setMobileSection] = useState<'main' | 'specialties' | 'language'>('main');
   const searchRef = useRef<HTMLInputElement>(null);
+  const [authOpen,setAuthOpen]=useState(false);
+  const [authMode,setAuthMode]=useState<'login'|'signup'>('login');
+  const [authEmail,setAuthEmail]=useState('');
+  const [authPassword,setAuthPassword]=useState('');
+  const [authCountry,setAuthCountry]=useState('EG');
+  const [authBusy,setAuthBusy]=useState(false);
+  const [authError,setAuthError]=useState('');
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -85,6 +94,8 @@ export function Header() {
     { label: t.nav.about, href: '/#about', icon: Info },
     { label: t.nav.contact, href: '/#contact', icon: Phone },
   ];
+  const submitAuth=async()=>{setAuthBusy(true);setAuthError('');try{const selected=COUNTRY_OPTIONS.find(x=>x.code===authCountry);if(selected)setCountry(selected);if(authMode==='signup'){const r=await supabase.auth.signUp({email:authEmail.trim().toLowerCase(),password:authPassword,options:{data:{country_code:authCountry,language_code:lang}}});if(r.error)throw r.error;}else{const r=await supabase.auth.signInWithPassword({email:authEmail.trim().toLowerCase(),password:authPassword});if(r.error)throw r.error;const u:any=r.data?.user;if(u?.user_metadata?.country_code){const saved=COUNTRY_OPTIONS.find(x=>x.code===u.user_metadata.country_code);if(saved)setCountry(saved)}}localStorage.setItem('sb1_country_code',authCountry);localStorage.setItem('sb1_account_email',authEmail.trim().toLowerCase());setAuthOpen(false);window.location.reload();}catch(e:any){setAuthError(e?.message||'تعذر تسجيل الدخول')}finally{setAuthBusy(false)}};
+
   return (
     <>
       <header
@@ -148,11 +159,11 @@ export function Header() {
               <div className="hidden md:flex items-center gap-2">
                 {isAnonymous && (
                   <>
-                    <button className="btn-ghost text-sm" >
+                    <button onClick={()=>{setAuthMode('login');setAuthOpen(true);setAuthError('')}} className="btn-ghost text-sm" >
                       <LogIn className="h-4 w-4" />
                       {t.nav.signIn}
                     </button>
-                    <button className="btn-primary text-sm" >
+                    <button onClick={()=>{window.location.href='/register'}} className="btn-primary text-sm" >
                       <UserPlus className="h-4 w-4" />
                       {t.nav.signUp}
                     </button>
@@ -181,6 +192,8 @@ export function Header() {
           </div>
         </div>
       </header>
+
+      {authOpen&&<div className="fixed inset-0 z-[100] grid place-items-center bg-slate-900/50 p-4" dir={lang==='ar'?'rtl':'ltr'}><div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"><div className="flex items-center justify-between"><div><h2 className="text-2xl font-extrabold">{authMode==='login'?(lang==='ar'?'تسجيل الدخول':'Sign in'):(lang==='ar'?'إنشاء حساب':'Create account')}</h2><p className="mt-1 text-sm text-gray-500">{lang==='ar'?'اختر الدولة لتحديد محتوى وخدمات بلدك.':'Choose your country for country-specific content and services.'}</p></div><button onClick={()=>setAuthOpen(false)} className="rounded-xl p-2 hover:bg-gray-100"><X className="h-5 w-5"/></button></div><div className="mt-5 space-y-3"><select value={authCountry} onChange={e=>setAuthCountry(e.target.value)} className="input-field bg-white">{COUNTRY_OPTIONS.map(x=><option key={x.code} value={x.code}>{x.flag} {x.nameKey}</option>)}</select><input type="email" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} placeholder={lang==='ar'?'البريد الإلكتروني':'Email'} className="input-field"/><input type="password" value={authPassword} onChange={e=>setAuthPassword(e.target.value)} placeholder={lang==='ar'?'كلمة المرور':'Password'} className="input-field"/>{authError&&<div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{authError}</div>}<button disabled={authBusy} onClick={submitAuth} className="btn-primary w-full">{authBusy?'...':authMode==='login'?(lang==='ar'?'دخول':'Sign in'):(lang==='ar'?'إنشاء الحساب':'Create account')}</button><button onClick={()=>{setAuthMode(authMode==='login'?'signup':'login');setAuthError('')}} className="w-full text-sm font-bold text-teal-700">{authMode==='login'?(lang==='ar'?'ليس لديك حساب؟ إنشاء حساب':'Create an account'):(lang==='ar'?'لديك حساب؟ تسجيل الدخول':'Sign in instead')}</button></div></div></div>}
 
       {/* Mobile drawer */}
       {mobileOpen && (
