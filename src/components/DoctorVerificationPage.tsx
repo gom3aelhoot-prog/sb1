@@ -172,7 +172,7 @@ export function DoctorVerificationPage({ onNavigate }: { onNavigate: (view: stri
 
   return (
     <div className="bg-neutral-50 min-h-screen">
-      {/* Header */}
+      {/* Header — compact SB1 verification hero */}
       <div className="bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white py-5 lg:py-6">
         <div className="container-x">
           <h1 className="text-2xl lg:text-3xl font-bold">{t.verification.title}</h1>
