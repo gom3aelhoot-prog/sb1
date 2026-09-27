@@ -20,7 +20,7 @@ export default function ComplaintsPage(){
    if(rpc.data){setResult(rpc.data);setStep(4);return;}
    const complaintId='demo-complaint-'+Date.now();
    await supabase.from('complaints').insert({...form,id:complaintId,rating:Number(form.rating),language_code:lang,provider_id:form.providerId||null,session_id:form.sessionId||null});
-   let code=null;
+   let code:string|null=null;
    if(Number(form.rating)<=2 || form.severity==='high'){
     code='SB1-'+Math.random().toString(36).slice(2,10).toUpperCase();
     const discount=Math.min(30,form.severity==='high'?30:20);
