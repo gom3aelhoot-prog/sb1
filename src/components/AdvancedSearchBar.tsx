@@ -5,18 +5,18 @@ import {useRouter} from '@/lib/router';
 import {countriesForLanguage,serviceCitiesForCountry,specialtyCatalog} from '@/lib/catalog';
 
 type Props={compact?:boolean};
-const typeMap=[['doctor','أخصائي'],['clinic','عيادة'],['pharmacy','صيدلية'],['lab','مختبر'],['radiology','أشعة'],['article','مقالة'],['video','فيديو'],['audio','تسجيل صوتي'],['library','مكتبة']] as const;
+const typeMap=[['doctor','أخصائي'],['clinic','عيادة'],['pharmacy','صيدلية'],['lab','مختبر'],['radiology','أشعة'],['rehab','تأهيل'],['physio','علاج طبيعي'],['addiction','علاج إدمان'],['elderly','رعاية مسنين'],['medical-supplies','أدوات طبية'],['property','مكان طبي للإيجار'],['article','مقالة'],['video','فيديو'],['audio','تسجيل صوتي'],['library','مكتبة']] as const;
 
 export default function AdvancedSearchBar({compact=true}:Props){
  const {lang,dir}=useI18n(); const {navigate}=useRouter(); const countries=countriesForLanguage(lang);
  const [q,setQ]=useState(''); const [kind,setKind]=useState('doctor'); const [country,setCountry]=useState(''); const [city,setCity]=useState(''); const [age,setAge]=useState('all'); const [specialty,setSpecialty]=useState('');
- const facilityMode=['clinic','pharmacy','lab','radiology'].includes(kind);
+ const facilityMode=['clinic','pharmacy','lab','radiology','rehab','physio','addiction','elderly','medical-supplies','property'].includes(kind);
  const cities=useMemo(()=>country?serviceCitiesForCountry(country):[],[country]);
  const labels:any={
- ar:{placeholder:'ابحث عن طبيب أو متخصص أو خدمة أو دواء أو مؤسسة...',country:'الدولة',city:'المدينة',age:'العمر',specialty:'التخصص',choose:'اختيار نوع البحث',search:'بحث',all:'الكل',doctor:'الأخصائيون',facility:'المرافق',article:'المقالات',video:'الفيديو',audio:'التسجيل الصوتي',library:'المكتبة',clinic:'عيادة',pharmacy:'صيدلية',lab:'مختبر',radiology:'الأشعة'},
- en:{placeholder:'Search for a doctor, specialist, service, medicine or facility...',country:'Country',city:'City',age:'Age',specialty:'Specialty',choose:'Search type',search:'Search',all:'All',doctor:'Specialists',facility:'Facilities',article:'Articles',video:'Videos',audio:'Audio',library:'Library',clinic:'Clinic',pharmacy:'Pharmacy',lab:'Lab',radiology:'Radiology'}
+ ar:{placeholder:'ابحث عن طبيب أو متخصص أو خدمة أو دواء أو مؤسسة...',country:'الدولة',city:'المدينة',age:'العمر',specialty:'التخصص',choose:'اختيار نوع البحث',search:'بحث',all:'الكل',doctor:'الأخصائيون',facility:'المرافق',article:'المقالات',video:'الفيديو',audio:'التسجيل الصوتي',library:'المكتبة',clinic:'عيادة',pharmacy:'صيدلية',lab:'مختبر',radiology:'الأشعة',rehab:'تأهيل',physio:'علاج طبيعي',addiction:'علاج إدمان',elderly:'رعاية مسنين','medical-supplies':'أدوات طبية',property:'مكان طبي للإيجار'},
+ en:{placeholder:'Search for a doctor, specialist, service, medicine or facility...',country:'Country',city:'City',age:'Age',specialty:'Specialty',choose:'Search type',search:'Search',all:'All',doctor:'Specialists',facility:'Facilities',article:'Articles',video:'Videos',audio:'Audio',library:'Library',clinic:'Clinic',pharmacy:'Pharmacy',lab:'Lab',radiology:'Radiology',rehab:'Rehabilitation',physio:'Physiotherapy',addiction:'Addiction Care',elderly:'Elderly Care','medical-supplies':'Medical Supplies',property:'Medical Property'}
  }[lang]||{};
- const go=(e:any)=>{e.preventDefault();const p=new URLSearchParams();if(q.trim())p.set('q',q.trim());p.set('kind',kind);if(country)p.set('country',country);if(facilityMode&&city)p.set('city',city);if(kind==='doctor'){if(age!=='all')p.set('age',age);if(specialty)p.set('specialty',specialty);}if(kind==='clinic'||kind==='pharmacy'||kind==='lab'||kind==='radiology')p.set('service',kind);navigate('/search?'+p.toString());};
+ const go=(e:any)=>{e.preventDefault();const p=new URLSearchParams();if(q.trim())p.set('q',q.trim());p.set('kind',kind);if(country)p.set('country',country);if(facilityMode&&city)p.set('city',city);if(kind==='doctor'){if(age!=='all')p.set('age',age);if(specialty)p.set('specialty',specialty);}if(facilityMode)p.set('service',kind);navigate('/search?'+p.toString());};
  const choose=(k:string)=>{setKind(k as any);setCity('');if(k!=='doctor'){setAge('all');setSpecialty('');}};
  return <form onSubmit={go} dir={dir} className={compact?'w-full':''}>
   <div className="relative">
