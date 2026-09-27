@@ -63,6 +63,7 @@ export function Header() {
     { label: platformT('nav.courses'), href: '/courses' },
     { label: lang==='ar'?'الجلسات المجانية':lang==='ru'?'Бесплатные сессии':lang==='de'?'Kostenlose Sitzungen':'Free Sessions', href: '/sessions' },
     { label: lang==='ar'?'اختار طبيبك':lang==='ru'?'Выберите врача':lang==='de'?'Arzt auswählen':'Choose your doctor', href: '/choose-doctor' },
+    { label: lang==='ar'?'مناقصات وطلبات الجلسات':lang==='ru'?'Запросы и предложения':lang==='de'?'Anfragen & Angebote':'Session Requests & Offers', href: '/requests' },
     { label: lang==='ar'?'المرافق الطبية':lang==='ru'?'Медицинские учреждения':lang==='de'?'Medizinische Einrichtungen':lang==='en'?'Medical Facilities':'Medical Facilities', href: '/facilities' },
     { label: 'الاختبارات الطبية والنفسية', href: '/tests' },
     { label: 'المتجر', href: '/store' },
