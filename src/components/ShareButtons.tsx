@@ -20,6 +20,6 @@ export default function ShareButtons({ title, url, compact=false }: { title:stri
   ];
   return <div className={compact?'flex flex-wrap gap-1.5':'flex flex-wrap gap-2'} onClick={e=>e.stopPropagation()}>
     {items.map(({label,icon:Icon,action})=><button type="button" key={label} onClick={action} title={label} className={compact?'inline-flex items-center gap-1 rounded-lg border bg-white px-2 py-1 text-[11px] font-bold text-gray-600 hover:border-teal-400':'inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-xs font-bold text-gray-700 hover:border-teal-400'}><Icon className={compact?'h-3.5 w-3.5':'h-4 w-4'}/>{label}</button>)}
-    <button type="button" onClick={()=>native().then(ok=>!ok&&copy())} className={compact?'inline-flex items-center gap-1 rounded-lg bg-teal-50 px-2 py-1 text-[11px] font-bold text-teal-700':'inline-flex items-center gap-2 rounded-xl bg-teal-50 px-3 py-2 text-xs font-bold text-teal-700'}><Share2 className="h-4 w-4"/>مشاركة</button>
+    <button type="button" onClick={()=>{void native().then(ok=>{if(!ok) void copy();})}} className={compact?'inline-flex items-center gap-1 rounded-lg bg-teal-50 px-2 py-1 text-[11px] font-bold text-teal-700':'inline-flex items-center gap-2 rounded-xl bg-teal-50 px-3 py-2 text-xs font-bold text-teal-700'}><Share2 className="h-4 w-4"/>مشاركة</button>
   </div>;
 }
