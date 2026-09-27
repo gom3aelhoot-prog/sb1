@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-  LayoutDashboard, Users, FileText, FileSignature, Video, Headphones, BookOpen, ShoppingBag,
+  LayoutDashboard, Users, FileText, FileSignature, Video, Headphones, BookOpen, ShoppingBag, Search,
   UserPlus,
   MessageSquare, DollarSign, AlertTriangle, Settings, LogOut,
   Plus, Trash2, Edit, Stethoscope, Eye, Shield, TrendingUp, X
@@ -9,7 +9,7 @@ import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Question, type Article, type DoctorVideo, type DoctorAudio, type Course, type Payment, type AIViolation, type SiteSettings, type VideoSession, type TextSession, type Specialty } from '@/lib/supabase';
 import { getDiscountConfig,getAdSlots,saveDiscountConfig,saveAdSlots,type DiscountConfig,type AdSlot } from '@/lib/adConfig';
 
-type AdminSection = 'overview' | 'doctors' | 'questions' | 'articles' | 'videos' | 'audio' | 'courses' | 'sessions' | 'payments' | 'pricing' | 'violations' | 'admins' | 'ads' | 'settings';
+type AdminSection = 'overview' | 'registrations' | 'doctors' | 'questions' | 'articles' | 'videos' | 'audio' | 'courses' | 'sessions' | 'payments' | 'pricing' | 'violations' | 'admins' | 'ads' | 'settings';
 
 function PricingRow({item,onSaved}:{item:any;onSaved:()=>void}){const [v,setV]=useState(item);return <tr className="border-b"><td className="p-3 font-bold">{v.name_ar||v.name||v.country_code||'قاعدة دولة'}</td><td className="p-3"><input className="input-field w-28" type="number" value={v.price_usd??v.base_price??0} onChange={e=>setV({...v,price_usd:Number(e.target.value),base_price:Number(e.target.value)})}/></td><td className="p-3"><input className="input-field w-20" type="number" value={v.duration_days??7} onChange={e=>setV({...v,duration_days:Number(e.target.value)})}/></td><td className="p-3"><input className="input-field w-20" type="number" value={v.specialists_notified??v.notification_reach??5} onChange={e=>setV({...v,specialists_notified:Number(e.target.value),notification_reach:Number(e.target.value)})}/></td><td className="p-3"><input className="input-field w-20" type="number" value={v.max_answers??3} onChange={e=>setV({...v,max_answers:Number(e.target.value)})}/></td><td className="p-3"><button className="btn-primary text-xs" onClick={async()=>{const payload={...v};delete payload.id;delete payload.name;delete payload.name_ar;delete payload.description;delete payload.description_ar;delete payload.sort_order;const {error}=await supabase.from(item.base_price!==undefined?'question_pricing_rules':'pricing_tiers').update(payload).eq('id',item.id);if(!error)onSaved()}}>حفظ</button></td></tr>}
 export default function AdminPage() {
@@ -37,6 +37,8 @@ export default function AdminPage() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(false);
   const [admins, setAdmins] = useState<any[]>([]);
+  const [registrations, setRegistrations] = useState<any[]>([]);
+  const [registrationSearch, setRegistrationSearch] = useState({q:'',country:'',city:'',type:'',language:'',from:'',to:''});
   const [newAdmin, setNewAdmin] = useState({name:'',email:'',role:'moderator'});
   const [discountConfig,setDiscountConfig]=useState<DiscountConfig>(getDiscountConfig());
   const [adSlots,setAdSlots]=useState<AdSlot[]>(getAdSlots());
@@ -101,6 +103,21 @@ export default function AdminPage() {
         setQuestions([{ id: '', specialty_id: '', author_name: '', title: '', body: '', age: null, gender: '', status: '', views: 0, created_at: '' } as Question]);
         setPayments(payData || []);
         (window as unknown as Record<string, unknown>).__counts = { dCount, qCount, aCount, vCount, cCount, vsCount, vioCount };
+        break;
+      }
+      case 'registrations': {
+        const { data, error } = await supabase.from('sb1_registration_directory').select('*').order('last_seen_at',{ascending:false}).limit(5000);
+        if (data && !error) setRegistrations(data);
+        else {
+          const [{data:p},{data:i},{data:s},{data:d}] = await Promise.all([
+            supabase.from('profiles').select('*').limit(2000),
+            supabase.from('institutions').select('*').limit(2000),
+            supabase.from('sb1_specialist_registration_requests').select('*').limit(2000),
+            supabase.from('sb1_delivery_workers').select('*').limit(2000)
+          ]);
+          const rows=[...(p||[]).map((x:any)=>({...x,source_table:'profiles',account_type:x.role||'client'})),...(i||[]).map((x:any)=>({...x,source_table:'institutions',account_type:x.type||'institution'})),...(s||[]).map((x:any)=>({...x,source_table:'specialist_requests',account_type:'specialist'})),...(d||[]).map((x:any)=>({...x,source_table:'delivery_workers',account_type:'delivery_worker'}))];
+          setRegistrations(rows);
+        }
         break;
       }
       case 'doctors': {
@@ -244,6 +261,7 @@ export default function AdminPage() {
 
   const menuItems: { key: AdminSection; label: string; icon: typeof LayoutDashboard }[] = [
     { key: 'overview', label: t('admin.overview'), icon: LayoutDashboard },
+    { key: 'registrations', label: 'سجل التسجيل والبحث المتقدم', icon: Search },
     { key: 'doctors', label: t('admin.doctors'), icon: Stethoscope },
     { key: 'questions', label: t('admin.questions'), icon: MessageSquare },
     { key: 'articles', label: t('admin.articles'), icon: FileText },
@@ -402,6 +420,20 @@ export default function AdminPage() {
                   ))}
                   {payments.length === 0 && <p className="p-4 text-center text-gray-400 text-sm">لا توجد مدفوعات</p>}
                 </div>
+              </div>
+            ) : section === 'registrations' ? (
+              <div className="space-y-5">
+                <div><h2 className="text-xl font-bold text-gray-800">سجل التسجيل والبحث المتقدم</h2><p className="text-sm text-gray-500 mt-1">بحث حي في الاسم، البريد، الهاتف، الدولة، المدينة، اللغة، نوع الحساب والتاريخ مع آخر دخول.</p></div>
+                <div className="card p-5 grid md:grid-cols-4 gap-3">
+                  <input className="input-field md:col-span-2" placeholder="اسم / بريد / هاتف / مؤسسة / تخصص" value={registrationSearch.q} onChange={e=>setRegistrationSearch({...registrationSearch,q:e.target.value})}/>
+                  <input className="input-field" placeholder="الدولة ISO مثل RU أو SA" value={registrationSearch.country} onChange={e=>setRegistrationSearch({...registrationSearch,country:e.target.value.toUpperCase()})}/>
+                  <input className="input-field" placeholder="المدينة مثل موسكو" value={registrationSearch.city} onChange={e=>setRegistrationSearch({...registrationSearch,city:e.target.value})}/>
+                  <select className="input-field" value={registrationSearch.type} onChange={e=>setRegistrationSearch({...registrationSearch,type:e.target.value})}><option value="">كل أنواع الحساب</option><option value="client">عميل</option><option value="specialist">أخصائي</option><option value="institution">مؤسسة</option><option value="delivery_worker">توصيل</option></select>
+                  <input className="input-field" placeholder="اللغة" value={registrationSearch.language} onChange={e=>setRegistrationSearch({...registrationSearch,language:e.target.value.toLowerCase()})}/>
+                  <input className="input-field" type="date" value={registrationSearch.from} onChange={e=>setRegistrationSearch({...registrationSearch,from:e.target.value})}/>
+                  <input className="input-field" type="date" value={registrationSearch.to} onChange={e=>setRegistrationSearch({...registrationSearch,to:e.target.value})}/>
+                </div>
+                <div className="card overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b text-right"><th className="p-3">الاسم</th><th className="p-3">النوع</th><th className="p-3">الهاتف</th><th className="p-3">البريد</th><th className="p-3">الدولة</th><th className="p-3">المدينة</th><th className="p-3">اللغة</th><th className="p-3">آخر دخول</th></tr></thead><tbody>{registrations.filter((r:any)=>{const q=registrationSearch.q.toLowerCase();const created=String(r.created_at||'').slice(0,10);return (!q||[r.name,r.email,r.phone,r.specialty_id,r.metadata?.name].some(v=>String(v||'').toLowerCase().includes(q)))&&(!registrationSearch.country||String(r.country_code||'').toUpperCase()===registrationSearch.country)&&(!registrationSearch.city||String(r.city||'').toLowerCase().includes(registrationSearch.city.toLowerCase()))&&(!registrationSearch.type||r.account_type===registrationSearch.type)&&(!registrationSearch.language||String(r.language_code||'').toLowerCase()===registrationSearch.language)&&(!registrationSearch.from||created>=registrationSearch.from)&&(!registrationSearch.to||created<=registrationSearch.to)}).slice(0,1000).map((r:any)=><tr key={r.id} className="border-b hover:bg-slate-50"><td className="p-3 font-bold">{r.name||'-'}</td><td className="p-3">{r.account_type||'-'}</td><td className="p-3" dir="ltr">{r.phone||'-'}</td><td className="p-3" dir="ltr">{r.email||'-'}</td><td className="p-3">{r.country_code||'-'}</td><td className="p-3">{r.city||'-'}</td><td className="p-3">{r.language_code||'-'}</td><td className="p-3">{r.last_seen_at?new Date(r.last_seen_at).toLocaleString():r.created_at?new Date(r.created_at).toLocaleString():'-'}</td></tr>)}{registrations.length===0&&<tr><td colSpan={8} className="p-8 text-center text-slate-400">لا توجد بيانات</td></tr>}</tbody></table></div>
               </div>
             ) : section === 'doctors' ? (
               <DataTable
