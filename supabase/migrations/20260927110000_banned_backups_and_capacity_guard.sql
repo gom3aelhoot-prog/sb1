@@ -172,3 +172,46 @@ for each row execute function public.sb1_capture_rejected_submission();
 alter table public.content_submissions add column if not exists file_size_bytes bigint;
 alter table public.content_submissions add column if not exists media_hash text;
 create index if not exists content_submissions_media_hash_idx on public.content_submissions(media_hash);
+
+
+create or replace function public.sb1_capacity_snapshot(
+  p_storage_limit_gb numeric default 100,
+  p_db_limit_gb numeric default 20
+) returns jsonb
+language plpgsql security definer set search_path=public
+as $$
+declare
+  v_storage_bytes numeric := 0;
+  v_db_bytes numeric := pg_database_size(current_database());
+  v_storage_pct numeric := 0;
+  v_db_pct numeric := 0;
+  v_duplicate_count bigint := 0;
+  v_report jsonb;
+begin
+  if public.sb1_admin_role() not in ('owner','moderator') then raise exception 'ADMIN_FORBIDDEN'; end if;
+  select coalesce(sum(coalesce((metadata->>'size')::numeric,0)),0) into v_storage_bytes from storage.objects;
+  v_storage_pct := case when p_storage_limit_gb > 0 then (v_storage_bytes/(p_storage_limit_gb*1024*1024*1024))*100 else 0 end;
+  v_db_pct := case when p_db_limit_gb > 0 then (v_db_bytes/(p_db_limit_gb*1024*1024*1024))*100 else 0 end;
+  select count(*) into v_duplicate_count from (
+    select media_hash from public.content_submissions where media_hash is not null and media_hash<>'' group by media_hash having count(*)>1
+  ) d;
+  v_report:=jsonb_build_object(
+    'storage_bytes',v_storage_bytes,
+    'storage_gb',round((v_storage_bytes/1024/1024/1024)::numeric,3),
+    'storage_limit_gb',p_storage_limit_gb,
+    'storage_percent',round(v_storage_pct,2),
+    'database_bytes',v_db_bytes,
+    'database_gb',round((v_db_bytes/1024/1024/1024)::numeric,3),
+    'database_limit_gb',p_db_limit_gb,
+    'database_percent',round(v_db_pct,2),
+    'duplicate_media_groups',v_duplicate_count,
+    'generated_at',now()
+  );
+  if greatest(v_storage_pct,v_db_pct) >= 85 then
+    insert into public.sb1_capacity_events(metric_type,metric_value,threshold,unit,severity,report)
+    values('storage_or_database_pressure',greatest(v_storage_pct,v_db_pct),85,'percent',
+      case when greatest(v_storage_pct,v_db_pct)>=95 then 'critical' else 'warning' end,v_report);
+  end if;
+  return v_report;
+end $$;
+grant execute on function public.sb1_capacity_snapshot(numeric,numeric) to authenticated;
