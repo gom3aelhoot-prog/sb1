@@ -90,6 +90,7 @@ import SpecialistFreeSessionsPage from '@/pages/SpecialistFreeSessionsPage';
 import PushNotifications from '@/components/PushNotifications';
 import JobsTicker from '@/components/JobsTicker';
 import OnboardingTour from '@/components/OnboardingTour';
+import OwnerCommandCenterPage from '@/pages/OwnerCommandCenterPage';
 
 type HashView = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
 
@@ -176,6 +177,7 @@ function PlatformRoute() {
   if (route === '/notifications') return <NotificationsPage />;
   if (route === '/settings') return <SettingsPage />;
   if (route === '/admin-dashboard') return <AdminDashboardPage />;
+  if (route === '/owner/commands') return <OwnerCommandCenterPage />;
   if (route === '/admin') return <AdminPage />;
   return null;
 }
