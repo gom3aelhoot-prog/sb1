@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-  LayoutDashboard, Users, FileText, Video, Headphones, BookOpen, ShoppingBag,
+  LayoutDashboard, Users, FileText, FileSignature, Video, Headphones, BookOpen, ShoppingBag,
   UserPlus,
   MessageSquare, DollarSign, AlertTriangle, Settings, LogOut,
   Plus, Trash2, Edit, Stethoscope, Eye, Shield, TrendingUp, X
@@ -40,6 +40,7 @@ export default function AdminPage() {
   const [newAdmin, setNewAdmin] = useState({name:'',email:'',role:'moderator'});
   const [discountConfig,setDiscountConfig]=useState<DiscountConfig>(getDiscountConfig());
   const [adSlots,setAdSlots]=useState<AdSlot[]>(getAdSlots());
+
 
   // Add modal
   const [showAdd, setShowAdd] = useState<AdminSection | null>(null);
@@ -279,7 +280,7 @@ export default function AdminPage() {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="card p-3 sticky top-24">
-              <button onClick={() => window.location.href='/admin/store'} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-right text-sm font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 mb-2"><ShoppingBag className="w-5 h-5" />إدارة المتجر</button>
+              <button onClick={() => window.location.href='/admin/store'} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-right text-sm font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 mb-2"><ShoppingBag className="w-5 h-5" />إدارة المتجر</button><button onClick={() => window.location.href='/admin/contracts-center'} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-right text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 mb-2"><FileSignature className="w-5 h-5" />مركز العقود والاستمارات</button>
               {menuItems.map((item) => (
                 <button
                   key={item.key}
