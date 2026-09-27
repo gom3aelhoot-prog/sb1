@@ -21,6 +21,7 @@ create table if not exists public.sb1_safety_sanctions (
   until_at timestamptz,
   level text not null,
   permanent boolean not null default false,
+  evidence_image text,
   created_at timestamptz not null default now()
 );
 create index if not exists sb1_safety_sanctions_user_idx on public.sb1_safety_sanctions(user_key, created_at desc);
