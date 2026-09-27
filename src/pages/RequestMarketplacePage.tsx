@@ -1,4 +1,4 @@
-import {useMemo,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
 import {Clock,Users,ShieldCheck,Lock,Globe2,Video,MessageSquare,CalendarDays,Send} from 'lucide-react';
 import {useI18n} from '@/lib/i18n';
 import {useApp} from '@/i18n/AppContext';
@@ -21,6 +21,7 @@ export default function RequestMarketplacePage(){
  const [days,setDays]=useState(3);const [target,setTarget]=useState(5);const [visibility,setVisibility]=useState<'open'|'hidden'>('open');
  const [message,setMessage]=useState('');const [requests,setRequests]=useState<any[]>(load);const [selected,setSelected]=useState<any>(null);
  const currency=country.currency;const fee=feeFor(currency,days,target);
+ useEffect(()=>{const now=Date.now();const next=load().map((r:any)=>{if(r.status==='open'&&r.createdAt&&now-new Date(r.createdAt).getTime()>=r.days*86400000&&(r.offers||0)<r.target){const discounts=JSON.parse(localStorage.getItem('sb1_request_discounts')||'[]');if(!discounts.some((d:any)=>d.requestId===r.id)){discounts.push({id:'discount-'+r.id,requestId:r.id,percent:50,reason:(r.offers||0)===0?'no_response':'target_not_reached',status:'available',createdAt:new Date().toISOString()});localStorage.setItem('sb1_request_discounts',JSON.stringify(discounts))}return {...r,status:'expired',guaranteeDiscount:50} }return r});save(next);setRequests(next)},[]);
  const create=()=>{if(!specialty||problem.trim().length<20){setMessage(lang==='ar'?'اختر التخصص واكتب تفاصيل المشكلة بشكل كافٍ.':'Choose a specialty and describe the problem in enough detail.');return}
   const reference='req-'+Date.now();const draft={id:reference,specialty,problem,requirements,targetPrice,availableTime,days,target,visibility,country:country.name,countryCode:country.code,currency,fee,createdAt:new Date().toISOString(),offers:0,status:'pending',offersList:[]};
   localStorage.setItem('sb1_pending_request_'+reference,JSON.stringify(draft));navigate('/payments?type=request&reference='+encodeURIComponent(reference)+'&amount='+fee+'&currency='+encodeURIComponent(currency));
