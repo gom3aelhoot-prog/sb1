@@ -17,7 +17,7 @@ jobs:
         run: |
           rm -rf .git node_modules
           find . -type f \( -name '.env' -o -name '.env.*' \) -not -name '.env.example' -delete
-          zip -r ../SB1-complete-source.zip . -x '*.DS_Store'
+          zip -r SB1-complete-source.zip . -x '*.DS_Store'
       - uses: actions/upload-artifact@v4
         with:
           name: SB1-complete-source
