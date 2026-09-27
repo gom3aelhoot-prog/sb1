@@ -29,12 +29,15 @@ import { NotificationsPopover } from '@/components/NotificationsPopover';
 import PrivateNotificationsPopover from '@/components/PrivateNotificationsPopover';
 import { SPECIALTIES } from '@/types/i18n';
 import SessionNavCounter from '@/components/SessionNavCounter';
+import { getRole } from '@/lib/access';
 
 export function Header() {
   const { t, isAnonymous } = useApp();
   const { t: platformT, lang } = useI18n();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const role=getRole();
+  const isPrivate=(href:string)=>{if(['/dashboard'].includes(href))return ['client','owner'].includes(role);if(href.startsWith('/specialist'))return ['specialist','owner'].includes(role);if(href==='/delivery')return ['institution','delivery_worker','owner'].includes(role);if(href==='/complaints'||href==='/safety')return !['guest'].includes(role);if(href.startsWith('/owner')||href.startsWith('/admin'))return ['owner','moderator'].includes(role);return true};
   const [mobileSection, setMobileSection] = useState<'main' | 'specialties' | 'language'>('main');
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -79,7 +82,7 @@ export function Header() {
     { label: lang==='ar'?'باقات المتابعة':'Long-term Packages', href: '/specialist/packages' },
     { label: lang==='ar'?'الأمان والبلاغات':'Safety & Reports', href: '/safety' },
 
-  ];
+  ].filter(item=>isPrivate(item.href));
   const navItems = [
     { label: t.nav.home, href: '/#home', icon: Home },
     { label: lang==='ar' ? 'الأخصائيون والأطباء' : lang==='ru' ? 'Специалисты и врачи' : lang==='de' ? 'Fachärzte & Ärzte' : 'Specialists & Doctors', href: '/doctors', icon: Stethoscope },
