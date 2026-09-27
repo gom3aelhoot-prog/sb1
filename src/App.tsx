@@ -7,6 +7,7 @@ import { Footer } from '@/components/Footer';
 import { Hero } from '@/components/Hero';
 import { Features } from '@/components/Features';
 import { HowItWorks } from '@/components/HowItWorks';
+import AskAllSpecialistsSection from '@/components/AskAllSpecialistsSection';
 import { BottomActionCards } from '@/components/BottomActionCards';
 import { CTASection } from '@/components/CTASection';
 import { DiscountBanner } from '@/components/DiscountBanner';
@@ -292,6 +293,7 @@ function AppContent() {
             <Features />
             <section className="mx-auto w-full max-w-7xl px-4 py-12" dir="rtl"><div className="rounded-3xl border bg-white p-6 shadow-sm overflow-hidden"><div className="mb-5 flex items-center justify-between gap-4"><div><h2 className="text-2xl font-extrabold">الأخبار الطبية اليومية</h2><p className="mt-1 text-gray-500">أخبار ومقالات وصور وفيديوهات باللغة المختارة.</p></div><a href="/news" className="group relative inline-flex items-center gap-2 rounded-xl bg-teal-700 px-5 py-3 font-bold text-white shadow-lg transition hover:scale-105"><span className="absolute -inset-1 -z-10 animate-ping rounded-xl bg-teal-400/40"></span><span className="animate-pulse">👆</span>عرض الأخبار</a></div><div className="mb-5 overflow-hidden rounded-xl bg-slate-950 text-white"><div className="flex w-max items-center gap-5 py-2 px-4 animate-[marquee_18s_linear_infinite]"><span>🔔 عاجل · SB1 · آخر الأخبار الطبية والتعليمية</span><span>•</span><span>تحديثات يومية</span><span>•</span><span>مقالات · فيديو · ريلز · صور</span></div></div><div className="grid gap-4 md:grid-cols-3"><div className="rounded-2xl bg-slate-50 p-5"><b>الصحة النفسية</b><p className="mt-2 text-sm text-gray-600">أحدث التحديثات التعليمية عن النوم والقلق والوسواس.</p></div><div className="rounded-2xl bg-slate-50 p-5"><b>القلب والأوعية</b><p className="mt-2 text-sm text-gray-600">محتوى يومي عن الوقاية والمتابعة وصحة القلب.</p></div><div className="relative overflow-hidden rounded-2xl bg-slate-100"><img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80" className="h-full min-h-32 w-full object-cover"/><div className="absolute inset-x-0 bottom-0 bg-black/60 p-3 text-sm font-bold text-white">صور وفيديوهات من أخبار SB1</div></div></div></div></section>
             <section className="mx-auto w-full max-w-7xl px-4 pb-10" dir="rtl"><h3 className="mb-4 text-xl font-extrabold">مساحات إعلانية</h3><AdPlacement placement="home-news" count={3} variant="horizontal"/></section>
+            <AskAllSpecialistsSection />
             <HowItWorks />
             <BottomActionCards />
             <CTASection />
