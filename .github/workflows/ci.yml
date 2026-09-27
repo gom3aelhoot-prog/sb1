@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npm run build
       - name: Package full SB1 source
         run: zip -r SB1-complete-source.zip . -x '.git/*' 'node_modules/*' '.env' '.env.*'
