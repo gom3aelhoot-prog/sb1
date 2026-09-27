@@ -87,6 +87,7 @@ import OwnerTeamChatPage from '@/pages/OwnerTeamChatPage';
 import QuestionAccountingPage from '@/pages/QuestionAccountingPage';
 import PediatricLibraryPage from '@/pages/PediatricLibraryPage';
 import ChooseDoctorPage from '@/pages/ChooseDoctorPage';
+import RequestMarketplacePage from '@/pages/RequestMarketplacePage';
 import AppointmentBookingPage from '@/pages/AppointmentBookingPage';
 import AppointmentsPage from '@/pages/AppointmentsPage';
 import VideoAppointmentDoctorPage from '@/pages/VideoAppointmentDoctorPage';
@@ -159,6 +160,7 @@ function PlatformRoute() {
   if (route === '/sessions') return <SessionsPage />;
   if (route === '/specialist-sessions') return <SpecialistFreeSessionsPage />;
   if (route === '/choose-doctor') return <ChooseDoctorPage />;
+  if (route === '/requests') return <RequestMarketplacePage />;
   if (route === '/appointments') return <AppointmentsPage />;
   if (route === '/appointments/book') return <AppointmentBookingPage />;
   if (route === '/specialist-appointments') return <VideoAppointmentDoctorPage />;
