@@ -4,6 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import type { Question } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
 import { virtualDoctorsForSpecialty } from '@/lib/catalog';
+import { getRole } from '@/lib/access';
 import ShareButtons from '@/components/ShareButtons';
 
 function timeAgo(date: string, lang: string): string {
@@ -24,6 +25,7 @@ function timeAgo(date: string, lang: string): string {
 export default function QuestionCard({ question, specialistView = false }: { question: Question; specialistView?: boolean }) {
   const { navigate } = useRouter();
   const { t, specialtyName, lang, dir } = useI18n();
+  const role=getRole();
   const answerCount = question.answers?.length ?? (question as any).answer_count ?? 0;
   const qDoctor:any = (question.answers as any)?.[0]?.doctor || virtualDoctorsForSpecialty((question.specialty as any)?.slug || '', lang, 5)[0];
   const title = localizedField(question as unknown as Record<string, unknown>, 'title', lang, question.title);
@@ -32,7 +34,7 @@ export default function QuestionCard({ question, specialistView = false }: { que
   const questionPrice=(question as any).question_price;
 
   return (
-    <button onClick={() => navigate(`/questions/${question.id}`)} className="card card-hover w-full p-5 text-start" dir={dir}>
+    <button onClick={() => { if(role==='guest' && marketStatus==='free'){ window.location.href='/register'; return; } navigate(`/questions/${question.id}`); }} className="card card-hover w-full p-5 text-start" dir={dir}>
       <div className="mb-2 flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1"><div className="mb-2 flex flex-wrap items-center gap-2">{(question as any).is_urgent && <span className="badge bg-red-50 text-red-700"><AlertTriangle className="inline h-3 w-3 me-1"/>مستعجل</span>}{(question as any).is_new && <span className="badge bg-blue-50 text-blue-700">جديد</span>}</div><h3 className="line-clamp-2 text-base font-bold leading-snug text-gray-800">{title}</h3></div>
         {question.specialty && <span className="badge shrink-0 whitespace-nowrap bg-teal-50 text-teal-700">{specialtyName(question.specialty)}</span>}
