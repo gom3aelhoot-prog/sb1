@@ -20,6 +20,7 @@ export default function RegisterPage() {
     showName: true, anonymous: false, institutionType: 'clinic', address: '', services: '', deliveryEnabled: false, deliveryMethod: 'platform', schedule: '', documents: '',
   });
   const [docUrls, setDocUrls] = useState<{ id?: string; cert?: string; license?: string }>({});
+  const [institutionFiles, setInstitutionFiles] = useState<string[]>([]);
   const [registrationCountry, setRegistrationCountry] = useState(country);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -58,12 +59,12 @@ export default function RegisterPage() {
         await supabase.from('affiliate_members').insert({user_id:authResult.data.user?.id||null,name:formData.name,email,member_type:accountType||'client',referral_code:'SB1-'+Date.now().toString(36).toUpperCase(),parent_id:parentId,level:parentId?parentLevel+1:0,country_code:registrationCountry.code,language_code:lang,points:0,wallet_balance:0,total_sales:0,status:'active'});
       } catch {}
       try { await supabase.from('newsletter_subscribers').upsert({email,name:formData.name,language_code:lang,country_code:registrationCountry.code,is_active:true},{onConflict:'email'}); } catch {}
-      if (accountType === 'delivery_worker') { const { error } = await supabase.from('sb1_delivery_workers').insert({name:formData.name,phone:formData.phone,city:formData.address||'',status:'pending'}); if(error) throw error; }
+      if (accountType === 'delivery_worker') { const { error } = await supabase.from('sb1_delivery_workers').insert({name:formData.name,phone:formData.phone,city:formData.address||'',status:'pending',documents:{files:institutionFiles},country_code:registrationCountry.code,language_code:lang}); if(error) throw error; }
       if (accountType === 'client') {
         const { error } = await supabase.from('profiles').insert({ id: authResult.data.user?.id, name: formData.anonymous ? 'مجهول' : formData.name, email, phone: formData.phone, role: 'client', country_code: registrationCountry.code, language_code: lang, is_anonymous: formData.anonymous });
         if (error) throw error;
       } else if (accountType === 'institution') {
-        const { error } = await supabase.from('institutions').insert({ name: formData.name, type: formData.institutionType, address: formData.address, phone: formData.phone, email, service_info: formData.services, schedule_info: formData.schedule, documents_info: formData.documents, delivery_enabled: formData.deliveryEnabled, delivery_method: formData.deliveryMethod, is_approved: false, subscription_plan: 'free', country_code: registrationCountry.code, language_code: lang });
+        const { error } = await supabase.from('institutions').insert({ name: formData.name, type: formData.institutionType, address: formData.address, phone: formData.phone, email, service_info: formData.services, schedule_info: formData.schedule, documents_info: formData.documents, document_files: institutionFiles, delivery_enabled: formData.deliveryEnabled, delivery_method: formData.deliveryMethod, delivery_worker_policy: formData.deliveryMethod==='platform'?'all':'institution_workers', is_approved: false, subscription_plan: 'free', country_code: registrationCountry.code, language_code: lang });
         if (error) throw error;
       }
       localStorage.removeItem('sb1_guest_client');
@@ -181,6 +182,7 @@ export default function RegisterPage() {
                                 <input placeholder="العنوان" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="input-field" />
                 <textarea placeholder="الخدمات والأسعار والمواعيد" value={formData.services} onChange={(e) => setFormData({ ...formData, services: e.target.value })} className="input-field" rows={4} />
                 <textarea placeholder="الوثائق والتراخيص وأرقامها" value={formData.documents} onChange={(e) => setFormData({ ...formData, documents: e.target.value })} className="input-field" rows={3} />
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4"><label className="block text-sm font-bold text-gray-700 mb-2">إرفاق وثائق المؤسسة</label><input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={e=>setInstitutionFiles(Array.from(e.target.files||[]).map(f=>f.name))} className="block w-full text-sm"/><p className="mt-2 text-xs text-gray-500">يتم تسجيل أسماء الملفات مع طلب المؤسسة. التخزين الآمن الفعلي للملفات يحتاج مساحة تخزين خاصة بالمشروع.</p>{institutionFiles.length>0&&<div className="mt-2 text-xs text-teal-700">{institutionFiles.join(' · ')}</div>}</div>
                 <textarea placeholder="جدول المواعيد وساعات العمل" value={formData.schedule} onChange={(e) => setFormData({ ...formData, schedule: e.target.value })} className="input-field" rows={3} />
                 {formData.institutionType === 'pharmacy' && <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4 space-y-3"><label className="flex items-center gap-2 font-bold"><input type="checkbox" checked={formData.deliveryEnabled} onChange={e=>setFormData({...formData,deliveryEnabled:e.target.checked})}/> أريد خدمة التوصيل</label>{formData.deliveryEnabled&&<><select value={formData.deliveryMethod} onChange={e=>setFormData({...formData,deliveryMethod:e.target.value})} className="input-field bg-white"><option value="platform">التوصيل من خلال SB1</option><option value="self">التوصيل بواسطة الصيدلية</option></select>{formData.deliveryMethod==='platform'&&<p className="text-sm text-orange-800">سيتم إنشاء حسابات مستقلة للعاملين في التوصيل واستقبال إشعارات الطلبات.</p>}</>}</div>}
               </>
