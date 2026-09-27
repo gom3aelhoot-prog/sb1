@@ -11,6 +11,7 @@ export default function ClinicsPage() {
   const { navigate } = useRouter();
   const [clinics, setClinics] = useState<(Clinic & { doctor?: { name: string } })[]>([]);
   const [loading, setLoading] = useState(true);
+  const [priceSort,setPriceSort] = useState('none');
   const [bookingClinic, setBookingClinic] = useState<Clinic | null>(null);
   const [bookForm, setBookForm] = useState({ patient_name: '', patient_email: '', patient_phone: '', scheduled_at: '' });
   const [bookSuccess, setBookSuccess] = useState(false);
@@ -42,7 +43,7 @@ export default function ClinicsPage() {
     <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-6xl mx-auto px-4">
         <h1 className="text-2xl font-bold text-gray-800 mb-2">{t('clinics.title')}</h1>
-        <p className="text-gray-500 mb-6">{t('clinics.subtitle')}</p>
+        <p className="text-gray-500 mb-6">{t('clinics.subtitle')}</p><div className="mb-5"><select value={priceSort} onChange={e=>setPriceSort(e.target.value)} className="rounded-xl border bg-white px-4 py-2.5"><option value="none">ترتيب حسب السعر</option><option value="low">الأقل سعراً أولاً</option><option value="high">الأعلى سعراً أولاً</option></select></div>
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -50,7 +51,7 @@ export default function ClinicsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {clinics.map((c) => (
+            {[...clinics].sort((a:any,b:any)=>priceSort==='low'?Number(a.service_price??25)-Number(b.service_price??25):priceSort==='high'?Number(b.service_price??25)-Number(a.service_price??25):0).map((c) => (
               <div key={c.id} className="card overflow-hidden hover:shadow-lg transition-all">
                 {c.image_url && <img src={c.image_url} alt={c.name} className="w-full h-40 object-cover" />}
                 <div className="p-5">
@@ -64,7 +65,7 @@ export default function ClinicsPage() {
                     </div>
                   </div>
                   {c.description && <p className="text-sm text-gray-600 mb-3 line-clamp-2">{c.description}</p>}
-                  {c.address && <p className="text-xs text-gray-500 flex items-center gap-1 mb-1"><MapPin className="w-3.5 h-3.5" />{c.address}</p>}
+                  <p className="text-sm font-bold text-emerald-700 mb-2">من 25 USD</p>{c.address && <p className="text-xs text-gray-500 flex items-center gap-1 mb-1"><MapPin className="w-3.5 h-3.5" />{c.address}</p>}
                   {c.phone && <p className="text-xs text-gray-500 flex items-center gap-1 mb-3"><Phone className="w-3.5 h-3.5" />{c.phone}</p>}
                   <div className="mt-3 grid grid-cols-2 gap-2"><button onClick={() => navigate('/clinics/'+c.id)} className="btn-secondary w-full text-sm">تفاصيل المؤسسة</button><button onClick={() => setBookingClinic(c)} className="btn-primary w-full text-sm flex items-center justify-center gap-2">
                     <Calendar className="w-4 h-4" />
