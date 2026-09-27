@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Upload, FileText, Video, Headphones, BookOpen, Clock, ShieldCheck } from 'lucide-react';
+import { Upload, FileText, Video, Headphones, BookOpen, Clock, ShieldCheck, Sparkles, Search, Image as ImageIcon, BadgeCheck, MessageCircle, TrendingUp, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useI18n } from '@/lib/i18n';
 import { specialtyCatalog } from '@/lib/catalog';
@@ -22,11 +22,17 @@ export default function SpecialistContentUploadPage() {
   const [coverSearch, setCoverSearch] = useState('');
   const [coverImages, setCoverImages] = useState<any[]>([]);
   const [selectedCover, setSelectedCover] = useState<any>(null);
+  const [mediaTab, setMediaTab] = useState<'covers'|'emoji'|'badges'>('covers');
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiOutput, setAiOutput] = useState('');
+  const [aiBusy, setAiBusy] = useState(false);
+  const [freeAnswered, setFreeAnswered] = useState(0);
 
   useEffect(() => {
     const first = specialtyCatalog(lang)[0];
     setSpecialty(first?.slug || '');
     supabase.auth.getUser().then((r: any) => setUserId(r.data?.user?.id || ''));
+    setFreeAnswered(Number(localStorage.getItem('sb1_free_answers_count') || 0));
   }, [lang]);
 
   useEffect(() => {
@@ -51,6 +57,17 @@ export default function SpecialistContentUploadPage() {
     };
     loadCovers();
   }, [specialty, coverSearch, lang]);
+
+
+  const mediaImages = Array.from({length: 72}, (_, i) => ({ id: 'bank-' + (i + 1), title: 'Medical Media ' + (i + 1), image_url: 'https://images.unsplash.com/photo-' + ['1576091160399-112ba8d25d1d','1579684385127-1ef15d508118','1584982751601-97dcc096659c','1532938911079-1b06ac7ceec7','1584515933487-779824d29309','1559757175-0eb30cd8c063'][i % 6] + '?auto=format&fit=crop&w=1200&q=90', search_text: 'medical health ' + i }));
+  const medicalBadges = ['🩺','❤️','🫀','🧠','🫁','🦷','👁️','🧬','🧪','💊','🏥','🚑','🩻','🔬','🩹','🧑‍⚕️','👩‍⚕️','🧑‍🔬','🧘','💚','⭐','🏅','✅','🛡️'];
+  const badgeNames = ['طبيب معتمد','أخصائي موثق','محتوى طبي','رعاية موثوقة','مجيب مجاني','خبير التخصص','محتوى مميز','كاتب طبي','مدرب معتمد','مركز موثق','مؤسسة صحية','شريك SB1'];
+  const runAI = async (kind: 'article'|'reel'|'reply') => {
+    setAiBusy(true); setAiOutput(''); await new Promise(r => setTimeout(r, 450));
+    const topic = aiPrompt.trim() || title || 'موضوع طبي'; const spec = specialty || 'التخصص الطبي';
+    const out = kind === 'article' ? 'عنوان مقترح: ' + topic + '\n\nمقدمة: محتوى تثقيفي عام حول ' + spec + ' يشرح الفكرة بلغة واضحة.\n\nالنقاط الرئيسية:\n• تعريف مبسط\n• الأعراض والعلامات الشائعة\n• متى يجب طلب المساعدة الطبية\n• نصائح عامة مبنية على مصادر موثوقة\n\nتنبيه: المحتوى تثقيفي ولا يغني عن التشخيص.' : kind === 'reel' ? 'فكرة ريلز 45 ثانية عن ' + spec + ': سؤال جذاب، ثلاث معلومات قصيرة، خطأ شائع، ثم دعوة لمتابعة الأخصائي. الموضوع: ' + topic : 'رد مقترح: أشكرك على سؤالك. قد تكون الأسباب متعددة ولا يمكن تأكيد التشخيص من الرسائل وحدها. اذكر مدة الأعراض والأدوية والأعراض المصاحبة، واطلب تقييماً طبياً عند وجود علامات مقلقة.';
+    setAiOutput(out); setAiBusy(false);
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,6 +152,23 @@ export default function SpecialistContentUploadPage() {
             </div>
           </div>
 
+          <div className="mb-5 grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border bg-teal-50 p-4"><TrendingUp className="h-5 w-5 text-teal-700"/><b className="mt-2 block">نشاط وظهور الحساب</b><p className="mt-1 text-xs text-gray-600">أجبت على {freeAnswered} سؤالاً مجانياً. استمر في الإجابة لرفع نشاط الملف.</p></div>
+            <div className="md:col-span-2 rounded-2xl border bg-white p-4">
+              <div className="flex items-center gap-2 font-extrabold"><Sparkles className="h-5 w-5 text-purple-600"/>المساعد الذكي للأخصائي</div>
+              <textarea value={aiPrompt} onChange={e=>setAiPrompt(e.target.value)} className="input-field mt-3 w-full min-h-20" placeholder="موضوع المقال أو الريلز أو الرد…"/>
+              <div className="mt-2 flex flex-wrap gap-2"><button type="button" onClick={()=>runAI('article')} disabled={aiBusy} className="rounded-xl bg-purple-50 px-3 py-2 text-xs font-bold text-purple-700">توليد مقال</button><button type="button" onClick={()=>runAI('reel')} disabled={aiBusy} className="rounded-xl bg-pink-50 px-3 py-2 text-xs font-bold text-pink-700">فكرة ريلز</button><button type="button" onClick={()=>runAI('reply')} disabled={aiBusy} className="rounded-xl bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700">صياغة رد</button></div>
+              {aiOutput&&<pre className="mt-3 whitespace-pre-wrap rounded-xl bg-gray-50 p-3 text-xs leading-6">{aiOutput}</pre>}
+              <p className="mt-2 text-[11px] text-gray-500">المساعد يولد مسودة أولية؛ يجب مراجعتها طبياً قبل النشر.</p>
+            </div>
+          </div>
+          <div className="mb-5 rounded-2xl border bg-white p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-extrabold">بنك الميديا والبادجات</h2><p className="text-xs text-gray-500">أغلفة وصور وإيموجي وشارات صحية جاهزة.</p></div><div className="relative"><Search className="absolute start-3 top-3 h-4 w-4 text-gray-400"/><input value={coverSearch} onChange={e=>setCoverSearch(e.target.value)} className="input-field ps-9" placeholder="بحث…"/></div></div>
+            <div className="mt-3 flex gap-2"><button type="button" onClick={()=>setMediaTab('covers')} className={'rounded-xl px-3 py-2 text-xs font-bold '+(mediaTab==='covers'?'bg-teal-700 text-white':'bg-gray-100')}>الأغلفة</button><button type="button" onClick={()=>setMediaTab('emoji')} className={'rounded-xl px-3 py-2 text-xs font-bold '+(mediaTab==='emoji'?'bg-teal-700 text-white':'bg-gray-100')}>الإيموجي الطبي</button><button type="button" onClick={()=>setMediaTab('badges')} className={'rounded-xl px-3 py-2 text-xs font-bold '+(mediaTab==='badges'?'bg-teal-700 text-white':'bg-gray-100')}>البادجات</button></div>
+            {mediaTab==='covers'&&<div className="mt-3 grid grid-cols-3 gap-2 md:grid-cols-6">{mediaImages.filter(x=>!coverSearch||x.search_text.includes(coverSearch.toLowerCase())).slice(0,36).map(x=><button type="button" key={x.id} onClick={()=>setSelectedCover(x)} className={'overflow-hidden rounded-xl border '+(selectedCover?.id===x.id?'ring-2 ring-teal-600':'')}><img src={x.image_url} className="h-20 w-full object-cover"/><span className="block p-1 text-[9px]">{x.title}</span></button>)}</div>}
+            {mediaTab==='emoji'&&<div className="mt-3 grid grid-cols-8 gap-2 md:grid-cols-12">{medicalBadges.map((x,i)=><button type="button" key={i} onClick={()=>setTitle(v=>v+' '+x)} className="grid aspect-square place-items-center rounded-xl bg-gray-50 text-2xl hover:bg-teal-50">{x}</button>)}</div>}
+            {mediaTab==='badges'&&<div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">{badgeNames.map((x,i)=><button type="button" key={x} onClick={()=>setDescription(v=>v+' ['+x+']')} className="rounded-xl border bg-teal-50 p-3 text-start text-xs font-bold"><BadgeCheck className="mb-1 h-5 w-5 text-teal-700"/>{x}</button>)}</div>}
+          </div>
           <div className="mt-5 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800">
             <Clock className="inline h-4 w-4 me-1" /> المحتوى يدخل «قيد المراجعة» ولا يظهر للجمهور قبل الموافقة.
           </div>
