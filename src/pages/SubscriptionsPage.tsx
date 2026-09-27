@@ -54,55 +54,7 @@ export default function SubscriptionsPage() {
               </div>;
             })}
           </div>
-        )}        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="card p-8 animate-pulse">
-                <div className="h-12 w-12 bg-gray-100 rounded-xl mb-4" />
-                <div className="h-6 bg-gray-100 rounded w-2/3 mb-3" />
-                <div className="h-4 bg-gray-100 rounded w-full mb-2" />
-                <div className="h-4 bg-gray-100 rounded w-3/4" />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {plans.map((plan, i) => {
-              const Icon = planIcons[i] || Sparkles;
-              const color = planColors[i] || 'teal';
-              const features = (plan.features || '').split('،').filter(Boolean); const displayPrice = Number(plan.price||0);
-              return (
-                <div key={plan.id} className={`card p-8 relative overflow-hidden ${i === 1 ? 'ring-2 ring-teal-500' : ''}`}>
-                  {i === 1 && (
-                    <div className="absolute top-0 right-0 bg-teal-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                      {lang === 'ar' ? 'الأكثر شعبية' : 'Popular'}
-                    </div>
-                  )}
-                  <div className={`w-14 h-14 rounded-2xl bg-${color}-100 flex items-center justify-center mb-4`}>
-                    <Icon className={`w-7 h-7 text-${color}-600`} />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-800 mb-1">{plan.name_ar || plan.name}</h3>
-                  <div className="flex items-baseline gap-1 mb-4">
-                    <span className="text-3xl font-bold text-gray-800">{displayPrice===0?'0':displayPrice.toLocaleString(lang==='ar'?'ar-EG':'en-US')} {country.currencySymbol}</span>
-                    <span className="text-sm text-gray-400">{plan.duration_months===1?'شهرياً':`كل ${plan.duration_months} أشهر`}</span>
-                  </div>
-                  <ul className="space-y-2 mb-6">
-                    {features.map((f, fi) => (
-                      <li key={fi} className="flex items-start gap-2 text-sm text-gray-600">
-                        <Check className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
-                        <span>{f.trim()}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <button onClick={() => navigate(plan.price === 0 ? '/register' : `/payments?type=subscription&plan=${plan.id}&amount=${displayPrice}`)} className={`btn-primary w-full ${i !== 1 ? 'btn-secondary' : ''}`}>
-                    {t('subs.choose')}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+        )}      </div>
     </div>
   );
 }
