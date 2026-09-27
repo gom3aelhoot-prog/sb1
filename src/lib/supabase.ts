@@ -49,6 +49,18 @@ const demoTables: Record<string, DemoRow[]> = {
   ],
   site_settings: [{ id:1, site_name:'SB1', default_language:'ar', free_session_messages:3, video_session_price:25, currency:'USD', ai_moderation_enabled:true, stripe_enabled:false, updated_at:now }],
   admin_users: [],
+  complaints: [],
+  provider_wallets: [],
+  provider_sanctions: [],
+  session_holds: [],
+  sanction_rules: [
+    {id:'demo-rule-no-show',rule_key:'video_no_show',name:'عدم حضور جلسة الفيديو',description:'غرامة وتجميد عند عدم الحضور دون عذر',enabled:true,penalty_amount:25,hold_percent:100,freeze_hours:72,freeze_account:true,complaint_threshold:1,review_threshold:0,compensation_discount_percent:30,compensation_free_questions:1,compensation_free_consultations:1},
+    {id:'demo-rule-review',rule_key:'negative_review',name:'تقييم سلبي يحتاج تحقيقاً',description:'حجز جزئي وتحقيق',enabled:true,penalty_amount:0,hold_percent:30,freeze_hours:24,freeze_account:false,complaint_threshold:1,review_threshold:2,compensation_discount_percent:20,compensation_free_questions:1,compensation_free_consultations:0},
+    {id:'demo-rule-complaints',rule_key:'complaint_threshold',name:'تراكم الشكاوى',description:'تصعيد عند تراكم الشكاوى',enabled:true,penalty_amount:50,hold_percent:50,freeze_hours:168,freeze_account:true,complaint_threshold:3,review_threshold:0,compensation_discount_percent:30,compensation_free_questions:2,compensation_free_consultations:1},
+  ],
+  complaint_assistant_actions: [],
+  compensation_codes: [],
+
   payments: [], video_sessions: [], text_sessions: [], specialist_planner: [], planner_reminders: [], lab_bookings: [], radiology_bookings: [], clinic_bookings: [],
   specialist_documents: [], specialist_posts: [], specialist_diary: [], post_comments: [], user_follows: [],
   medical_tests: [], test_results: [], ai_report_analysis: [], favorites: [], advertisements: [], jobs: [], job_applications: [], referral_rewards: [],
