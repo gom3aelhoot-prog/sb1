@@ -21,3 +21,8 @@ export async function reviewSafetyAppeal(appealId:string,decision:'accept'|'reje
   try { const {data,error}=await supabase.rpc('sb1_review_safety_appeal',{p_appeal_id:appealId,p_decision:decision,p_note:note||null}); if(!error) return data; } catch {}
   const arr=localAppeals().map((x:any)=>x.id===appealId?{...x,status:decision==='accept'||decision==='restore'?'accepted':'rejected',decision,note,reviewedAt:new Date().toISOString()}:x); localStorage.setItem('sb1_safety_appeals',JSON.stringify(arr)); return {ok:true};
 }
+
+export async function submitViolationReport(userKey:string,reason:string,evidenceImage?:string){
+ try { const {data,error}=await supabase.rpc('sb1_submit_violation_report',{p_user_key:safetyKey(userKey),p_reason:reason,p_evidence_image:evidenceImage||null}); if(!error) return {ok:true,id:data}; } catch {}
+ const alerts=ownerAlerts(); const item={id:'report-'+Date.now(),type:'safety_report',userKey:safetyKey(userKey),reason,level:'report_pending',evidenceImage:evidenceImage||null,createdAt:new Date().toISOString(),recipients:['owner','moderators'],read:false}; localStorage.setItem(ALERTS,JSON.stringify([item,...alerts].slice(0,200))); return {ok:true,id:item.id};
+}
