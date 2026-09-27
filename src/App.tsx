@@ -11,6 +11,10 @@ import { BottomActionCards } from '@/components/BottomActionCards';
 import { CTASection } from '@/components/CTASection';
 import { DiscountBanner } from '@/components/DiscountBanner';
 import SiteAdSlots from '@/components/SiteAdSlots';
+import AdPlacement from '@/components/AdPlacement';
+import AdPackagesPage from '@/pages/AdPackagesPage';
+import AdsDashboardPage from '@/pages/AdsDashboardPage';
+import AdsAdminPage from '@/pages/AdsAdminPage';
 import { SpecialistsPage } from '@/components/SpecialistsPage';
 import { DoctorVerificationPage } from '@/components/DoctorVerificationPage';
 import { FacilitiesPage as LocalFacilitiesPage } from '@/components/FacilitiesPage';
@@ -161,6 +165,9 @@ function PlatformRoute() {
   if (route === '/support') return <ServiceCenterPage />;
   if (route === '/admin/store') return <StoreAdminPage />;
   if (route === '/apps') return <AppsPage />;
+  if (route === '/ads/packages') return <AdPackagesPage />;
+  if (route === '/ads/dashboard') return <AdsDashboardPage />;
+  if (route === '/admin/ads') return <AdsAdminPage />;
   if (route === '/register/contracts') return <RegistrationContractsPage />;
   if (route === '/news') return <DailyNewsPage />;
   if (route === '/books') return <BooksPage />;
@@ -277,9 +284,11 @@ function AppContent() {
             <Hero />
             <Features />
             <section className="mx-auto w-full max-w-7xl px-4 py-12" dir="rtl"><div className="rounded-3xl border bg-white p-6 shadow-sm"><div className="flex items-center justify-between gap-4"><div><h2 className="text-2xl font-extrabold">الأخبار الطبية اليومية</h2><p className="mt-1 text-gray-500">تحديثات وموجزات طبية تعليمية باللغة المختارة.</p></div><a href="/news" className="rounded-xl bg-teal-700 px-5 py-3 font-bold text-white">عرض الأخبار</a></div><div className="mt-5 grid gap-4 md:grid-cols-3"><div className="rounded-2xl bg-slate-50 p-5"><b>الصحة النفسية</b><p className="mt-2 text-sm text-gray-600">أحدث التحديثات التعليمية عن النوم والقلق والوسواس.</p></div><div className="rounded-2xl bg-slate-50 p-5"><b>القلب والأوعية</b><p className="mt-2 text-sm text-gray-600">محتوى يومي عن الوقاية والمتابعة وصحة القلب.</p></div><div className="rounded-2xl bg-slate-50 p-5"><b>الأطفال</b><p className="mt-2 text-sm text-gray-600">موجزات تعليمية عن النمو والتغذية والتقييم.</p></div></div></div></section>
+            <section className="mx-auto w-full max-w-7xl px-4 pb-10" dir="rtl"><h3 className="mb-4 text-xl font-extrabold">مساحات إعلانية</h3><AdPlacement placement="home-news" count={3} variant="horizontal"/></section>
             <HowItWorks />
             <BottomActionCards />
             <CTASection />
+            <section className="mx-auto w-full max-w-7xl px-4 py-8" dir="rtl"><h3 className="mb-4 text-xl font-extrabold">مساحات إعلانية</h3><AdPlacement placement="home-cta" count={5} variant="horizontal"/></section>
             <JobsTicker />
           </>
         )}
