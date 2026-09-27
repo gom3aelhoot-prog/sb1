@@ -172,6 +172,14 @@ export default function RegisterPage() {
               <input type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="input-field" />
             </div>
 
+            {accountType === 'delivery_worker' && <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">المدينة</label>
+              <select required value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value, address: e.target.value })} className="input-field bg-white">
+                <option value="">اختر المدينة</option>
+                {citiesForCountry(registrationCountry.code, lang).map((x:any)=><option key={x.key} value={x.key}>{x.name}</option>)}
+              </select>
+              <p className="mt-1 text-xs text-gray-500">المدينة فقط؛ لا يتم طلب عنوان المنزل أو الشارع.</p>
+            </div>}
             {accountType === 'institution' && (
               <>
                 <div>
