@@ -28,12 +28,17 @@ export default function RegisterPage() {
   const [institutionFiles, setInstitutionFiles] = useState<string[]>([]);
   const [registrationCountry, setRegistrationCountry] = useState(country);
   const [submitting, setSubmitting] = useState(false);
+  const [oauthProvider, setOauthProvider] = useState('');
+  const [oauthUserId, setOauthUserId] = useState('');
   const [success, setSuccess] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const referralCode = new URLSearchParams(window.location.search).get('ref') || '';
 
   useEffect(() => {
     supabase.from('specialties').select('*').order('name').then(({ data }) => setSpecialties(data || []));
+    if (registrationStep === 'identity' && queryParams.get('oauth') === '1') {
+      supabase.auth.getUser().then(({data}:any)=>{const u=data?.user;if(u){setOauthUserId(u.id||'');setOauthProvider(localStorage.getItem('sb1_oauth_provider')||u.user_metadata?.provider||'');setFormData(v=>({...v,name:v.name||u.user_metadata?.full_name||u.user_metadata?.name||'',email:v.email||u.email||''}));}});
+    }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,7 +60,13 @@ export default function RegisterPage() {
         setSuccess(true);
         return;
       }
-      const authResult = await supabase.auth.signUp({ email, password: formData.password, options: { data: { name: formData.name, role: accountType, age: age || null, parental_consent: Boolean(formData.parentalConsent), country_code: registrationCountry.code, language_code: lang, city: formData.city } } });
+      let authResult:any;
+      if (oauthUserId) {
+        const current = await supabase.auth.getUser();
+        authResult = { data: { user: current.data?.user || {id:oauthUserId,email} }, error: current.error || null };
+      } else {
+        authResult = await supabase.auth.signUp({ email, password: formData.password, options: { data: { name: formData.name, role: accountType, age: age || null, parental_consent: Boolean(formData.parentalConsent), country_code: registrationCountry.code, language_code: lang, city: formData.city } } });
+      }
       if (authResult.error) throw authResult.error;
       try {
         let parentId:any = null;
@@ -81,6 +92,14 @@ export default function RegisterPage() {
     } catch (err: any) {
       alert(err?.message || 'تعذر إرسال الطلب');
     } finally { setSubmitting(false); }
+  };
+
+  const handleOAuth = async (provider:string) => {
+    localStorage.setItem('sb1_pending_registration', JSON.stringify({...formData, country_code:registrationCountry.code, language_code:lang}));
+    localStorage.setItem('sb1_oauth_provider', provider);
+    const redirectTo = window.location.origin + '/register?step=identity&type=' + encodeURIComponent(accountType || 'client') + '&oauth=1';
+    const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo } });
+    if (error) alert(error.message || 'تعذر بدء تسجيل الدخول');
   };
 
   if (success) {
@@ -170,7 +189,14 @@ export default function RegisterPage() {
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">{t('register.password')}</label>
-              <input type="password" required value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="input-field" />
+              <input type="password" required={!oauthUserId} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="input-field" />
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="font-bold text-slate-800 mb-3">تسجيل الدخول بحساب موجود</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <button type="button" key="google" onClick={()=>handleOAuth('google')} className="rounded-xl bg-white border px-3 py-3 text-sm font-bold hover:bg-slate-50">Google</button><button type="button" key="facebook" onClick={()=>handleOAuth('facebook')} className="rounded-xl bg-white border px-3 py-3 text-sm font-bold hover:bg-slate-50">Facebook</button><button type="button" key="linkedin_oidc" onClick={()=>handleOAuth('linkedin_oidc')} className="rounded-xl bg-white border px-3 py-3 text-sm font-bold hover:bg-slate-50">LinkedIn</button><button type="button" key="custom:yandex" onClick={()=>handleOAuth('custom:yandex')} className="rounded-xl bg-white border px-3 py-3 text-sm font-bold hover:bg-slate-50">Yandex</button><button type="button" key="custom:vk" onClick={()=>handleOAuth('custom:vk')} className="rounded-xl bg-white border px-3 py-3 text-sm font-bold hover:bg-slate-50">VK.ru</button><button type="button" key="custom:okru" onClick={()=>handleOAuth('custom:okru')} className="rounded-xl bg-white border px-3 py-3 text-sm font-bold hover:bg-slate-50">OK.ru</button>
+              </div>
+              <p className="text-xs text-slate-500 mt-3">بعد العودة من مزود الدخول، إذا كانت بيانات الحساب ناقصة ستظهر لك حقول «إكمال التسجيل» قبل إنشاء الحساب النهائي.</p>
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">{t('register.phone')}</label>
