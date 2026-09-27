@@ -1,4 +1,4 @@
-import {ReactNode} from 'react';
+import type {ReactNode} from 'react';
 import {getRole,routeAllowed,setPreviewRole,type SB1Role} from '@/lib/access';
 export default function RoleGate({path,children}:{path:string;children:ReactNode}){
  const role=getRole();
