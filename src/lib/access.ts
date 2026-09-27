@@ -13,7 +13,7 @@ export function roleLabel(role:SB1Role,lang='ar'){
  return m[role]?.[lang]||m[role]?.en||role;
 }
 export const PRIVATE_ROUTES:{prefix:string;roles:SB1Role[]}[]=[
- {prefix:'/dashboard',roles:['client']},{prefix:'/specialist/studio',roles:['specialist']},{prefix:'/specialist/packages',roles:['specialist']},{prefix:'/specialist-sessions',roles:['specialist']},{prefix:'/specialist-appointments',roles:['specialist']},{prefix:'/specialist/content',roles:['specialist']},{prefix:'/specialist/dashboard',roles:['specialist']},
+ {prefix:'/dashboard',roles:['client']},{prefix:'/client/dashboard',roles:['client']},{prefix:'/institution/dashboard',roles:['institution']},{prefix:'/delivery/dashboard',roles:['delivery_worker']},{prefix:'/property',roles:['property_owner']},{prefix:'/specialist/studio',roles:['specialist']},{prefix:'/specialist/packages',roles:['specialist']},{prefix:'/specialist-sessions',roles:['specialist']},{prefix:'/specialist-appointments',roles:['specialist']},{prefix:'/specialist/content',roles:['specialist']},{prefix:'/specialist/dashboard',roles:['specialist']},
  {prefix:'/delivery',roles:['delivery_worker','institution']},{prefix:'/facility-registration',roles:['institution']},{prefix:'/property',roles:['property_owner']},
  {prefix:'/admin',roles:['moderator','owner']},{prefix:'/admin-dashboard',roles:['moderator','owner']},{prefix:'/owner',roles:['owner']},{prefix:'/admin/',roles:['moderator','owner']},
 ];
