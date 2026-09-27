@@ -254,7 +254,7 @@ export default function AskPage() {
                   <div className="mt-1 text-2xl font-extrabold text-teal-700">{Number((tier.price_usd * countryMultiplier).toFixed(2)).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')} {questionBasePrice.currency_symbol}</div>
                   <div className="mt-3 space-y-2 text-sm text-gray-600">
                     <div className="flex items-center gap-2"><Clock className="w-4 h-4" />{tier.duration_days} {lang === 'ar' ? 'يوم ظهور الطلب' : 'days visible'}</div>
-                    <div className="flex items-center gap-2"><Users className="w-4 h-4" />{tier.selectedSpecialties.length} {lang === 'ar' ? 'تخصصات مختارة' : 'selected specialties'}</div>
+                    <div className="flex items-center gap-2"><Users className="w-4 h-4" />{tier.selectedSpecialties?.length || 0} {lang === 'ar' ? 'تخصصات مختارة' : 'selected specialties'}</div>
                   </div>
                 </button>
               ))}
