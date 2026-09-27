@@ -10,3 +10,14 @@ try{void supabase.from('sb1_owner_alerts').insert({alert_type:'safety_violation'
 export function clearExpiredSanction(userKey?:string){const x=getSanction(userKey);return x}
 export function ownerAlerts(){try{return JSON.parse(localStorage.getItem(ALERTS)||'[]')}catch{return[]}}
 export function markAlertRead(id:string){const xs=ownerAlerts().map((x:any)=>x.id===id?{...x,read:true}:x);localStorage.setItem(ALERTS,JSON.stringify(xs))}
+
+
+export async function submitSafetyAppeal(userKey:string, complaint:string, evidenceImage?:string){
+  try { const {data,error}=await supabase.rpc('sb1_submit_safety_appeal',{p_user_key:safetyKey(userKey),p_complaint:complaint,p_evidence_image:evidenceImage||null}); if(!error) return {ok:true,id:data}; } catch {}
+  const key=safetyKey(userKey); const arr=JSON.parse(localStorage.getItem('sb1_safety_appeals')||'[]'); const item={id:'appeal-'+Date.now(),userKey:key,complaint,evidenceImage:evidenceImage||null,status:'pending',createdAt:new Date().toISOString()}; localStorage.setItem('sb1_safety_appeals',JSON.stringify([item,...arr])); return {ok:true,id:item.id};
+}
+export function localAppeals(){try{return JSON.parse(localStorage.getItem('sb1_safety_appeals')||'[]')}catch{return[]}}
+export async function reviewSafetyAppeal(appealId:string,decision:'accept'|'reject'|'restore'|'suspend'|'delete',note?:string){
+  try { const {data,error}=await supabase.rpc('sb1_review_safety_appeal',{p_appeal_id:appealId,p_decision:decision,p_note:note||null}); if(!error) return data; } catch {}
+  const arr=localAppeals().map((x:any)=>x.id===appealId?{...x,status:decision==='accept'||decision==='restore'?'accepted':'rejected',decision,note,reviewedAt:new Date().toISOString()}:x); localStorage.setItem('sb1_safety_appeals',JSON.stringify(arr)); return {ok:true};
+}
