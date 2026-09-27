@@ -23,7 +23,7 @@ export default function RequestMarketplacePage(){
  const currency=country.currency;const fee=feeFor(currency,days,target);
  const create=()=>{if(!specialty||problem.trim().length<20){setMessage(lang==='ar'?'اختر التخصص واكتب تفاصيل المشكلة بشكل كافٍ.':'Choose a specialty and describe the problem in enough detail.');return}
   const reference='req-'+Date.now();const draft={id:reference,specialty,problem,requirements,targetPrice,availableTime,days,target,visibility,country:country.name,countryCode:country.code,currency,fee,createdAt:new Date().toISOString(),offers:0,status:'pending',offersList:[]};
-  localStorage.setItem('sb1_pending_request_'+reference,JSON.stringify(draft));navigate('/request-payment?reference='+encodeURIComponent(reference)+'&amount='+fee+'&currency='+encodeURIComponent(currency));
+  localStorage.setItem('sb1_pending_request_'+reference,JSON.stringify(draft));navigate('/payments?type=request&reference='+encodeURIComponent(reference)+'&amount='+fee+'&currency='+encodeURIComponent(currency));
  };
  const addOffer=(r:any)=>{const docs=virtualDoctorsForSpecialty(r.specialty,lang,Math.min(r.target,20));const d=docs[(r.offers||0)%Math.max(1,docs.length)];const offer={id:'offer-'+Date.now(),doctorName:d?.name||'Specialist demo',comment:lang==='ar'?'أستطيع مراجعة التفاصيل في جلسة فيديو ومناقشة الخطوات المناسبة. هذا عرض تجريبي.':'I can review the details in a video session and discuss appropriate next steps. Demo offer.',price:Number(r.targetPrice)||30,durationMinutes:60,createdAt:new Date().toISOString()};const next=load().map((x:any)=>x.id===r.id?{...x,offers:(x.offers||0)+1,offersList:[...(x.offersList||[]),offer]}:x);save(next);setRequests(next);};
  const all=[...requests];const open=all.filter(r=>r.visibility==='open');
