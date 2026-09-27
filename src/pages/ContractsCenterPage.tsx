@@ -23,6 +23,8 @@ function downloadBlob(blob:Blob,name:string){const a=document.createElement('a')
 function active(t:ContractTemplate){return !t.disabledUntil||new Date(t.disabledUntil).getTime()<=Date.now()}
 
 export default function ContractsCenterPage(){
+ const [authorized,setAuthorized]=useState<boolean|null>(null);
+ useEffect(()=>{try{const a=JSON.parse(localStorage.getItem('admin_auth')||'null');setAuthorized(!!a&&['owner','moderator','content_manager','support'].includes(a.role))}catch{setAuthorized(false)}},[]);
  const [templates,setTemplates]=useState<ContractTemplate[]>(readTemplates);
  const [selectedId,setSelectedId]=useState(templates[0]?.id||'');
  const [lang,setLang]=useState('ar');
@@ -32,6 +34,8 @@ export default function ContractsCenterPage(){
  const [notice,setNotice]=useState('');
  const [previewRef]=useState({current:null as HTMLDivElement|null});
  const current=useMemo(()=>templates.find(t=>t.id===selectedId)||templates[0],[templates,selectedId]);
+ if(authorized===null)return <div className="min-h-screen grid place-items-center">جارٍ التحقق من صلاحية لوحة التحكم...</div>;
+ if(!authorized)return <div className="min-h-screen grid place-items-center p-6"><div className="rounded-2xl bg-white border p-8 text-center"><h1 className="text-xl font-extrabold">غير مصرح</h1><p className="mt-2 text-slate-500">هذا المركز متاح للمالك والمشرفين فقط.</p><button onClick={()=>window.location.href='/admin'} className="mt-4 rounded-xl bg-teal-700 text-white px-5 py-3 font-bold">العودة للوحة التحكم</button></div></div>;
  const persist=(next:ContractTemplate[])=>{setTemplates(next);localStorage.setItem('sb1_contract_center_templates',JSON.stringify(next));};
  useEffect(()=>{(async()=>{try{const {data}=await supabase.from('contract_templates').select('*').order('updated_at',{ascending:false});if(data?.length){const mapped=data.map((x:any)=>({id:x.id,key:x.template_key,title:x.title,category:x.category,language:x.language||'ar',body:x.body||'',enabled:x.is_active!==false,disabledUntil:x.disabled_until||'',version:x.version||1,updatedAt:x.updated_at||new Date().toISOString()}));setTemplates(mapped);localStorage.setItem('sb1_contract_center_templates',JSON.stringify(mapped));}}catch{}})()},[]);
  if(!current)return null;
