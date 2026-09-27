@@ -87,6 +87,9 @@ import StoreAdminPage from '@/pages/StoreAdminPage';
 import AppsPage from '@/pages/AppsPage';
 import RegistrationContractsPage from '@/pages/RegistrationContractsPage';
 import DailyNewsPage from '@/pages/DailyNewsPage';
+import NewsHubPage from '@/pages/NewsHubPage';
+import NewsProfilePage from '@/pages/NewsProfilePage';
+import NewsControlPage from '@/pages/NewsControlPage';
 import BooksPage from '@/pages/BooksPage';
 import SurgicalVideoLibraryPage from '@/pages/SurgicalVideoLibraryPage';
 import LearningAdminPage from '@/pages/LearningAdminPage';
@@ -170,7 +173,10 @@ function PlatformRoute() {
   if (route === '/ads/dashboard') return <AdsDashboardPage />;
   if (route === '/admin/ads') return <AdsAdminPage />;
   if (route === '/register/contracts') return <RegistrationContractsPage />;
-  if (route === '/news') return <DailyNewsPage />;
+  if (route === '/news') return <NewsHubPage />;
+  if (route === '/news/control') return <NewsControlPage />;
+  if (route.startsWith('/news/profile/')) return <NewsProfilePage id={route.split('/')[3] || 'owner'} />;
+  if (route.startsWith('/news/')) return <DailyNewsPage />;
   if (route === '/books') return <BooksPage />;
   if (route === '/surgical-videos') return <SurgicalVideoLibraryPage />;
   if (route === '/admin/learning') return <LearningAdminPage />;
@@ -284,7 +290,7 @@ function AppContent() {
           <>
             <Hero />
             <Features />
-            <section className="mx-auto w-full max-w-7xl px-4 py-12" dir="rtl"><div className="rounded-3xl border bg-white p-6 shadow-sm"><div className="flex items-center justify-between gap-4"><div><h2 className="text-2xl font-extrabold">الأخبار الطبية اليومية</h2><p className="mt-1 text-gray-500">تحديثات وموجزات طبية تعليمية باللغة المختارة.</p></div><a href="/news" className="rounded-xl bg-teal-700 px-5 py-3 font-bold text-white">عرض الأخبار</a></div><div className="mt-5 grid gap-4 md:grid-cols-3"><div className="rounded-2xl bg-slate-50 p-5"><b>الصحة النفسية</b><p className="mt-2 text-sm text-gray-600">أحدث التحديثات التعليمية عن النوم والقلق والوسواس.</p></div><div className="rounded-2xl bg-slate-50 p-5"><b>القلب والأوعية</b><p className="mt-2 text-sm text-gray-600">محتوى يومي عن الوقاية والمتابعة وصحة القلب.</p></div><div className="rounded-2xl bg-slate-50 p-5"><b>الأطفال</b><p className="mt-2 text-sm text-gray-600">موجزات تعليمية عن النمو والتغذية والتقييم.</p></div></div></div></section>
+            <section className="mx-auto w-full max-w-7xl px-4 py-12" dir="rtl"><div className="rounded-3xl border bg-white p-6 shadow-sm overflow-hidden"><div className="mb-5 flex items-center justify-between gap-4"><div><h2 className="text-2xl font-extrabold">الأخبار الطبية اليومية</h2><p className="mt-1 text-gray-500">أخبار ومقالات وصور وفيديوهات باللغة المختارة.</p></div><a href="/news" className="group relative inline-flex items-center gap-2 rounded-xl bg-teal-700 px-5 py-3 font-bold text-white shadow-lg transition hover:scale-105"><span className="absolute -inset-1 -z-10 animate-ping rounded-xl bg-teal-400/40"></span><span className="animate-pulse">👆</span>عرض الأخبار</a></div><div className="mb-5 overflow-hidden rounded-xl bg-slate-950 text-white"><div className="flex w-max items-center gap-5 py-2 px-4 animate-[marquee_18s_linear_infinite]"><span>🔔 عاجل · SB1 · آخر الأخبار الطبية والتعليمية</span><span>•</span><span>تحديثات يومية</span><span>•</span><span>مقالات · فيديو · ريلز · صور</span></div></div><div className="grid gap-4 md:grid-cols-3"><div className="rounded-2xl bg-slate-50 p-5"><b>الصحة النفسية</b><p className="mt-2 text-sm text-gray-600">أحدث التحديثات التعليمية عن النوم والقلق والوسواس.</p></div><div className="rounded-2xl bg-slate-50 p-5"><b>القلب والأوعية</b><p className="mt-2 text-sm text-gray-600">محتوى يومي عن الوقاية والمتابعة وصحة القلب.</p></div><div className="relative overflow-hidden rounded-2xl bg-slate-100"><img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80" className="h-full min-h-32 w-full object-cover"/><div className="absolute inset-x-0 bottom-0 bg-black/60 p-3 text-sm font-bold text-white">صور وفيديوهات من أخبار SB1</div></div></div></div></section>
             <section className="mx-auto w-full max-w-7xl px-4 pb-10" dir="rtl"><h3 className="mb-4 text-xl font-extrabold">مساحات إعلانية</h3><AdPlacement placement="home-news" count={3} variant="horizontal"/></section>
             <HowItWorks />
             <BottomActionCards />
