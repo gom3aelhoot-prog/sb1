@@ -172,8 +172,8 @@ export function Header() {
           </div>
         </div>
         <div className="hidden lg:block border-t border-neutral-100">
-          <div className="container-x grid grid-cols-10 gap-1 py-1.5">
-            {platformSections.slice(0,10).map((item) => (
+          <div className="container-x grid grid-cols-[repeat(11,minmax(0,1fr))] gap-1 py-1.5">
+            {platformSections.slice(0,11).map((item) => (
               <a key={item.href} href={item.href} className="min-w-0 rounded-lg px-1 py-2 text-center text-[11px] font-bold leading-tight text-neutral-600 hover:bg-primary-50 hover:text-primary-700 transition-colors">
                 {item.label}
               </a>
