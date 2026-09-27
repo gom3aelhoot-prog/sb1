@@ -292,5 +292,5 @@ const cl=clientLines[lang]||clientLines.en; const sl=specialistLines[lang]||spec
 }
 export function allFreeSessions(lang:string){return comprehensiveSpecialties.flatMap(s=>freeSessionsForSpecialty(s.slug,lang,25));}
 
-export function citiesForCountry(countryKey:string,lang:string='ar'){const base=countryData[countryKey];const fallback=arabCountryCities[countryKey];const city=base?.city||fallback||'';return city?[{key:city,name:city}]:[];}
+export function citiesForCountry(countryKey:string,lang:string='ar'){const aliases:Record<string,string>={SA:'saudi',AE:'uae',EG:'egypt',IQ:'iraq',JO:'jordan',KW:'kuwait',LB:'lebanon',LY:'libya',MA:'morocco',OM:'oman',PS:'palestine',QA:'qatar',SY:'syria',TN:'tunisia',YE:'yemen',DZ:'algeria',BH:'bahrain',MR:'mauritania',KM:'comoros',DJ:'djibouti',SD:'sudan',SO:'somalia',US:'usa',DE:'germany',RU:'russia',UZ:'uzbekistan',AM:'armenia',TJ:'tajikistan',UA:'ukraine',AZ:'azerbaijan',GE:'georgia',ET:'ethiopia'};const key=aliases[countryKey]||countryKey;const base=countryData[key];const fallback=arabCountryCities[countryKey];const city=base?.city||fallback||'';return city?[{key:city,name:city}]:[];}
 export function allArabicCountries(){return ARAB_COUNTRIES.map(c=>({key:c.code,name:arabCountryNames[c.code]||c.code,city:arabCountryCities[c.code]||''}));}
