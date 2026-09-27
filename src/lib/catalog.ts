@@ -93,6 +93,10 @@ export function virtualDoctorsForSpecialty(slug:string,lang:string,count=10,coun
  education:'SB1 Virtual Specialist Program',experience_years:i===0?17:5+(i%18),photo_url:(slug==='clinical-psychology'&&i===0)?'/jamal-james.jpg':doctorPhotoPool[(i+1)%doctorPhotoPool.length],city:p.city,rating:4.5+(i%5)/10,consultation_count:120+i*31,native_language:lang,is_online:i%3!==0,is_verified:false,is_virtual:true,phone_number:null,
  follower_count:i===0?98500:500+i*77,nationality:p.country,created_at:new Date(2026,0,1+i).toISOString(),specialty} as Doctor));
 }
+export function bookableDemoDoctorsForSpecialty(slug:string,lang:string,count=10,countryKey?:string):Doctor[]{
+ const docs=virtualDoctorsForSpecialty(slug,lang,count,countryKey);
+ return docs.map((d:any)=>({...d,is_virtual:false,is_verified:false,bio:(d.bio||'')+' حساب تجريبي قابل للحجز في نسخة SB1 التجريبية وليس ملفاً لممارس حقيقي.'}));
+}
 
 const questionScenarios:any={
  ar:[
