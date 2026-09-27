@@ -80,6 +80,7 @@ import DeliveryPage from '@/pages/DeliveryPage';
 import ServiceCenterPage from '@/pages/ServiceCenterPage';
 import StoreAdminPage from '@/pages/StoreAdminPage';
 import AppsPage from '@/pages/AppsPage';
+import BooksPage from '@/pages/BooksPage';
 import ComplaintsPage from '@/pages/ComplaintsPage';
 import ComplaintsAdminPage from '@/pages/ComplaintsAdminPage';
 import ReferralTreePage from '@/pages/ReferralTreePage';
@@ -149,6 +150,7 @@ function PlatformRoute() {
   if (route === '/support') return <ServiceCenterPage />;
   if (route === '/admin/store') return <StoreAdminPage />;
   if (route === '/apps') return <AppsPage />;
+  if (route === '/books') return <BooksPage />;
   if (route === '/complaints') return <ComplaintsPage />;
   if (route === '/admin/complaints') return <ComplaintsAdminPage />;
   if (route === '/specialist/content') return <SpecialistContentUploadPage />;
