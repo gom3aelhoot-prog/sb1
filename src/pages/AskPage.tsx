@@ -252,7 +252,7 @@ export default function AskPage() {
               <div className="font-bold text-gray-800">{lang === 'ar' ? 'سؤال مجاني' : 'Free question'}</div>
               <div className="text-xs text-gray-500 mt-1">{lang === 'ar' ? 'للحالات العامة' : 'For general questions'}</div>
             </button>
-            <button type="button" onClick={() => navigate('/paid-question' + (selectedSpecialties.length ? '?specialty=' + encodeURIComponent(selectedSpecialties[0]) : ''))} className={`rounded-2xl border-2 p-4 text-start transition ${questionType === 'paid' ? 'border-teal-500 bg-teal-50' : 'border-gray-100'}`}>
+            <button type="button" onClick={() => navigate('/paid-question?type=paid' + (selectedSpecialties.length ? '&specialty=' + encodeURIComponent(selectedSpecialties[0]) : ''))} className={`rounded-2xl border-2 p-4 text-start transition ${questionType === 'paid' ? 'border-teal-500 bg-teal-50' : 'border-gray-100'}`}>
               <div className="flex items-center gap-2 font-bold text-gray-800"><CreditCard className="w-4 h-4 text-teal-600" />{lang === 'ar' ? 'سؤال مدفوع' : 'Paid question'}</div>
               <div className="text-xs text-gray-500 mt-1">{lang === 'ar' ? 'متاح لجميع أطباء هذا التخصص خلال المدة المحددة' : 'Available to all doctors in this specialty for the selected duration'}</div>
             </button>
