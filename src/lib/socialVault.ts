@@ -17,3 +17,4 @@ export const getFollowing=()=>read<string[]>('following',[]);
 export const toggleFollowing=(id:string)=>{const a=getFollowing();const i=a.indexOf(id);if(i>=0)a.splice(i,1);else a.unshift(id);write('following',a);return a};
 export const setProfilePrivacy=(mode:'followers'|'private')=>write('privacy',mode);
 export const getProfilePrivacy=()=>read<'followers'|'private'>('privacy','followers');
+export const isFollowing=(id:string)=>getFollowing().includes(id);
