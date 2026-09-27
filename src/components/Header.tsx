@@ -179,7 +179,7 @@ export function Header() {
               </a>
             ))}
           </div>
-        </div>        </div>
+        </div>
       </header>
 
       {/* Mobile drawer */}
