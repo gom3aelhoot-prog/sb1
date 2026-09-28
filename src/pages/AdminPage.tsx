@@ -5,6 +5,7 @@ import {
   Plus, Trash2, Edit, Stethoscope, Eye, Shield, TrendingUp, X
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { readContactSettings, saveContactSettings, type ContactSettings } from '@/lib/contactSettings';
 import { supabase, type Doctor, type Question, type Article, type DoctorVideo, type DoctorAudio, type Course, type Payment, type AIViolation, type SiteSettings, type VideoSession, type TextSession, type Specialty } from '@/lib/supabase';
 
 type AdminSection = 'overview' | 'doctors' | 'questions' | 'articles' | 'videos' | 'audio' | 'courses' | 'sessions' | 'payments' | 'violations' | 'settings';
@@ -32,6 +33,7 @@ export default function AdminPage() {
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(false);
+  const [contact, setContact] = useState<ContactSettings>(() => readContactSettings());
   const [platformFee, setPlatformFee] = useState<number>(() => Number(localStorage.getItem('sb1_platform_fee_percent') || 30));
 
   // Add modal
@@ -175,6 +177,7 @@ export default function AdminPage() {
     loadData('violations');
   };
 
+  const handleSaveContact = () => { saveContactSettings(contact); alert('تم حفظ بيانات التواصل والروابط. ستظهر مباشرة في الموقع.'); };
   const handleSaveSettings = async () => {
     localStorage.setItem('sb1_platform_fee_percent', String(Math.max(0, Math.min(100, platformFee)));
     if (!settings) return;
@@ -489,6 +492,25 @@ export default function AdminPage() {
                 <h2 className="text-xl font-bold text-gray-800 mb-4">{t('admin.settings')}</h2>
                 {settings && (
                   <div className="card p-6 space-y-4">
+                    <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
+                      <h3 className="text-lg font-bold text-blue-900 mb-1">بيانات «تواصل معنا» والروابط</h3>
+                      <p className="text-xs text-blue-700 mb-4">اكتب الرابط الكامل لصفحتك. عند الضغط على الأيقونة في الموقع يفتح الرابط مباشرة في تبويب جديد.</p>
+                      <div className="grid md:grid-cols-2 gap-3">
+                        <input value={contact.email} onChange={e=>setContact({...contact,email:e.target.value})} placeholder="البريد الإلكتروني" className="input-field bg-white" />
+                        <input value={contact.phone} onChange={e=>setContact({...contact,phone:e.target.value})} placeholder="رقم الهاتف" className="input-field bg-white" />
+                        <input value={contact.address} onChange={e=>setContact({...contact,address:e.target.value})} placeholder="العنوان" className="input-field bg-white md:col-span-2" />
+                        <input value={contact.facebook} onChange={e=>setContact({...contact,facebook:e.target.value})} placeholder="رابط Facebook — https://facebook.com/..." className="input-field bg-white" />
+                        <input value={contact.instagram} onChange={e=>setContact({...contact,instagram:e.target.value})} placeholder="رابط Instagram" className="input-field bg-white" />
+                        <input value={contact.twitter} onChange={e=>setContact({...contact,twitter:e.target.value})} placeholder="رابط X / Twitter" className="input-field bg-white" />
+                        <input value={contact.linkedin} onChange={e=>setContact({...contact,linkedin:e.target.value})} placeholder="رابط LinkedIn" className="input-field bg-white" />
+                        <input value={contact.youtube} onChange={e=>setContact({...contact,youtube:e.target.value})} placeholder="رابط YouTube" className="input-field bg-white" />
+                        <input value={contact.telegram} onChange={e=>setContact({...contact,telegram:e.target.value})} placeholder="رابط Telegram" className="input-field bg-white" />
+                        <input value={contact.whatsapp} onChange={e=>setContact({...contact,whatsapp:e.target.value})} placeholder="رابط WhatsApp" className="input-field bg-white" />
+                        <input value={contact.website} onChange={e=>setContact({...contact,website:e.target.value})} placeholder="رابط الموقع/الخدمة" className="input-field bg-white" />
+                      </div>
+                      <button onClick={handleSaveContact} className="mt-4 btn-primary">حفظ بيانات التواصل والروابط</button>
+                    </div>
+
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">اسم الموقع</label>
                       <input type="text" value={settings.site_name} onChange={(e) => setSettings({ ...settings, site_name: e.target.value })} className="input-field" />
