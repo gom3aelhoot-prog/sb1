@@ -1,4 +1,4 @@
-import { HeartPulse, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Send } from 'lucide-react';
+import { HeartPulse, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube, Send, MessageCircle, Globe2 } from 'lucide-react';
 import { useApp } from '@/i18n/AppContext';
 import { useEffect, useState } from 'react';
 import { readContactSettings, type ContactSettings } from '@/lib/contactSettings';
@@ -27,6 +27,10 @@ export function Footer() {
     { icon: Twitter, href: contact.twitter, label: 'X / Twitter' },
     { icon: Instagram, href: contact.instagram, label: 'Instagram' },
     { icon: Linkedin, href: contact.linkedin, label: 'LinkedIn' },
+    { icon: Youtube, href: contact.youtube, label: 'YouTube' },
+    { icon: MessageCircle, href: contact.telegram, label: 'Telegram' },
+    { icon: MessageCircle, href: contact.whatsapp, label: 'WhatsApp' },
+    { icon: Globe2, href: contact.website, label: 'Website' },
   ].filter(x => x.href);
 
   return (
