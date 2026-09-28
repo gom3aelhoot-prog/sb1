@@ -3,14 +3,13 @@ import { ArrowRight,Star,MapPin,Clock,Users,Heart,MessageCircle,Send,Video,BookO
 import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase,type Doctor } from '@/lib/supabase';
-import { specialtyName } from '@/lib/i18n';
 import { virtualDoctorsForSpecialty } from '@/lib/catalog';
 
 type P={id:string;body:string;kind:'post'|'reel'|'article'|'video'|'audio'|'book';media?:string;likes:number;comments:{name:string;body:string}[];privacy:'public'|'followers'|'selected';created:number;doctor_id:string};
 const tr=(lang:string,a:string,r:string,e:string)=>lang==='ar'?a:lang==='ru'?r:e;
 
 export default function DoctorProfilePage({id}:{id:string}){
- const {navigate}=useRouter();const {lang,dir}=useI18n();
+ const {navigate}=useRouter();const {lang,dir,specialtyName}=useI18n();
  const [doctor,setDoctor]=useState<Doctor|null>(null);const [loading,setLoading]=useState(true);
  const [posts,setPosts]=useState<P[]>([]);const [composer,setComposer]=useState('');const [kind,setKind]=useState<P['kind']>('post');const [privacy,setPrivacy]=useState<P['privacy']>('public');const [autoShare,setAutoShare]=useState(true);const [cover,setCover]=useState<string>(()=>localStorage.getItem('sb1_cover_'+id)||'');
  const [liked,setLiked]=useState<string[]>(()=>JSON.parse(localStorage.getItem('sb1_liked_'+id)||'[]'));const [saved,setSaved]=useState<string[]>(()=>JSON.parse(localStorage.getItem('sb1_saved_'+id)||'[]'));const [following,setFollowing]=useState(false);const [followBack,setFollowBack]=useState(true);const [search,setSearch]=useState('');
