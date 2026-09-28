@@ -67,6 +67,7 @@ import MediaHubPage from '@/pages/MediaHubPage';
 import SpecialistStorePage from '@/pages/SpecialistStorePage';
 import AppsPage from '@/pages/AppsPage';
 import OtherServicesPage from '@/pages/OtherServicesPage';
+import SocialNetworkPage from '@/pages/SocialNetworkPage';
 import GiftPackagesPage from '@/pages/GiftPackagesPage';
 import GiftClaimPage from '@/pages/GiftClaimPage';
 
@@ -105,6 +106,7 @@ function PlatformRoute() {
   if (route === '/gifts') return <GiftPackagesPage />;
   if (route.startsWith('/gift/')) return <GiftClaimPage />;
   if (route === '/other-services') return <OtherServicesPage />;
+  if (route === '/social') return <SocialNetworkPage />;
   if (route === '/articles') return <ArticlesPage />;
   if (route.startsWith('/articles/')) return <ArticleDetailPage id={route.split('/')[2]} />;
   if (route === '/videos') return <VideosPage />;
