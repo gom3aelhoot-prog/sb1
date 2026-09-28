@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import { User, Stethoscope, Upload, Check, FileText, Shield, UserCircle, ArrowRight, Building2, Truck } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { useApp } from '@/i18n/AppContext';
+import { citiesForCountry } from '@/lib/cities';
 import { useRouter } from '@/lib/router';
 import { supabase, type Specialty } from '@/lib/supabase';
 import { useEffect } from 'react';
 
 export default function RegisterPage() {
   const { t, specialtyName } = useI18n();
+  const { country } = useApp();
+  const cities = citiesForCountry(country.code);
   const { navigate } = useRouter();
   const [accountType, setAccountType] = useState<'client' | 'specialist' | 'institution' | 'other_services' | 'delivery_worker' | null>(null);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', phone: '', specialty: '', otherServiceType: 'clinic-rent', listingMode: 'rent', listingPrice: '', listingDuration: '30 يوم', listingDetails: '',
-    showName: true, anonymous: false, institutionType: 'clinic', address: '', services: '',
+    showName: true, anonymous: false, institutionType: 'clinic', address: '', city: '', services: '',
   });
   const [docUrls, setDocUrls] = useState<{ id?: string; cert?: string; license?: string }>({});
   const [submitting, setSubmitting] = useState(false);
@@ -43,7 +47,7 @@ export default function RegisterPage() {
         const { error } = await supabase.from('institutions').insert({
           name: formData.name,
           type: formData.institutionType,
-          address: formData.address,
+          address: `${formData.city}${formData.address ? `، ${formData.address}` : ''}`,
           phone: formData.phone,
           email: formData.email.trim().toLowerCase(),
           service_info: formData.services,
@@ -195,7 +199,11 @@ export default function RegisterPage() {
                     <option value="clinic">عيادة / مستشفى</option><option value="lab">مختبر</option><option value="radiology">مركز أشعة</option><option value="rehab">تأهيل</option><option value="pharmacy">صيدلية</option><option value="elderly">رعاية كبار السن</option><option value="addiction">علاج الإدمان</option>
                   </select>
                 </div>
-                <input placeholder="العنوان" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="input-field" />
+                <div className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-sm text-blue-800">هذه البيانات مالية خاصة. لا يراها العامة.</div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div><label className="block text-sm font-semibold text-gray-700 mb-2">المدينة</label><select required value={formData.city} onChange={(e)=>setFormData({...formData,city:e.target.value})} className="input-field"><option value="">اختر المدينة</option>{cities.map(city=><option key={city} value={city}>{city}</option>)}</select></div>
+                  <div><label className="block text-sm font-semibold text-gray-700 mb-2">العنوان / الحي</label><input placeholder="الحي أو العنوان" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="input-field" /></div>
+                </div>
                 <textarea placeholder="الخدمات والأسعار والمواعيد" value={formData.services} onChange={(e) => setFormData({ ...formData, services: e.target.value })} className="input-field" rows={4} />
               </>
             )}
