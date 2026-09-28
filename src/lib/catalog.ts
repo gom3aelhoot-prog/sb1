@@ -132,14 +132,30 @@ export function virtualLibraryForSpecialty(slug:string,lang:string,count=2): Spe
   })) as SpecialtyLibraryItem[];
 }
 
+const FACILITY_LABELS:any={
+ ar:{clinic:'العيادات والمستشفيات',lab:'المختبرات',radiology:'مراكز الأشعة',elderly:'دور رعاية المسنين',pharmacy:'الصيدليات',addiction:'مراكز علاج الإدمان',rehab:'مراكز التأهيل والعلاج الطبيعي','medical-supplies':'الأدوات الطبية'},
+ en:{clinic:'Clinics & Hospitals',lab:'Laboratories',radiology:'Radiology Centers',elderly:'Elderly Care Homes',pharmacy:'Pharmacies',addiction:'Addiction Treatment Centers',rehab:'Rehabilitation & Physiotherapy','medical-supplies':'Medical Supplies'},
+ de:{clinic:'Kliniken und Krankenhäuser',lab:'Labore',radiology:'Radiologiezentren',elderly:'Seniorenpflege',pharmacy:'Apotheken',addiction:'Suchtbehandlungszentren',rehab:'Rehabilitation und Physiotherapie','medical-supplies':'Medizinische Hilfsmittel'},
+ ru:{clinic:'Клиники и больницы',lab:'Лаборатории',radiology:'Радиологические центры',elderly:'Дома престарелых',pharmacy:'Аптеки',addiction:'Центры лечения зависимостей',rehab:'Реабилитация и физиотерапия','medical-supplies':'Медицинские товары'},
+ uk:{clinic:'Клініки та лікарні',lab:'Лабораторії',radiology:'Радіологічні центри',elderly:'Будинки догляду',pharmacy:'Аптеки',addiction:'Центри лікування залежностей',rehab:'Реабілітація та фізіотерапія','medical-supplies':'Медичні товари'},
+ uz:{clinic:'Klinikalar va shifoxonalar',lab:'Laboratoriyalar',radiology:'Radiologiya markazlari',elderly:'Keksalar parvarishi',pharmacy:'Dorixonalar',addiction:'Giyohvandlikni davolash markazlari',rehab:'Reabilitatsiya va fizioterapiya','medical-supplies':'Tibbiy buyumlar'},
+ hy:{clinic:'Կլինիկաներ և հիվանդանոցներ',lab:'Լաբորատորիաներ',radiology:'Ռադիոլոգիայի կենտրոններ',elderly:'Տարեցների խնամք',pharmacy:'Դեղատներ',addiction:'Կախվածության բուժման կենտրոններ',rehab:'Վերականգնում և ֆիզիոթերապիա','medical-supplies':'Բժշկական պարագաներ'},
+ tg:{clinic:'Клиникаҳо ва беморхонаҳо',lab:'Лабораторияҳо',radiology:'Марказҳои радиология',elderly:'Нигоҳубини пиронсолон',pharmacy:'Дорухонаҳо',addiction:'Марказҳои табобати вобастагӣ',rehab:'Барқарорсозӣ ва физиотерапия','medical-supplies':'Таҷҳизоти тиббӣ'},
+ az:{clinic:'Klinikalar və xəstəxanalar',lab:'Laboratoriyalar',radiology:'Radiologiya mərkəzləri',elderly:'Yaşlılara qulluq',pharmacy:'Apteklər',addiction:'Asılılığın müalicəsi mərkəzləri',rehab:'Reabilitasiya və fizioterapiya','medical-supplies':'Tibbi ləvazimatlar'},
+ am:{clinic:'ክሊኒኮች እና ሆስፒታሎች',lab:'ላቦራቶሪዎች',radiology:'የራዲዮሎጂ ማዕከላት',elderly:'የአረጋውያን እንክብካቤ',pharmacy:'ፋርማሲዎች',addiction:'የሱስ ሕክምና ማዕከላት',rehab:'ማገገሚያ እና ፊዚዮቴራፒ','medical-supplies':'የሕክምና መሳሪያዎች'},
+ ka:{clinic:'კლინიკები და საავადმყოფოები',lab:'ლაბორატორიები',radiology:'რადიოლოგიის ცენტრები',elderly:'ხანდაზმულთა მოვლა',pharmacy:'აფთიაქები',addiction:'დამოკიდებულების მკურნალობის ცენტრები',rehab:'რეაბილიტაცია და ფიზიოთერაპია','medical-supplies':'სამედიცინო მოწყობილობები'}
+};
 export function virtualFacilities(lang:string, country?:string): AdditionalFacility[] {
-  const p=languageCountry(lang); const wanted=country||p.country;
-  const kinds=[['clinic','عيادة / Clinic'],['lab','مختبر / Lab'],['radiology','مركز أشعة / Radiology'],['elderly','دار رعاية مسنين / Elderly Care'],['pharmacy','صيدلية / Pharmacy'],['addiction','مركز علاج الإدمان / Addiction Care'],['rehab','مركز تأهيل وعلاج طبيعي / Rehabilitation'],['medical-supplies','متجر أدوات طبية / Medical Supplies']];
-  return kinds.map(([kind,label],i)=>({
-    id:`catalog-fac-${lang}-${kind}`,facility_type:kind,name:lang==='ar'?`${label.split(' / ')[0]} ${wanted}`:`${label.split(' / ')[1]} ${wanted}`,
-    description:lang==='ar'?`بيانات تجريبية للمرفق باللغة العربية في ${wanted}.`:`Demo facility data in ${p.native} for ${wanted}.`,
-    address:p.city+' - SB1 Health District',phone:null,email:null,logo_url:null,services:'Appointments, services, prices and schedules',schedule:{sun:'09:00-18:00',mon:'09:00-18:00',tue:'09:00-18:00',wed:'09:00-18:00',thu:'09:00-18:00'},rating:4.6,is_active:true,created_at:new Date().toISOString(),city:p.city,country:wanted,language:lang
-  })) as any;
+ const p=languageCountry(lang); const wanted=country||p.country; const labels=FACILITY_LABELS[lang]||FACILITY_LABELS.en;
+ return Object.keys(labels).flatMap((kind)=>Array.from({length:5},(_,i)=>({
+   id:`catalog-fac-${lang}-${kind}-${i+1}`,facility_type:kind,
+   name:`${labels[kind]} ${wanted} ${i+1}`,
+   description:lc(lang).body+` ${wanted}.`,
+   address:`${p.city} - ${wanted} - SB1 Health District ${i+1}`,phone:null,email:null,logo_url:null,
+   services:lang==='ar'?'حجز ومواعيد وخدمات وأسعار تجريبية':lang==='ru'?'Запись, услуги, цены и расписание':'Appointments, services, prices and schedules',
+   schedule:{sun:'09:00-18:00',mon:'09:00-18:00',tue:'09:00-18:00',wed:'09:00-18:00',thu:'09:00-18:00'},
+   rating:4.5+(i%4)/10,is_active:true,created_at:new Date().toISOString(),city:p.city,country:wanted,language:lang
+ })) as AdditionalFacility[]);
 }
 
 
