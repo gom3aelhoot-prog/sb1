@@ -1,5 +1,5 @@
 import { useMemo,useState } from 'react';
-import { BookOpen,Camera,Heart,MessageCircle,Users,Image as ImageIcon,Plus,Trash2,Share2,Link2,Play,Mic,FolderPlus,Globe2,Facebook,Instagram,Youtube,Linkedin,Music2 } from 'lucide-react';
+import { BookOpen,Camera,Heart,MessageCircle,Users,Image as ImageIcon,Plus,Trash2,Share2,Link2,Play,Mic,FolderPlus,Globe2,Facebook,Instagram,Youtube,Linkedin,Music2,Smartphone,QrCode } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useRouter } from '@/lib/router';
 
@@ -58,7 +58,7 @@ export default function ProfilePage(){
       <div className="-mt-14 flex flex-col md:flex-row md:items-end gap-4">
        <div className="h-28 w-28 rounded-3xl border-4 border-white bg-teal-100 grid place-items-center text-3xl font-black text-teal-700 shadow-lg">GA</div>
        <div className="flex-1"><h1 className="text-2xl font-black">{tr(lang,'حسابي','My Profile','Мой профиль')}</h1><p className="text-sm text-gray-500 mt-1">{tr(lang,'هذا حساب شخصي — يمكنك نشر ما تريد ما دام لا يخالف قواعد SB1.','Personal account — you may publish any permitted content, not only medical content.','Личный профиль — можно публиковать разрешённый контент, не только медицинский.')}</p></div>
-       <button onClick={()=>navigate('/settings')} className="rounded-xl border px-4 py-2">{tr(lang,'إعدادات الحساب','Account settings','Настройки')}</button>
+       <div className="flex gap-2"><button onClick={()=>navigate('/device')} className="rounded-xl border px-4 py-2 flex items-center gap-2"><QrCode className="h-4 w-4"/> ربط الهاتف</button><button onClick={()=>navigate('/settings')} className="rounded-xl border px-4 py-2">{tr(lang,'إعدادات الحساب','Account settings','Настройки')}</button>
       </div>
 
       <section className="mt-8">
