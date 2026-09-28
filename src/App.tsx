@@ -85,7 +85,7 @@ function getHashView(): { view: HashView; pharmacyId: string } {
 }
 
 function PlatformRoute() {
-  const { path } = useRouter();
+  const { path, navigate } = useRouter();
   const route = getPathOnly(path);
   if (route === '/') return null;
   if (route === '/doctors') return <DoctorsPage />;
@@ -123,7 +123,7 @@ function PlatformRoute() {
   if (route === '/labs') return <LabsPage />;
   if (route === '/policy') return <PolicyPage />;
   if (route === '/tests') return <TestsPage />;
-  if (route === '/facilities') return <LocalFacilitiesPage />;
+  if (route === '/facilities') return <LocalFacilitiesPage onNavigate={navigate} />;
   if (route === '/jobs') return <JobsPage />;
   if (route === '/referral') return <ReferralPage />;
   if (route === '/ai-reader') return <AIReaderPage />;
