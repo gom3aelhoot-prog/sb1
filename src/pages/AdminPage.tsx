@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import {
   LayoutDashboard, Users, FileText, Video, Headphones, BookOpen,
-  MessageSquare, DollarSign, AlertTriangle, Settings, LogOut,
+  MessageSquare, DollarSign, AlertTriangle, Settings, LogOut, Gift,
   Plus, Trash2, Edit, Stethoscope, Eye, Shield, TrendingUp, X
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { readContactSettings, saveContactSettings, type ContactSettings } from '@/lib/contactSettings';
 import PricingAdminPanel from '@/components/PricingAdminPanel';
+import OwnerVipGiftsPanel from '@/components/OwnerVipGiftsPanel';
 import { supabase, type Doctor, type Question, type Article, type DoctorVideo, type DoctorAudio, type Course, type Payment, type AIViolation, type SiteSettings, type VideoSession, type TextSession, type Specialty } from '@/lib/supabase';
 
-type AdminSection = 'overview' | 'doctors' | 'questions' | 'articles' | 'videos' | 'audio' | 'courses' | 'sessions' | 'payments' | 'violations' | 'pricing' | 'settings';
+type AdminSection = 'overview' | 'doctors' | 'questions' | 'articles' | 'videos' | 'audio' | 'courses' | 'sessions' | 'payments' | 'violations' | 'pricing' | 'vip_gifts' | 'settings';
 
 export default function AdminPage() {
   const { t, specialtyName } = useI18n();
@@ -228,6 +229,7 @@ export default function AdminPage() {
     { key: 'sessions', label: t('admin.sessions'), icon: Users },
     { key: 'payments', label: t('admin.payments'), icon: DollarSign },
     { key: 'pricing', label: 'الأسعار والباقات', icon: DollarSign },
+    { key: 'vip_gifts', label: 'VIP والهدايا', icon: Gift },
     { key: 'violations', label: t('admin.violations'), icon: AlertTriangle },
     { key: 'settings', label: t('admin.settings'), icon: Settings },
   ];
@@ -491,6 +493,8 @@ export default function AdminPage() {
               </div>
             ) : section === 'pricing' ? (
               <PricingAdminPanel />
+            ) : section === 'vip_gifts' ? (
+              <OwnerVipGiftsPanel />
             ) : section === 'settings' ? (
               <div>
                 <h2 className="text-xl font-bold text-gray-800 mb-4">{t('admin.settings')}</h2>
