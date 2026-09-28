@@ -23,6 +23,7 @@ import { MegaMenu } from '@/components/MegaMenu';
 import { LanguageSwitcher, MobileLanguageSwitcher } from '@/components/LanguageSwitcher';
 import { NotificationsPopover } from '@/components/NotificationsPopover';
 import { SPECIALTIES } from '@/types/i18n';
+import { DemoTransparencyNotice } from '@/components/DemoTransparencyNotice';
 
 export function Header() {
   const { t, isAnonymous } = useApp();
@@ -30,6 +31,7 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const deliveryWorker = typeof window !== 'undefined' && localStorage.getItem('sb1_user_role') === 'delivery_worker';
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showAuthNotice, setShowAuthNotice] = useState(false);
   const [mobileSection, setMobileSection] = useState<'main' | 'specialties' | 'language'>('main');
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -154,11 +156,11 @@ export function Header() {
               <div className="hidden md:flex items-center gap-2">
                 {isAnonymous && (
                   <>
-                    <button className="btn-ghost text-sm" >
+                    <button className="btn-ghost text-sm" onClick={() => setShowAuthNotice(true)} >
                       <LogIn className="h-4 w-4" />
                       {t.nav.signIn}
                     </button>
-                    <button className="btn-primary text-sm" >
+                    <button className="btn-primary text-sm" onClick={() => setShowAuthNotice(true)} >
                       <UserPlus className="h-4 w-4" />
                       {t.nav.signUp}
                     </button>
@@ -188,6 +190,8 @@ export function Header() {
           </div>
         </div>
       </header>
+
+      {showAuthNotice && <DemoTransparencyNotice mode="info" onClose={() => setShowAuthNotice(false)} />}
 
       {/* Mobile drawer */}
       {mobileOpen && (
@@ -288,6 +292,7 @@ export function Header() {
                         onClick={(e) => {
                           e.preventDefault();
                           setMobileOpen(false);
+                          setShowAuthNotice(true);
                         }}
                       >
                         <LogIn className="h-4 w-4" />
@@ -298,6 +303,7 @@ export function Header() {
                         onClick={(e) => {
                           e.preventDefault();
                           setMobileOpen(false);
+                          setShowAuthNotice(true);
                         }}
                       >
                         <UserPlus className="h-4 w-4" />
