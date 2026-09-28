@@ -123,7 +123,7 @@ function PlatformRoute() {
   if (route === '/labs') return <LabsPage />;
   if (route === '/policy') return <PolicyPage />;
   if (route === '/tests') return <TestsPage />;
-  if (route === '/facilities') return <FacilitiesPage />;
+  if (route === '/facilities') return <LocalFacilitiesPage />;
   if (route === '/jobs') return <JobsPage />;
   if (route === '/referral') return <ReferralPage />;
   if (route === '/ai-reader') return <AIReaderPage />;
