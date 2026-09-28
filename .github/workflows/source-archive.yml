@@ -1,0 +1,16 @@
+name: SB1 source archive
+on:
+  push:
+    branches: [main]
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create source ZIP
+        run: zip -r "SB1-latest-${GITHUB_SHA::7}.zip" . -x ".git/*" "node_modules/*" "dist/*"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SB1-latest-source
+          path: SB1-latest-*.zip
+          retention-days: 30
