@@ -148,7 +148,7 @@ const FACILITY_LABELS:any={
 export function virtualFacilities(lang:string, country?:string): AdditionalFacility[] {
  const p=languageCountry(lang); const wanted=country||p.country; const labels=FACILITY_LABELS[lang]||FACILITY_LABELS.en;
  return Object.keys(labels).flatMap((kind)=>Array.from({length:5},(_,i)=>({
-   id:`catalog-fac-${lang}-${kind}-${i+1}`,facility_type:kind,
+   id:`catalog-fac-${lang}-${kind}-${i+1}-${encodeURIComponent(wanted)}`,facility_type:kind,
    name:`${labels[kind]} ${wanted} ${i+1}`,
    description:lc(lang).body+` ${wanted}.`,
    address:`${p.city} - ${wanted} - SB1 Health District ${i+1}`,phone:null,email:null,logo_url:null,
