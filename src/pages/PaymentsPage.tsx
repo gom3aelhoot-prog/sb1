@@ -16,6 +16,8 @@ export default function PaymentsPage() {
   const { path, navigate } = useRouter();
   const query = parseQuery(path);
   const isQuestionCheckout = query.type === 'question' && !!query.reference;
+  const listingAmount = Number(query.amount || 0);
+  const isListingCheckout = query.type === 'listing' && listingAmount > 0;
   const [loading, setLoading] = useState(isQuestionCheckout);
   const [paying, setPaying] = useState(false);
   const [paid, setPaid] = useState(false);
@@ -53,6 +55,11 @@ export default function PaymentsPage() {
       setLoading(false);
     });
   }, [isQuestionCheckout, query.reference, lang]);
+
+  const startListingCheckout = async () => {
+    setCheckoutLoading(true); setError('');
+    try { const response=await fetch('/api/create-checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({amount:listingAmount,currency:'usd',description:'SB1 service listing',reference_id:query.reference||'listing'})}); const data=await response.json(); if(!response.ok||!data.url) throw new Error(data.error||'Checkout unavailable'); window.location.href=data.url; } catch { setError(lang==='ar'?'بوابة الدفع المباشر غير مفعلة على هذا النشر.':'Live checkout is not configured on this deployment.'); } finally { setCheckoutLoading(false); }
+  };
 
   const startLiveCheckout = async () => {
     if (!payment) return;
@@ -114,6 +121,10 @@ export default function PaymentsPage() {
     setPaid(true);
     setPaying(false);
   };
+
+  if (isListingCheckout) {
+    return <div className="min-h-screen pt-24 pb-16 bg-gray-50"><div className="max-w-xl mx-auto px-4"><div className="card p-8 text-center"><ShieldCheck className="mx-auto w-14 h-14 text-teal-600"/><h1 className="mt-4 text-2xl font-bold text-gray-800">{lang==='ar'?'دفع إعلان الخدمة':'Service listing payment'}</h1><p className="mt-2 text-gray-500">{lang==='ar'?'قيمة باقة العرض:':'Listing package:'} {listingAmount} USD</p>{error&&<p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}<button onClick={startListingCheckout} disabled={checkoutLoading} className="btn-primary w-full mt-6">{checkoutLoading?(lang==='ar'?'جاري فتح الدفع...':'Opening checkout...'):(lang==='ar'?'الدفع الآمن':'Pay securely')}</button><button onClick={()=>navigate('/other-services')} className="mt-3 text-sm text-gray-500 underline">{lang==='ar'?'العودة للخدمات الأخرى':'Back to services'}</button></div></div></div>;
+  }
 
   if (isQuestionCheckout) {
     return (
