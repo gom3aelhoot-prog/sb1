@@ -4,6 +4,7 @@ import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 import { virtualQuestionsForSpecialty,virtualAnswersForQuestion } from '@/lib/catalog';
+import { DemoAccountMark } from '@/components/DemoTransparencyNotice';
 export default function QuestionDetailPage({id}:{id:string}){
  const {navigate}=useRouter();const {lang,dir}=useI18n();
  const match=id.match(/^catalog-q-([^-]+)-(.+)-(\d+)$/);const slug=match?.[2]||comprehensiveSpecialties[0].slug;
@@ -13,7 +14,7 @@ export default function QuestionDetailPage({id}:{id:string}){
  return <div className="min-h-screen bg-gray-50 pt-24 pb-16" dir={dir}><div className="mx-auto max-w-3xl px-4">
   <button onClick={()=>navigate('/questions')} className="mb-5 flex items-center gap-2 text-sm text-gray-500"><ArrowRight className="h-4 w-4"/>العودة للأسئلة</button>
   <div className="rounded-2xl bg-white border p-7"><span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700">{question.specialty?.name}</span><h1 className="mt-4 text-2xl font-extrabold text-gray-900">{question.title}</h1><p className="mt-4 leading-8 text-gray-600">{question.body}</p><div className="mt-5 flex gap-4 text-xs text-gray-400"><span>{question.author_name}</span><span><Eye className="inline h-4 w-4"/> {question.views}</span></div></div>
-  <h2 className="mt-8 mb-4 text-xl font-extrabold flex items-center gap-2"><MessageCircle className="text-teal-600"/> {answers.length} إجابات تجريبية</h2>
-  <div className="space-y-4">{answers.map(a=><div key={a.id} className="rounded-2xl bg-white border p-6"><div className="flex items-start gap-3"><div className="h-11 w-11 rounded-xl bg-teal-50 flex items-center justify-center"><User className="text-teal-600"/></div><div><b>{a.doctor?.name}</b><p className="mt-3 leading-7 text-gray-600">{a.body}</p><span className="mt-3 inline-flex items-center gap-1 text-xs text-gray-400"><ThumbsUp className="h-3.5 w-3.5"/>{a.helpful_count}</span></div></div></div>)}</div>
+  <h2 className="mt-8 mb-4 text-xl font-extrabold flex items-center gap-2"><MessageCircle className="text-teal-600"/> {answers.length} إجابات</h2>
+  <div className="space-y-4">{answers.map(a=><div key={a.id} className="rounded-2xl bg-white border p-6"><div className="flex items-start gap-3"><div className="relative h-11 w-11 rounded-full bg-teal-50 flex items-center justify-center"><User className="text-teal-600"/><DemoAccountMark className="absolute -end-1 -top-1 h-3.5 w-3.5"/></div><div><b>{a.doctor?.name}</b><p className="mt-3 leading-7 text-gray-600">{a.body}</p><span className="mt-3 inline-flex items-center gap-1 text-xs text-gray-400"><ThumbsUp className="h-3.5 w-3.5"/>{a.helpful_count}</span></div></div></div>)}</div>
  </div></div>;
 }
