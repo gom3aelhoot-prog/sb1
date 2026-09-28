@@ -1,6 +1,6 @@
 export type ManagedRole='owner'|'specialist'|'institution'|'client'|'service'|'delivery_worker';
 export type PermissionKey='dashboard'|'prices'|'sessions'|'delete_specialist_videos'|'close_accounts'|'manage_content'|'manage_courses'|'manage_videos'|'manage_services'|'view_private_content'|'view_sessions'|'manage_users';
-export type ManagedPage={id:string;parentId?:string;role:ManagedRole;name:string;username:string;avatar?:string;language:string;country:string;isClone:boolean;linked:boolean;expiresAt?:string;status:'active'|'expired'|'revoked';permissions:Record<PermissionKey,boolean>};
+export type ManagedPage={id:string;parentId?:string;role:ManagedRole;name:string;username:string;avatar?:string;language:string;country:string;isClone:boolean;linked:boolean;expiresAt?:string;status:'active'|'expired'|'revoked';password?:string;permissions:Record<PermissionKey,boolean>};
 const KEY='sb1_managed_pages_v3';
 const permissions=(o:Partial<Record<PermissionKey,boolean>>={}):Record<PermissionKey,boolean>=>({dashboard:false,prices:false,sessions:false,delete_specialist_videos:false,close_accounts:false,manage_content:false,manage_courses:false,manage_videos:false,manage_services:false,view_private_content:false,view_sessions:false,manage_users:false,...o});
 export const defaultManagedPages=():ManagedPage[]=>[
@@ -13,5 +13,5 @@ export const defaultManagedPages=():ManagedPage[]=>[
 ];
 export function loadManagedPages(){if(typeof window==='undefined')return defaultManagedPages();try{const x=JSON.parse(localStorage.getItem(KEY)||'');if(Array.isArray(x)&&x.length)return x}catch{}const d=defaultManagedPages();localStorage.setItem(KEY,JSON.stringify(d));return d}
 export function saveManagedPages(p:ManagedPage[]){localStorage.setItem(KEY,JSON.stringify(p));window.dispatchEvent(new Event('sb1-managed-pages'))}
-export function cloneManagedPage(parent:ManagedPage,name:string):ManagedPage{const id='page-'+Date.now().toString(36);return {...parent,id,parentId:parent.id,name,username:name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+id.slice(-4),isClone:true,linked:true,avatar:undefined,permissions:{...parent.permissions},expiresAt:undefined,status:'active'}}
+export function cloneManagedPage(parent:ManagedPage,name:string):ManagedPage{const id='page-'+Date.now().toString(36);return {...parent,id,parentId:parent.id,name,username:name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+id.slice(-4),isClone:true,linked:true,avatar:undefined,password:'SB1-'+Math.random().toString(36).slice(2,8).toUpperCase(),permissions:{...parent.permissions},expiresAt:undefined,status:'active'}}
 export const roleLabel=(r:ManagedRole)=>({owner:'المالك',specialist:'أخصائي',institution:'مؤسسة',client:'مستخدم',service:'خدمات أخرى',delivery_worker:'عامل توصيل'}[r]);
