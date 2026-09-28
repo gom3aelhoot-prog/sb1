@@ -107,7 +107,7 @@ const ocdQuestions: Question[] = [
 ];
 const demoMedicalTests: MedicalTest[] = [
  {id:'demo-ocd',test_type:'ocd',title:'اختبار أعراض الوسواس القهري — فحص أولي',title_en:'OCD Symptom Screening',description:'فحص أولي تعليمي للأعراض وليس تشخيصاً.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
- {id:'demo-ocd2',test_type:'ocd_screening',title:'اختبار الوسواس والتكرار — نسخة ثانية',title_en:'OCD Repetition Screening',description:'اختبار إضافي لاستكشاف الأعراض العامة.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},\n {id:'demo-ocd3',test_type:'ocd',title:'فحص الأفكار الاقتحامية',title_en:'Intrusive Thoughts Screening',description:'فحص أولي للأفكار الاقتحامية المتكررة.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},\n {id:'demo-ocd4',test_type:'ocd_screening',title:'فحص التحقق والطقوس',title_en:'Checking and Rituals Screening',description:'فحص أولي لسلوكيات التحقق والطقوس.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},\n {id:'demo-ocd5',test_type:'ocd_screening',title:'فحص التجنب والقلق الوسواسي',title_en:'OCD Avoidance Screening',description:'فحص أولي للتجنب والقلق المرتبط بالأفكار المتكررة.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
+ {id:'demo-ocd2',test_type:'ocd_screening',title:'اختبار الوسواس والتكرار — نسخة ثانية',title_en:'OCD Repetition Screening',description:'اختبار إضافي لاستكشاف الأعراض العامة.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
  {id:'demo-depression',test_type:'depression',title:'فحص أعراض الاكتئاب',title_en:'Depression Symptom Screening',description:'فحص أولي للأعراض النفسية.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
  {id:'demo-anxiety',test_type:'anxiety',title:'فحص أعراض القلق',title_en:'Anxiety Symptom Screening',description:'فحص أولي لأعراض القلق.',category:'mental',questions:null,created_by:null,is_active:true,created_at:new Date().toISOString()},
 ];
@@ -255,8 +255,6 @@ export default function TestsPage() {
       case 'prediabetes':
       case 'asthma':
       case 'depression':
-      case 'ocd':
-      case 'ocd_screening':
       case 'anxiety':
         calculateQuestionnaire(); break;
       default: setResult(tr('هذا الاختبار سيتوفر قريباً', 'This test will be available soon'));
@@ -451,7 +449,7 @@ export default function TestsPage() {
                 <div className="mt-4 flex flex-wrap justify-center gap-2">
                   <button onClick={saveResult} className="flex items-center gap-2 rounded-xl bg-teal-50 px-4 py-2 text-teal-700 text-sm font-medium"><Save className="w-4 h-4" /> {t('tests.save')}</button>
                   <button onClick={()=>{localStorage.setItem('sb1_test_result_draft',result);window.location.href='/doctors?specialty=clinical-psychology'}} className="rounded-xl bg-indigo-50 px-4 py-2 text-indigo-700 text-sm font-medium">إرسال لأخصائي</button>
-                  <button onClick={()=>{localStorage.setItem('sb1_test_result_draft',result);window.location.href='/ask'}} className="rounded-xl bg-amber-50 px-4 py-2 text-amber-700 text-sm font-medium">إدراج في سؤال</button><button onClick={()=>{localStorage.setItem('sb1_test_result_draft',result);window.location.href='/media'}} className="rounded-xl bg-purple-50 px-4 py-2 text-purple-700 text-sm font-medium">عرض المحتوى المرتبط</button>
+                  <button onClick={()=>{localStorage.setItem('sb1_test_result_draft',result);window.location.href='/ask'}} className="rounded-xl bg-amber-50 px-4 py-2 text-amber-700 text-sm font-medium">إدراج في سؤال</button>
                 </div>
               </div>
             )}
