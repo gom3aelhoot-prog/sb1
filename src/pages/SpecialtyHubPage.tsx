@@ -39,7 +39,7 @@ export default function SpecialtyHubPage() {
   }, [slug]);
 
   const title = specialty ? (lang === 'en' ? specialty.en : lang === 'de' ? specialty.de : lang === 'ru' ? specialty.ru : specialty.ar) : 'التخصص';
-  const relatedDoctors = useMemo(() => loadedDoctors.length ? loadedDoctors : virtualDoctorsForSpecialty(slug, lang, 8), [loadedDoctors, slug, lang]);
+  const relatedDoctors = useMemo(() => loadedDoctors.length ? loadedDoctors : virtualDoctorsForSpecialty(slug, lang, 25), [loadedDoctors, slug, lang]);
   const relatedQuestions = useMemo(() => loadedQuestions.length ? loadedQuestions : virtualQuestionsForSpecialty(slug, lang, 50), [loadedQuestions, slug, lang]);
 
   if (!specialty) {

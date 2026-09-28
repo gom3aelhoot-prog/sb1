@@ -41,6 +41,7 @@ export default function AskPage() {
   const [questionType, setQuestionType] = useState<'free' | 'paid'>('free');
   const [selectedTierId, setSelectedTierId] = useState('plus');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
+  const [contentLang, setContentLang] = useState(lang);
   const [form, setForm] = useState({ author_name: '', age: '', gender: 'ذكر', title: '', body: '' });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -115,6 +116,7 @@ export default function AskPage() {
           age: form.age ? parseInt(form.age) : null,
           gender: form.gender,
           status: questionType === 'paid' ? 'pending_payment' : 'pending',
+          content_language: contentLang,
         }).select('id').single();
         if (!insertError && data?.id) dbQuestionId = data.id;
       } catch {
@@ -124,6 +126,7 @@ export default function AskPage() {
       const localQuestion = {
         id, specialty_id: fallbackSpec.id, author_name: form.author_name.trim(), title: form.title.trim(), body: form.body.trim(),
         age: form.age ? parseInt(form.age) : null, gender: form.gender, status: questionType === 'paid' ? 'pending_payment' : 'pending',
+        content_language: contentLang,
         views: 0, created_at: new Date().toISOString(), specialty: fallbackSpec, answers: [],
       };
       const existing = JSON.parse(localStorage.getItem('sb1_demo_questions') || '[]');
@@ -240,6 +243,7 @@ export default function AskPage() {
               {specialties.map((spec) => <option key={spec.id} value={spec.slug}>{specialtyName(spec)}</option>)}
             </select>
           </div>
+          <div><label className="block text-sm font-semibold text-gray-700 mb-2">لغة السؤال <span className="text-red-500">*</span></label><select value={contentLang} onChange={e=>setContentLang(e.target.value)} className="input-field" required><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select></div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">{t('ask.name')} <span className="text-red-500">*</span></label>
             <div className="relative"><User className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" /><input type="text" value={form.author_name} onChange={(e) => setForm({ ...form, author_name: e.target.value })} placeholder={t('ask.name_placeholder')} className="input-field pr-12" required /></div>
