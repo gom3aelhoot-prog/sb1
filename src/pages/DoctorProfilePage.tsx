@@ -1,5 +1,5 @@
 import { useEffect,useMemo,useState } from 'react';
-import { ArrowRight,Star,MapPin,Clock,Users,Heart,MessageCircle,Send,Video,BookOpen,Mic,Image as ImageIcon,Upload,Settings2,Repeat2,Bookmark,Search,Globe2,Lock,UserPlus } from 'lucide-react';
+import { ArrowRight,Star,MapPin,Clock,Users,Heart,MessageCircle,Send,Video,BookOpen,Mic,Image as ImageIcon,Upload,Settings2,Repeat2,Bookmark,Search,Globe2,Lock,UserPlus,Plus } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase,type Doctor } from '@/lib/supabase';
@@ -16,7 +16,7 @@ export default function DoctorProfilePage({id}:{id:string}){
  const [comment,setComment]=useState<Record<string,string>>({});const [showComposer,setShowComposer]=useState(false);const [mediaUrl,setMediaUrl]=useState('');
 
  useEffect(()=>{(async()=>{try{const {data}=await supabase.from('doctors').select('*, specialty(*)').eq('id',id).maybeSingle();if(data)setDoctor(data);else{const m=id.match(/^catalog-doctor-([^\\-]+)-(.+)-(\\d+)$/);if(m){const d=virtualDoctorsForSpecialty(m[2],m[1],8).find(x=>x.id===id);if(d)setDoctor(d)}}}catch{}setLoading(false)})()},[id]);
- useEffect(()=>{if(!doctor)return;const seed:P[]=Array.from({length:6},(_,i)=>({id:'profile-seed-'+id+'-'+i,doctor_id:id,body:tr(lang,`منشور تثقيفي تجريبي من ${doctor.name} حول ${doctor.specialty?.name||'التخصص'}.`,`Учебная публикация ${doctor.name} по специальности.`,`Educational post from ${doctor.name} about the specialty.`),kind:i===1||i===4?'reel':i===2?'article':'post',media:i===1||i===4?'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4':undefined,likes:20+i*7,comments:i===0?[{name:'مستخدم SB1',body:'محتوى مفيد، شكراً.'}]:[],privacy:i===4?'followers':'public',created:Date.now()-i*86400000}));try{const all=JSON.parse(localStorage.getItem('sb1_profile_posts')||'{}');setPosts(all[id]||seed)}catch{setPosts(seed)}},[doctor,id,lang]);
+ useEffect(()=>{if(!doctor)return;try{const all=JSON.parse(localStorage.getItem('sb1_profile_posts')||'{}');setPosts(Array.isArray(all[id])?all[id]:[])}catch{setPosts([])}},[doctor,id,lang]);
  const save=(next:P[])=>{setPosts(next);try{const all=JSON.parse(localStorage.getItem('sb1_profile_posts')||'{}');all[id]=next;localStorage.setItem('sb1_profile_posts',JSON.stringify(all))}catch{}};
  const reels=useMemo(()=>posts.filter(p=>p.kind==='reel'),[posts]);const filtered=useMemo(()=>posts.filter(p=>!search||p.body.toLowerCase().includes(search.toLowerCase())),[posts,search]);
  const publish=()=>{if(!composer.trim()&&!mediaUrl)return;const p:P={id:'profile-local-'+Date.now(),doctor_id:id,body:composer.trim(),kind,media:mediaUrl||undefined,likes:0,comments:[],privacy,created:Date.now()};save([p,...posts]);setComposer('');setMediaUrl('');setShowComposer(false)}; const onMedia=(file:File)=>{if(file.size>4*1024*1024)return;const r=new FileReader();r.onload=()=>setMediaUrl(String(r.result));r.readAsDataURL(file)};
