@@ -32,6 +32,7 @@ export default function AdminPage() {
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(false);
+  const [platformFee, setPlatformFee] = useState<number>(() => Number(localStorage.getItem('sb1_platform_fee_percent') || 30));
 
   // Add modal
   const [showAdd, setShowAdd] = useState<AdminSection | null>(null);
@@ -175,6 +176,7 @@ export default function AdminPage() {
   };
 
   const handleSaveSettings = async () => {
+    localStorage.setItem('sb1_platform_fee_percent', String(Math.max(0, Math.min(100, platformFee)));
     if (!settings) return;
     await supabase.from('site_settings').update({
       site_name: settings.site_name,
@@ -490,6 +492,11 @@ export default function AdminPage() {
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">اسم الموقع</label>
                       <input type="text" value={settings.site_name} onChange={(e) => setSettings({ ...settings, site_name: e.target.value })} className="input-field" />
+                    </div>
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                      <label className="block text-sm font-bold text-amber-900 mb-2">نسبة المنصة من الخدمات والإعلانات (%)</label>
+                      <input type="number" min="0" max="100" value={platformFee} onChange={(e) => setPlatformFee(Number(e.target.value))} className="input-field bg-white" />
+                      <p className="mt-2 text-xs text-amber-800">القيمة الافتراضية 30%. هذا الإعداد محفوظ في لوحة الإدارة المحلية، أما الدفع الحقيقي فيستخدم SB1_PLATFORM_FEE_PERCENT في بيئة Vercel.</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
