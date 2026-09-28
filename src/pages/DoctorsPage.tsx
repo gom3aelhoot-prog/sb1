@@ -8,7 +8,7 @@ import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 import { demoDoctors } from '@/lib/demoData';
 import { specialtyCatalog,virtualDoctorsForSpecialty,languageCountry } from '@/lib/catalog';
 export default function DoctorsPage(){
- const {path}=useRouter();const {navigate}=useRouter();const {t,lang,dir}=useI18n();const q=parseQuery(path);const [specialty,setSpecialty]=useState(q.specialty||'');const [search,setSearch]=useState(q.q||'');const [city,setCity]=useState('');const [dbDoctors,setDbDoctors]=useState<Doctor[]>([]);
+ const {path}=useRouter();const {navigate}=useRouter();const {t,lang,dir}=useI18n(); const {country}=useApp(); const cities=citiesForCountry(country.code);const q=parseQuery(path);const [specialty,setSpecialty]=useState(q.specialty||'');const [search,setSearch]=useState(q.q||'');const [city,setCity]=useState('');const [dbDoctors,setDbDoctors]=useState<Doctor[]>([]);
  const specs=useMemo(()=>specialtyCatalog(lang),[lang]);const profile=languageCountry(lang);
  useEffect(()=>{setSpecialty(q.specialty||'');setSearch(q.q||'')},[q.specialty,q.q]);
  useEffect(()=>{(async()=>{const {data}=await supabase.from('doctors').select('*, specialty(*)').eq('is_virtual',false);setDbDoctors((data||[]) as Doctor[])})().catch(()=>setDbDoctors([]))},[]);
@@ -22,7 +22,7 @@ export default function DoctorsPage(){
   <div className="rounded-2xl bg-white border p-5 mb-6 grid gap-3 md:grid-cols-3">
    <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="ابحث باسم الأخصائي" className="rounded-xl border px-4 py-3"/>
    <select value={specialty} onChange={e=>{setSpecialty(e.target.value);navigate('/doctors?specialty='+e.target.value)}} className="rounded-xl border px-4 py-3"><option value="">اختر التخصص</option>{specs.map(s=><option key={s.slug} value={s.slug}>{s.name}</option>)}</select>
-   <input value={city} onChange={e=>setCity(e.target.value)} placeholder={profile.city} className="rounded-xl border px-4 py-3"/>
+   <select value={city} onChange={e=>setCity(e.target.value)} className="rounded-xl border px-4 py-3"><option value="">اختر المدينة</option>{cities.map(x=><option key={x} value={x}>{x}</option>)}</select>
   </div>
   {specialty&&<div className="mb-5 rounded-2xl bg-teal-50 border border-teal-100 p-4 text-sm text-teal-800">يوجد 5 إلى 25 ملفاً افتراضياً لكل تخصص في كل لغة. الملفات الافتراضية تعليمية وليست أشخاصاً حقيقيين.</div>}
   {!specialty?<div className="rounded-2xl bg-white border p-8 text-center"><Search className="mx-auto h-10 w-10 text-gray-300"/><p className="mt-3 text-gray-500">اختر التخصص لعرض الأخصائيين والأطباء.</p></div>:<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">{doctors.map(d=><DoctorCard key={d.id} doctor={d}/>)}</div>}
