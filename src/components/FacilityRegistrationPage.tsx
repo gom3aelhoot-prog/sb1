@@ -18,6 +18,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useApp } from '@/i18n/AppContext';
+import { citiesForCountry } from '@/lib/cities';
 
 type Step = 1 | 2 | 3;
 
@@ -27,7 +28,8 @@ interface UploadedFile {
 }
 
 export function FacilityRegistrationPage({ onNavigate }: { onNavigate: (view: string) => void }) {
-  const { t, direction } = useApp();
+  const { t, direction, country } = useApp();
+  const cities = citiesForCountry(country.code);
   const ArrowNext = direction === 'rtl' ? ArrowLeft : ArrowRight;
   const ArrowBack = direction === 'rtl' ? ArrowRight : ArrowLeft;
 
@@ -205,18 +207,20 @@ export function FacilityRegistrationPage({ onNavigate }: { onNavigate: (view: st
                       />
                     </div>
                   </div>
-                  <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">هذه البيانات مالية خاصة. لا يراها العامة.</div>
+                                    <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold text-neutral-700 mb-1.5">{t.facilityRegistration.city}</label>
                       <div className="relative">
                         <MapPin className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-                        <input
-                          type="text"
+                        <select
                           value={city}
                           onChange={(e) => setCity(e.target.value)}
-                          placeholder={t.facilityRegistration.cityPlaceholder}
-                          className="w-full rounded-xl border border-neutral-200 bg-neutral-50 py-3 ps-10 pe-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-primary-400 focus:bg-white focus:ring-2 focus:ring-primary-100 focus:outline-none transition-all"
-                        />
+                          className="w-full rounded-xl border border-neutral-200 bg-neutral-50 py-3 ps-10 pe-3 text-sm text-neutral-900 focus:border-primary-400 focus:bg-white focus:ring-2 focus:ring-primary-100 focus:outline-none transition-all"
+                        >
+                          <option value="">{t.facilityRegistration.cityPlaceholder}</option>
+                          {cities.map((item) => <option key={item} value={item}>{item}</option>)}
+                        </select>
                       </div>
                     </div>
                     <div>
