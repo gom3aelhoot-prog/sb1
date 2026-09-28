@@ -28,6 +28,11 @@ const demoTables: Record<string, DemoRow[]> = {
   specialist_documents: [], specialist_posts: [], specialist_diary: [], post_comments: [], user_follows: [],
   medical_tests: [], test_results: [], ai_report_analysis: [], favorites: [], advertisements: [], jobs: [], job_applications: [], referral_rewards: [],
   country_pricing: [], institutions: [], delivery_workers: [], admin_chat_messages: [],
+  vip_links: [], gift_packages: [
+    {id:'gift-basic',name:'باقة هدية الاستشارة',description:'هدية تمنح صاحبها استشارتين مجانيتين وخصم 10% على الخدمات التالية.',free_services:2,discount_percent:10,account_type:'client',duration_days:30,is_active:true},
+    {id:'gift-plus',name:'باقة هدية Plus',description:'هدية تمنح 5 خدمات مجانية وخصم 20%.',free_services:5,discount_percent:20,account_type:'client',duration_days:60,is_active:true},
+    {id:'gift-pro',name:'باقة هدية Pro',description:'هدية مرنة يمكن للمالك تحديد نوع الحساب والخدمات والخصم.',free_services:10,discount_percent:30,account_type:'client',duration_days:90,is_active:true},
+  ], gift_claims: [],
   signup_promotions: [{ id:'promo-demo', code:'SB1-FIRST-SIGNUP', discount_percent:10, is_active:true }],
 };
 
