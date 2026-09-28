@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import {Wallet,Plus,Gift,ArrowDownLeft,ArrowUpRight,ShieldCheck,ShoppingCart,Heart,RefreshCw} from 'lucide-react';
+import {Wallet,Plus,Gift,ArrowDownLeft,ArrowUpRight,ShieldCheck,ShoppingCart,Heart,RefreshCw,LockKeyhole} from 'lucide-react';
 import {useI18n} from '@/lib/i18n';
 import {useApp} from '@/i18n/AppContext';
 import {useRouter,parseQuery} from '@/lib/router';
@@ -14,6 +14,7 @@ export default function WalletPage(){
  const buyCredits=()=>{addCredits(100);setCredits(creditsBalance());};
  const load=async()=>{setWallet(await ensureWallet());const {data}=await supabase.from('sb1_wallet_transactions').select('*').eq('account_key',key).order('created_at',{ascending:false}).limit(30);setTx(data||[])};
  useEffect(()=>{load()},[]);
+ if(authorized===false)return <div dir={dir} className="min-h-screen bg-gray-50 pt-24 pb-16"><div className="mx-auto max-w-xl px-4"><div className="rounded-3xl border bg-white p-8 text-center shadow-sm"><LockKeyhole className="mx-auto h-12 w-12 text-teal-600"/><h1 className="mt-4 text-2xl font-extrabold">هذه الصفحة خاصة</h1><p className="mt-2 text-gray-500">المحفظة والحسابات المالية لا تظهر للزوار. لا يراها إلا صاحب الحساب والمشرفون والإدارة.</p><a href="/login" className="mt-6 inline-block rounded-xl bg-teal-600 px-5 py-3 font-bold text-white">تسجيل الدخول</a></div></div></div>;
  useEffect(()=>{if(q.topup==='success'&&q.session_id){setBusy(true);fetch('/api/wallet-confirm',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({session_id:q.session_id})}).then(r=>r.json()).then(x=>{if(x.ok)setMessage(lang==='ar'?'تم شحن المحفظة بنجاح.':'Wallet topped up successfully.');else setMessage(x.error||'Payment could not be verified.');return load()}).finally(()=>setBusy(false))}},[q.topup,q.session_id]);
  const topup=async()=>{const n=Number(amount);if(!n||n<=0)return;setBusy(true);try{const r=await fetch('/api/wallet-checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({amount:n,currency:(wallet?.currency_code||'USD').toLowerCase(),account_key:key})});const x=await r.json();if(!r.ok)throw new Error(x.error);location.href=x.url}catch(e){setMessage(e instanceof Error?e.message:'تعذر بدء الدفع')}finally{setBusy(false)}};
  return <div dir={dir} className="min-h-screen bg-gray-50 pt-24 pb-16"><div className="mx-auto max-w-6xl px-4">
