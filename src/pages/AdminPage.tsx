@@ -181,7 +181,7 @@ export default function AdminPage() {
 
   const handleSaveContact = () => { saveContactSettings(contact); alert('تم حفظ بيانات التواصل والروابط. ستظهر مباشرة في الموقع.'); };
   const handleSaveSettings = async () => {
-    localStorage.setItem('sb1_platform_fee_percent', String(Math.max(0, Math.min(100, platformFee)));
+    localStorage.setItem('sb1_platform_fee_percent', String(Math.max(0, Math.min(100, platformFee))));
     if (!settings) return;
     await supabase.from('site_settings').update({
       site_name: settings.site_name,
