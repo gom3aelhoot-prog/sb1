@@ -21,25 +21,15 @@ export default function DoctorCard({ doctor }: { doctor: Doctor }) {
   const bio = localizedField(doctor as unknown as Record<string, unknown>, 'bio', lang, doctor.bio);
   const city = localizedField(doctor as unknown as Record<string, unknown>, 'city', lang, doctor.city);
 
-  const expLabels: Record<string,string> = {
-    ar: 'سنة', ru: 'лет', de: 'Jahre', en: 'yrs'
-  }[lang] || 'yrs';
+  const expLabels: Record<string,string> = { ar: 'سنة', ru: 'лет', de: 'Jahre', en: 'yrs' };
   const expLabel = expLabels[lang] || 'yrs';
-  const consultLabels: Record<string,string> = {
-    ar: 'استشارة', ru: 'консультаций', de: 'Beratungen', en: 'consults'
-  }[lang] || 'consults';
+  const consultLabels: Record<string,string> = { ar: 'استشارة', ru: 'консультаций', de: 'Beratungen', en: 'consults' };
   const consultLabel = consultLabels[lang] || 'consults';
-  const virtualLabels: Record<string,string> = {
-    ar: 'افتراضي', ru: 'Виртуальный', de: 'Virtuell', en: 'Virtual'
-  }[lang] || 'Virtual';
+  const virtualLabels: Record<string,string> = { ar: 'افتراضي', ru: 'Виртуальный', de: 'Virtuell', en: 'Virtual' };
   const virtualLabel = virtualLabels[lang] || 'Virtual';
-  const fullProfileLabels: Record<string,string> = {
-    ar: 'عرض الصفحة الكاملة', ru: 'Открыть профиль', de: 'Profil öffnen', en: 'View full profile'
-  }[lang] || 'View full profile';
+  const fullProfileLabels: Record<string,string> = { ar: 'عرض الصفحة الكاملة', ru: 'Открыть профиль', de: 'Profil öffnen', en: 'View full profile' };
   const fullProfileLabel = fullProfileLabels[lang] || 'View full profile';
-  const sessionLabels: Record<string,string> = {
-    ar: 'طلب جلسة', ru: 'Сессия', de: 'Sitzung', en: 'Session'
-  }[lang] || 'Session';
+  const sessionLabels: Record<string,string> = { ar: 'طلب جلسة', ru: 'Сессия', de: 'Sitzung', en: 'Session' };
   const sessionLabel = sessionLabels[lang] || 'Session';
 
   const handleConsult = (e: React.MouseEvent) => {
