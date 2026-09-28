@@ -17,8 +17,8 @@ const labels:any={
  am:{clinic:'ክሊኒኮች እና ሆስፒታሎች',lab:'ላቦራቶሪዎች',radiology:'ራዲዮሎጂ',elderly:'የአረጋውያን እንክብካቤ',pharmacy:'ፋርማሲዎች',addiction:'የሱስ ሕክምና',rehab:'ማገገሚያ እና ፊዚዮቴራፒ','medical-supplies':'የሕክምና መሳሪያዎች'},
  ka:{clinic:'კლინიკები და საავადმყოფოები',lab:'ლაბორატორიები',radiology:'რადიოლოგია',elderly:'ხანდაზმულთა მოვლა',pharmacy:'აფთიაქები',addiction:'დამოკიდებულების მკურნალობა',rehab:'რეაბილიტაცია და ფიზიოთერაპია','medical-supplies':'სამედიცინო მოწყობილობები'}
 };
-export default function FacilitiesPage(){
- const {lang,dir}=useI18n();const {navigate}=useRouter();const p=languageCountry(lang);const [type,setType]=useState('clinic');const [country,setCountry]=useState(p.country);const countryOptions=[p.country,'السعودية','الإمارات','مصر','الأردن','Deutschland','Россия','Հայաստան','საქართველო','O‘zbekiston','United Kingdom'];
+export default function FacilitiesPage({initialType='clinic'}:{initialType?:string}){
+ const {lang,dir}=useI18n();const {navigate}=useRouter();const p=languageCountry(lang);const [type,setType]=useState(initialType);const [country,setCountry]=useState(p.country);const countryOptions=[p.country,'السعودية','الإمارات','مصر','الأردن','Deutschland','Россия','Հայաստան','საქართველო','O‘zbekiston','United Kingdom'];
  const list=useMemo(()=>virtualFacilities(lang,country).filter(f=>f.facility_type===type),[lang,country,type]);
  return <div className="min-h-screen bg-gray-50 pt-24 pb-16" dir={dir}><div className="mx-auto max-w-7xl px-4">
   <div className="rounded-3xl bg-gradient-to-br from-teal-700 to-cyan-600 p-8 text-white"><h1 className="text-3xl font-extrabold">المرافق الطبية</h1><p className="mt-2 text-teal-50">المؤسسات تظهر حسب اللغة والبلد المختارين.</p></div>
