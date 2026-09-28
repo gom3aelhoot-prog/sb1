@@ -6,6 +6,7 @@ import { supabase, type Course, type Specialty } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
 import { demoCourses, demoSpecialties } from '@/lib/demoData';
 import { virtualCoursesForSpecialty } from '@/lib/catalog';
+import { DemoTransparencyNotice } from '@/components/DemoTransparencyNotice';
 
 export default function CoursesPage() {
   const { navigate } = useRouter();
@@ -18,6 +19,7 @@ export default function CoursesPage() {
   const [enrollForm, setEnrollForm] = useState({ name: '', email: '' });
   const [enrolling, setEnrolling] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
+  const [showDemoNotice, setShowDemoNotice] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -136,7 +138,7 @@ export default function CoursesPage() {
                     </div>
                     <div className="flex items-center justify-between border-t border-gray-100 pt-4">
                       <span className="text-2xl font-bold text-teal-600">${course.price}</span>
-                      <button onClick={() => { setEnrollCourse(course); setEnrolled(false); }} className="btn-primary flex items-center gap-2 text-sm">
+                      <button onClick={() => { setEnrollCourse(course); setEnrolled(false); setShowDemoNotice(true); }} className="btn-primary flex items-center gap-2 text-sm">
                         <Check className="h-4 w-4" />
                         {t('courses.enroll')}
                       </button>
@@ -148,6 +150,8 @@ export default function CoursesPage() {
           </div>
         )}
       </div>
+
+      {showDemoNotice && <DemoTransparencyNotice mode="purchase" onClose={()=>setShowDemoNotice(false)} onContinue={()=>{setShowDemoNotice(false);}}/>}
 
       {enrollCourse && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setEnrollCourse(null)}>
