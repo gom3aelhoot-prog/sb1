@@ -4,6 +4,7 @@ import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import type { Doctor } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
+import { DemoAccountMark } from '@/components/DemoTransparencyNotice';
 
 export default function DoctorCard({ doctor }: { doctor: Doctor }) {
   const { navigate } = useRouter();
@@ -87,7 +88,7 @@ export default function DoctorCard({ doctor }: { doctor: Doctor }) {
           <Star className="h-3 w-3 fill-white text-white" />
           <span className="text-xs font-bold text-white">{Number(doctor.rating).toFixed(1)}</span>
         </div>
-        {doctor.is_virtual && <div className="absolute -end-1 -top-1 rounded-full bg-purple-500 p-1 shadow-sm"><Bot className="h-3.5 w-3.5 text-white" /></div>}
+        {doctor.is_virtual && <DemoAccountMark className="absolute -end-1 -top-1" />}
       </div>
 
       <h3 className="flex items-center gap-1.5 text-lg font-bold text-gray-800 transition-colors group-hover:text-teal-600">
