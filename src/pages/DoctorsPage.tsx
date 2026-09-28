@@ -7,6 +7,8 @@ import DoctorCard from '@/components/DoctorCard';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 import { demoDoctors } from '@/lib/demoData';
 import { specialtyCatalog,virtualDoctorsForSpecialty,languageCountry } from '@/lib/catalog';
+import { useApp } from '@/i18n/AppContext';
+import { citiesForCountry } from '@/lib/cities';
 export default function DoctorsPage(){
  const {path}=useRouter();const {navigate}=useRouter();const {t,lang,dir}=useI18n(); const {country}=useApp(); const cities=citiesForCountry(country.code);const q=parseQuery(path);const [specialty,setSpecialty]=useState(q.specialty||'');const [search,setSearch]=useState(q.q||'');const [city,setCity]=useState('');const [dbDoctors,setDbDoctors]=useState<Doctor[]>([]);
  const specs=useMemo(()=>specialtyCatalog(lang),[lang]);const profile=languageCountry(lang);
