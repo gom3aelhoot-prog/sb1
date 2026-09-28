@@ -10,9 +10,9 @@ jobs:
       - name: Create source manifest
         run: printf "SB1 source archive\nCommit: %s\nCreated: %s\n" "$GITHUB_SHA" "$(date -u)" > SB1-SOURCE-MANIFEST.txt
       - name: Create source ZIP
-        run: zip -r "SB1-latest-${GITHUB_SHA::7}.zip" . -x ".git/*" "node_modules/*" "dist/*"
+        run: zip -r "/tmp/SB1-latest-${GITHUB_SHA::7}.zip" . -x ".git/*" "node_modules/*" "dist/*" "SB1-latest-*.zip"
       - uses: actions/upload-artifact@v4
         with:
           name: SB1-latest-source
-          path: SB1-latest-*.zip
+          path: /tmp/SB1-latest-*.zip
           retention-days: 30
