@@ -132,14 +132,16 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     );
   }
 
-  const tabs: { key: Tab; label: string; icon: typeof FileText }[] = [
+  const publicTabs: { key: Tab; label: string; icon: typeof FileText }[] = [
     { key: 'videos', label: lang==='ar'?'فيديوهاتي وريلز وقصصي':lang==='ru'?'Мои видео, Reels и истории':'My Videos, Reels & Stories', icon: Video },
     { key: 'articles', label: lang==='ar'?'مقالاتي':lang==='ru'?'Мои статьи':'My Articles', icon: BookOpen },
     { key: 'courses', label: lang==='ar'?'الدورات والكورسات':lang==='ru'?'Курсы':'Courses', icon: GraduationCap },
     { key: 'questions', label: lang==='ar'?'الاستشارات والأسئلة السابقة':lang==='ru'?'Консультации и вопросы':'Consultations & Questions', icon: MessageCircle },
-    { key: 'portfolio', label: lang==='ar'?'المحفظة والحسابات':lang==='ru'?'Портфолио и счета':'Portfolio & Accounts', icon: BriefcaseIcon },
-    { key: 'control', label: lang==='ar'?'الإشعارات والتحكم':lang==='ru'?'Уведомления и управление':'Notifications & Control', icon: SettingsIcon },
   ];
+  const tabs = canViewPrivateFinance ? [...publicTabs,
+    { key: 'portfolio' as Tab, label: lang==='ar'?'المحفظة والحسابات':lang==='ru'?'Портфолио и счета':'Portfolio & Accounts', icon: BriefcaseIcon },
+    { key: 'control' as Tab, label: lang==='ar'?'الإشعارات والتحكم':lang==='ru'?'Уведомления и управление':'Notifications & Control', icon: SettingsIcon },
+  ] : publicTabs;
 
   return (
     <div className="min-h-screen pt-20 pb-16">
