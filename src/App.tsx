@@ -124,9 +124,9 @@ function PlatformRoute() {
   if (route === '/chat') return <ChatRoomsPage />;
   if (route === '/library') return <LibraryPage />;
   if (route === '/planner') return <PlannerPage />;
-  if (route === '/clinics') return <ClinicsPage />;
-  if (route === '/radiology') return <RadiologyPage />;
-  if (route === '/labs') return <LabsPage />;
+  if (route === '/clinics') return <FacilitiesPage initialType="clinic" />;
+  if (route === '/radiology') return <FacilitiesPage initialType="radiology" />;
+  if (route === '/labs') return <FacilitiesPage initialType="lab" />;
   if (route === '/policy') return <PolicyPage />;
   if (route === '/tests') return <TestsPage />;
   if (route === '/facilities') return <LocalFacilitiesPage onNavigate={navigate} />;
