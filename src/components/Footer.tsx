@@ -1,8 +1,12 @@
 import { HeartPulse, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Send } from 'lucide-react';
 import { useApp } from '@/i18n/AppContext';
+import { useEffect, useState } from 'react';
+import { readContactSettings, type ContactSettings } from '@/lib/contactSettings';
 
 export function Footer() {
   const { t } = useApp();
+  const [contact, setContact] = useState<ContactSettings>(readContactSettings());
+  useEffect(() => { const sync=()=>setContact(readContactSettings()); window.addEventListener('sb1-contact-settings',sync); return()=>window.removeEventListener('sb1-contact-settings',sync); }, []);
 
   const patientLinks = [
     { label: t.footer.findDoctor, href: '/doctors' },
@@ -19,11 +23,11 @@ export function Footer() {
   ];
 
   const socialLinks = [
-    { icon: Facebook, href: '#' },
-    { icon: Twitter, href: '#' },
-    { icon: Instagram, href: '#' },
-    { icon: Linkedin, href: '#' },
-  ];
+    { icon: Facebook, href: contact.facebook, label: 'Facebook' },
+    { icon: Twitter, href: contact.twitter, label: 'X / Twitter' },
+    { icon: Instagram, href: contact.instagram, label: 'Instagram' },
+    { icon: Linkedin, href: contact.linkedin, label: 'LinkedIn' },
+  ].filter(x => x.href);
 
   return (
     <footer id="contact" className="bg-neutral-900 text-neutral-300">
@@ -105,15 +109,15 @@ export function Footer() {
             <ul className="mt-4 space-y-3">
               <li className="flex items-center gap-3 text-sm text-neutral-400">
                 <Mail className="h-4 w-4 text-primary-400 flex-shrink-0" />
-                support@sb1.com
+                {contact.email || '—'}
               </li>
               <li className="flex items-center gap-3 text-sm text-neutral-400">
                 <Phone className="h-4 w-4 text-primary-400 flex-shrink-0" />
-                —
+                {contact.phone || '—'}
               </li>
               <li className="flex items-start gap-3 text-sm text-neutral-400">
                 <MapPin className="h-4 w-4 text-primary-400 flex-shrink-0 mt-0.5" />
-                <span>SB1</span>
+                <span>{contact.address || 'SB1'}</span>
               </li>
             </ul>
 
@@ -125,6 +129,9 @@ export function Footer() {
                   <a
                     key={i}
                     href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={social.label}
                     
                     className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-800 text-neutral-400 transition-all hover:bg-primary-600 hover:text-white"
                     aria-label={t.footer.followUs}
