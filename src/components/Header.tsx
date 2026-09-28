@@ -67,6 +67,7 @@ export function Header() {
     { label: labels[2], href: '/store' },
     { label: labels[3], href: '/referral' },
     { label: lang==='ar'?'المجتمع الاجتماعي':lang==='ru'?'Соцсеть':'Social', href: '/social' },
+    { label: 'الألعاب والتطبيقات', href: '/apps' },
     { label: 'باقات الهدايا', href: '/gifts' },
   ];
   const navItems = [
