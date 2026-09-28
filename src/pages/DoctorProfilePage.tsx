@@ -6,6 +6,7 @@ import { supabase,type Doctor } from '@/lib/supabase';
 import { virtualDoctorsForSpecialty } from '@/lib/catalog';
 import { demoDoctors } from '@/lib/demoData';
 import { DemoAccountMark } from '@/components/DemoTransparencyNotice';
+import VideoSourceCatalog from '@/components/VideoSourceCatalog';
 
 type P={id:string;body:string;kind:'post'|'reel'|'article'|'video'|'audio'|'book';media?:string;contentLang?:string;likes:number;comments:{name:string;body:string;demo?:boolean}[];privacy:'public'|'followers'|'selected';created:number;doctor_id:string};
 const tr=(lang:string,a:string,r:string,e:string)=>lang==='ar'?a:lang==='ru'?r:e;
