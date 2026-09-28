@@ -25,11 +25,25 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [imgError, setImgError] = useState(false);
   const [isFollowing, setIsFollowing] = useState(()=>isFollowingVault(id));
+  const [canViewPrivateFinance, setCanViewPrivateFinance] = useState(false);
   const profileAvatar = doctor?.photo_url || ('https://api.dicebear.com/9.x/personas/svg?seed=' + encodeURIComponent(id));
   const [wallet,setWallet] = useState(()=>{try{return JSON.parse(localStorage.getItem('sb1_specialist_wallet')||'{"balance":1250,"points":340,"due":180}')}catch{return {balance:1250,points:340,due:180}}});
 
   useEffect(() => {
     (async () => {
+      try {
+        const { data: auth } = await supabase.auth.getUser();
+        const user = auth?.user as any;
+        const role = user?.user_metadata?.role || localStorage.getItem('sb1_account_role') || '';
+        const accountDoctorId = localStorage.getItem('sb1_account_doctor_id') || user?.user_metadata?.doctor_id || '';
+        let admin = false;
+        if (user?.email) {
+          const { data: adminRow } = await supabase.from('admin_users').select('role,is_active').eq('email', user.email).maybeSingle();
+          admin = Boolean(adminRow?.is_active && ['owner','moderator','admin','supervisor'].includes(String(adminRow.role).toLowerCase()));
+        }
+        const isOwner = Boolean(user?.id && accountDoctorId && accountDoctorId === id);
+        setCanViewPrivateFinance(Boolean(admin || isOwner || ['owner','moderator','admin','supervisor'].includes(String(role).toLowerCase())));
+      } catch { setCanViewPrivateFinance(false); }
       const { data: doc } = await supabase.from('doctors').select('*, specialty(*)').eq('id', id).maybeSingle();
       let resolved = doc as Doctor | null;
       if (!resolved && id.startsWith('catalog-doctor-')) {
@@ -190,13 +204,14 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           </div>
         </div>
 
-        <div className="sticky top-16 z-20 mb-4 rounded-2xl border bg-slate-900 text-white shadow-lg">
+        {canViewPrivateFinance && <div className="sticky top-16 z-20 mb-4 rounded-2xl border bg-slate-900 text-white shadow-lg">
           <div className="grid grid-cols-3 divide-x divide-white/10">
             <div className="p-3 text-center"><Wallet className="mx-auto h-5 w-5"/><span className="mt-1 block text-[11px] text-white/60">رصيد الأموال</span><b>{wallet.balance} USD</b></div>
             <div className="p-3 text-center"><Coins className="mx-auto h-5 w-5"/><span className="mt-1 block text-[11px] text-white/60">محفظة النقاط</span><b>{wallet.points}</b></div>
             <div className="p-3 text-center"><BadgeCheck className="mx-auto h-5 w-5"/><span className="mt-1 block text-[11px] text-white/60">المستحقات</span><b>{wallet.due} USD</b></div>
           </div>
-        </div>
+          <div className="border-t border-white/10 px-4 py-2 text-center text-[11px] text-white/65">هذه البيانات مالية خاصة. لا يراها إلا صاحب الحساب والمشرفون والإدارة.</div>
+        </div>}
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 border-b border-gray-100 overflow-x-auto">
@@ -306,11 +321,11 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           <div className="space-y-4">{questions.map(q=><QuestionCard key={q.id} question={q}/>)}<a href={'/questions?specialty='+(doctor.specialty?.slug||'')} className="inline-block rounded-xl bg-teal-700 px-4 py-2 text-white font-bold">كل الأسئلة والإجابات</a></div>
         )}
 
-        {activeTab === 'portfolio' && (
+        {canViewPrivateFinance && activeTab === 'portfolio' && (
           <div className="grid gap-4 md:grid-cols-3"><div className="card p-5"><Wallet className="text-teal-600"/><b className="block mt-3">الرصيد</b><strong>{wallet.balance} USD</strong></div><div className="card p-5"><Coins className="text-indigo-600"/><b className="block mt-3">النقاط</b><strong>{wallet.points}</strong></div><div className="card p-5"><BadgeCheck className="text-amber-500"/><b className="block mt-3">المستحقات</b><strong>{wallet.due} USD</strong></div><div className="card p-5 md:col-span-3"><b>أدوات الأخصائي</b><div className="mt-3 flex flex-wrap gap-2"><button onClick={()=>navigate('/specialist/packages')} className="rounded-xl bg-teal-50 px-4 py-2 text-teal-700">باقات المتابعة</button><button onClick={()=>navigate('/specialist/studio')} className="rounded-xl bg-indigo-50 px-4 py-2 text-indigo-700">استوديو الأخصائي</button><button onClick={()=>navigate('/wallet')} className="rounded-xl bg-slate-100 px-4 py-2">المحفظة</button></div></div></div>
         )}
 
-        {activeTab === 'control' && (
+        {canViewPrivateFinance && activeTab === 'control' && (
           <div className="grid gap-4 md:grid-cols-2"><a href="/notifications/private" className="card p-5"><Bell className="text-teal-600"/><b className="block mt-2">الإشعارات الخاصة</b></a><a href="/settings" className="card p-5"><SettingsIcon className="text-indigo-600"/><b className="block mt-2">إعدادات الحساب والتحكم</b></a><a href="/specialist/content" className="card p-5"><PenLine className="text-amber-600"/><b className="block mt-2">نشر وإدارة المحتوى</b></a><a href="/specialist/studio" className="card p-5"><ShieldCheck className="text-emerald-600"/><b className="block mt-2">الإيموجي والبادجات</b></a></div>
         )}
 
