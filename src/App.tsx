@@ -110,7 +110,7 @@ function PlatformRoute() {
   if (route === '/videos') return <VideosPage />;
   if (route === '/audio') return <AudioPage />;
   if (route === '/courses') return <CoursesPage />;
-  if (route.startsWith('/courses/')) return <CourseDetailPage id={route.split('/')[2]} />;
+  if (route.startsWith('/courses/')) return <CourseDetailPage />;
   if (route === '/sessions') return <SessionsPage />;
   if (route === '/register') return <RegisterPage />;
   if (route === '/verification') return <DoctorVerificationPage onNavigate={(view) => { window.location.hash = view.startsWith('#') ? view : `#${view}`; }} />;
