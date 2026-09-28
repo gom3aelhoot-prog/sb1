@@ -51,7 +51,7 @@ export function virtualDoctorsForSpecialty(slug:string, lang:string, count=8): D
   const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
   const p=languageCountry(lang); const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!;
   return Array.from({length:Math.max(5,Math.min(25,count))},(_,i)=>({
-    id:`catalog-doctor-${lang}-${slug}-${i+1}`, name:p.names[i%p.names.length], specialty_id:sp.id,
+    id:`catalog-doctor-${lang}-${slug}-${i+1}`, name:(i<p.names.length?p.names[i]:p.names[i%p.names.length]+' — SB1 '+(i+1)), specialty_id:sp.id,
     bio: lang==='ar' ? `أخصائي افتراضي تعليمي في ${s.ar}. هذا الملف تجريبي وغير مرتبط بشخص حقيقي.` : `Virtual educational specialist profile for ${s.en}. This demo profile is not a real person.`,
     education:'SB1 Virtual Specialist Program', experience_years:5+(i%18), photo_url:'',
     city:p.city, rating:4.5+(i%5)/10, consultation_count:120+i*31, native_language:lang,
