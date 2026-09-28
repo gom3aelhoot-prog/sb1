@@ -17,21 +17,6 @@ export const LANGUAGE_PROFILES: Record<string,{country:string;city:string;native
 
 export const languageCountry = (lang:string) => LANGUAGE_PROFILES[lang] || LANGUAGE_PROFILES.ar;
 
-const LANGUAGE_COPY:any={
- ar:{article:['مقال تثقيفي','دليل عملي','ما الذي يجب معرفته'],body:'محتوى طبي تثقيفي مُنشأ بالذكاء الاصطناعي للمراجعة التحريرية، يشرح المفاهيم والأعراض وعوامل الخطورة والفحوصات والمتابعة ومتى يجب طلب المساعدة. لا يُعد تشخيصاً أو وصفة علاجية فردية.',video:'شرح طبي مبسط',audio:'تسجيل صوتي طبي',book:'كتاب طبي تعليمي',course:'دورة تدريبية عملية',question:'سؤال تثقيفي',answer:'إجابة تثقيفية من أخصائي افتراضي: تعتمد الخطوة المناسبة على التاريخ المرضي والفحص والتفاصيل. عند وجود أعراض شديدة أو مستمرة يجب طلب تقييم طبي مباشر.'},
- en:{article:['Medical Education','Practical Guide','What You Should Know'],body:'An AI-generated medical education draft for editorial review covering concepts, symptoms, risk factors, common evaluations, follow-up and when to seek professional care. It is not an individual diagnosis or prescription.',video:'Simple Medical Lesson',audio:'Medical Audio Guide',book:'Medical Education Book',course:'Practical Training Course',question:'Educational Question',answer:'Educational answer from a virtual specialist: the appropriate next step depends on history, examination and case details. Persistent or severe symptoms require professional assessment.'},
- de:{article:['Medizinischer Leitfaden','Praxisleitfaden','Wichtige Informationen'],body:'Ein von KI erstellter medizinischer Bildungsentwurf zur redaktionellen Prüfung. Er behandelt Grundlagen, Symptome, Risikofaktoren, übliche Untersuchungen, Verlaufskontrolle und den Zeitpunkt einer fachärztlichen Abklärung. Keine individuelle Diagnose oder Therapie.',video:'Einfache medizinische Erklärung',audio:'Medizinischer Audioguide',book:'Medizinisches Lehrbuch',course:'Praktischer Fortbildungskurs',question:'Bildungsfrage',answer:'Bildungsantwort eines virtuellen Spezialisten: Der nächste Schritt hängt von Anamnese, Untersuchung und Falldetails ab. Anhaltende oder schwere Beschwerden sollten professionell abgeklärt werden.'},
- ru:{article:['Медицинская статья','Практическое руководство','Что важно знать'],body:'Материал, созданный ИИ для редакторской проверки. Он рассматривает общие сведения, симптомы, факторы риска, обследования, наблюдение и ситуации, когда нужна очная медицинская помощь. Это не индивидуальный диагноз и не назначение лечения.',video:'Простое медицинское объяснение',audio:'Медицинская аудиозапись',book:'Медицинская учебная книга',course:'Практический учебный курс',question:'Образовательный вопрос',answer:'Образовательный ответ виртуального специалиста: следующий шаг зависит от анамнеза, осмотра и деталей случая. При выраженных или длительных симптомах нужна профессиональная оценка.'},
- uk:{article:['Медична стаття','Практичний посібник','Що важливо знати'],body:'Матеріал, створений ШІ для редакторської перевірки. Він охоплює загальні відомості, симптоми, фактори ризику, обстеження, спостереження та випадки, коли потрібна очна медична допомога. Це не індивідуальний діагноз чи призначення.',video:'Просте медичне пояснення',audio:'Медичний аудіозапис',book:'Медична навчальна книга',course:'Практичний навчальний курс',question:'Освітнє питання',answer:'Освітня відповідь віртуального спеціаліста: наступний крок залежить від анамнезу, огляду та деталей випадку. При виражених або тривалих симптомах потрібна професійна оцінка.'},
- uz:{article:['Tibbiy maqola','Amaliy qo‘llanma','Bilish kerak bo‘lganlar'],body:'Tahririy ko‘rib chiqish uchun sun’iy intellekt tomonidan yaratilgan tibbiy ma’rifiy material. Unda asosiy tushunchalar, alomatlar, xavf omillari, tekshiruvlar, kuzatuv va qachon mutaxassisga murojaat qilish kerakligi yoritiladi. Bu shaxsiy tashxis yoki davolash tavsiyasi emas.',video:'Oddiy tibbiy tushuntirish',audio:'Tibbiy audio yozuv',book:'Tibbiy o‘quv kitobi',course:'Amaliy o‘quv kursi',question:'Ma’rifiy savol',answer:'Virtual mutaxassisning ma’rifiy javobi: keyingi qadam anamnez, ko‘rik va holat tafsilotlariga bog‘liq. Kuchli yoki uzoq davom etuvchi alomatlarda mutaxassis bahosi kerak.'},
- hy:{article:['Բժշկական հոդված','Գործնական ուղեցույց','Ինչ պետք է իմանալ'],body:'Խմբագրական վերանայման համար արհեստական բանականությամբ ստեղծված կրթական բժշկական նյութ։ Ներկայացվում են ընդհանուր տեղեկություններ, ախտանիշներ, ռիսկի գործոններ, հետազոտություններ և մասնագետին դիմելու պահը։ Սա անհատական ախտորոշում կամ բուժման նշանակում չէ։',video:'Պարզ բժշկական բացատրություն',audio:'Բժշկական աուդիո',book:'Բժշկական ուսումնական գիրք',course:'Գործնական ուսուցման դասընթաց',question:'Կրթական հարց',answer:'Վիրտուալ մասնագետի կրթական պատասխան․ հաջորդ քայլը կախված է անամնեզից, զննումից և դեպքի մանրամասներից։ Երկարատև կամ ծանր ախտանիշների դեպքում անհրաժեշտ է մասնագիտական գնահատում։'},
- tg:{article:['Мақолаи тиббӣ','Роҳнамои амалӣ','Чиро бояд донист'],body:'Маводи тиббии омӯзишӣ, ки бо зеҳни сунъӣ барои баррасии таҳрирӣ сохта шудааст. Он маълумоти умумӣ, нишонаҳо, омилҳои хавф, ташхис ва вақти муроҷиат ба мутахассисро шарҳ медиҳад. Ин ташхис ё тавсияи табобати инфиродӣ нест.',video:'Шарҳи одии тиббӣ',audio:'Сабти аудиоии тиббӣ',book:'Китоби омӯзишии тиббӣ',course:'Курси амалии омӯзишӣ',question:'Саволи омӯзишӣ',answer:'Ҷавоби омӯзишии мутахассиси виртуалӣ: қадами навбатӣ аз таърихи беморӣ, муоина ва ҷузъиёти ҳолат вобаста аст. Ҳангоми нишонаҳои сахт ё давомдор арзёбии мутахассис зарур аст.'},
- az:{article:['Tibbi məqalə','Praktik bələdçi','Nə bilmək lazımdır'],body:'Redaksiya yoxlaması üçün süni intellekt tərəfindən yaradılmış tibbi maarifləndirici material. Ümumi məlumatları, simptomları, risk amillərini, müayinələri və nə vaxt mütəxəssisə müraciət etməli olduğunu izah edir. Bu fərdi diaqnoz və müalicə təyinatı deyil.',video:'Sadə tibbi izah',audio:'Tibbi audio yazı',book:'Tibbi tədris kitabı',course:'Praktik təlim kursu',question:'Maarifləndirici sual',answer:'Virtual mütəxəssisin maarifləndirici cavabı: növbəti addım anamnez, müayinə və vəziyyətin təfərrüatlarından asılıdır. Şiddətli və ya uzunmüddətli simptomlarda mütəxəssis qiymətləndirməsi lazımdır.'},
- am:{article:['የሕክምና ጽሑፍ','ተግባራዊ መመሪያ','ማወቅ ያለብዎት'],body:'ለአርትዖት ግምገማ በሰው ሰራሽ እውቀት የተፈጠረ የጤና ትምህርታዊ ይዘት። አጠቃላይ መረጃ፣ ምልክቶች፣ የአደጋ ምክንያቶች፣ ምርመራዎች እና መቼ ለባለሙያ መጠየቅ እንዳለብዎ ያብራራል። ይህ የግል ምርመራ ወይም ሕክምና ማዘዣ አይደለም።',video:'ቀላል የሕክምና ማብራሪያ',audio:'የሕክምና ድምጽ',book:'የሕክምና ትምህርት መጽሐፍ',course:'ተግባራዊ የስልጠና ኮርስ',question:'የትምህርት ጥያቄ',answer:'የቨርቹዋል ባለሙያ የትምህርት መልስ፦ ቀጣዩ እርምጃ በህክምና ታሪክ፣ ምርመራ እና በጉዳዩ ዝርዝሮች ይወሰናል። ከባድ ወይም የሚቆዩ ምልክቶች ካሉ የባለሙያ ግምገማ ያስፈልጋል።'},
- ka:{article:['სამედიცინო სტატია','პრაქტიკული გზამკვლევი','რა უნდა იცოდეთ'],body:'რედაქციული განხილვისთვის ხელოვნური ინტელექტით შექმნილი სამედიცინო საგანმანათლებლო მასალა. მოიცავს ზოგად ინფორმაციას, სიმპტომებს, რისკის ფაქტორებს, გამოკვლევებს და სპეციალისტთან მიმართვის დროს. ეს არ არის ინდივიდუალური დიაგნოზი ან მკურნალობის დანიშნულება.',video:'მარტივი სამედიცინო ახსნა',audio:'სამედიცინო აუდიო ჩანაწერი',book:'სამედიცინო სასწავლო წიგნი',course:'პრაქტიკული სასწავლო კურსი',question:'საგანმანათლებლო კითხვა',answer:'ვირტუალური სპეციალისტის საგანმანათლებლო პასუხი: შემდეგი ნაბიჯი დამოკიდებულია ანამნეზზე, გამოკვლევაზე და შემთხვევის დეტალებზე. მძიმე ან ხანგრძლივი სიმპტომებისას საჭიროა სპეციალისტის შეფასება.'}
-};
-const lc=(lang:string)=>(LANGUAGE_COPY[lang]||LANGUAGE_COPY.en);
-
 export function localizedSpecialty(s:any, lang:string) {
   if (lang==='ar') return s.ar;
   if (lang==='en') return s.en;
@@ -51,7 +36,7 @@ export function virtualDoctorsForSpecialty(slug:string, lang:string, count=8): D
   const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
   const p=languageCountry(lang); const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!;
   return Array.from({length:Math.max(5,Math.min(25,count))},(_,i)=>({
-    id:`catalog-doctor-${lang}-${slug}-${i+1}`, name:(i<p.names.length?p.names[i]:p.names[i%p.names.length]+' — SB1 '+(i+1)), specialty_id:sp.id,
+    id:`catalog-doctor-${lang}-${slug}-${i+1}`, name:p.names[i%p.names.length], specialty_id:sp.id,
     bio: lang==='ar' ? `أخصائي افتراضي تعليمي في ${s.ar}. هذا الملف تجريبي وغير مرتبط بشخص حقيقي.` : `Virtual educational specialist profile for ${s.en}. This demo profile is not a real person.`,
     education:'SB1 Virtual Specialist Program', experience_years:5+(i%18), photo_url:'',
     city:p.city, rating:4.5+(i%5)/10, consultation_count:120+i*31, native_language:lang,
@@ -73,9 +58,9 @@ export function virtualQuestionsForSpecialty(slug:string,lang:string,count=50): 
   const templates=qTemplates[lang]||qTemplates.en;
   return Array.from({length:count},(_,i)=>({
     id:`catalog-q-${lang}-${slug}-${i+1}`, specialty_id:sp.id, author_name:lang==='ar'?'مستخدم SB1': 'SB1 User',
-    title:`${lc(lang).question}: ${localizedSpecialty(s,lang)} #${i+1}`,
-    body:`${lc(lang).body} ${localizedSpecialty(s,lang)}.`,
-    age:18+(i%55),gender:i%2?'أنثى':'ذكر',status:'answered',views:80+i*7,created_at:new Date(2026,0,1+(i%28)).toISOString(),specialty:sp,answers:Array.from({length:8},(_,j)=>({id:`catalog-answer-preview-${slug}-${lang}-${i+1}-${j+1}`})) as any
+    title:`${templates[i%templates.length]} — ${localizedSpecialty(s,lang)} #${i+1}`,
+    body:lang==='ar'? `سؤال تجريبي تعليمي عن ${s.ar}. نرجو قراءة الإجابات العامة وعدم اعتبارها تشخيصاً فردياً.` : `Educational demo question about ${s.en}. The answers are general information, not an individual diagnosis.`,
+    age:18+(i%55),gender:i%2?'أنثى':'ذكر',status:'answered',views:80+i*7,created_at:new Date(2026,0,1+(i%28)).toISOString(),specialty:sp
   }));
 }
 
@@ -83,7 +68,7 @@ export function virtualAnswersForQuestion(question:Question,lang:string,count=8)
   const names=LANGUAGE_PROFILES[lang]?.names||LANGUAGE_PROFILES.en.names;
   return Array.from({length:Math.max(5,Math.min(20,count))},(_,i)=>({
     id:`${question.id}-answer-${i+1}`, question_id:question.id, doctor_id:`${question.id}-doctor-${i+1}`,
-    body:lc(lang).answer,
+    body:lang==='ar'? `إجابة تجريبية من أخصائي افتراضي: تعتمد الخطوة المناسبة على تفاصيل الحالة والتاريخ المرضي والفحص. عند وجود أعراض شديدة أو مستمرة يجب طلب تقييم طبي مباشر.` : `Demo specialist answer: the appropriate next step depends on the history, examination and details of the case. Persistent or severe symptoms should be assessed by a qualified professional.`,
     helpful_count:20+i*3,created_at:new Date().toISOString(),doctor:virtualDoctorsForSpecialty(question.specialty?.slug||'',lang,8)[i%8]
   }));
 }
@@ -93,9 +78,9 @@ export function virtualArticlesForSpecialty(slug:string,lang:string,count=3): Ar
   const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const doc=virtualDoctorsForSpecialty(slug,lang,5)[0];
   return Array.from({length:count},(_,i)=>({
     id:`catalog-art-${lang}-${slug}-${i+1}`,specialty_id:sp.id,doctor_id:doc.id,
-    title:`${lc(lang).article[i%lc(lang).article.length]}: ${localizedSpecialty(s,lang)} — ${i+1}`,
-    excerpt:lc(lang).body,
-    body:`${lc(lang).body} ${localizedSpecialty(s,lang)}. ${lc(lang).body}`,
+    title:lang==='ar'?`دليل تثقيفي: ${s.ar} — الجزء ${i+1}`:`Educational guide: ${s.en} — Part ${i+1}`,
+    excerpt:lang==='ar'?`مقال تثقيفي مُنشأ بالذكاء الاصطناعي للمراجعة التحريرية حول ${s.ar}.`:`AI-generated educational draft for editorial review about ${s.en}.`,
+    body:lang==='ar'? `هذا محتوى تثقيفي تجريبي مُنشأ بالذكاء الاصطناعي لأغراض العرض، يشرح المفاهيم العامة وعوامل الخطورة والمتابعة ومتى يجب مراجعة الأخصائي. لا يُستخدم للتشخيص أو العلاج الفردي.\\n\\n${s.ar} موضوع واسع ويجب تخصيص النصيحة حسب الحالة.`:`This is an AI-generated educational draft for demonstration and editorial review about ${s.en}. It covers general concepts, risk factors, monitoring and when to seek professional care. It is not individual diagnosis or treatment.\\n\\nContent should be reviewed before publication.`,
     image_url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80',reading_time_min:5+i,views:1000+i*300,created_at:new Date().toISOString(),specialty:sp,doctor:doc
   })) as Article[];
 }
@@ -105,8 +90,8 @@ export function virtualVideosForSpecialty(slug:string,lang:string,count=2): Doct
   const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const doc=virtualDoctorsForSpecialty(slug,lang,5)[0];
   return Array.from({length:count},(_,i)=>({
     id:`catalog-vid-${lang}-${slug}-${i+1}`,doctor_id:doc.id,specialty_id:sp.id,
-    title:`${lc(lang).video}: ${localizedSpecialty(s,lang)} — ${i+1}`,
-    description:lc(lang).body,
+    title:lang==='ar'?`شرح مبسط في ${s.ar} — ${i+1}`:`Simple lesson in ${s.en} — ${i+1}`,
+    description:lang==='ar'?'فيديو تجريبي مبسط باللغة المختارة.':'Simple demo video in the selected language.',
     video_url:'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
     thumbnail_url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80',duration_seconds:180,views:500+i*100,created_at:new Date().toISOString(),doctor:doc,specialty:sp
   }));
@@ -117,8 +102,8 @@ export function virtualAudioForSpecialty(slug:string,lang:string,count=2): Docto
   const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const doc=virtualDoctorsForSpecialty(slug,lang,5)[0];
   return Array.from({length:count},(_,i)=>({
     id:`catalog-audio-${lang}-${slug}-${i+1}`,doctor_id:doc.id,specialty_id:sp.id,
-    title:`${lc(lang).audio}: ${localizedSpecialty(s,lang)} — ${i+1}`,
-    description:lc(lang).body,
+    title:lang==='ar'?`تسجيل صوتي: ${s.ar} — ${i+1}`:`Audio guide: ${s.en} — ${i+1}`,
+    description:lang==='ar'?'تسجيل صوتي تجريبي للتثقيف الصحي.':'Demo educational audio in the selected language.',
     audio_url:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',duration_seconds:300,listens:200,created_at:new Date().toISOString(),doctor:doc,specialty:sp
   }));
 }
@@ -127,40 +112,24 @@ export function virtualLibraryForSpecialty(slug:string,lang:string,count=2): Spe
   const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
   const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!;
   return Array.from({length:count},(_,i)=>({
-    id:`catalog-book-${lang}-${slug}-${i+1}`,specialty_id:sp.id,item_type:'book',title:`${lc(lang).book}: ${localizedSpecialty(s,lang)} — ${i+1}`,
-    description:lc(lang).body,url:null,image_url:null,source:'SB1 AI Editorial Library',is_auto_generated:true,created_at:new Date().toISOString(),specialty:sp
+    id:`catalog-book-${lang}-${slug}-${i+1}`,specialty_id:sp.id,item_type:'book',title:lang==='ar'?`كتاب ${s.ar} — المجلد ${i+1}`:`${s.en} Handbook — Volume ${i+1}`,
+    description:lang==='ar'?'كتاب تجريبي تعليمي من مكتبة SB1.':'Demo educational book in the SB1 library.',url:null,image_url:null,source:'SB1 AI Editorial Library',is_auto_generated:true,created_at:new Date().toISOString(),specialty:sp
   })) as SpecialtyLibraryItem[];
 }
 
-const FACILITY_LABELS:any={
- ar:{clinic:'العيادات والمستشفيات',lab:'المختبرات',radiology:'مراكز الأشعة',elderly:'دور رعاية المسنين',pharmacy:'الصيدليات',addiction:'مراكز علاج الإدمان',rehab:'مراكز التأهيل والعلاج الطبيعي','medical-supplies':'الأدوات الطبية'},
- en:{clinic:'Clinics & Hospitals',lab:'Laboratories',radiology:'Radiology Centers',elderly:'Elderly Care Homes',pharmacy:'Pharmacies',addiction:'Addiction Treatment Centers',rehab:'Rehabilitation & Physiotherapy','medical-supplies':'Medical Supplies'},
- de:{clinic:'Kliniken und Krankenhäuser',lab:'Labore',radiology:'Radiologiezentren',elderly:'Seniorenpflege',pharmacy:'Apotheken',addiction:'Suchtbehandlungszentren',rehab:'Rehabilitation und Physiotherapie','medical-supplies':'Medizinische Hilfsmittel'},
- ru:{clinic:'Клиники и больницы',lab:'Лаборатории',radiology:'Радиологические центры',elderly:'Дома престарелых',pharmacy:'Аптеки',addiction:'Центры лечения зависимостей',rehab:'Реабилитация и физиотерапия','medical-supplies':'Медицинские товары'},
- uk:{clinic:'Клініки та лікарні',lab:'Лабораторії',radiology:'Радіологічні центри',elderly:'Будинки догляду',pharmacy:'Аптеки',addiction:'Центри лікування залежностей',rehab:'Реабілітація та фізіотерапія','medical-supplies':'Медичні товари'},
- uz:{clinic:'Klinikalar va shifoxonalar',lab:'Laboratoriyalar',radiology:'Radiologiya markazlari',elderly:'Keksalar parvarishi',pharmacy:'Dorixonalar',addiction:'Giyohvandlikni davolash markazlari',rehab:'Reabilitatsiya va fizioterapiya','medical-supplies':'Tibbiy buyumlar'},
- hy:{clinic:'Կլինիկաներ և հիվանդանոցներ',lab:'Լաբորատորիաներ',radiology:'Ռադիոլոգիայի կենտրոններ',elderly:'Տարեցների խնամք',pharmacy:'Դեղատներ',addiction:'Կախվածության բուժման կենտրոններ',rehab:'Վերականգնում և ֆիզիոթերապիա','medical-supplies':'Բժշկական պարագաներ'},
- tg:{clinic:'Клиникаҳо ва беморхонаҳо',lab:'Лабораторияҳо',radiology:'Марказҳои радиология',elderly:'Нигоҳубини пиронсолон',pharmacy:'Дорухонаҳо',addiction:'Марказҳои табобати вобастагӣ',rehab:'Барқарорсозӣ ва физиотерапия','medical-supplies':'Таҷҳизоти тиббӣ'},
- az:{clinic:'Klinikalar və xəstəxanalar',lab:'Laboratoriyalar',radiology:'Radiologiya mərkəzləri',elderly:'Yaşlılara qulluq',pharmacy:'Apteklər',addiction:'Asılılığın müalicəsi mərkəzləri',rehab:'Reabilitasiya və fizioterapiya','medical-supplies':'Tibbi ləvazimatlar'},
- am:{clinic:'ክሊኒኮች እና ሆስፒታሎች',lab:'ላቦራቶሪዎች',radiology:'የራዲዮሎጂ ማዕከላት',elderly:'የአረጋውያን እንክብካቤ',pharmacy:'ፋርማሲዎች',addiction:'የሱስ ሕክምና ማዕከላት',rehab:'ማገገሚያ እና ፊዚዮቴራፒ','medical-supplies':'የሕክምና መሳሪያዎች'},
- ka:{clinic:'კლინიკები და საავადმყოფოები',lab:'ლაბორატორიები',radiology:'რადიოლოგიის ცენტრები',elderly:'ხანდაზმულთა მოვლა',pharmacy:'აფთიაქები',addiction:'დამოკიდებულების მკურნალობის ცენტრები',rehab:'რეაბილიტაცია და ფიზიოთერაპია','medical-supplies':'სამედიცინო მოწყობილობები'}
-};
 export function virtualFacilities(lang:string, country?:string): AdditionalFacility[] {
- const p=languageCountry(lang); const wanted=country||p.country; const labels=FACILITY_LABELS[lang]||FACILITY_LABELS.en;
- return Object.keys(labels).flatMap((kind)=>Array.from({length:5},(_,i)=>({
-   id:`catalog-fac-${lang}-${kind}-${i+1}-${encodeURIComponent(wanted)}`,facility_type:kind,
-   name:`${labels[kind]} ${wanted} ${i+1}`,
-   description:lc(lang).body+` ${wanted}.`,
-   address:`${p.city} - ${wanted} - SB1 Health District ${i+1}`,phone:null,email:null,logo_url:null,
-   services:lang==='ar'?'حجز ومواعيد وخدمات وأسعار تجريبية':lang==='ru'?'Запись, услуги, цены и расписание':'Appointments, services, prices and schedules',
-   schedule:{sun:'09:00-18:00',mon:'09:00-18:00',tue:'09:00-18:00',wed:'09:00-18:00',thu:'09:00-18:00'},
-   rating:4.5+(i%4)/10,is_active:true,created_at:new Date().toISOString(),city:p.city,country:wanted,language:lang
- })) as AdditionalFacility[]);
+  const p=languageCountry(lang); const wanted=country||p.country;
+  const kinds=[['clinic','عيادة / Clinic'],['lab','مختبر / Lab'],['radiology','مركز أشعة / Radiology'],['elderly','دار رعاية مسنين / Elderly Care'],['pharmacy','صيدلية / Pharmacy'],['addiction','مركز علاج الإدمان / Addiction Care'],['rehab','مركز تأهيل وعلاج طبيعي / Rehabilitation'],['medical-supplies','متجر أدوات طبية / Medical Supplies']];
+  return kinds.map(([kind,label],i)=>({
+    id:`catalog-fac-${lang}-${kind}`,facility_type:kind,name:lang==='ar'?`${label.split(' / ')[0]} ${wanted}`:`${label.split(' / ')[1]} ${wanted}`,
+    description:lang==='ar'?`بيانات تجريبية للمرفق باللغة العربية في ${wanted}.`:`Demo facility data in ${p.native} for ${wanted}.`,
+    address:p.city+' - SB1 Health District',phone:null,email:null,logo_url:null,services:'Appointments, services, prices and schedules',schedule:{sun:'09:00-18:00',mon:'09:00-18:00',tue:'09:00-18:00',wed:'09:00-18:00',thu:'09:00-18:00'},rating:4.6,is_active:true,created_at:new Date().toISOString(),city:p.city,country:wanted,language:lang
+  })) as any;
 }
 
 
 export function virtualCoursesForSpecialty(slug:string,lang:string,count=4) {
  const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
  const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const doc=virtualDoctorsForSpecialty(slug,lang,5)[0];
- return Array.from({length:count},(_,i)=>({id:`catalog-course-${lang}-${slug}-${i+1}`,specialty_id:sp.id,doctor_id:doc.id,title:`${lc(lang).course}: ${localizedSpecialty(s,lang)} — ${i+1}`,description:`${lc(lang).body} ${localizedSpecialty(s,lang)}.`,image_url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80',price:19+i*10,duration_weeks:4+i,lessons_count:8+i*2,level:i===0?'beginner':i===1?'intermediate':'advanced',enrolled_count:100+i*50,rating:4.7,is_published:true,created_at:new Date().toISOString(),doctor:doc,specialty:sp}));
+ return Array.from({length:count},(_,i)=>({id:`catalog-course-${lang}-${slug}-${i+1}`,specialty_id:sp.id,doctor_id:doc.id,title:lang==='ar'?`دورة ${s.ar} العملية — المستوى ${i+1}`:`${s.en} Practical Course — Level ${i+1}`,description:lang==='ar'?`دورة تدريبية تجريبية مُنشأة بالذكاء الاصطناعي مع مراجعة تعليمية، تتضمن دروساً واختبارات وتطبيقات عملية.`:`AI-generated educational course draft for ${s.en}, with lessons, quizzes and practical exercises for editorial review.`,image_url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80',price:19+i*10,duration_weeks:4+i,lessons_count:8+i*2,level:i===0?'beginner':i===1?'intermediate':'advanced',enrolled_count:100+i*50,rating:4.7,is_published:true,created_at:new Date().toISOString(),doctor:doc,specialty:sp}));
 }
