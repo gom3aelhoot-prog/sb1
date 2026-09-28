@@ -37,9 +37,8 @@ export default function CoursesPage() {
         if (spec) dbQuery = dbQuery.eq('specialty_id', spec.id);
       }
       const { data } = await dbQuery.order('created_at', { ascending: false });
-      const generated = selectedSpecialty ? virtualCoursesForSpecialty(selectedSpecialty, lang, 6) : demoSpecialties.slice(0,12).flatMap(s => virtualCoursesForSpecialty(s.slug, lang, 3));
-      const merged = [...(data || []), ...generated];
-      setCourses((merged.length ? merged : demoCourses) as Course[]);
+      const generated = selectedSpecialty ? virtualCoursesForSpecialty(selectedSpecialty, lang, 4) : demoSpecialties.slice(0,12).flatMap(s => virtualCoursesForSpecialty(s.slug, lang, 2));
+      setCourses((data && data.length ? data : (generated.length ? generated : demoCourses)) as Course[]);
       setLoading(false);
     })().catch(() => { setCourses(demoCourses); setLoading(false); });
   }, [selectedSpecialty, lang]);
@@ -139,7 +138,7 @@ export default function CoursesPage() {
                     </div>
                     <div className="flex items-center justify-between border-t border-gray-100 pt-4">
                       <span className="text-2xl font-bold text-teal-600">${course.price}</span>
-                      <button onClick={() => navigate('/courses/'+course.id)} className="btn-primary flex items-center gap-2 text-sm">
+                      <button onClick={() => { setEnrollCourse(course); setEnrolled(false); setShowDemoNotice(true); }} className="btn-primary flex items-center gap-2 text-sm">
                         <Check className="h-4 w-4" />
                         {t('courses.enroll')}
                       </button>
