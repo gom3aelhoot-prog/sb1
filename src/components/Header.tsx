@@ -64,6 +64,7 @@ export function Header() {
     { label: 'الاختبارات الطبية والنفسية', href: '/tests' },
     { label: labels[2], href: '/store' },
     { label: labels[3], href: '/referral' },
+    { label: lang==='ar'?'المجتمع الاجتماعي':lang==='ru'?'Соцсеть':'Social', href: '/social' },
     { label: 'باقات الهدايا', href: '/gifts' },
   ];
   const navItems = [
