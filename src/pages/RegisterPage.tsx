@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Stethoscope, Upload, Check, FileText, Shield, UserCircle, ArrowRight, Building2 } from 'lucide-react';
+import { User, Stethoscope, Upload, Check, FileText, Shield, UserCircle, ArrowRight, Building2, Truck } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useRouter } from '@/lib/router';
 import { supabase, type Specialty } from '@/lib/supabase';
@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 export default function RegisterPage() {
   const { t, specialtyName } = useI18n();
   const { navigate } = useRouter();
-  const [accountType, setAccountType] = useState<'client' | 'specialist' | 'institution' | 'other_services' | null>(null);
+  const [accountType, setAccountType] = useState<'client' | 'specialist' | 'institution' | 'other_services' | 'delivery_worker' | null>(null);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', phone: '', specialty: '', otherServiceType: 'clinic-rent', listingMode: 'rent', listingPrice: '', listingDuration: '30 يوم', listingDetails: '',
@@ -28,6 +28,7 @@ export default function RegisterPage() {
     try {
       const authResult = await supabase.auth.signUp({ email: formData.email.trim().toLowerCase(), password: formData.password, options: { data: { name: formData.name, role: accountType } } });
       if (authResult.error) throw authResult.error;
+      localStorage.setItem('sb1_user_role', accountType || 'client');
       if (accountType === 'client') {
         const { error } = await supabase.from('profiles').insert({
           id: authResult.data.user?.id,
@@ -132,6 +133,7 @@ export default function RegisterPage() {
               <h3 className="text-lg font-bold text-gray-800 mb-1">تسجيل مؤسسة</h3>
               <p className="text-sm text-gray-500">عيادة، مختبر، أشعة، مستشفى، صيدلية أو مركز تأهيل</p>
             </button>
+            <button onClick={() => setAccountType('delivery_worker')} className="card p-8 text-center hover:shadow-lg transition-all group md:col-span-2"><div className="w-16 h-16 rounded-2xl bg-purple-100 flex items-center justify-center mx-auto mb-4"><Truck className="w-8 h-8 text-purple-600" /></div><h3 className="text-lg font-bold text-gray-800 mb-1">عامل توصيل</h3><p className="text-sm text-gray-500">الوصول إلى متجر العملاء وخدمات الخصم المخصصة لعمال التوصيل.</p></button>
             <button
               onClick={() => setAccountType('other_services')}
               className="card p-8 text-center hover:shadow-lg transition-all group md:col-span-2"
