@@ -70,15 +70,18 @@ export default function CoursesPage() {
     advanced: t('courses.advanced'),
   };
 
-  const successTitle: Record<string,string> = {
+  const successTitles: Record<string,string> = {
     ar: 'تم التسجيل بنجاح!', ru: 'Регистрация прошла успешно!', de: 'Anmeldung erfolgreich!', en: 'Enrollment successful!'
   }[lang] || 'Enrollment successful!';
-  const successBody: Record<string,string> = {
+  const successTitle = successTitles[lang] || 'Enrollment successful!';
+  const successBodies: Record<string,string> = {
     ar: 'ستصلك تفاصيل الدورة على بريدك الإلكتروني', ru: 'Детали курса будут отправлены на вашу электронную почту', de: 'Die Kursdetails werden an Ihre E-Mail-Adresse gesendet', en: 'Course details will be sent to your email'
   }[lang] || 'Course details will be sent to your email';
-  const payLabel: Record<string,string> = {
+  const successBody = successBodies[lang] || 'Course details will be sent to your email';
+  const payLabels: Record<string,string> = {
     ar: 'ادفع وسجل الآن', ru: 'Оплатить и записаться', de: 'Bezahlen und anmelden', en: 'Pay & enroll now'
   }[lang] || 'Pay & enroll now';
+  const payLabel = payLabels[lang] || 'Pay & enroll now';
 
   return (
     <div className="min-h-screen pt-24 pb-16" dir={dir}>
