@@ -1,4 +1,4 @@
-import {useState} from 'react';import {Plus,ShieldCheck,Video,Lock} from 'lucide-react';import {useI18n} from '@/lib/i18n';import {comprehensiveSpecialties} from '@/lib/comprehensiveSpecialties';import {embed,providers} from '@/components/VideoSourceCatalog';
+import {useState} from 'react';import {Plus,ShieldCheck,Video,Lock} from 'lucide-react';import {useI18n} from '@/lib/i18n';import {comprehensiveSpecialties} from '@/lib/comprehensiveSpecialties';import {providers} from '@/components/VideoSourceCatalog';
 type V={id:string;title:string;language:string;specialty:string;provider:string;url:string;license:string;rightsVerified:boolean;published:boolean};
 const K='sb1_video_sources_admin';
 const langs=['ar','en','de','ru','uz','hy','tg','uk','az','am','ka'];
