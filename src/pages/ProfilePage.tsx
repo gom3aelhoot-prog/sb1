@@ -1,5 +1,5 @@
 import { useMemo,useState } from 'react';
-import { BookOpen,Camera,Heart,MessageCircle,Users,Image as ImageIcon,Plus,Trash2,Share2,Link2,Play,Mic,FolderPlus,Globe2,Facebook,Instagram,Youtube,Linkedin,Music2,Smartphone,QrCode } from 'lucide-react';
+import { BookOpen,Camera,Heart,MessageCircle,Users,Image as ImageIcon,Plus,Trash2,Share2,Link2,Play,Mic,FolderPlus,Globe2,Facebook,Instagram,Youtube,Linkedin,Music2,Smartphone,QrCode,Send,ShieldCheck } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useRouter } from '@/lib/router';
 
@@ -9,12 +9,7 @@ type Favorite={id:string;title:string;url:string;type:'video'|'audio'|'link';alb
 type Album={id:string;name:string;favoriteIds:string[];shared:boolean};
 
 const accounts=[
- {id:'youtube',name:'YouTube',Icon:Youtube},
- {id:'instagram',name:'Instagram',Icon:Instagram},
- {id:'facebook',name:'Facebook',Icon:Facebook},
- {id:'linkedin',name:'LinkedIn',Icon:Linkedin},
- {id:'vk',name:'VK',Icon:Globe2},
- {id:'ok',name:'OK',Icon:Globe2},
+ {id:'youtube',name:'YouTube',Icon:Youtube}, {id:'instagram',name:'Instagram',Icon:Instagram}, {id:'facebook',name:'Facebook',Icon:Facebook}, {id:'linkedin',name:'LinkedIn',Icon:Linkedin}, {id:'whatsapp',name:'WhatsApp',Icon:MessageCircle}, {id:'telegram',name:'Telegram',Icon:Send}, {id:'bip',name:'BiP',Icon:MessageCircle}, {id:'max',name:'MAX',Icon:Smartphone}, {id:'viber',name:'Viber',Icon:MessageCircle}, {id:'signal',name:'Signal',Icon:ShieldCheck}, {id:'vk',name:'VK',Icon:Globe2}, {id:'ok',name:'OK',Icon:Globe2},
 ];
 
 const tr=(lang:string,ar:string,en:string,ru:string)=>lang==='ar'?ar:lang==='ru'?ru:en;
