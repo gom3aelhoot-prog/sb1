@@ -72,6 +72,10 @@ import GiftPackagesPage from '@/pages/GiftPackagesPage';
 import GiftClaimPage from '@/pages/GiftClaimPage';
 import SocialAppsPage from '@/pages/SocialAppsPage';
 import DeviceConnectPage from '@/pages/DeviceConnectPage';
+import ManagedPagesPage from '@/pages/ManagedPagesPage';
+import ManagedAccountPage from '@/pages/ManagedAccountPage';
+import MediaSourceAdminPage from '@/pages/MediaSourceAdminPage';
+import ManagedPagesBar from '@/components/ManagedPagesBar';
 
 type HashView = 'home' | 'specialists' | 'verification' | 'facilities' | 'facility-registration' | 'pharmacy-store' | 'tracking' | 'library' | 'compounder' | 'dictionary' | 'reels';
 
@@ -111,6 +115,9 @@ function PlatformRoute() {
   if (route === '/social') return <SocialNetworkPage />;
   if (route === '/social-apps') return <SocialAppsPage />;
   if (route === '/device') return <DeviceConnectPage />;
+  if (route === '/managed-pages') return <ManagedPagesPage />;
+  if (route.startsWith('/account/')) return <ManagedAccountPage id={route.split('/')[2]} />;
+  if (route === '/media-sources') return <MediaSourceAdminPage />;
   if (route === '/articles') return <ArticlesPage />;
   if (route.startsWith('/articles/')) return <ArticleDetailPage id={route.split('/')[2]} />;
   if (route === '/videos') return <VideosPage />;
@@ -177,6 +184,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
+      {!isHome && <ManagedPagesBar />}
       <main className="flex-1">
         {isHome && !localHashPage && (
           <>
