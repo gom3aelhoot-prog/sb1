@@ -18,7 +18,8 @@ const kinds=[
 
 const feeKey='sb1_platform_fee_percent';
 const listingKey='sb1_service_listings';
-const getListings=():Listing[]=>{try{return JSON.parse(localStorage.getItem(listingKey)||'[]')}catch{return[]}};
+const demoListings:Listing[]=[{id:'demo-sale-1',kind:'medical-place-sale',title:'مركز طبي مجهز للبيع',description:'مركز طبي تجريبي مجهز بغرف كشف واستقبال.',country:'السعودية',city:'الرياض',phone:'+966500000001',price:120000,currency:'USD',duration:'للبيع',owner:'SB1 Demo',createdAt:new Date().toISOString()},{id:'demo-rent-1',kind:'medical-place-rent',title:'عيادة مجهزة للإيجار',description:'عيادة تجريبية جاهزة للتشغيل.',country:'الإمارات',city:'دبي',phone:'+971500000001',price:2500,currency:'USD',duration:'شهري',owner:'SB1 Demo',createdAt:new Date().toISOString()},{id:'demo-ambulance-1',kind:'ambulance',title:'خدمة إسعاف ونقل طبي',description:'خدمة تجريبية للنقل الطبي.',country:'مصر',city:'القاهرة',phone:'+201000000001',price:35,currency:'USD',duration:'لكل طلب',owner:'SB1 Demo',createdAt:new Date().toISOString()},{id:'demo-home-1',kind:'home-care',title:'رعاية منزلية وتمريض',description:'خدمات رعاية منزلية تجريبية.',country:'الأردن',city:'عمّان',phone:'+962700000001',price:20,currency:'USD',duration:'لكل زيارة',owner:'SB1 Demo',createdAt:new Date().toISOString()},{id:'demo-equipment-1',kind:'medical-equipment',title:'معدات وأدوات طبية',description:'إعلان تجريبي لمعدات طبية.',country:'ألمانيا',city:'Berlin',phone:'+491500000001',price:50,currency:'USD',duration:'30 يوم',owner:'SB1 Demo',createdAt:new Date().toISOString()}];
+const getListings=():Listing[]=>{try{const saved=JSON.parse(localStorage.getItem(listingKey)||'null');return Array.isArray(saved)&&saved.length?saved:demoListings}catch{return demoListings}};
 
 export default function OtherServicesPage(){
  const {lang,dir}=useI18n();const {navigate}=useRouter();const ar=lang==='ar';
