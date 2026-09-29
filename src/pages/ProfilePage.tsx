@@ -2,6 +2,7 @@ import { BookOpen, Camera, FileText, GraduationCap, Heart, MessageCircle, UserRo
 import { useI18n } from '@/lib/i18n';
 import { useRouter } from '@/lib/router';
 import { lt } from '@/lib/featureText';
+import PageProfileTools from '@/components/PageProfileTools';
 
 export default function ProfilePage() {
   const { lang } = useI18n();
@@ -35,6 +36,7 @@ export default function ProfilePage() {
 
             <div className="mt-8 border-t pt-6 flex flex-wrap gap-3 text-sm text-gray-500"><span><Heart className="inline w-4 h-4 ml-1 text-rose-500" />{lt(lang,{ar:'34 إعجابًا هذا الشهر',ru:'34 отметки «Нравится» в этом месяце',en:'34 likes this month',de:'34 Likes diesen Monat'})}</span><span><FileText className="inline w-4 h-4 ml-1 text-teal-500" />{lt(lang,{ar:'6 ملفات مشتركة',ru:'6 общих файлов',en:'6 shared files',de:'6 geteilte Dateien'})}</span><span><UserRound className="inline w-4 h-4 ml-1" />{lt(lang,{ar:'حساب موثق',ru:'Подтверждённый профиль',en:'Verified profile',de:'Verifiziertes Profil'})}</span></div>
           </div>
+          <PageProfileTools />
         </div>
       </div>
     </div>
