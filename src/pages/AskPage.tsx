@@ -41,7 +41,7 @@ export default function AskPage() {
   const [questionType, setQuestionType] = useState<'free' | 'paid'>('free');
   const [selectedTierId, setSelectedTierId] = useState('plus');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
-  const [contentLang, setContentLang] = useState(lang);
+  const [contentLang, setContentLang] = useState(lang as any);
   const [form, setForm] = useState({ author_name: '', age: '', gender: 'ذكر', title: '', body: '' });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
