@@ -1,5 +1,6 @@
 import type { Doctor, Specialty, Question, Answer, Article, DoctorVideo, DoctorAudio, SpecialtyLibraryItem, AdditionalFacility } from '@/lib/supabase';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
+import { CITIES_BY_COUNTRY, citiesForCountry } from '@/lib/cities';
 
 export const LANGUAGE_PROFILES: Record<string,{country:string;city:string;native:string;names:string[]}> = {
   ar:{country:'الدول العربية',city:'دمشق',native:'العربية',names:['د. جمال نادي','د. أحمد خالد','د. سامر محمود','د. ياسر حسن','د. كريم علي','د. عمر يوسف','د. رامي أسعد','د. مازن خليل']},
@@ -16,6 +17,12 @@ export const LANGUAGE_PROFILES: Record<string,{country:string;city:string;native
 };
 
 export const languageCountry = (lang:string) => LANGUAGE_PROFILES[lang] || LANGUAGE_PROFILES.ar;
+
+const COUNTRY_NAMES:any={ar:{SA:'السعودية',AE:'الإمارات',EG:'مصر',IQ:'العراق',JO:'الأردن',KW:'الكويت',LB:'لبنان',LY:'ليبيا',MA:'المغرب',OM:'عُمان',PS:'فلسطين',QA:'قطر',SY:'سوريا',TN:'تونس',YE:'اليمن',DZ:'الجزائر',BH:'البحرين',MR:'موريتانيا',SD:'السودان',SO:'الصومال',DE:'ألمانيا',RU:'روسيا',UZ:'أوزبكستان',AM:'أرمينيا',TG:'طاجيكستان',UA:'أوكرانيا',AZ:'أذربيجان',KA:'جورجيا',ET:'إثيوبيا',GB:'المملكة المتحدة',US:'الولايات المتحدة'},en:{SA:'Saudi Arabia',AE:'United Arab Emirates',EG:'Egypt',IQ:'Iraq',JO:'Jordan',KW:'Kuwait',LB:'Lebanon',LY:'Libya',MA:'Morocco',OM:'Oman',PS:'Palestine',QA:'Qatar',SY:'Syria',TN:'Tunisia',YE:'Yemen',DZ:'Algeria',BH:'Bahrain',MR:'Mauritania',SD:'Sudan',SO:'Somalia',DE:'Germany',RU:'Russia',UZ:'Uzbekistan',AM:'Armenia',TG:'Tajikistan',UA:'Ukraine',AZ:'Azerbaijan',KA:'Georgia',ET:'Ethiopia',GB:'United Kingdom',US:'United States'},de:{DE:'Deutschland',RU:'Russland',UZ:'Usbekistan',AM:'Armenien',TG:'Tadschikistan',UA:'Ukraine',AZ:'Aserbaidschan',KA:'Georgien',GB:'Vereinigtes Königreich',US:'USA',SA:'Saudi-Arabien',EG:'Ägypten',AE:'Vereinigte Arabische Emirate'},ru:{RU:'Россия',UZ:'Узбекистан',AM:'Армения',TG:'Таджикистан',UA:'Украина',AZ:'Азербайджан',KA:'Грузия',DE:'Германия',GB:'Великобритания',US:'США',SA:'Саудовская Аравия',EG:'Египет',AE:'ОАЭ'},uk:{UA:'Україна',RU:'Росія',UZ:'Узбекистан',AM:'Вірменія',TG:'Таджикистан',AZ:'Азербайджан',KA:'Грузія',DE:'Німеччина',GB:'Велика Британія',US:'США'},uz:{UZ:'O‘zbekiston',RU:'Rossiya',AM:'Armaniston',TG:'Tojikiston',UA:'Ukraina',AZ:'Ozarbayjon',KA:'Gruziya',DE:'Germaniya',GB:'Buyuk Britaniya',US:'AQSh'},hy:{AM:'Հայաստան',RU:'Ռուսաստան',UZ:'Ուզբեկստան',TG:'Տաջիկստան',UA:'Ուկրաինա',AZ:'Ադրբեջան',KA:'Վրաստան',DE:'Գերմանիա',GB:'Մեծ Բրիտանիա',US:'ԱՄՆ'},tg:{TG:'Тоҷикистон',RU:'Русия',UZ:'Ӯзбекистон',AM:'Арманистон',UA:'Украина',AZ:'Озарбойҷон',KA:'Гурҷистон',DE:'Олмон',GB:'Британияи Кабир',US:'ИМА'},az:{AZ:'Azərbaycan',RU:'Rusiya',UZ:'Özbəkistan',AM:'Ermənistan',TG:'Tacikistan',UA:'Ukrayna',KA:'Gürcüstan',DE:'Almaniya',GB:'Böyük Britaniya',US:'ABŞ'},am:{ET:'ኢትዮጵያ',AM:'አርሜኒያ',RU:'ሩሲያ',UZ:'ኡዝቤኪስታን',TG:'ታጂኪስታን',UA:'ዩክሬን',AZ:'አዘርባጃን',KA:'ጆርጂያ',DE:'ጀርመን',GB:'ዩናይትድ ኪንግደም',US:'አሜሪካ'},ka:{KA:'საქართველო',RU:'რუსეთი',UZ:'უზბეკეთი',AM:'სომხეთი',TG:'ტაჯიკეთი',UA:'უკრაინა',AZ:'აზერბაიჯანი',DE:'გერმანია',GB:'გაერთიანებული სამეფო',US:'აშშ'}};
+const DEFAULT_COUNTRY_BY_LANG:any={ar:'SA',en:'GB',de:'DE',ru:'RU',uk:'UA',uz:'UZ',hy:'AM',tg:'TG',az:'AZ',am:'ET',ka:'KA'};
+export function countryLabel(lang:string,code:string){return COUNTRY_NAMES[lang]?.[code]||COUNTRY_NAMES.en?.[code]||code;}
+export function resolveCountryCode(value?:string){if(!value)return 'SA';if(CITIES_BY_COUNTRY[value])return value;for(const [lang,names] of Object.entries(COUNTRY_NAMES)){const code=Object.entries(names as Record<string,string>).find(([,name])=>name===value)?.[0];if(code)return code;}return value;}
+
 
 const LANGUAGE_COPY:any={
  ar:{article:['مقال تثقيفي','دليل عملي','ما الذي يجب معرفته'],body:'محتوى طبي تثقيفي مُنشأ بالذكاء الاصطناعي للمراجعة التحريرية، يشرح المفاهيم والأعراض وعوامل الخطورة والفحوصات والمتابعة ومتى يجب طلب المساعدة. لا يُعد تشخيصاً أو وصفة علاجية فردية.',video:'شرح طبي مبسط',audio:'تسجيل صوتي طبي',book:'كتاب طبي تعليمي',course:'دورة تدريبية عملية',question:'سؤال تثقيفي',answer:'إجابة تثقيفية من أخصائي افتراضي: تعتمد الخطوة المناسبة على التاريخ المرضي والفحص والتفاصيل. عند وجود أعراض شديدة أو مستمرة يجب طلب تقييم طبي مباشر.'},
@@ -47,16 +54,15 @@ export function specialtyCatalog(lang:string): Specialty[] {
   }));
 }
 
-export function virtualDoctorsForSpecialty(slug:string, lang:string, count=8): Doctor[] {
+export function virtualDoctorsForSpecialty(slug:string, lang:string, count=8, countryCode?:string): Doctor[] {
   const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
-  const p=languageCountry(lang); const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!;
+  const code=resolveCountryCode(countryCode||DEFAULT_COUNTRY_BY_LANG[lang]); const cities=citiesForCountry(code); const p=languageCountry(lang); const country=countryLabel(lang,code);
+  const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!;
   return Array.from({length:Math.max(5,Math.min(25,count))},(_,i)=>({
-    id:`catalog-doctor-${lang}-${slug}-${i+1}`, name:(i<p.names.length?p.names[i]:p.names[i%p.names.length]+' — SB1 '+(i+1)), specialty_id:sp.id,
+    id:`catalog-doctor-${lang}-${slug}-${code}-${i+1}`, name:(i<p.names.length?p.names[i]:p.names[i%p.names.length]+' — SB1 '+(i+1)), specialty_id:sp.id,
     bio: lang==='ar' ? `أخصائي افتراضي تعليمي في ${s.ar}. هذا الملف تجريبي وغير مرتبط بشخص حقيقي.` : `Virtual educational specialist profile for ${s.en}. This demo profile is not a real person.`,
-    education:'SB1 Virtual Specialist Program', experience_years:5+(i%18), photo_url:'',
-    city:p.city, rating:4.5+(i%5)/10, consultation_count:120+i*31, native_language:lang,
-    is_online:i%3!==0, is_verified:false, is_virtual:true, phone_number:null, follower_count:600+i*47,
-    nationality:p.country, created_at:new Date().toISOString(), specialty:sp
+    education:'SB1 Virtual Specialist Program', experience_years:5+(i%18), photo_url:'', city:cities[i%Math.max(1,cities.length)]||p.city, rating:4.5+(i%5)/10, consultation_count:120+i*31, native_language:lang,
+    is_online:i%3!==0, is_verified:false, is_virtual:true, phone_number:null, follower_count:600+i*47, nationality:country, created_at:new Date().toISOString(), specialty:sp
   })) as Doctor[];
 }
 
@@ -145,16 +151,14 @@ const FACILITY_LABELS:any={
  am:{clinic:'ክሊኒኮች እና ሆስፒታሎች',lab:'ላቦራቶሪዎች',radiology:'የራዲዮሎጂ ማዕከላት',elderly:'የአረጋውያን እንክብካቤ',pharmacy:'ፋርማሲዎች',addiction:'የሱስ ሕክምና ማዕከላት',rehab:'ማገገሚያ እና ፊዚዮቴራፒ','medical-supplies':'የሕክምና መሳሪያዎች'},
  ka:{clinic:'კლინიკები და საავადმყოფოები',lab:'ლაბორატორიები',radiology:'რადიოლოგიის ცენტრები',elderly:'ხანდაზმულთა მოვლა',pharmacy:'აფთიაქები',addiction:'დამოკიდებულების მკურნალობის ცენტრები',rehab:'რეაბილიტაცია და ფიზიოთერაპია','medical-supplies':'სამედიცინო მოწყობილობები'}
 };
-export function virtualFacilities(lang:string, country?:string): AdditionalFacility[] {
- const p=languageCountry(lang); const wanted=country||p.country; const labels=FACILITY_LABELS[lang]||FACILITY_LABELS.en;
+export function virtualFacilities(lang:string, countryCode?:string): AdditionalFacility[] {
+ const code=resolveCountryCode(countryCode||DEFAULT_COUNTRY_BY_LANG[lang]); const p=languageCountry(lang); const country=countryLabel(lang,code); const cities=citiesForCountry(code); const labels=FACILITY_LABELS[lang]||FACILITY_LABELS.en;
  return Object.keys(labels).flatMap((kind)=>Array.from({length:5},(_,i)=>({
-   id:`catalog-fac-${lang}-${kind}-${i+1}-${encodeURIComponent(wanted)}`,facility_type:kind,
-   name:`${labels[kind]} ${wanted} ${i+1}`,
-   description:lc(lang).body+` ${wanted}.`,
-   address:`${p.city} - ${wanted} - SB1 Health District ${i+1}`,phone:null,email:null,logo_url:null,
+   id:`catalog-fac-${lang}-${kind}-${code}-${i+1}`,facility_type:kind,
+   name:`${labels[kind]} ${country} ${i+1}`,description:lc(lang).body+` ${country}.`,
+   address:`${cities[i%Math.max(1,cities.length)]||p.city} - ${country} - SB1 Health District ${i+1}`,phone:null,email:null,logo_url:null,
    services:lang==='ar'?'حجز ومواعيد وخدمات وأسعار تجريبية':lang==='ru'?'Запись, услуги, цены и расписание':'Appointments, services, prices and schedules',
-   schedule:{sun:'09:00-18:00',mon:'09:00-18:00',tue:'09:00-18:00',wed:'09:00-18:00',thu:'09:00-18:00'},
-   rating:4.5+(i%4)/10,is_active:true,created_at:new Date().toISOString(),city:p.city,country:wanted,language:lang
+   schedule:{sun:'09:00-18:00',mon:'09:00-18:00',tue:'09:00-18:00',wed:'09:00-18:00',thu:'09:00-18:00'},rating:4.5+(i%4)/10,is_active:true,created_at:new Date().toISOString(),city:cities[i%Math.max(1,cities.length)]||p.city,country,language:lang
  })) as AdditionalFacility[]);
 }
 
