@@ -25,7 +25,7 @@ with check (auth.uid()=applicant_id);
 
 create policy "face verification owner admin read"
 on public.sb1_face_verification_submissions for select to authenticated
-using (auth.uid()=applicant_id or public.sb1_can_admin('moderator'));
+using (public.sb1_can_admin('moderator'));
 
 create policy "face verification owner admin update"
 on public.sb1_face_verification_submissions for update to authenticated
@@ -48,8 +48,7 @@ on storage.objects for select to authenticated
 using (
   bucket_id='sb1-face-verification'
   and (
-    (storage.foldername(name))[1]=auth.uid()::text
-    or public.sb1_can_admin('moderator')
+    public.sb1_can_admin('moderator')
   )
 );
 
