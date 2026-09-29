@@ -273,6 +273,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               </div>
             ))}
             {posts.length === 0 && <p className="text-center text-gray-400 py-8">{t('common.loading')}</p>}
+            </div>
           </div>
         )}
 
