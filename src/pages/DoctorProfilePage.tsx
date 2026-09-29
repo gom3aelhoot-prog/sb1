@@ -27,7 +27,7 @@ export default function DoctorProfilePage({id}:{id:string}){
  const toggle=(set:string[],key:string,storage:string)=>{const n=set.includes(key)?set.filter(x=>x!==key):[...set,key];if(storage.includes('liked'))setLiked(n);else setSaved(n);localStorage.setItem(storage,n.length?JSON.stringify(n):'[]')};
  const addComment=(p:P)=>{const body=(comment[p.id]||'').trim();if(!body)return;save(posts.map(x=>x.id===p.id?{...x,comments:[...x.comments,{name:localStorage.getItem('chat_name')||'مستخدم SB1',body}]}:x));setComment({...comment,[p.id]:''})};
  const onCover=(file:File)=>{if(file.size>3*1024*1024)return;const r=new FileReader();r.onload=()=>{const v=String(r.result);setCover(v);localStorage.setItem('sb1_cover_'+id,v)};r.readAsDataURL(file)};
- if(loading)return <div className="min-h-screen pt-28 text-center text-gray-400">{tr(lang,'جاري تحميل الملف...','Загрузка профиля...','Loading profile...')}</div>;
+ if(loading)return <div className="min-h-screen pt-28 text-center text-gray-400">{tr(lang,'جاري تحميل الملف الآن...','Загрузка профиля...','Loading profile...')}</div>;
  if(!doctor)return <div className="min-h-screen pt-28 text-center"><p className="text-gray-500">الملف غير موجود</p><button onClick={()=>navigate('/doctors')} className="btn-primary mt-4">العودة</button></div>;
  return <div dir={dir} className="min-h-screen bg-gray-50 pt-20 pb-16"><div className="mx-auto max-w-5xl px-4">
   <button onClick={()=>navigate('/doctors')} className="flex items-center gap-2 text-gray-500 py-4"><ArrowRight className="h-4 w-4"/>{tr(lang,'الأخصائيون والأطباء','Специалисты и врачи','Specialists & Doctors')}</button>
