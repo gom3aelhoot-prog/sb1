@@ -22,6 +22,7 @@ const groups = [
 export default function SpecialtyHubPage() {
   const { path, navigate } = useRouter();
   const { lang, dir, specialtyName } = useI18n();
+  const { country } = useApp();
   const slug = getPathOnly(path).split('/')[2] || '';
   const specialty = comprehensiveSpecialties.find(s => s.slug === slug);
   const [activeTab, setActiveTab] = useState<'doctors'|'questions'|'library'>('doctors');
