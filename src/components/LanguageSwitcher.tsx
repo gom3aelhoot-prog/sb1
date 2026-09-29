@@ -69,7 +69,7 @@ export function MobileLanguageSwitcher({ onClose }: { onClose?: () => void }) {
   return <div className="space-y-3">
     <div className="flex gap-1 rounded-xl bg-neutral-100 p-1">
       <button onClick={() => setActiveTab('language')} className={`flex-1 rounded-lg px-3 py-2 text-sm ${activeTab === 'language' ? 'bg-white text-primary-700 shadow-sm' : 'text-neutral-600'}`}>{t.language.selectLanguage}</button>
-      <button onClick={() => setActiveTab('country')} className={`flex-1 rounded-lg px-3 py-2 text-sm ${activeTab === 'country' ? 'bg-white text-primary-700 shadow-sm' : 'text-neutral-600'}`}>{t.language.selectCountry}</button>}
+      <button onClick={() => setActiveTab('country')} className={`flex-1 rounded-lg px-3 py-2 text-sm ${activeTab === 'country' ? 'bg-white text-primary-700 shadow-sm' : 'text-neutral-600'}`}>{t.language.selectCountry}</button>
     </div>
     {activeTab === 'language' ? <LanguageList onClose={onClose} /> : <CountryList onClose={onClose} />}
   </div>;
