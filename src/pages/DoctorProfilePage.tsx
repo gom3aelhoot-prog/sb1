@@ -225,7 +225,9 @@ export default function DoctorProfilePage({ id }: { id: string }) {
 
         {/* Tab Content */}
         {activeTab === 'home' && (
-          <div className="space-y-4">
+          <div className="space-y-6">
+            <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} />
+            <div className="space-y-4">
             {posts.map((post) => (
               <div key={post.id} className="card p-5">
                 <div className="flex items-center gap-3 mb-3">
@@ -298,8 +300,6 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         {canSeePrivate && activeTab === 'portfolio' && (
           <div className="grid gap-4 md:grid-cols-3"><div className="card p-5"><Wallet className="text-teal-600"/><b className="block mt-3">الرصيد</b><strong>{wallet.balance} USD</strong></div><div className="card p-5"><Coins className="text-indigo-600"/><b className="block mt-3">النقاط</b><strong>{wallet.points}</strong></div><div className="card p-5"><BadgeCheck className="text-amber-500"/><b className="block mt-3">المستحقات</b><strong>{wallet.due} USD</strong></div><div className="card p-5 md:col-span-3"><b>أدوات الأخصائي</b><div className="mt-3 flex flex-wrap gap-2"><button onClick={()=>navigate('/specialist/packages')} className="rounded-xl bg-teal-50 px-4 py-2 text-teal-700">باقات المتابعة</button><button onClick={()=>navigate('/specialist/studio')} className="rounded-xl bg-indigo-50 px-4 py-2 text-indigo-700">استوديو الأخصائي</button><button onClick={()=>navigate('/wallet')} className="rounded-xl bg-slate-100 px-4 py-2">المحفظة</button></div></div></div>
         )}
-
-        {activeTab === 'home' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} />}
 
         {/* CTA */}
         <div className="card p-6 mt-6 bg-gradient-to-l from-teal-50 to-white">
