@@ -79,8 +79,8 @@ export function virtualQuestionsForSpecialty(slug:string,lang:string,count=50): 
   const templates=qTemplates[lang]||qTemplates.en;
   return Array.from({length:count},(_,i)=>({
     id:`catalog-q-${lang}-${slug}-${i+1}`, specialty_id:sp.id, author_name:lang==='ar'?'مستخدم SB1': 'SB1 User',
-    title:`${lc(lang).question}: ${localizedSpecialty(s,lang)} #${i+1}`,
-    body:`${lc(lang).body} ${localizedSpecialty(s,lang)}.`,
+    title:`${templates[i%templates.length] || lc(lang).question}: ${localizedSpecialty(s,lang)} #${i+1}`,
+    body:`${templates[i%templates.length] || lc(lang).question}. ${lc(lang).body} ${localizedSpecialty(s,lang)}.`,
     age:18+(i%55),gender:i%2?'أنثى':'ذكر',status:'answered',views:80+i*7,created_at:new Date(2026,0,1+(i%28)).toISOString(),specialty:sp,answers:Array.from({length:8},(_,j)=>({id:`catalog-answer-preview-${slug}-${lang}-${i+1}-${j+1}`})) as any
   }));
 }
