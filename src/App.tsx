@@ -67,6 +67,7 @@ import MediaHubPage from '@/pages/MediaHubPage';
 import SpecialistStorePage from '@/pages/SpecialistStorePage';
 import AppsPage from '@/pages/AppsPage';
 import OtherServicesPage from '@/pages/OtherServicesPage';
+import PlatformFacilitiesPage from '@/pages/FacilitiesPage';
 import SocialNetworkPage from '@/pages/SocialNetworkPage';
 import GiftPackagesPage from '@/pages/GiftPackagesPage';
 import GiftClaimPage from '@/pages/GiftClaimPage';
@@ -131,12 +132,12 @@ function PlatformRoute() {
   if (route === '/chat') return <ChatRoomsPage />;
   if (route === '/library') return <LibraryPage />;
   if (route === '/planner') return <PlannerPage />;
-  if (route === '/clinics') return <LocalFacilitiesPage initialType="clinic" />;
-  if (route === '/radiology') return <LocalFacilitiesPage initialType="radiology" />;
-  if (route === '/labs') return <LocalFacilitiesPage initialType="lab" />;
+  if (route === '/clinics') return <PlatformFacilitiesPage initialType="clinic" />;
+  if (route === '/radiology') return <PlatformFacilitiesPage initialType="radiology" />;
+  if (route === '/labs') return <PlatformFacilitiesPage initialType="lab" />;
   if (route === '/policy') return <PolicyPage />;
   if (route === '/tests') return <TestsPage />;
-  if (route === '/facilities') return <LocalFacilitiesPage onNavigate={navigate} />;
+  if (route === '/facilities') return <PlatformFacilitiesPage initialType="clinic" />;
   if (route === '/jobs') return <JobsPage />;
   if (route === '/referral') return <ReferralPage />;
   if (route === '/ai-reader') return <AIReaderPage />;
@@ -186,7 +187,7 @@ function AppContent() {
       const text = (anchor.textContent || '').trim();
       const labels: Record<string,string> = {
         'طب الأطفال والمواليد':'pediatrics','Pediatrics and Neonatology':'pediatrics','Кардиология':'cardiology','أمراض القلب':'cardiology',
-        'القلب والأوعية الدموية':'cardiology','الأمراض الجلدية والتجميل':'dermatology','الأمراض الجلدية':'dermatology','العظام والمفاصل والكسور':'orthopedics',
+        'القلب والأوعية الدموية':'cardiology','الأمراض الجلدية':'dermatology','العظام والمفاصل والكسور':'orthopedics',
         'الأعصاب والدماغ':'neurology','الأمراض الجلدية والتجميل':'dermatology','المناعة':'allergy-immunology','أمراض الشيخوخة':'geriatrics',
         'الطب العام والباطنة':'internal-medicine','العلاج بالتنويم المغناطيسي':'hypnotherapy','التحليل النفسي':'psychoanalysis',
         'العلاج السلوكي الجدلي':'dialectical-behavior-therapy','علاج القلق والرهاب والوسواس':'clinical-psychology'
