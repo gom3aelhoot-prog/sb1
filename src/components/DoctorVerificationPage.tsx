@@ -18,6 +18,7 @@ import {
   Check,
 } from 'lucide-react';
 import { useApp } from '@/i18n/AppContext';
+import { supabase } from '@/lib/supabase';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -40,6 +41,8 @@ export function DoctorVerificationPage({ onNavigate }: { onNavigate: (view: stri
   const [licenseFile, setLicenseFile] = useState<UploadedFile | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [photoCaptured, setPhotoCaptured] = useState<string | null>(null);
+  const [faceFrames, setFaceFrames] = useState<string[]>([]);
+  const [applicantType, setApplicantType] = useState<'specialist'|'institution'|'delivery_worker'|'service_other'>('specialist');
   const [agreed, setAgreed] = useState(false);
   const [signature, setSignature] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -66,7 +69,7 @@ export function DoctorVerificationPage({ onNavigate }: { onNavigate: (view: stri
   const canProceed = (): boolean => {
     if (step === 1) return fullName.trim() !== '' && email.trim() !== '' && licenseNumber.trim() !== '';
     if (step === 2) return idFile !== null && licenseFile !== null;
-    if (step === 3) return photoCaptured !== null;
+    if (step === 3) return faceFrames.length === 3;
     if (step === 4) return agreed && signature.trim() !== '';
     return false;
   };
@@ -99,8 +102,10 @@ export function DoctorVerificationPage({ onNavigate }: { onNavigate: (view: stri
         canvasRef.current.width = videoRef.current.videoWidth;
         canvasRef.current.height = videoRef.current.videoHeight;
         ctx.drawImage(videoRef.current, 0, 0);
-        setPhotoCaptured(canvasRef.current.toDataURL('image/jpeg'));
-        stopCamera();
+        const frame = canvasRef.current.toDataURL('image/jpeg', 0.88);
+        setFaceFrames(prev => [...prev, frame].slice(0, 3));
+        setPhotoCaptured(frame);
+        if (faceFrames.length + 1 >= 3) stopCamera();
       }
     }
   };
@@ -118,13 +123,32 @@ export function DoctorVerificationPage({ onNavigate }: { onNavigate: (view: stri
     return `${(bytes / 1048576).toFixed(1)} MB`;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setSubmitting(true);
     setError(false);
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('يجب تسجيل الدخول قبل إرسال ملف التحقق.');
+      if (faceFrames.length !== 3) throw new Error('يجب التقاط ثلاث صور للوجه.');
+      const paths: string[] = [];
+      for (let i = 0; i < faceFrames.length; i++) {
+        const blob = await (await fetch(faceFrames[i])).blob();
+        const path = user.id + '/' + crypto.randomUUID() + '-frame-' + (i + 1) + '.jpg';
+        const upload = await supabase.storage.from('sb1-face-verification').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+        if (upload.error) throw upload.error;
+        paths.push(path);
+      }
+      const { error: insertError } = await supabase.from('sb1_face_verification_submissions').insert({
+        applicant_id: user.id, applicant_type: applicantType, full_name: fullName.trim(), email: email.trim(),
+        phone: phone.trim() || null, license_number: licenseNumber.trim(), frame_1_path: paths[0], frame_2_path: paths[1], frame_3_path: paths[2]
+      });
+      if (insertError) throw insertError;
       setSubmitted(true);
-    }, 1800);
+    } catch {
+      setError(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const resetForm = () => {
@@ -136,6 +160,7 @@ export function DoctorVerificationPage({ onNavigate }: { onNavigate: (view: stri
     setIdFile(null);
     setLicenseFile(null);
     setPhotoCaptured(null);
+    setFaceFrames([]);
     setAgreed(false);
     setSignature('');
     setSubmitted(false);
@@ -277,6 +302,16 @@ export function DoctorVerificationPage({ onNavigate }: { onNavigate: (view: stri
                 </div>
               )}
 
+              {/* Applicant type */}
+              {step === 1 && (
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-neutral-700 mb-1.5">نوع الحساب المتقدم</label>
+                  <select value={applicantType} onChange={e=>setApplicantType(e.target.value as typeof applicantType)} className="w-full rounded-xl border border-neutral-200 bg-neutral-50 py-3 px-3 text-sm">
+                    <option value="specialist">أخصائي</option><option value="institution">مؤسسة</option><option value="delivery_worker">عامل توصيل</option><option value="service_other">خدمات أخرى</option>
+                  </select>
+                </div>
+              )}
+
               {/* Step 2: Documents */}
               {step === 2 && (
                 <div className="space-y-4">
@@ -323,17 +358,17 @@ export function DoctorVerificationPage({ onNavigate }: { onNavigate: (view: stri
                     <p className="text-sm text-primary-700 font-medium">{t.verification.cameraFaceMatchDesc}</p>
                   </div>
 
-                  {photoCaptured ? (
+                  {faceFrames.length > 0 ? (
                     <div className="flex flex-col items-center gap-3">
                       <div className="relative rounded-2xl overflow-hidden border-2 border-primary-200">
-                        <img src={photoCaptured} alt="Captured" className="w-64 h-64 object-cover" />
+                        <img src={faceFrames[faceFrames.length - 1]} alt="Captured face frame" className="w-64 h-64 object-cover" />
                         <div className="absolute top-2 end-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-white">
                           <Check className="h-4 w-4" />
                         </div>
                       </div>
-                      <p className="text-sm font-medium text-primary-600">{t.verification.photoCaptured}</p>
+                      <p className="text-sm font-medium text-primary-600">تم التقاط {faceFrames.length} من 3 لقطات</p>
                       <button
-                        onClick={() => setPhotoCaptured(null)}
+                        onClick={() => { setFaceFrames([]); setPhotoCaptured(null); }}
                         className="rounded-xl border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-50"
                       >
                         {t.verification.retake}
@@ -352,7 +387,7 @@ export function DoctorVerificationPage({ onNavigate }: { onNavigate: (view: stri
                         className="flex items-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-700"
                       >
                         <Camera className="h-5 w-5" />
-                        {t.verification.capturePhoto}
+                        {faceFrames.length < 3 ? `التقاط اللقطة ${faceFrames.length + 1} من 3` : `اكتمل الفحص`}
                       </button>
                     </div>
                   ) : (
@@ -371,7 +406,7 @@ export function DoctorVerificationPage({ onNavigate }: { onNavigate: (view: stri
                   )}
 
                   <canvas ref={canvasRef} className="hidden" />
-                  <p className="text-xs text-neutral-400 leading-relaxed text-center">{t.verification.faceMatchNote}</p>
+                  <p className="text-xs text-neutral-400 leading-relaxed text-center">تُلتقط ثلاث كادرات فقط وتحفظ داخل ملف المتقدم للمراجعة الداخلية من المالك والمشرفين. لا يتم ربط الفحص بأي خدمة خارجية أو مطابقة وجه خارج SB1.</p>
                 </div>
               )}
 
