@@ -12,8 +12,12 @@ const write=(k:string,v:any)=>{try{localStorage.setItem(k,JSON.stringify(v))}cat
 const id=()=>`sb1-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
 const qr=(url:string)=>`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}`;
 
-export default function PageProfileTools({ canManage=false, pageId='current', pageName='SB1' }:{canManage?:boolean;pageId?:string;pageName?:string}){
- const [feed,setFeed]=useState<FeedItem[]>(()=>read(key('feed',pageId),[]));
+export default function PageProfileTools({ canManage=false, pageId='current', pageName='SB1', seedPosts=[] }:{canManage?:boolean;pageId?:string;pageName?:string;seedPosts?:Array<{id:string;body:string;image_url?:string|null;video_url?:string|null;post_type?:string;created_at:string}>}){
+ const [feed,setFeed]=useState<FeedItem[]>(()=>{
+   const saved=read<FeedItem[]>(key('feed',pageId),[]);
+   if(saved.length)return saved;
+   return seedPosts.map((p,i)=>({id:p.id,kind:p.video_url?(p.post_type==='reel'?'reel':'video'):(p.image_url?'image':'post'),text:p.body,mediaUrl:p.video_url||p.image_url||undefined,createdAt:p.created_at,likes:p.likes_count||0,comments:[],public:true,demo:false}));
+ });
  const [albums,setAlbums]=useState<AlbumItem[]>(()=>read(key('albums',pageId),[{id:id(),name:'المحتوى العام',media:[],public:true}]));
  const [clones,setClones]=useState<CloneRecord[]>(()=>read('sb1_clone_registry',[]));
  const [post,setPost]=useState('');
