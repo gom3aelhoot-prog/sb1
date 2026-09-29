@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, BookOpen, MessageCircle, Stethoscope, Users, Video } from 'lucide-react';
 import { useRouter, getPathOnly } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
+import { useApp } from '@/i18n/AppContext';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 import { demoDoctors, demoQuestions } from '@/lib/demoData';
 import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty } from '@/lib/catalog';
@@ -39,7 +40,7 @@ export default function SpecialtyHubPage() {
   }, [slug]);
 
   const title = specialty ? (lang === 'en' ? specialty.en : lang === 'de' ? specialty.de : lang === 'ru' ? specialty.ru : specialty.ar) : 'التخصص';
-  const relatedDoctors = useMemo(() => loadedDoctors.length ? loadedDoctors : virtualDoctorsForSpecialty(slug, lang, 25), [loadedDoctors, slug, lang]);
+  const relatedDoctors = useMemo(() => loadedDoctors.length ? loadedDoctors : virtualDoctorsForSpecialty(slug, lang, 25, country.code), [loadedDoctors, slug, lang, country.code]);
   const relatedQuestions = useMemo(() => loadedQuestions.length ? loadedQuestions : virtualQuestionsForSpecialty(slug, lang, 50), [loadedQuestions, slug, lang]);
 
   if (!specialty) {
