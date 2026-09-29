@@ -125,6 +125,7 @@ export default function TestsPage() {
   const [tests, setTests] = useState<MedicalTest[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [search, setSearch] = useState('');
   const [activeTest, setActiveTest] = useState<MedicalTest | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
@@ -139,7 +140,7 @@ export default function TestsPage() {
     })();
   }, []);
 
-  const filteredTests = activeCategory === 'all' ? tests : tests.filter((tst) => tst.category === activeCategory);
+  const filteredTests = tests.filter((tst) => activeCategory === 'all' || tst.category === activeCategory).filter((tst) => !search.trim() || `${tst.title} ${tst.title_en || ''} ${tst.description}`.toLowerCase().includes(search.trim().toLowerCase()));
 
   const tr = (ar: string, en: string) => lang === 'en' ? en : ar;
 
@@ -256,6 +257,8 @@ export default function TestsPage() {
       case 'asthma':
       case 'depression':
       case 'anxiety':
+      case 'ocd':
+      case 'ocd_screening':
         calculateQuestionnaire(); break;
       default: setResult(tr('هذا الاختبار سيتوفر قريباً', 'This test will be available soon'));
     }
