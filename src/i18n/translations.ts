@@ -11,7 +11,6 @@ import uk from './translations/uk';
 import az from './translations/az';
 import ka from './translations/ka';
 // Fallback UI dictionaries for the newly enabled locales; platform pages use their full locale dictionaries.
-import ar from './translations/ar';
 
 export const translations: Record<LanguageCode, TranslationData> = {
   ar,
