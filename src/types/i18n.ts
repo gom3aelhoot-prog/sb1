@@ -912,151 +912,27 @@ export const ALL_COUNTRIES: CountryInfo[] = [
   { code:'TG', nameKey:'tajikistan', currency:'TJS', currencySymbol:'ЅМ', flag:'🇹🇯' },
   { code:'UA', nameKey:'ukraine', currency:'UAH', currencySymbol:'₴', flag:'🇺🇦' },
   { code:'AZ', nameKey:'azerbaijan', currency:'AZN', currencySymbol:'₼', flag:'🇦🇿' },
-  { code:'KA', nameKey:'georgia', currency:'GEL', currencySymbol:'₾', flag:'🇬🇪' },
+  { code:'GE', nameKey:'georgia', currency:'GEL', currencySymbol:'₾', flag:'🇬🇪' },
   { code:'ET', nameKey:'ethiopia', currency:'ETB', currencySymbol:'Br', flag:'🇪🇹' },
   { code:'GB', nameKey:'unitedKingdom', currency:'GBP', currencySymbol:'£', flag:'🇬🇧' },
-  { code:'US', nameKey:'unitedStates', currency:'USD', currencySymbol:'
+  { code:'US', nameKey:'unitedStates', currency:'USD', currencySymbol:'$ ', flag:'🇺🇸' },
+  { code:'CA', nameKey:'canada', currency:'CAD', currencySymbol:'C$', flag:'🇨🇦' },
+  { code:'AT', nameKey:'austria', currency:'EUR', currencySymbol:'€', flag:'🇦🇹' },
+  { code:'CH', nameKey:'switzerland', currency:'CHF', currencySymbol:'CHF', flag:'🇨🇭' },
+];
+
 export const CURRENCY_RATES: Record<string, number> = {
-  USD: 1,
-  SAR: 3.75,
-  AED: 3.67,
-  EGP: 48.5,
-  IQD: 1310,
-  JOD: 0.71,
-  KWD: 0.31,
-  LBP: 89500,
-  LYD: 4.85,
-  MAD: 9.95,
-  OMR: 0.39,
-  ILS: 3.7,
-  QAR: 3.64,
-  SYP: 13000,
-  TND: 3.1,
-  YER: 250,
-  DZD: 134,
-  BHD: 0.38,
-  MRU: 39.5,
-  SDG: 550,
-  SOS: 570,
-  EUR: 0.92,
-  RUB: 92,
-  UZS: 12600,
-  AMD: 390,
-  TJS: 10.9,
-  UAH: 41,
-  AZN: 1.7,
-  GEL: 2.7,
-  ETB: 150,
-  GBP: 0.75,
+  USD:1,SAR:3.75,AED:3.67,EGP:48.5,IQD:1310,JOD:0.71,KWD:0.31,LBP:89500,LYD:4.85,MAD:9.95,OMR:0.39,ILS:3.7,QAR:3.64,SYP:13000,TND:3.1,YER:250,DZD:134,BHD:0.38,MRU:39.5,SDG:550,SOS:570,EUR:0.92,RUB:92,UZS:12600,AMD:390,TJS:10.9,UAH:41,AZN:1.7,GEL:2.7,ETB:150,GBP:0.75,CAD:1.37,CHF:0.88
 };
 
 export const SPECIALTIES: SpecialtyCategory[] = [
-  {
-    key: 'children',
-    icon: 'Baby',
-    items: [
-      { key: 'pediatricsNeonatal', icon: 'BabyIcon' },
-      { key: 'behaviorModification', icon: 'Brain' },
-      { key: 'speechLearning', icon: 'Languages' },
-      { key: 'denverMethod', icon: 'Ruler' },
-      { key: 'sensoryMotor', icon: 'Activity' },
-    ],
-  },
-  {
-    key: 'mentalHealth',
-    icon: 'Brain',
-    items: [
-      { key: 'psychiatrist', icon: 'Stethoscope' },
-      { key: 'psychotherapist', icon: 'HeartHandshake' },
-      { key: 'psychologist', icon: 'BrainCircuit' },
-      { key: 'neuropsychRehab', icon: 'Network' },
-      { key: 'abaTherapy', icon: 'LineChart' },
-      { key: 'psychoanalysis', icon: 'BrainCog' },
-      { key: 'sleepDisorders', icon: 'Moon' },
-      { key: 'anxietyPhobiaOcd', icon: 'Wind' },
-    ],
-  },
-  {
-    key: 'otherSpecialties',
-    icon: 'Stethoscope',
-    items: [
-      { key: 'generalInternal', icon: 'Thermometer' },
-      { key: 'cardiology', icon: 'HeartPulse' },
-      { key: 'dermatology', icon: 'Sparkles' },
-      { key: 'orthopedics', icon: 'Bone' },
-      { key: 'neurology', icon: 'Brain' },
-      { key: 'immunology', icon: 'Shield' },
-      { key: 'geriatrics', icon: 'Accessibility' },
-      { key: 'carpix', icon: 'Camera' },
-    ],
-  },
-];
-, flag:'🇺🇸' },
-];
-
-// Approximate USD exchange rates for pricing display
-export const CURRENCY_RATES: Record<string, number> = {
-  USD: 1,
-  SAR: 3.75,
-  AED: 3.67,
-  EGP: 48.5,
-  IQD: 1310,
-  JOD: 0.71,
-  KWD: 0.31,
-  LBP: 89500,
-  LYD: 4.85,
-  MAD: 9.95,
-  OMR: 0.39,
-  ILS: 3.7,
-  QAR: 3.64,
-  SYP: 13000,
-  TND: 3.1,
-  YER: 250,
-  DZD: 134,
-  BHD: 0.38,
-  MRU: 39.5,
-  SDG: 550,
-  SOS: 570,
-};
-
-export const SPECIALTIES: SpecialtyCategory[] = [
-  {
-    key: 'children',
-    icon: 'Baby',
-    items: [
-      { key: 'pediatricsNeonatal', icon: 'BabyIcon' },
-      { key: 'behaviorModification', icon: 'Brain' },
-      { key: 'speechLearning', icon: 'Languages' },
-      { key: 'denverMethod', icon: 'Ruler' },
-      { key: 'sensoryMotor', icon: 'Activity' },
-    ],
-  },
-  {
-    key: 'mentalHealth',
-    icon: 'Brain',
-    items: [
-      { key: 'psychiatrist', icon: 'Stethoscope' },
-      { key: 'psychotherapist', icon: 'HeartHandshake' },
-      { key: 'psychologist', icon: 'BrainCircuit' },
-      { key: 'neuropsychRehab', icon: 'Network' },
-      { key: 'abaTherapy', icon: 'LineChart' },
-      { key: 'psychoanalysis', icon: 'BrainCog' },
-      { key: 'sleepDisorders', icon: 'Moon' },
-      { key: 'anxietyPhobiaOcd', icon: 'Wind' },
-    ],
-  },
-  {
-    key: 'otherSpecialties',
-    icon: 'Stethoscope',
-    items: [
-      { key: 'generalInternal', icon: 'Thermometer' },
-      { key: 'cardiology', icon: 'HeartPulse' },
-      { key: 'dermatology', icon: 'Sparkles' },
-      { key: 'orthopedics', icon: 'Bone' },
-      { key: 'neurology', icon: 'Brain' },
-      { key: 'immunology', icon: 'Shield' },
-      { key: 'geriatrics', icon: 'Accessibility' },
-      { key: 'carpix', icon: 'Camera' },
-    ],
-  },
+  { key:'children', icon:'Baby', items:[
+    {key:'pediatricsNeonatal',icon:'BabyIcon'},{key:'behaviorModification',icon:'Brain'},{key:'speechLearning',icon:'Languages'},{key:'denverMethod',icon:'Ruler'},{key:'sensoryMotor',icon:'Activity'}
+  ]},
+  { key:'mentalHealth', icon:'Brain', items:[
+    {key:'psychiatrist',icon:'Stethoscope'},{key:'psychotherapist',icon:'HeartHandshake'},{key:'psychologist',icon:'BrainCircuit'},{key:'neuropsychRehab',icon:'Network'},{key:'abaTherapy',icon:'LineChart'},{key:'psychoanalysis',icon:'BrainCog'},{key:'sleepDisorders',icon:'Moon'},{key:'anxietyPhobiaOcd',icon:'Wind'}
+  ]},
+  { key:'otherSpecialties', icon:'Stethoscope', items:[
+    {key:'generalInternal',icon:'Thermometer'},{key:'cardiology',icon:'HeartPulse'},{key:'dermatology',icon:'Sparkles'},{key:'orthopedics',icon:'Bone'},{key:'neurology',icon:'Brain'},{key:'immunology',icon:'Shield'},{key:'geriatrics',icon:'Accessibility'},{key:'carpix',icon:'Camera'}
+  ]}
 ];
