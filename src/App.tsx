@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AppProvider } from '@/i18n/AppContext';
-import { I18nProvider } from '@/lib/i18n';
+import { I18nProvider,useI18n } from '@/lib/i18n';
 import { RouterProvider, useRouter, getPathOnly } from '@/lib/router';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -166,6 +166,38 @@ function AppContent() {
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Enter') return;
+      const target = event.target as HTMLInputElement | null;
+      if (!target || target.tagName !== 'INPUT') return;
+      const placeholder = target.placeholder || '';
+      if (!/بحث|search|buscar|suche|поиск/i.test(placeholder)) return;
+      const value = target.value.trim();
+      if (!value) return;
+      window.history.pushState({}, '', '/doctors?q=' + encodeURIComponent(value));
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      window.scrollTo(0,0);
+    };
+    const onClick = (event: MouseEvent) => {
+      const anchor = (event.target as HTMLElement)?.closest?.('a[href="#"]') as HTMLAnchorElement | null;
+      if (!anchor) return;
+      const text = (anchor.textContent || '').trim();
+      const labels: Record<string,string> = {
+        'طب الأطفال والمواليد':'pediatrics','Pediatrics and Neonatology':'pediatrics','Кардиология':'cardiology','أمراض القلب':'cardiology',
+        'القلب والأوعية الدموية':'cardiology','الأمراض الجلدية والتجميل':'dermatology','الأمراض الجلدية':'dermatology','العظام والمفاصل والكسور':'orthopedics',
+        'الأعصاب والدماغ':'neurology','الأمراض الجلدية والتجميل':'dermatology','المناعة':'allergy-immunology','أمراض الشيخوخة':'geriatrics',
+        'الطب العام والباطنة':'internal-medicine','العلاج بالتنويم المغناطيسي':'hypnotherapy','التحليل النفسي':'psychoanalysis',
+        'العلاج السلوكي الجدلي':'dialectical-behavior-therapy','علاج القلق والرهاب والوسواس':'clinical-psychology'
+      };
+      const slug=labels[text];
+      if(slug){event.preventDefault();window.history.pushState({},'', '/specialties/'+slug);window.dispatchEvent(new PopStateEvent('popstate'));window.scrollTo(0,0);}
+    };
+    document.addEventListener('keydown',onKeyDown);
+    document.addEventListener('click',onClick);
+    return ()=>{document.removeEventListener('keydown',onKeyDown);document.removeEventListener('click',onClick)};
+  }, [lang]);
 
   const navigate = (v: string) => { window.location.hash = v; };
 
