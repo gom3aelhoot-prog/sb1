@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, BadgeCheck, PenLine, Share2, ExternalLink, Copy, Briefcase as BriefcaseIcon, Settings as SettingsIcon, Bookmark, Archive, Coins, Wallet, Bell, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Home, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, BadgeCheck, PenLine, Share2, ExternalLink, Copy, Briefcase as BriefcaseIcon, Settings as SettingsIcon, Bookmark, Archive, Coins, Wallet, Bell, ShieldCheck } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { getRole } from '@/lib/access';
 import PageProfileTools from '@/components/PageProfileTools';
@@ -124,7 +124,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   }
 
   const tabs: { key: Tab; label: string; icon: typeof FileText }[] = [
-    { key: 'home', label: lang==='ar'?'الرئيسية':lang==='ru'?'Главная':'Home', icon: HomeIcon as any },
+    { key: 'home', label: lang==='ar'?'الرئيسية':lang==='ru'?'Главная':'Home', icon: Home },
     { key: 'articles', label: lang==='ar'?'مقالاتي':lang==='ru'?'Мои статьи':'My Articles', icon: BookOpen },
     { key: 'questions', label: lang==='ar'?'الأسئلة المجابة':lang==='ru'?'Отвеченные вопросы':'Answered Questions', icon: MessageCircle },
     { key: 'courses', label: lang==='ar'?'الدورات والكورسات':lang==='ru'?'Курсы':'Courses', icon: GraduationCap },
