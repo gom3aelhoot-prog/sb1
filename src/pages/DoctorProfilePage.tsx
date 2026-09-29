@@ -1,16 +1,21 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, BadgeCheck, PenLine, Share2, ExternalLink, Copy, Briefcase as BriefcaseIcon, Settings as SettingsIcon, Bookmark, Archive, Coins, Wallet, Bell, ShieldCheck } from 'lucide-react';
 import { useRouter } from '@/lib/router';
+import { getRole } from '@/lib/access';
+import PageProfileTools from '@/components/PageProfileTools';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Question, type SpecialistPost, type PostComment, type Article, type DoctorAudio } from '@/lib/supabase';
 import QuestionCard from '@/components/QuestionCard';
 import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty, virtualArticlesForSpecialty, virtualAudioForSpecialty, virtualVideosForSpecialty, virtualCoursesForSpecialty } from '@/lib/catalog';
 import { toggleSaved, isSaved, toggleLiked, isLiked, archiveItem, addComment, toggleFollowing, isFollowing as isFollowingVault } from '@/lib/socialVault';
 
-type Tab = 'videos' | 'articles' | 'courses' | 'questions' | 'portfolio' | 'control';
+type Tab = 'home' | 'articles' | 'questions' | 'courses' | 'portfolio';
 
 export default function DoctorProfilePage({ id }: { id: string }) {
   const { navigate } = useRouter();
+  const role = getRole();
+  const canManagePage = role === 'owner' || role === 'moderator' || localStorage.getItem('sb1_page_owner_id') === id || localStorage.getItem('sb1_is_page_owner') === 'true';
+  const canSeePrivate = canManagePage;
   const { t, specialtyName, lang } = useI18n();
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -21,7 +26,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const [comments, setComments] = useState<Record<string, PostComment[]>>({});
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
-  const [activeTab, setActiveTab] = useState<Tab>('videos');
+  const [activeTab, setActiveTab] = useState<Tab>('home');
   const [loading, setLoading] = useState(true);
   const [imgError, setImgError] = useState(false);
   const [isFollowing, setIsFollowing] = useState(()=>isFollowingVault(id));
@@ -119,12 +124,11 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   }
 
   const tabs: { key: Tab; label: string; icon: typeof FileText }[] = [
-    { key: 'videos', label: lang==='ar'?'فيديوهاتي وريلز وقصصي':lang==='ru'?'Мои видео, Reels и истории':'My Videos, Reels & Stories', icon: Video },
+    { key: 'home', label: lang==='ar'?'الرئيسية':lang==='ru'?'Главная':'Home', icon: HomeIcon as any },
     { key: 'articles', label: lang==='ar'?'مقالاتي':lang==='ru'?'Мои статьи':'My Articles', icon: BookOpen },
+    { key: 'questions', label: lang==='ar'?'الأسئلة المجابة':lang==='ru'?'Отвеченные вопросы':'Answered Questions', icon: MessageCircle },
     { key: 'courses', label: lang==='ar'?'الدورات والكورسات':lang==='ru'?'Курсы':'Courses', icon: GraduationCap },
-    { key: 'questions', label: lang==='ar'?'الاستشارات والأسئلة السابقة':lang==='ru'?'Консультации и вопросы':'Consultations & Questions', icon: MessageCircle },
-    { key: 'portfolio', label: lang==='ar'?'المحفظة والحسابات':lang==='ru'?'Портфолио и счета':'Portfolio & Accounts', icon: BriefcaseIcon },
-    { key: 'control', label: lang==='ar'?'الإشعارات والتحكم':lang==='ru'?'Уведомления и управление':'Notifications & Control', icon: SettingsIcon },
+    ...(canSeePrivate ? [{ key: 'portfolio' as Tab, label: lang==='ar'?'الحسابات والمال':lang==='ru'?'Счета и финансы':'Accounts & Money', icon: BriefcaseIcon }] : []),
   ];
 
   return (
@@ -190,12 +194,20 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           </div>
         </div>
 
-        <div className="sticky top-16 z-20 mb-4 rounded-2xl border bg-slate-900 text-white shadow-lg">
+        {canSeePrivate && <div className="sticky top-16 z-20 mb-4 rounded-2xl border bg-slate-900 text-white shadow-lg">
           <div className="grid grid-cols-3 divide-x divide-white/10">
             <div className="p-3 text-center"><Wallet className="mx-auto h-5 w-5"/><span className="mt-1 block text-[11px] text-white/60">رصيد الأموال</span><b>{wallet.balance} USD</b></div>
             <div className="p-3 text-center"><Coins className="mx-auto h-5 w-5"/><span className="mt-1 block text-[11px] text-white/60">محفظة النقاط</span><b>{wallet.points}</b></div>
             <div className="p-3 text-center"><BadgeCheck className="mx-auto h-5 w-5"/><span className="mt-1 block text-[11px] text-white/60">المستحقات</span><b>{wallet.due} USD</b></div>
           </div>
+        </div>}
+
+        {/* Reels strip: always above the horizontal profile menu */}
+        <div className="mb-5 grid grid-cols-2 md:grid-cols-5 gap-4">
+          {posts.filter((p)=>p.video_url || p.post_type==='reel').slice(0,5).map((p,i)=><button key={p.id} onClick={()=>setActiveTab('home')} className="relative overflow-hidden rounded-2xl aspect-[3/5] bg-gradient-to-br from-teal-600 to-cyan-500 text-white p-4 text-start shadow-sm">
+            {p.image_url&&<img src={p.image_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-70"/>}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"/><span className="relative z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-teal-700 font-bold">{i+1}</span><span className="absolute bottom-3 start-3 end-3 z-10 text-xs font-semibold">{p.body}</span>
+          </button>)}
         </div>
 
         {/* Tabs */}
@@ -212,7 +224,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         </div>
 
         {/* Tab Content */}
-        {activeTab === 'videos' && (
+        {activeTab === 'home' && (
           <div className="space-y-4">
             {posts.map((post) => (
               <div key={post.id} className="card p-5">
@@ -262,7 +274,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           </div>
         )}
 
-        {activeTab === 'videos' && (
+        {activeTab === 'home' && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {posts.filter((p) => p.video_url).map((p) => (
               <div key={p.id} className="card overflow-hidden">
@@ -274,7 +286,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           </div>
         )}
 
-        {activeTab === 'videos' && (
+        {activeTab === 'home' && (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {posts.slice(0,5).map((p,i)=><button key={p.id} onClick={()=>setActiveTab('videos')} className="relative overflow-hidden rounded-2xl aspect-[3/5] bg-gradient-to-br from-teal-600 to-cyan-500 text-white p-4 text-start shadow-sm">
               {p.image_url&&<img src={p.image_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-70"/>}
@@ -306,13 +318,11 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           <div className="space-y-4">{questions.map(q=><QuestionCard key={q.id} question={q}/>)}<a href={'/questions?specialty='+(doctor.specialty?.slug||'')} className="inline-block rounded-xl bg-teal-700 px-4 py-2 text-white font-bold">كل الأسئلة والإجابات</a></div>
         )}
 
-        {activeTab === 'portfolio' && (
+        {canSeePrivate && activeTab === 'portfolio' && (
           <div className="grid gap-4 md:grid-cols-3"><div className="card p-5"><Wallet className="text-teal-600"/><b className="block mt-3">الرصيد</b><strong>{wallet.balance} USD</strong></div><div className="card p-5"><Coins className="text-indigo-600"/><b className="block mt-3">النقاط</b><strong>{wallet.points}</strong></div><div className="card p-5"><BadgeCheck className="text-amber-500"/><b className="block mt-3">المستحقات</b><strong>{wallet.due} USD</strong></div><div className="card p-5 md:col-span-3"><b>أدوات الأخصائي</b><div className="mt-3 flex flex-wrap gap-2"><button onClick={()=>navigate('/specialist/packages')} className="rounded-xl bg-teal-50 px-4 py-2 text-teal-700">باقات المتابعة</button><button onClick={()=>navigate('/specialist/studio')} className="rounded-xl bg-indigo-50 px-4 py-2 text-indigo-700">استوديو الأخصائي</button><button onClick={()=>navigate('/wallet')} className="rounded-xl bg-slate-100 px-4 py-2">المحفظة</button></div></div></div>
         )}
 
-        {activeTab === 'control' && (
-          <div className="grid gap-4 md:grid-cols-2"><a href="/notifications/private" className="card p-5"><Bell className="text-teal-600"/><b className="block mt-2">الإشعارات الخاصة</b></a><a href="/settings" className="card p-5"><SettingsIcon className="text-indigo-600"/><b className="block mt-2">إعدادات الحساب والتحكم</b></a><a href="/specialist/content" className="card p-5"><PenLine className="text-amber-600"/><b className="block mt-2">نشر وإدارة المحتوى</b></a><a href="/specialist/studio" className="card p-5"><ShieldCheck className="text-emerald-600"/><b className="block mt-2">الإيموجي والبادجات</b></a></div>
-        )}
+        <PageProfileTools canManage={canManagePage} />
 
         {/* CTA */}
         <div className="card p-6 mt-6 bg-gradient-to-l from-teal-50 to-white">
