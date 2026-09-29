@@ -6,6 +6,7 @@ import { specialtyCatalog } from '@/lib/catalog';
 
 export default function SpecialtiesPage() {
   const { lang, dir } = useI18n();
+  const ui:any={ar:{title:'التخصصات الطبية',sub:'{ui.sub}',choose:'{ui.choose}',search:'ابحث عن التخصص...',back:'العودة للتخصصات'},en:{title:'Medical specialties',sub:'Choose one specialty to open its specialists, Q&A and related content.',choose:'Choose specialty',search:'Search specialties...',back:'Back to specialties'},de:{title:'Medizinische Fachgebiete',sub:'Wählen Sie ein Fachgebiet für Spezialisten, Fragen und Inhalte.',choose:'Fachgebiet wählen',search:'Fachgebiet suchen...',back:'Zurück zu Fachgebieten'},ru:{title:'Медицинские специальности',sub:'Выберите специальность, чтобы открыть специалистов, вопросы и контент.',choose:'Выберите специальность',search:'Поиск специальности...',back:'Назад к специальностям'},uk:{title:'Медичні спеціальності',sub:'Оберіть спеціальність для перегляду спеціалістів, запитань та контенту.',choose:'Оберіть спеціальність',search:'Пошук спеціальності...',back:'Назад'},uz:{title:'Tibbiy mutaxassisliklar',sub:'Mutaxassislar, savollar va kontentni ochish uchun mutaxassislikni tanlang.',choose:'Mutaxassislikni tanlang',search:'Mutaxassislikni qidiring...',back:'Orqaga'},hy:{title:'Բժշկական մասնագիտություններ',sub:'Ընտրեք մասնագիտություն՝ մասնագետները, հարցերը և բովանդակությունը բացելու համար։',choose:'Ընտրել մասնագիտություն',search:'Փնտրել մասնագիտություն...',back:'Հետ'},tg:{title:'Ихтисосҳои тиббӣ',sub:'Ихтисосро интихоб кунед, то мутахассисон ва саволу ҷавобҳоро бинед.',choose:'Ихтисосро интихоб кунед',search:'Ҷустуҷӯи ихтисос...',back:'Бозгашт'},az:{title:'Tibbi ixtisaslar',sub:'Mütəxəssislər, suallar və məzmunu açmaq üçün ixtisas seçin.',choose:'İxtisası seçin',search:'İxtisas axtarın...',back:'Geri'},am:{title:'የሕክምና ስፔሻሊቲዎች',sub:'ስፔሻሊቲ ይምረጡ።',choose:'ስፔሻሊቲ ይምረጡ',search:'ስፔሻሊቲ ይፈልጉ...',back:'ተመለስ'},ka:{title:'სამედიცინო სპეციალობები',sub:'აირჩიეთ სპეციალობა სპეციალისტების, კითხვებისა და კონტენტის სანახავად.',choose:'აირჩიეთ სპეციალობა',search:'მოძებნეთ სპეციალობა...',back:'უკან'}}[lang]||{};
   const { navigate } = useRouter();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -14,14 +15,14 @@ export default function SpecialtiesPage() {
   return <div className="min-h-screen bg-gray-50 pt-24 pb-16" dir={dir}>
     <div className="mx-auto max-w-4xl px-4">
       <div className="rounded-3xl bg-gradient-to-br from-teal-700 to-cyan-600 p-8 text-white shadow-lg text-center">
-        <h1 className="text-3xl font-extrabold">التخصصات الطبية</h1>
+        <h1 className="text-3xl font-extrabold">{ui.title}</h1>
         <p className="mt-2 text-teal-50">اختر تخصصاً واحداً لفتح الأخصائيين والأسئلة والأجوبة والمحتوى المرتبط به.</p>
         <button onClick={() => setOpen(v=>!v)} className="mt-7 inline-flex items-center gap-3 rounded-2xl bg-white px-7 py-4 text-base font-bold text-teal-700 shadow-xl">
           اختار التخصص <ChevronDown className={open?'rotate-180':''}/>
         </button>
       </div>
       {open && <div className="mt-5 rounded-2xl bg-white border border-gray-100 shadow-xl p-5">
-        <div className="relative mb-4"><Search className="absolute start-3 top-3.5 h-5 w-5 text-gray-400"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="ابحث عن التخصص..." className="w-full rounded-xl border border-gray-200 py-3 ps-10 pe-4 outline-none focus:border-teal-500"/></div>
+        <div className="relative mb-4"><Search className="absolute start-3 top-3.5 h-5 w-5 text-gray-400"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder={ui.search} className="w-full rounded-xl border border-gray-200 py-3 ps-10 pe-4 outline-none focus:border-teal-500"/></div>
         <div className="max-h-[55vh] overflow-y-auto grid gap-2 sm:grid-cols-2">
           {filtered.map(s=><button key={s.slug} onClick={()=>navigate('/specialties/'+s.slug)} className="flex items-center justify-between rounded-xl border border-gray-100 px-4 py-3 text-start hover:border-teal-300 hover:bg-teal-50">
             <span className="font-semibold text-gray-800">{s.name}</span><ArrowRight className="h-4 w-4 text-teal-600"/>
