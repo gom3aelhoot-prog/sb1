@@ -357,54 +357,36 @@ export function DoctorVerificationPage({ onNavigate }: { onNavigate: (view: stri
                   <div className="rounded-xl bg-primary-50 border border-primary-100 px-4 py-3">
                     <p className="text-sm text-primary-700 font-medium">{t.verification.cameraFaceMatchDesc}</p>
                   </div>
-
-                  {faceFrames.length > 0 ? (
+                  {cameraActive ? (
                     <div className="flex flex-col items-center gap-3">
-                      <div className="relative rounded-2xl overflow-hidden border-2 border-primary-200">
-                        <img src={faceFrames[faceFrames.length - 1]} alt="Captured face frame" className="w-64 h-64 object-cover" />
-                        <div className="absolute top-2 end-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-white">
-                          <Check className="h-4 w-4" />
-                        </div>
+                      <div className="relative rounded-2xl overflow-hidden border-2 border-primary-300">
+                        <video ref={videoRef} autoPlay playsInline className="w-64 h-64 object-cover" />
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none"><div className="w-48 h-56 rounded-full border-2 border-white/60" /></div>
                       </div>
                       <p className="text-sm font-medium text-primary-600">تم التقاط {faceFrames.length} من 3 لقطات</p>
-                      <button
-                        onClick={() => { setFaceFrames([]); setPhotoCaptured(null); }}
-                        className="rounded-xl border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-50"
-                      >
-                        {t.verification.retake}
+                      <button onClick={capturePhoto} disabled={faceFrames.length >= 3} className="flex items-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-700 disabled:opacity-40">
+                        <Camera className="h-5 w-5" />{faceFrames.length < 3 ? `التقاط اللقطة ${faceFrames.length + 1} من 3` : 'اكتمل الفحص'}
                       </button>
                     </div>
-                  ) : cameraActive ? (
+                  ) : faceFrames.length === 3 ? (
                     <div className="flex flex-col items-center gap-3">
-                      <div className="rounded-2xl overflow-hidden border-2 border-primary-300">
-                        <video ref={videoRef} autoPlay playsInline className="w-64 h-64 object-cover" />
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <div className="w-48 h-56 rounded-full border-2 border-white/60" />
-                        </div>
-                      </div>
-                      <button
-                        onClick={capturePhoto}
-                        className="flex items-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-700"
-                      >
-                        <Camera className="h-5 w-5" />
-                        {faceFrames.length < 3 ? `التقاط اللقطة ${faceFrames.length + 1} من 3` : `اكتمل الفحص`}
-                      </button>
+                      <div className="grid grid-cols-3 gap-2">{faceFrames.map((frame,i)=><img key={i} src={frame} alt={'لقطة '+(i+1)} className="h-32 w-32 rounded-xl object-cover border-2 border-primary-200" />)}</div>
+                      <p className="text-sm font-medium text-primary-600">اكتمل التقاط اللقطات الثلاث.</p>
+                      <button onClick={() => { setFaceFrames([]); setPhotoCaptured(null); }} className="rounded-xl border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-50">{t.verification.retake}</button>
+                    </div>
+                  ) : faceFrames.length > 0 ? (
+                    <div className="flex flex-col items-center gap-3">
+                      <img src={faceFrames[faceFrames.length - 1]} alt="آخر لقطة" className="h-64 w-64 rounded-2xl object-cover border-2 border-primary-200" />
+                      <p className="text-sm font-medium text-primary-600">تم التقاط {faceFrames.length} من 3 لقطات.</p>
+                      <button onClick={startCamera} className="rounded-xl bg-primary-600 px-6 py-3 text-sm font-bold text-white">استمرار والتقاط التالية</button>
+                      <button onClick={() => { setFaceFrames([]); setPhotoCaptured(null); }} className="rounded-xl border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-50">{t.verification.retake}</button>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-3 py-8">
-                      <div className="flex h-24 w-24 items-center justify-center rounded-full bg-neutral-100">
-                        <Camera className="h-10 w-10 text-neutral-400" />
-                      </div>
-                      <button
-                        onClick={startCamera}
-                        className="flex items-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-700"
-                      >
-                        <Camera className="h-5 w-5" />
-                        {t.verification.startCamera}
-                      </button>
+                      <div className="flex h-24 w-24 items-center justify-center rounded-full bg-neutral-100"><Camera className="h-10 w-10 text-neutral-400" /></div>
+                      <button onClick={startCamera} className="flex items-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-700"><Camera className="h-5 w-5" />{t.verification.startCamera}</button>
                     </div>
                   )}
-
                   <canvas ref={canvasRef} className="hidden" />
                   <p className="text-xs text-neutral-400 leading-relaxed text-center">تُلتقط ثلاث كادرات فقط وتحفظ داخل ملف المتقدم للمراجعة الداخلية من المالك والمشرفين. لا يتم ربط الفحص بأي خدمة خارجية أو مطابقة وجه خارج SB1.</p>
                 </div>
