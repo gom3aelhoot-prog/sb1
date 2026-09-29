@@ -10,6 +10,8 @@ import tg from './translations/tg';
 import uk from './translations/uk';
 import az from './translations/az';
 import ka from './translations/ka';
+// Fallback UI dictionaries for the newly enabled locales; platform pages use their full locale dictionaries.
+import ar from './translations/ar';
 
 export const translations: Record<LanguageCode, TranslationData> = {
   ar,
@@ -23,6 +25,9 @@ export const translations: Record<LanguageCode, TranslationData> = {
   uk,
   az,
   ka,
+  en: ar,
+  de: ar,
+  am: ar,
 };
 
 export type { TranslationData, LanguageCode };
