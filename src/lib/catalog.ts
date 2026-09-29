@@ -96,12 +96,13 @@ export function virtualAnswersForQuestion(question:Question,lang:string,count=8)
 
 export function virtualArticlesForSpecialty(slug:string,lang:string,count=3): Article[] {
   const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
-  const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const doc=virtualDoctorsForSpecialty(slug,lang,5)[0];
+  const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const doc=virtualDoctorsForSpecialty(slug,lang,5)[0]; const copy=lc(lang);
+  const topics:any={ar:['الأعراض والعلامات المهمة','الفحوصات والتقييم','المتابعة والوقاية','متى يجب طلب المساعدة','أسئلة شائعة'],en:['Symptoms and warning signs','Evaluation and common tests','Follow-up and prevention','When to seek care','Frequently asked questions'],de:['Symptome und Warnzeichen','Untersuchung und Diagnostik','Nachsorge und Prävention','Wann Hilfe nötig ist','Häufige Fragen'],ru:['Симптомы и тревожные признаки','Обследование и диагностика','Наблюдение и профилактика','Когда обращаться за помощью','Частые вопросы']}[lang]||['Medical overview','Evaluation and tests','Follow-up','When to seek care','Frequently asked questions'];
   return Array.from({length:count},(_,i)=>({
     id:`catalog-art-${lang}-${slug}-${i+1}`,specialty_id:sp.id,doctor_id:doc.id,
-    title:`${lc(lang).article[i%lc(lang).article.length]}: ${localizedSpecialty(s,lang)} — ${i+1}`,
-    excerpt:lc(lang).body,
-    body:`${lc(lang).body} ${localizedSpecialty(s,lang)}. ${lc(lang).body}`,
+    title:`${copy.article[i%copy.article.length]}: ${localizedSpecialty(s,lang)} — ${topics[i%topics.length]}`,
+    excerpt:`${topics[i%topics.length]} — ${copy.body}`,
+    body:`${topics[i%topics.length]}: ${localizedSpecialty(s,lang)}. ${copy.body} ${localizedSpecialty(s,lang)}. ${i%2===0?copy.body:''}`,
     image_url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80',reading_time_min:5+i,views:1000+i*300,created_at:new Date().toISOString(),specialty:sp,doctor:doc
   })) as Article[];
 }
