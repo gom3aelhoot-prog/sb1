@@ -17,12 +17,12 @@ export default function DoctorsPage(){
  const doctors=useMemo(()=>{
    if(!specialty) {
      const real=dbDoctors.filter(d=>d.native_language===lang);
-     const generated=comprehensiveSpecialties.flatMap(s=>virtualDoctorsForSpecialty(s.slug,lang,5));
+     const generated=comprehensiveSpecialties.flatMap(s=>virtualDoctorsForSpecialty(s.slug,lang,5,country.code));
      return [...real,...generated].filter((d,i,a)=>a.findIndex(x=>x.id===d.id)===i).filter(d=>!search||d.name.toLowerCase().includes(search.toLowerCase())).filter(d=>!city||d.city===city).slice(0,40);
    }
    const real=dbDoctors.filter(d=>d.native_language===lang && d.specialty?.slug===specialty);
-   return (real.length?real:virtualDoctorsForSpecialty(specialty,lang,25)).filter(d=>!search||d.name.toLowerCase().includes(search.toLowerCase())).filter(d=>!city||d.city===city);
- },[dbDoctors,specialty,lang,search,city]);
+   return (real.length?real:virtualDoctorsForSpecialty(specialty,lang,25,country.code)).filter(d=>!search||d.name.toLowerCase().includes(search.toLowerCase())).filter(d=>!city||d.city===city);
+ },[dbDoctors,specialty,lang,search,city,country.code]);
  return <div className="min-h-screen pt-24 pb-16 bg-gray-50" dir={dir}><div className="mx-auto max-w-7xl px-4">
   <div className="mb-6 rounded-3xl bg-gradient-to-br from-teal-700 to-cyan-600 p-7 text-white"><h1 className="text-3xl font-extrabold">الأخصائيون والأطباء</h1><p className="mt-2">اللغة الحالية: {profile.native}. تظهر الملفات الخاصة باللغة المختارة فقط.</p></div>
   <div className="rounded-2xl bg-white border p-5 mb-6 grid gap-3 md:grid-cols-3">
