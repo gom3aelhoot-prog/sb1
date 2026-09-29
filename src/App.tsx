@@ -198,7 +198,7 @@ function AppContent() {
     document.addEventListener('keydown',onKeyDown);
     document.addEventListener('click',onClick);
     return ()=>{document.removeEventListener('keydown',onKeyDown);document.removeEventListener('click',onClick)};
-  }, [lang]);
+  }, []);
 
   const navigate = (v: string) => { window.location.hash = v; };
 
