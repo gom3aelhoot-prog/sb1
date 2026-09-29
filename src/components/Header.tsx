@@ -39,6 +39,7 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const role=getRole();
+  const canSeePrivateHeader = role==='owner' || role==='moderator' || localStorage.getItem('sb1_is_page_owner')==='true';
   const isPrivate=(href:string)=>{if(['/dashboard'].includes(href))return ['client','owner'].includes(role);if(href.startsWith('/specialist'))return ['specialist','owner'].includes(role);if(href==='/delivery')return ['institution','delivery_worker','owner'].includes(role);if(href==='/complaints'||href==='/safety')return !['guest'].includes(role);if(href.startsWith('/owner')||href.startsWith('/admin'))return ['owner','moderator'].includes(role);return true};
   const [mobileSection, setMobileSection] = useState<'main' | 'specialties' | 'language'>('main');
   const searchRef = useRef<HTMLInputElement>(null);
@@ -143,17 +144,16 @@ export function Header() {
 
               <LanguageSwitcher />
 
-              <a href="/wallet" className="hidden sm:flex items-center gap-1.5 rounded-xl border border-teal-100 bg-teal-50 px-3 py-2 text-sm font-bold text-teal-700 hover:bg-teal-100" title="المحفظة">
+              {canSeePrivateHeader && <a href="/wallet" className="hidden sm:flex items-center gap-1.5 rounded-xl border border-teal-100 bg-teal-50 px-3 py-2 text-sm font-bold text-teal-700 hover:bg-teal-100" title="المحفظة">
                 <Wallet className="h-4 w-4" />
                 <span className="hidden xl:inline">المحفظة</span>
-              </a>
+              </a>}
               <a href="/cart" className="group relative flex min-w-10 flex-col items-center justify-center rounded-xl px-1 py-1 text-neutral-700 hover:bg-neutral-100" title="سلة المشتريات">
                 <ShoppingCart className="h-5 w-5" />
                 <span className="mt-0.5 text-[9px] font-bold leading-none text-neutral-500">{lang==='ar'?'سلة المشتريات':lang==='ru'?'Корзина':lang==='de'?'Warenkorb':'Cart'}</span>
               </a>
 
-              <a href="/notifications/global" className="relative flex h-10 w-10 items-center justify-center rounded-xl text-sky-700 hover:bg-sky-50" title="الإشعارات العامة"><Globe2 className="h-5 w-5"/></a>
-              <PrivateNotificationsPopover />
+              {canSeePrivateHeader && <><a href="/notifications/global" className="relative flex h-10 w-10 items-center justify-center rounded-xl text-sky-700 hover:bg-sky-50" title="الإشعارات العامة"><Globe2 className="h-5 w-5"/></a><PrivateNotificationsPopover /></>}
 
               {/* Auth buttons */}
               <div className="hidden md:flex items-center gap-2">
