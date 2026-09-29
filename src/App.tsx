@@ -69,6 +69,7 @@ import NotificationsPage from '@/pages/NotificationsPage';
 import GlobalNotificationsPage from '@/pages/GlobalNotificationsPage';
 import PrivateNotificationsPage from '@/pages/PrivateNotificationsPage';
 import SettingsPage from '@/pages/SettingsPage';
+import FaceVerificationReviewPage from '@/pages/FaceVerificationReviewPage';
 import MediaHubPage from '@/pages/MediaHubPage';
 import SpecialistStorePage from '@/pages/SpecialistStorePage';
 import WalletPage from '@/pages/WalletPage';
@@ -226,6 +227,7 @@ function PlatformRoute() {
   if (route === '/notifications/global') return <GlobalNotificationsPage />;
   if (route === '/notifications/private') return <PrivateNotificationsPage />;
   if (route === '/settings') return <SettingsPage />;
+  if (route === '/admin/face-verification') return <FaceVerificationReviewPage />;
   if (route === '/admin-dashboard') return <AdminDashboardPage />;
   if (route === '/owner/commands') return <OwnerCommandCenterPage />;
   if (route === '/owner/integrations') return <OwnerIntegrationsPage />;
