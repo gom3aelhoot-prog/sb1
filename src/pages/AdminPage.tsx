@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import {
   LayoutDashboard, Users, FileText, Video, Headphones, BookOpen,
-  MessageSquare, DollarSign, AlertTriangle, Settings, LogOut,
+  MessageSquare, DollarSign, AlertTriangle, Settings, LogOut, Gift,
   Plus, Trash2, Edit, Stethoscope, Eye, Shield, TrendingUp, X
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { readContactSettings, saveContactSettings, type ContactSettings } from '@/lib/contactSettings';
+import PricingAdminPanel from '@/components/PricingAdminPanel';
+import OwnerVipGiftsPanel from '@/components/OwnerVipGiftsPanel';
 import { supabase, type Doctor, type Question, type Article, type DoctorVideo, type DoctorAudio, type Course, type Payment, type AIViolation, type SiteSettings, type VideoSession, type TextSession, type Specialty } from '@/lib/supabase';
 
-type AdminSection = 'overview' | 'doctors' | 'questions' | 'articles' | 'videos' | 'audio' | 'courses' | 'sessions' | 'payments' | 'violations' | 'settings';
+type AdminSection = 'overview' | 'doctors' | 'questions' | 'articles' | 'videos' | 'audio' | 'courses' | 'sessions' | 'payments' | 'violations' | 'pricing' | 'vip_gifts' | 'settings';
 
 export default function AdminPage() {
   const { t, specialtyName } = useI18n();
@@ -32,6 +35,8 @@ export default function AdminPage() {
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(false);
+  const [contact, setContact] = useState<ContactSettings>(() => readContactSettings());
+  const [platformFee, setPlatformFee] = useState<number>(() => Number(localStorage.getItem('sb1_platform_fee_percent') || 30));
 
   // Add modal
   const [showAdd, setShowAdd] = useState<AdminSection | null>(null);
@@ -161,7 +166,16 @@ export default function AdminPage() {
   };
 
   const handleAdd = async (table: string) => {
-    const { error } = await supabase.from(table).insert(addForm);
+    const contentTables = new Set(['doctors','articles','doctor_videos','doctor_audio','courses','specialty_library_items']);
+    const payload = { ...addForm } as Record<string, any>;
+    const selectedLanguage = payload.content_language || 'ar';
+    delete payload.content_language;
+    if (contentTables.has(table)) {
+      const translationFields: Record<string, any> = {};
+      for (const key of ['name','bio','title','excerpt','body','description','source']) if (payload[key] != null) translationFields[key] = payload[key];
+      payload.translations = { [selectedLanguage]: translationFields };
+    }
+    const { error } = await supabase.from(table).insert(payload);
     if (!error) {
       setShowAdd(null);
       setAddForm({});
@@ -174,7 +188,9 @@ export default function AdminPage() {
     loadData('violations');
   };
 
+  const handleSaveContact = () => { saveContactSettings(contact); alert('تم حفظ بيانات التواصل والروابط. ستظهر مباشرة في الموقع.'); };
   const handleSaveSettings = async () => {
+    localStorage.setItem('sb1_platform_fee_percent', String(Math.max(0, Math.min(100, platformFee))));
     if (!settings) return;
     await supabase.from('site_settings').update({
       site_name: settings.site_name,
@@ -221,6 +237,8 @@ export default function AdminPage() {
     { key: 'courses', label: t('admin.courses'), icon: BookOpen },
     { key: 'sessions', label: t('admin.sessions'), icon: Users },
     { key: 'payments', label: t('admin.payments'), icon: DollarSign },
+    { key: 'pricing', label: 'الأسعار والباقات', icon: DollarSign },
+    { key: 'vip_gifts', label: 'VIP والهدايا', icon: Gift },
     { key: 'violations', label: t('admin.violations'), icon: AlertTriangle },
     { key: 'settings', label: t('admin.settings'), icon: Settings },
   ];
@@ -482,14 +500,42 @@ export default function AdminPage() {
                   {violations.length === 0 && <p className="text-center text-gray-400 py-8">لا توجد مخالفات</p>}
                 </div>
               </div>
+            ) : section === 'pricing' ? (
+              <PricingAdminPanel />
+            ) : section === 'vip_gifts' ? (
+              <OwnerVipGiftsPanel />
             ) : section === 'settings' ? (
               <div>
                 <h2 className="text-xl font-bold text-gray-800 mb-4">{t('admin.settings')}</h2>
                 {settings && (
                   <div className="card p-6 space-y-4">
+                    <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
+                      <h3 className="text-lg font-bold text-blue-900 mb-1">بيانات «تواصل معنا» والروابط</h3>
+                      <p className="text-xs text-blue-700 mb-4">اكتب الرابط الكامل لصفحتك. عند الضغط على الأيقونة في الموقع يفتح الرابط مباشرة في تبويب جديد.</p>
+                      <div className="grid md:grid-cols-2 gap-3">
+                        <input value={contact.email} onChange={e=>setContact({...contact,email:e.target.value})} placeholder="البريد الإلكتروني" className="input-field bg-white" />
+                        <input value={contact.phone} onChange={e=>setContact({...contact,phone:e.target.value})} placeholder="رقم الهاتف" className="input-field bg-white" />
+                        <input value={contact.address} onChange={e=>setContact({...contact,address:e.target.value})} placeholder="العنوان" className="input-field bg-white md:col-span-2" />
+                        <input value={contact.facebook} onChange={e=>setContact({...contact,facebook:e.target.value})} placeholder="رابط Facebook — https://facebook.com/..." className="input-field bg-white" />
+                        <input value={contact.instagram} onChange={e=>setContact({...contact,instagram:e.target.value})} placeholder="رابط Instagram" className="input-field bg-white" />
+                        <input value={contact.twitter} onChange={e=>setContact({...contact,twitter:e.target.value})} placeholder="رابط X / Twitter" className="input-field bg-white" />
+                        <input value={contact.linkedin} onChange={e=>setContact({...contact,linkedin:e.target.value})} placeholder="رابط LinkedIn" className="input-field bg-white" />
+                        <input value={contact.youtube} onChange={e=>setContact({...contact,youtube:e.target.value})} placeholder="رابط YouTube" className="input-field bg-white" />
+                        <input value={contact.telegram} onChange={e=>setContact({...contact,telegram:e.target.value})} placeholder="رابط Telegram" className="input-field bg-white" />
+                        <input value={contact.whatsapp} onChange={e=>setContact({...contact,whatsapp:e.target.value})} placeholder="رابط WhatsApp" className="input-field bg-white" />
+                        <input value={contact.website} onChange={e=>setContact({...contact,website:e.target.value})} placeholder="رابط الموقع/الخدمة" className="input-field bg-white" />
+                      </div>
+                      <button onClick={handleSaveContact} className="mt-4 btn-primary">حفظ بيانات التواصل والروابط</button>
+                    </div>
+
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">اسم الموقع</label>
                       <input type="text" value={settings.site_name} onChange={(e) => setSettings({ ...settings, site_name: e.target.value })} className="input-field" />
+                    </div>
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                      <label className="block text-sm font-bold text-amber-900 mb-2">نسبة المنصة من الخدمات والإعلانات (%)</label>
+                      <input type="number" min="0" max="100" value={platformFee} onChange={(e) => setPlatformFee(Number(e.target.value))} className="input-field bg-white" />
+                      <p className="mt-2 text-xs text-amber-800">القيمة الافتراضية 30%. هذا الإعداد محفوظ في لوحة الإدارة المحلية، أما الدفع الحقيقي فيستخدم SB1_PLATFORM_FEE_PERCENT في بيئة Vercel.</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -534,6 +580,8 @@ export default function AdminPage() {
             <div className="space-y-3">
               {showAdd === 'doctors' && (
                 <>
+                  <label className="text-sm font-semibold">لغة المحتوى</label>
+                  <select className="input-field" value={addForm.content_language || 'ar'} onChange={(e) => setAddForm({ ...addForm, content_language: e.target.value })}><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
                   <input placeholder="اسم الطبيب" className="input-field" onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} />
                   <textarea placeholder="نبذة" className="input-field" onChange={(e) => setAddForm({ ...addForm, bio: e.target.value })} />
                   <input placeholder="المدينة" className="input-field" onChange={(e) => setAddForm({ ...addForm, city: e.target.value })} />
@@ -548,6 +596,8 @@ export default function AdminPage() {
               )}
               {showAdd === 'articles' && (
                 <>
+                  <label className="text-sm font-semibold">لغة المحتوى</label>
+                  <select className="input-field" value={addForm.content_language || 'ar'} onChange={(e) => setAddForm({ ...addForm, content_language: e.target.value })}><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
                   <input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
                   <input placeholder="مقتطف" className="input-field" onChange={(e) => setAddForm({ ...addForm, excerpt: e.target.value })} />
                   <textarea placeholder="المحتوى" rows={5} className="input-field" onChange={(e) => setAddForm({ ...addForm, body: e.target.value })} />
@@ -562,6 +612,8 @@ export default function AdminPage() {
               )}
               {showAdd === 'videos' && (
                 <>
+                  <label className="text-sm font-semibold">لغة المحتوى</label>
+                  <select className="input-field" value={addForm.content_language || 'ar'} onChange={(e) => setAddForm({ ...addForm, content_language: e.target.value })}><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
                   <input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
                   <textarea placeholder="الوصف" className="input-field" onChange={(e) => setAddForm({ ...addForm, description: e.target.value })} />
                   <input placeholder="رابط الفيديو" className="input-field" onChange={(e) => setAddForm({ ...addForm, video_url: e.target.value })} />
@@ -575,6 +627,8 @@ export default function AdminPage() {
               )}
               {showAdd === 'audio' && (
                 <>
+                  <label className="text-sm font-semibold">لغة المحتوى</label>
+                  <select className="input-field" value={addForm.content_language || 'ar'} onChange={(e) => setAddForm({ ...addForm, content_language: e.target.value })}><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
                   <input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
                   <textarea placeholder="الوصف" className="input-field" onChange={(e) => setAddForm({ ...addForm, description: e.target.value })} />
                   <input placeholder="رابط الصوت" className="input-field" onChange={(e) => setAddForm({ ...addForm, audio_url: e.target.value })} />
@@ -587,6 +641,8 @@ export default function AdminPage() {
               )}
               {showAdd === 'courses' && (
                 <>
+                  <label className="text-sm font-semibold">لغة المحتوى</label>
+                  <select className="input-field" value={addForm.content_language || 'ar'} onChange={(e) => setAddForm({ ...addForm, content_language: e.target.value })}><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
                   <input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
                   <textarea placeholder="الوصف" className="input-field" onChange={(e) => setAddForm({ ...addForm, description: e.target.value })} />
                   <input placeholder="السعر" type="number" className="input-field" onChange={(e) => setAddForm({ ...addForm, price: e.target.value })} />

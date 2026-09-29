@@ -4,6 +4,7 @@ import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import type { Doctor } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
+import { DemoAccountMark } from '@/components/DemoTransparencyNotice';
 
 export default function DoctorCard({ doctor }: { doctor: Doctor }) {
   const { navigate } = useRouter();
@@ -21,21 +22,16 @@ export default function DoctorCard({ doctor }: { doctor: Doctor }) {
   const bio = localizedField(doctor as unknown as Record<string, unknown>, 'bio', lang, doctor.bio);
   const city = localizedField(doctor as unknown as Record<string, unknown>, 'city', lang, doctor.city);
 
-  const expLabel = {
-    ar: 'سنة', ru: 'лет', de: 'Jahre', en: 'yrs'
-  }[lang] || 'yrs';
-  const consultLabel = {
-    ar: 'استشارة', ru: 'консультаций', de: 'Beratungen', en: 'consults'
-  }[lang] || 'consults';
-  const virtualLabel = {
-    ar: 'افتراضي', ru: 'Виртуальный', de: 'Virtuell', en: 'Virtual'
-  }[lang] || 'Virtual';
-  const fullProfileLabel = {
-    ar: 'عرض الصفحة الكاملة', ru: 'Открыть профиль', de: 'Profil öffnen', en: 'View full profile'
-  }[lang] || 'View full profile';
-  const sessionLabel = {
-    ar: 'طلب جلسة', ru: 'Сессия', de: 'Sitzung', en: 'Session'
-  }[lang] || 'Session';
+  const expLabels: Record<string,string> = { ar: 'سنة', ru: 'лет', de: 'Jahre', en: 'yrs' };
+  const expLabel = expLabels[lang] || 'yrs';
+  const consultLabels: Record<string,string> = { ar: 'استشارة', ru: 'консультаций', de: 'Beratungen', en: 'consults' };
+  const consultLabel = consultLabels[lang] || 'consults';
+  const virtualLabels: Record<string,string> = { ar: 'افتراضي', ru: 'Виртуальный', de: 'Virtuell', en: 'Virtual' };
+  const virtualLabel = virtualLabels[lang] || 'Virtual';
+  const fullProfileLabels: Record<string,string> = { ar: 'عرض الصفحة الكاملة', ru: 'Открыть профиль', de: 'Profil öffnen', en: 'View full profile' };
+  const fullProfileLabel = fullProfileLabels[lang] || 'View full profile';
+  const sessionLabels: Record<string,string> = { ar: 'طلب جلسة', ru: 'Сессия', de: 'Sitzung', en: 'Session' };
+  const sessionLabel = sessionLabels[lang] || 'Session';
 
   const handleConsult = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -92,7 +88,7 @@ export default function DoctorCard({ doctor }: { doctor: Doctor }) {
           <Star className="h-3 w-3 fill-white text-white" />
           <span className="text-xs font-bold text-white">{Number(doctor.rating).toFixed(1)}</span>
         </div>
-        {doctor.is_virtual && <div className="absolute -end-1 -top-1 rounded-full bg-purple-500 p-1 shadow-sm"><Bot className="h-3.5 w-3.5 text-white" /></div>}
+        {doctor.is_virtual && <DemoAccountMark className="absolute -end-1 -top-1" />}
       </div>
 
       <h3 className="flex items-center gap-1.5 text-lg font-bold text-gray-800 transition-colors group-hover:text-teal-600">

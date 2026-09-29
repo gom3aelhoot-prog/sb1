@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Menu, X, Stethoscope, Phone, ChevronDown } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
-import LanguageSwitcher from './LanguageSwitcher';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 export default function Navbar() {
   const { path, navigate } = useRouter();

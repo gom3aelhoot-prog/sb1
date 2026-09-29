@@ -13,6 +13,7 @@ import {
   type TranslationData,
   LANGUAGES,
   ARAB_COUNTRIES,
+  ALL_COUNTRIES,
   CURRENCY_RATES,
 } from '@/types/i18n';
 import { translations } from '@/i18n/translations';
@@ -48,13 +49,15 @@ function getInitialLanguage(): LanguageCode {
 }
 
 function getInitialCountry(): CountryInfo {
-  if (typeof window === 'undefined') return ARAB_COUNTRIES[0];
+  if (typeof window === 'undefined') return ALL_COUNTRIES[0];
   const stored = localStorage.getItem(STORAGE_KEYS.country);
   if (stored) {
-    const found = ARAB_COUNTRIES.find((c) => c.code === stored);
+    const found = ALL_COUNTRIES.find((c) => c.code === stored);
     if (found) return found;
   }
-  return ARAB_COUNTRIES[0];
+  const language = (localStorage.getItem(STORAGE_KEYS.language) || 'ar') as LanguageCode;
+  const defaults: Partial<Record<LanguageCode,string>> = { ar:'SA', en:'GB', de:'DE', ru:'RU', uz:'UZ', hy:'AM', tg:'TG', uk:'UA', az:'AZ', am:'ET', ka:'KA' };
+  return ALL_COUNTRIES.find((c) => c.code === defaults[language]) || ALL_COUNTRIES[0];
 }
 
 function getInitialDiscountDismissed(): boolean {
@@ -73,7 +76,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = direction;
+    localStorage.setItem(STORAGE_KEYS.language, language);
   }, [language, direction]);
+
+  useEffect(() => {
+    const sync = (event: Event) => {
+      const next = (event as CustomEvent<LanguageCode>).detail;
+      if (next && LANGUAGES[next]) setLanguageState(next);
+    };
+    window.addEventListener('sb1-language-change', sync);
+    return () => window.removeEventListener('sb1-language-change', sync);
+  }, []);
 
   useEffect(() => {
     // Show discount banner after a short delay on first visit (only if not dismissed)

@@ -5,6 +5,8 @@ import { useI18n } from '@/lib/i18n';
 import { supabase, type Course, type Specialty } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
 import { demoCourses, demoSpecialties } from '@/lib/demoData';
+import { virtualCoursesForSpecialty } from '@/lib/catalog';
+import { DemoTransparencyNotice } from '@/components/DemoTransparencyNotice';
 
 export default function CoursesPage() {
   const { navigate } = useRouter();
@@ -17,6 +19,7 @@ export default function CoursesPage() {
   const [enrollForm, setEnrollForm] = useState({ name: '', email: '' });
   const [enrolling, setEnrolling] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
+  const [showDemoNotice, setShowDemoNotice] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -34,10 +37,12 @@ export default function CoursesPage() {
         if (spec) dbQuery = dbQuery.eq('specialty_id', spec.id);
       }
       const { data } = await dbQuery.order('created_at', { ascending: false });
-      setCourses((data && data.length ? data : demoCourses) as Course[]);
+      const generated = selectedSpecialty ? virtualCoursesForSpecialty(selectedSpecialty, lang, 6) : demoSpecialties.slice(0,12).flatMap(s => virtualCoursesForSpecialty(s.slug, lang, 3));
+      const merged = [...(data || []), ...generated];
+      setCourses((merged.length ? merged : demoCourses) as Course[]);
       setLoading(false);
     })().catch(() => { setCourses(demoCourses); setLoading(false); });
-  }, [selectedSpecialty]);
+  }, [selectedSpecialty, lang]);
 
   const handleEnroll = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,15 +73,12 @@ export default function CoursesPage() {
     advanced: t('courses.advanced'),
   };
 
-  const successTitle = {
-    ar: 'تم التسجيل بنجاح!', ru: 'Регистрация прошла успешно!', de: 'Anmeldung erfolgreich!', en: 'Enrollment successful!'
-  }[lang] || 'Enrollment successful!';
-  const successBody = {
-    ar: 'ستصلك تفاصيل الدورة على بريدك الإلكتروني', ru: 'Детали курса будут отправлены на вашу электронную почту', de: 'Die Kursdetails werden an Ihre E-Mail-Adresse gesendet', en: 'Course details will be sent to your email'
-  }[lang] || 'Course details will be sent to your email';
-  const payLabel = {
-    ar: 'ادفع وسجل الآن', ru: 'Оплатить и записаться', de: 'Bezahlen und anmelden', en: 'Pay & enroll now'
-  }[lang] || 'Pay & enroll now';
+  const successTitles: Record<string,string> = { ar: 'تم التسجيل بنجاح!', ru: 'Регистрация прошла успешно!', de: 'Anmeldung erfolgreich!', en: 'Enrollment successful!' };
+  const successTitle = successTitles[lang] || 'Enrollment successful!';
+  const successBodies: Record<string,string> = { ar: 'ستصلك تفاصيل الدورة على بريدك الإلكتروني', ru: 'Детали курса будут отправлены на вашу электронную почту', de: 'Die Kursdetails werden an Ihre E-Mail-Adresse gesendet', en: 'Course details will be sent to your email' };
+  const successBody = successBodies[lang] || 'Course details will be sent to your email';
+  const payLabels: Record<string,string> = { ar: 'ادفع وسجل الآن', ru: 'Оплатить и записаться', de: 'Bezahlen und anmelden', en: 'Pay & enroll now' };
+  const payLabel = payLabels[lang] || 'Pay & enroll now';
 
   return (
     <div className="min-h-screen pt-24 pb-16" dir={dir}>
@@ -137,7 +139,7 @@ export default function CoursesPage() {
                     </div>
                     <div className="flex items-center justify-between border-t border-gray-100 pt-4">
                       <span className="text-2xl font-bold text-teal-600">${course.price}</span>
-                      <button onClick={() => { setEnrollCourse(course); setEnrolled(false); }} className="btn-primary flex items-center gap-2 text-sm">
+                      <button onClick={() => navigate('/courses/'+course.id)} className="btn-primary flex items-center gap-2 text-sm">
                         <Check className="h-4 w-4" />
                         {t('courses.enroll')}
                       </button>
@@ -149,6 +151,8 @@ export default function CoursesPage() {
           </div>
         )}
       </div>
+
+      {showDemoNotice && <DemoTransparencyNotice mode="purchase" onClose={()=>setShowDemoNotice(false)} onContinue={()=>{setShowDemoNotice(false);}}/>}
 
       {enrollCourse && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setEnrollCourse(null)}>

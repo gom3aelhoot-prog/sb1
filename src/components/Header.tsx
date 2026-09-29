@@ -23,12 +23,15 @@ import { MegaMenu } from '@/components/MegaMenu';
 import { LanguageSwitcher, MobileLanguageSwitcher } from '@/components/LanguageSwitcher';
 import { NotificationsPopover } from '@/components/NotificationsPopover';
 import { SPECIALTIES } from '@/types/i18n';
+import { DemoTransparencyNotice } from '@/components/DemoTransparencyNotice';
 
 export function Header() {
   const { t, isAnonymous } = useApp();
-  const { t: platformT } = useI18n();
+  const { t: platformT, lang } = useI18n();
   const [scrolled, setScrolled] = useState(false);
+  const deliveryWorker = typeof window !== 'undefined' && localStorage.getItem('sb1_user_role') === 'delivery_worker';
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showAuthNotice, setShowAuthNotice] = useState(false);
   const [mobileSection, setMobileSection] = useState<'main' | 'specialties' | 'language'>('main');
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -49,22 +52,24 @@ export function Header() {
     };
   }, [mobileOpen]);
 
-  const platformSections = [
-    { label: platformT('nav.doctors'), href: '/doctors' },
+  const labels:any = { ar:['الأخصائيون والأطباء','المحتوى الطبي والمكتبة','متجر الأخصائيين','المكافآت'], en:['Specialists & Doctors','Medical Content & Library','Specialist Store','Rewards'], de:['Fachärzte & Ärzte','Medizinische Inhalte & Bibliothek','Facharzt-Shop','Belohnungen'], ru:['Специалисты и врачи','Медицинский контент и библиотека','Магазин специалистов','Награды'], uk:['Спеціалісти та лікарі','Медичний контент і бібліотека','Магазин спеціалістів','Нагороди'], uz:['Mutaxassislar va shifokorlar','Tibbiy kontent va kutubxona','Mutaxassislar do‘koni','Mukofotlar'], hy:['Մասնագետներ և բժիշկներ','Բժշկական բովանդակություն և գրադարան','Մասնագետների խանութ','Պարգևներ'], tg:['Мутахассисон ва табибон','Мундариҷаи тиббӣ ва китобхона','Дӯкони мутахассисон','Мукофотҳо'], az:['Mütəxəssislər və həkimlər','Tibbi məzmun və kitabxana','Mütəxəssis mağazası','Mükafatlar'], am:['ስፔሻሊስቶች እና ሐኪሞች','የሕክምና ይዘት እና ቤተ-መጽሐፍት','የስፔሻሊስቶች መደብር','ሽልማቶች'], ka:['სპეციალისტები და ექიმები','სამედიცინო კონტენტი და ბიბლიოთეკა','სპეციალისტების მაღაზია','ჯილდოები']}[lang] || ['Specialists & Doctors','Medical Content & Library','Specialist Store','Rewards'];
+  const platformSections = deliveryWorker ? [{ label: labels[2], href: '/store' }] : [
+    { label: labels[0], href: '/doctors' },
     { label: platformT('nav.questions'), href: '/questions' },
-    { label: platformT('nav.ask'), href: '/consult' },
-    { label: platformT('nav.articles'), href: '/articles' },
-    { label: platformT('nav.videos'), href: '/videos' },
-    { label: platformT('nav.audio'), href: '/audio' },
+    { label: labels[1], href: '/media' },
     { label: platformT('nav.courses'), href: '/courses' },
     { label: platformT('nav.sessions'), href: '/sessions' },
     { label: platformT('nav.clinics'), href: '/clinics' },
     { label: platformT('nav.labs'), href: '/labs' },
     { label: platformT('nav.radiology'), href: '/radiology' },
     { label: platformT('nav.facilities'), href: '/facilities' },
-    { label: platformT('nav.library'), href: '/library' },
+    { label: 'الاختبارات الطبية والنفسية', href: '/tests' },
+    { label: labels[2], href: '/store' },
+    { label: labels[3], href: '/referral' },
+    { label: lang==='ar'?'المجتمع الاجتماعي':lang==='ru'?'Соцсеть':'Social', href: '/social' },
+    { label: 'الألعاب والتطبيقات', href: '/apps' },
+    { label: 'باقات الهدايا', href: '/gifts' },
   ];
-
   const navItems = [
     { label: t.nav.home, href: '/#home', icon: Home },
     { label: t.specialists.title, href: '/#specialists', icon: Stethoscope },
@@ -152,11 +157,11 @@ export function Header() {
               <div className="hidden md:flex items-center gap-2">
                 {isAnonymous && (
                   <>
-                    <button className="btn-ghost text-sm" >
+                    <button className="btn-ghost text-sm" onClick={() => setShowAuthNotice(true)} >
                       <LogIn className="h-4 w-4" />
                       {t.nav.signIn}
                     </button>
-                    <button className="btn-primary text-sm" >
+                    <button className="btn-primary text-sm" onClick={() => setShowAuthNotice(true)} >
                       <UserPlus className="h-4 w-4" />
                       {t.nav.signUp}
                     </button>
@@ -186,6 +191,8 @@ export function Header() {
           </div>
         </div>
       </header>
+
+      {showAuthNotice && <DemoTransparencyNotice mode="info" onClose={() => setShowAuthNotice(false)} />}
 
       {/* Mobile drawer */}
       {mobileOpen && (
@@ -286,6 +293,7 @@ export function Header() {
                         onClick={(e) => {
                           e.preventDefault();
                           setMobileOpen(false);
+                          setShowAuthNotice(true);
                         }}
                       >
                         <LogIn className="h-4 w-4" />
@@ -296,6 +304,7 @@ export function Header() {
                         onClick={(e) => {
                           e.preventDefault();
                           setMobileOpen(false);
+                          setShowAuthNotice(true);
                         }}
                       >
                         <UserPlus className="h-4 w-4" />

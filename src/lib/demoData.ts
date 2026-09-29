@@ -22,7 +22,8 @@ missingSpecialties.forEach((s) => demoSpecialties.push({
 }));
 
 export const demoDoctors: Doctor[] = [
- {id:'doc-1',name:'د. أحمد حسن',specialty_id:'sp-internal',bio:'استشاري باطنة بخبرة واسعة في التشخيص والمتابعة.',education:'دكتوراه الطب الباطني',experience_years:15,photo_url:photo('photo-1612349317150-e413f6a5b16d'),city:'دمشق',rating:4.9,consultation_count:1240,native_language:'ar',is_online:true,is_verified:true,is_virtual:true,phone_number:null,follower_count:3200,nationality:'سوري',created_at:now,specialty:demoSpecialties[0]},
+ {id:'owner-jamal',name:'دكتور جمال نادي',specialty_id:'sp-internal',bio:'المالك والمؤسس لمنصة SB1.',education:'طب وتطوير منصات صحية',experience_years:10,photo_url:'/jamal-james.jpg',city:'SB1',rating:5,consultation_count:0,native_language:'ar',is_online:true,is_verified:true,is_virtual:false,phone_number:null,follower_count:0,nationality:'عربي',created_at:now,specialty:demoSpecialties[0]},
+  {id:'doc-1',name:'د. أحمد حسن',specialty_id:'sp-internal',bio:'استشاري باطنة بخبرة واسعة في التشخيص والمتابعة.',education:'دكتوراه الطب الباطني',experience_years:15,photo_url:photo('photo-1612349317150-e413f6a5b16d'),city:'دمشق',rating:4.9,consultation_count:1240,native_language:'ar',is_online:true,is_verified:true,is_virtual:true,phone_number:null,follower_count:3200,nationality:'سوري',created_at:now,specialty:demoSpecialties[0]},
  {id:'doc-2',name:'د. سارة محمود',specialty_id:'sp-psych',bio:'أخصائية علم نفس إكلينيكي وعلاج معرفي سلوكي.',education:'ماجستير علم النفس الإكلينيكي',experience_years:11,photo_url:photo('photo-1559839734-2b71ea197ec2'),city:'حلب',rating:4.8,consultation_count:890,native_language:'ar',is_online:true,is_verified:true,is_virtual:true,phone_number:null,follower_count:2100,nationality:'سورية',created_at:now,specialty:demoSpecialties[2]},
  {id:'doc-3',name:'د. محمد علي',specialty_id:'sp-cardiology',bio:'استشاري أمراض قلب وقسطرة قلبية.',education:'زمالة أمراض القلب',experience_years:18,photo_url:photo('photo-1537368910025-700350fe46c7'),city:'حمص',rating:4.9,consultation_count:1560,native_language:'ar',is_online:false,is_verified:true,is_virtual:true,phone_number:null,follower_count:4100,nationality:'سوري',created_at:now,specialty:demoSpecialties[1]},
  {id:'doc-4',name:'د. ليلى كريم',specialty_id:'sp-pediatrics',bio:'طبيبة أطفال وحديثي الولادة.',education:'دكتوراه طب الأطفال',experience_years:13,photo_url:photo('photo-1594824476967-48c8b964273f'),city:'اللاذقية',rating:4.7,consultation_count:760,native_language:'ar',is_online:true,is_verified:true,is_virtual:true,phone_number:null,follower_count:1800,nationality:'سورية',created_at:now,specialty:demoSpecialties[3]},
@@ -55,11 +56,11 @@ export const demoFacilities: AdditionalFacility[] = [
  {id:'fac-1',facility_type:'rehab',name:'مركز SB1 للتأهيل',description:'إعادة تأهيل وعلاج طبيعي.',address:'دمشق - شارع العلاج',phone:'+963 11 555 5555',image_url:photo('photo-1576091160550-2173dba999ef'),is_active:true,created_at:now},
  {id:'fac-2',facility_type:'pharmacy',name:'صيدلية SB1',description:'صيدلية وخدمة توصيل.',address:'دمشق - المركز',phone:'+963 11 666 6666',image_url:photo('photo-1585435557343-3b092031a831'),is_active:true,created_at:now},
  {id:'fac-3',facility_type:'nursing',name:'دار SB1 للرعاية',description:'رعاية كبار السن وخدمات تمريضية.',address:'حلب - حي الهدوء',phone:'+963 21 777 7777',image_url:photo('photo-1516307365426-bea591f05011'),is_active:true,created_at:now},
-] as AdditionalFacility[];
+ ] as unknown as AdditionalFacility[];
 export const demoProducts: PharmacyProduct[] = [
  {id:'prod-1',facility_id:'fac-2',name:'مجموعة فيتامينات يومية',description:'منتج تجريبي للعرض في المتجر.',price:12,currency:'USD',image_url:photo('photo-1607619056574-7b8d3ee536b2'),stock_quantity:40,is_active:true,created_at:now},
  {id:'prod-2',facility_id:'fac-2',name:'جهاز قياس ضغط الدم',description:'جهاز منزلي للمتابعة.',price:35,currency:'USD',image_url:photo('photo-1559757148-5c350d0d3c56'),stock_quantity:25,is_active:true,created_at:now},
-];
+] as unknown as PharmacyProduct[];
 export const demoLibrary: SpecialtyLibraryItem[] = [
  {id:'lib-1',specialty_id:'sp-internal',item_type:'article',title:'دليل الباطنة للمريض',description:'مادة تثقيفية مبسطة.',url:null,image_url:null,source:'SB1 Medical Library',is_auto_generated:false,created_at:now,specialty:demoSpecialties[0]},
  {id:'lib-2',specialty_id:'sp-cardiology',item_type:'book',title:'أساسيات صحة القلب',description:'مرجع تثقيفي مختصر.',url:null,image_url:null,source:'SB1 Medical Library',is_auto_generated:false,created_at:now,specialty:demoSpecialties[1]},
@@ -68,9 +69,9 @@ export const demoLibrary: SpecialtyLibraryItem[] = [
 ];
 
 export const demoQuestions: Question[] = [
- {id:'q-demo-1',specialty_id:'sp-cardiology',author_name:'مستخدم SB1',title:'ما الفحوصات الدورية المهمة لصحة القلب؟',body:'أرغب في معرفة الفحوصات العامة التي تناسب المتابعة الوقائية لصحة القلب.',age:42,gender:'ذكر',status:'pending',views:184,specialty:demoSpecialties[1],answers:[]},
- {id:'q-demo-2',specialty_id:'sp-psych',author_name:'مستخدم SB1',title:'كيف أتعامل مع التوتر المتكرر؟',body:'أعاني من توتر متكرر وأريد معرفة الخطوات العامة التي تساعدني على تنظيمه ومتى أراجع مختصاً.',age:31,gender:'أنثى',status:'pending',views:231,specialty:demoSpecialties[2],answers:[]},
- {id:'q-demo-3',specialty_id:'sp-pediatrics',author_name:'مستخدم SB1',title:'متى يحتاج الطفل إلى مراجعة طبيب الأطفال؟',body:'ما العلامات التي تستدعي التواصل مع طبيب الأطفال بدلاً من الاكتفاء بالمتابعة المنزلية؟',age:6,gender:'أنثى',status:'pending',views:96,specialty:demoSpecialties[3],answers:[]},
+ {id:'q-demo-1',specialty_id:'sp-cardiology',author_name:'مستخدم SB1',title:'ما الفحوصات الدورية المهمة لصحة القلب؟',body:'أرغب في معرفة الفحوصات العامة التي تناسب المتابعة الوقائية لصحة القلب.',age:42,gender:'ذكر',status:'pending',views:184,created_at:now,specialty:demoSpecialties[1],answers:[]},
+ {id:'q-demo-2',specialty_id:'sp-psych',author_name:'مستخدم SB1',title:'كيف أتعامل مع التوتر المتكرر؟',body:'أعاني من توتر متكرر وأريد معرفة الخطوات العامة التي تساعدني على تنظيمه ومتى أراجع مختصاً.',age:31,gender:'أنثى',status:'pending',views:231,created_at:now,specialty:demoSpecialties[2],answers:[]},
+ {id:'q-demo-3',specialty_id:'sp-pediatrics',author_name:'مستخدم SB1',title:'متى يحتاج الطفل إلى مراجعة طبيب الأطفال؟',body:'ما العلامات التي تستدعي التواصل مع طبيب الأطفال بدلاً من الاكتفاء بالمتابعة المنزلية؟',age:6,gender:'أنثى',status:'pending',views:96,created_at:now,specialty:demoSpecialties[3],answers:[]},
 ];
 export const demoAnswers: Answer[] = [
  {id:'ans-demo-1',question_id:'q-demo-1',doctor_id:'doc-3',body:'تختلف الفحوصات حسب العمر وعوامل الخطورة والتاريخ المرضي. من الأفضل تحديد خطة متابعة مع طبيبك بعد تقييم هذه العوامل.',helpful_count:42,created_at:now,doctor:demoDoctors[2]},

@@ -27,7 +27,7 @@ export default async function handler(req:any, res:any) {
     params.set('success_url', successUrl);
     params.set('cancel_url', cancelUrl);
     if (body.customer_email) params.set('customer_email', body.customer_email);
-    const feePercent = Math.max(0, Math.min(100, Number(process.env.SB1_PLATFORM_FEE_PERCENT || 20)));
+    const feePercent = Math.max(0, Math.min(100, Number(process.env.SB1_PLATFORM_FEE_PERCENT || 30)));
     const destination = process.env.STRIPE_CONNECT_ACCOUNT_ID;
     if (destination) {
       params.set('payment_intent_data[application_fee_amount]', String(Math.round(cents * feePercent / 100)));

@@ -34,6 +34,12 @@ export default function FavoritesPage() {
     { key: 'product', label: t('favorites.products') },
     { key: 'test', label: t('favorites.tests') },
     { key: 'course', label: t('favorites.courses') },
+    { key: 'reel', label: 'ريلز' },
+    { key: 'history', label: 'هيستوري' },
+    { key: 'audio', label: 'صوت' },
+    { key: 'book', label: 'كتاب' },
+    { key: 'post', label: 'منشور' },
+    { key: 'comment', label: 'تعليق' },
   ];
 
   const filtered = activeTab === 'all' ? favorites : favorites.filter((f) => f.item_type === activeTab);
