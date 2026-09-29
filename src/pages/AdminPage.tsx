@@ -166,7 +166,16 @@ export default function AdminPage() {
   };
 
   const handleAdd = async (table: string) => {
-    const { error } = await supabase.from(table).insert(addForm);
+    const contentTables = new Set(['doctors','articles','doctor_videos','doctor_audio','courses','specialty_library_items']);
+    const payload = { ...addForm } as Record<string, any>;
+    const selectedLanguage = payload.content_language || 'ar';
+    delete payload.content_language;
+    if (contentTables.has(table)) {
+      const translationFields: Record<string, any> = {};
+      for (const key of ['name','bio','title','excerpt','body','description','source']) if (payload[key] != null) translationFields[key] = payload[key];
+      payload.translations = { [selectedLanguage]: translationFields };
+    }
+    const { error } = await supabase.from(table).insert(payload);
     if (!error) {
       setShowAdd(null);
       setAddForm({});
@@ -571,6 +580,8 @@ export default function AdminPage() {
             <div className="space-y-3">
               {showAdd === 'doctors' && (
                 <>
+                  <label className="text-sm font-semibold">لغة المحتوى</label>
+                  <select className="input-field" value={addForm.content_language || 'ar'} onChange={(e) => setAddForm({ ...addForm, content_language: e.target.value })}><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
                   <input placeholder="اسم الطبيب" className="input-field" onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} />
                   <textarea placeholder="نبذة" className="input-field" onChange={(e) => setAddForm({ ...addForm, bio: e.target.value })} />
                   <input placeholder="المدينة" className="input-field" onChange={(e) => setAddForm({ ...addForm, city: e.target.value })} />
@@ -585,6 +596,8 @@ export default function AdminPage() {
               )}
               {showAdd === 'articles' && (
                 <>
+                  <label className="text-sm font-semibold">لغة المحتوى</label>
+                  <select className="input-field" value={addForm.content_language || 'ar'} onChange={(e) => setAddForm({ ...addForm, content_language: e.target.value })}><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
                   <input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
                   <input placeholder="مقتطف" className="input-field" onChange={(e) => setAddForm({ ...addForm, excerpt: e.target.value })} />
                   <textarea placeholder="المحتوى" rows={5} className="input-field" onChange={(e) => setAddForm({ ...addForm, body: e.target.value })} />
@@ -599,6 +612,8 @@ export default function AdminPage() {
               )}
               {showAdd === 'videos' && (
                 <>
+                  <label className="text-sm font-semibold">لغة المحتوى</label>
+                  <select className="input-field" value={addForm.content_language || 'ar'} onChange={(e) => setAddForm({ ...addForm, content_language: e.target.value })}><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
                   <input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
                   <textarea placeholder="الوصف" className="input-field" onChange={(e) => setAddForm({ ...addForm, description: e.target.value })} />
                   <input placeholder="رابط الفيديو" className="input-field" onChange={(e) => setAddForm({ ...addForm, video_url: e.target.value })} />
@@ -612,6 +627,8 @@ export default function AdminPage() {
               )}
               {showAdd === 'audio' && (
                 <>
+                  <label className="text-sm font-semibold">لغة المحتوى</label>
+                  <select className="input-field" value={addForm.content_language || 'ar'} onChange={(e) => setAddForm({ ...addForm, content_language: e.target.value })}><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
                   <input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
                   <textarea placeholder="الوصف" className="input-field" onChange={(e) => setAddForm({ ...addForm, description: e.target.value })} />
                   <input placeholder="رابط الصوت" className="input-field" onChange={(e) => setAddForm({ ...addForm, audio_url: e.target.value })} />
@@ -624,6 +641,8 @@ export default function AdminPage() {
               )}
               {showAdd === 'courses' && (
                 <>
+                  <label className="text-sm font-semibold">لغة المحتوى</label>
+                  <select className="input-field" value={addForm.content_language || 'ar'} onChange={(e) => setAddForm({ ...addForm, content_language: e.target.value })}><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
                   <input placeholder="العنوان" className="input-field" onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} />
                   <textarea placeholder="الوصف" className="input-field" onChange={(e) => setAddForm({ ...addForm, description: e.target.value })} />
                   <input placeholder="السعر" type="number" className="input-field" onChange={(e) => setAddForm({ ...addForm, price: e.target.value })} />
