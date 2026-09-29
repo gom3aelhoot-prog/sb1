@@ -92,7 +92,7 @@ export default function PageProfileTools({ canManage=false, pageId='current', pa
    const message=`صفحة SB1: ${c.name}\nالرابط: ${c.link}\nPIN: ${c.pin}\nكلمة المرور: ${c.password}\nالمدة: ${c.expires||'بدون تاريخ انتهاء'}`;
    const target=giftTo.trim();
    const shareUrl=target?target:'mailto:?subject='+encodeURIComponent('صفحة SB1')+'&body='+encodeURIComponent(message);
-   if(target&&/^https?:\\/\\//.test(target))window.open(target,'_blank','noopener,noreferrer');else window.location.href=shareUrl;
+   if(target&&(target.startsWith('http://')||target.startsWith('https://')))window.open(target,'_blank','noopener,noreferrer');else window.location.href=shareUrl;
    navigator.clipboard?.writeText(message).catch(()=>{});
  };
  const togglePermission=(p:string)=>setPermissions(v=>v.includes(p)?v.filter(x=>x!==p):[...v,p]);
