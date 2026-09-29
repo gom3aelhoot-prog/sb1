@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, BookOpen, MessageCircle, Stethoscope, Users, Video } from 'lucide-react';
 import { useRouter, getPathOnly } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
+import { useApp } from '@/i18n/AppContext';
 import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 import { demoDoctors, demoQuestions } from '@/lib/demoData';
-import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty, localizedSpecialty } from '@/lib/catalog';
+import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty } from '@/lib/catalog';
 import { supabase } from '@/lib/supabase';
 import DoctorCard from '@/components/DoctorCard';
 import QuestionCard from '@/components/QuestionCard';
@@ -21,9 +22,10 @@ const groups = [
 export default function SpecialtyHubPage() {
   const { path, navigate } = useRouter();
   const { lang, dir, specialtyName } = useI18n();
+  const { country } = useApp();
   const slug = getPathOnly(path).split('/')[2] || '';
   const specialty = comprehensiveSpecialties.find(s => s.slug === slug);
-  const [activeTab, setActiveTab] = useState<'doctors'|'questions'|'library'>('questions');
+  const [activeTab, setActiveTab] = useState<'doctors'|'questions'|'library'>('doctors');
   const [loadedDoctors, setLoadedDoctors] = useState<any[]>([]);
   const [loadedQuestions, setLoadedQuestions] = useState<any[]>([]);
   useEffect(() => {
@@ -38,9 +40,9 @@ export default function SpecialtyHubPage() {
     })().catch(() => {});
   }, [slug]);
 
-  const title = specialty ? localizedSpecialty(specialty, lang) : 'التخصص';
-  const relatedDoctors = useMemo(() => { const db=loadedDoctors.filter(d=>d.native_language===lang); const virtual=virtualDoctorsForSpecialty(slug,lang,10); const ids=new Set(db.map(d=>d.id)); return [...db,...virtual.filter(d=>!ids.has(d.id))].slice(0,10); }, [loadedDoctors,slug,lang]);
-  const relatedQuestions = useMemo(() => { const generated=virtualQuestionsForSpecialty(slug,lang,50); const local=loadedQuestions.filter(q=>(q as any).language===lang || !(q as any).language); return [...local,...generated].slice(0,50); }, [loadedQuestions,slug,lang]);
+  const title = specialty ? (lang === 'en' ? specialty.en : lang === 'de' ? specialty.de : lang === 'ru' ? specialty.ru : specialty.ar) : 'التخصص';
+  const relatedDoctors = useMemo(() => loadedDoctors.length ? loadedDoctors : virtualDoctorsForSpecialty(slug, lang, 25, country.code), [loadedDoctors, slug, lang, country.code]);
+  const relatedQuestions = useMemo(() => loadedQuestions.length ? loadedQuestions : virtualQuestionsForSpecialty(slug, lang, 50), [loadedQuestions, slug, lang]);
 
   if (!specialty) {
     return <div className="min-h-screen pt-28 pb-16 text-center" dir={dir}><h1 className="text-2xl font-bold">التخصص غير موجود</h1><button onClick={() => navigate('/specialties')} className="btn-primary mt-5">العودة للتخصصات</button></div>;
@@ -66,7 +68,7 @@ export default function SpecialtyHubPage() {
         <div className="mt-6 flex flex-wrap gap-3">
           <button onClick={() => navigate('/ask?specialty='+encodeURIComponent(slug))} className="rounded-xl bg-white px-5 py-3 text-sm font-bold text-teal-700">اسأل عن حالتك</button>
           <button onClick={() => navigate('/sessions?specialty='+encodeURIComponent(slug))} className="rounded-xl bg-white/15 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/30">اطلب جلسة فيديو شخصية</button>
-          <button onClick={() => navigate('/questions?specialty='+encodeURIComponent(slug))} className="rounded-xl bg-white/15 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/30">شاهد الأسئلة والأجوبة</button><button onClick={() => navigate('/media?specialty='+encodeURIComponent(slug))} className="rounded-xl bg-white/15 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/30">المحتوى والمكتبة</button>
+          <button onClick={() => navigate('/questions?specialty='+encodeURIComponent(slug))} className="rounded-xl bg-white/15 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/30">شاهد الأسئلة والأجوبة</button>
         </div>
       </section>
 
@@ -82,8 +84,8 @@ export default function SpecialtyHubPage() {
       </section>}
 
       {activeTab==='questions' && <section className="mt-6">
-        <div className="mb-4 flex items-center justify-between"><h2 className="text-xl font-bold text-gray-800">أسئلة وأجوبة {title}</h2><div className="flex flex-wrap gap-2"><button onClick={() => navigate('/ask?specialty='+encodeURIComponent(slug))} className="btn-primary">اكتب سؤالك</button><button onClick={() => navigate('/doctors?specialty='+encodeURIComponent(slug))} className="rounded-xl border bg-white px-4 py-2 font-bold text-teal-700">أطباء تخصص {title}</button><button onClick={() => navigate('/sessions?specialty='+encodeURIComponent(slug))} className="rounded-xl border bg-white px-4 py-2 font-bold text-teal-700">الجلسات المجانية</button></div></div>
-        {relatedQuestions.length ? <div className="mx-auto max-w-4xl space-y-4">{relatedQuestions.map(q => <QuestionCard key={q.id} question={q}/>)}</div> : <div className="rounded-2xl bg-white p-8 text-center text-gray-500">لا توجد أسئلة منشورة في هذه النسخة التجريبية بعد. ابدأ أول سؤال.</div>}
+        <div className="mb-4 flex items-center justify-between"><h2 className="text-xl font-bold text-gray-800">أسئلة وأجوبة {title}</h2><button onClick={() => navigate('/ask?specialty='+encodeURIComponent(slug))} className="btn-primary">اكتب سؤالك</button></div>
+        {relatedQuestions.length ? <div className="grid grid-cols-1 gap-5 md:grid-cols-2">{relatedQuestions.map(q => <QuestionCard key={q.id} question={q}/>)}</div> : <div className="rounded-2xl bg-white p-8 text-center text-gray-500">لا توجد أسئلة منشورة في هذه النسخة التجريبية بعد. ابدأ أول سؤال.</div>}
       </section>}
 
       {activeTab==='library' && <section className="mt-6 grid gap-5 md:grid-cols-3">

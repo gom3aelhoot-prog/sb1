@@ -175,8 +175,6 @@ const uz: TranslationData = {
     mauritania: "Mavritaniya",
     sudan: "Sudan",
     somalia: "Somali",
-    comoros: 'Komor orollari',
-    djibouti: 'Jibuti',
   },
   qa: {
     title: "Tibbiy savol va maslahatlar",

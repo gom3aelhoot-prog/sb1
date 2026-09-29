@@ -13,12 +13,10 @@ import {
   type TranslationData,
   LANGUAGES,
   ARAB_COUNTRIES,
-  COUNTRY_OPTIONS,
-  LANGUAGE_DEFAULT_COUNTRY,
+  ALL_COUNTRIES,
   CURRENCY_RATES,
 } from '@/types/i18n';
 import { translations } from '@/i18n/translations';
-import { getDiscountConfig } from '@/lib/adConfig';
 
 interface AppContextValue {
   language: LanguageCode;
@@ -51,13 +49,15 @@ function getInitialLanguage(): LanguageCode {
 }
 
 function getInitialCountry(): CountryInfo {
-  if (typeof window === 'undefined') return ARAB_COUNTRIES.find(c=>c.code==='EG') || ARAB_COUNTRIES[0];
+  if (typeof window === 'undefined') return ALL_COUNTRIES[0];
   const stored = localStorage.getItem(STORAGE_KEYS.country);
   if (stored) {
-    const found = COUNTRY_OPTIONS.find((c) => c.code === stored);
+    const found = ALL_COUNTRIES.find((c) => c.code === stored);
     if (found) return found;
   }
-  return ARAB_COUNTRIES[0];
+  const language = (localStorage.getItem(STORAGE_KEYS.language) || 'ar') as LanguageCode;
+  const defaults: Partial<Record<LanguageCode,string>> = { ar:'SA', en:'GB', de:'DE', ru:'RU', uz:'UZ', hy:'AM', tg:'TG', uk:'UA', az:'AZ', am:'ET', ka:'KA' };
+  return ALL_COUNTRIES.find((c) => c.code === defaults[language]) || ALL_COUNTRIES[0];
 }
 
 function getInitialDiscountDismissed(): boolean {
@@ -68,37 +68,36 @@ function getInitialDiscountDismissed(): boolean {
 export function AppProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<LanguageCode>(getInitialLanguage);
   const [country, setCountryState] = useState<CountryInfo>(getInitialCountry);
-  const [discountDismissedAt, setDiscountDismissedAt] = useState<number>(() => Number(localStorage.getItem('sb1_discount_dismissed_at') || 0));
-  const [discountCloseCount, setDiscountCloseCount] = useState<number>(() => Number(localStorage.getItem('sb1_discount_close_count') || 0));
-  const [discountConfig,setDiscountConfig]=useState(getDiscountConfig());
+  const [discountDismissed, setDiscountDismissed] = useState<boolean>(getInitialDiscountDismissed);
   const [showDiscount, setShowDiscount] = useState<boolean>(false);
 
-  useEffect(()=>{const sync=()=>setDiscountConfig(getDiscountConfig());window.addEventListener('sb1-ad-config-change',sync);return()=>window.removeEventListener('sb1-ad-config-change',sync)},[]);
   const direction: Direction = LANGUAGES[language].direction;
 
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = direction;
+    localStorage.setItem(STORAGE_KEYS.language, language);
   }, [language, direction]);
 
   useEffect(() => {
-    if (!discountConfig.enabled) { setShowDiscount(false); return; }
-    const now=Date.now();
-    const cooldownMinutes = discountDismissedAt ? (discountCloseCount <= 1 ? 30 : 60) : 0;
-    const cooldown=cooldownMinutes*60000;
-    const remaining=Math.max(0,cooldown-(now-discountDismissedAt));
-    const delay=discountDismissedAt ? remaining : 2000;
-    const timer=setTimeout(()=>setShowDiscount(true),delay);
-    return()=>clearTimeout(timer);
-  }, [discountConfig.enabled,discountDismissedAt,discountCloseCount]);
+    const sync = (event: Event) => {
+      const next = (event as CustomEvent<LanguageCode>).detail;
+      if (next && LANGUAGES[next]) setLanguageState(next);
+    };
+    window.addEventListener('sb1-language-change', sync);
+    return () => window.removeEventListener('sb1-language-change', sync);
+  }, []);
+
+  useEffect(() => {
+    // Show discount banner after a short delay on first visit (only if not dismissed)
+    if (!discountDismissed) {
+      const timer = setTimeout(() => setShowDiscount(true), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [discountDismissed]);
 
   const setLanguage = useCallback((lang: LanguageCode) => {
     setLanguageState(lang);
-    const defaultCountryCode = LANGUAGE_DEFAULT_COUNTRY[lang];
-    if (defaultCountryCode) {
-      const nextCountry = COUNTRY_OPTIONS.find(c=>c.code===defaultCountryCode);
-      if (nextCountry) { setCountryState(nextCountry); localStorage.setItem(STORAGE_KEYS.country,nextCountry.code); }
-    }
     localStorage.setItem(STORAGE_KEYS.language, lang);
     window.dispatchEvent(new CustomEvent('sb1-language-change', { detail: lang }));
   }, []);
@@ -109,14 +108,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const dismissDiscount = useCallback(() => {
-    const now=Date.now();
+    setDiscountDismissed(true);
     setShowDiscount(false);
-    const nextCount=discountCloseCount+1;
-    setDiscountDismissedAt(now);
-    setDiscountCloseCount(nextCount);
-    localStorage.setItem('sb1_discount_dismissed_at',String(now));
-    localStorage.setItem('sb1_discount_close_count',String(nextCount));
-    localStorage.setItem(STORAGE_KEYS.discountDismissed,'true');
+    localStorage.setItem(STORAGE_KEYS.discountDismissed, 'true');
   }, []);
 
   const formatPrice = useCallback(
@@ -132,7 +126,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [country, language]
   );
 
-  const isAnonymous = typeof window === 'undefined' ? true : !localStorage.getItem('sb1_account_user_id') && !localStorage.getItem('sb1_account_email');
+  const isAnonymous = true; // No auth in this phase — all visitors are anonymous
 
   const value: AppContextValue = {
     language,
@@ -140,7 +134,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLanguage,
     t: translations[language],
     isAnonymous,
-    hasSeenDiscount: Boolean(discountDismissedAt),
+    hasSeenDiscount: discountDismissed,
     dismissDiscount,
     showDiscount,
     setShowDiscount,

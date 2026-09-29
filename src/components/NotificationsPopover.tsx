@@ -10,7 +10,6 @@ import {
   X,
 } from 'lucide-react';
 import { useApp } from '@/i18n/AppContext';
-import { getNotifications, runAppointmentReminders } from '@/lib/appointments';
 
 type NotificationType = 'doctorAnswered' | 'questionVoted' | 'doctorVerified' | 'appointmentReminder' | 'newMessage';
 
@@ -66,10 +65,8 @@ export function NotificationsPopover() {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const demo=buildDemoNotifications(t); const appointmentNotes=getNotifications().map(n=>({id:n.id,type:'appointmentReminder' as NotificationType,text:n.text,createdAt:new Date(n.createdAt).getTime(),read:n.read})); setNotifications([...appointmentNotes,...demo].slice(0,30));
+    setNotifications(buildDemoNotifications(t));
   }, [t]);
-
-  useEffect(() => { const tick=()=>{ runAppointmentReminders('ar'); const notes=getNotifications().map(n=>({id:n.id,type:'appointmentReminder' as NotificationType,text:n.text,createdAt:new Date(n.createdAt).getTime(),read:n.read})); if(notes.length)setNotifications(prev=>[...notes,...prev.filter(x=>!notes.some(n=>n.id===x.id))].slice(0,30)); }; tick(); const id=window.setInterval(tick,30000); window.addEventListener('sb1-appointments-change',tick); return()=>{clearInterval(id);window.removeEventListener('sb1-appointments-change',tick)} }, []);
 
   useEffect(() => {
     function onClick(e: MouseEvent) {

@@ -3,11 +3,10 @@ import { ArrowRight, Clock, Eye, User, Calendar, Share2 } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Article } from '@/lib/supabase';
-import { virtualArticlesForSpecialty } from '@/lib/catalog';
 
 export default function ArticleDetailPage({ id }: { id: string }) {
   const { navigate } = useRouter();
-  const { specialtyName,lang } = useI18n();
+  const { specialtyName } = useI18n();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgError, setImgError] = useState(false);
@@ -23,12 +22,10 @@ export default function ArticleDetailPage({ id }: { id: string }) {
       if (art) {
         setArticle(art);
         await supabase.from('articles').update({ views: (art.views || 0) + 1 }).eq('id', id);
-      } else if (id.startsWith('catalog-art-')) {
-        const parts=id.split('-'); const slug=parts.slice(3,-1).join('-'); const generated=virtualArticlesForSpecialty(slug,lang,50).find(a=>a.id===id); if(generated) setArticle(generated);
       }
       setLoading(false);
     })();
-  }, [id,lang]);
+  }, [id]);
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('ar', { year: 'numeric', month: 'long', day: 'numeric' });

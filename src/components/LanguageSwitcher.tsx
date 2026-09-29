@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Check, Globe, MapPin } from 'lucide-react';
 import { useApp } from '@/i18n/AppContext';
 import { useI18n } from '@/lib/i18n';
-import { COUNTRY_OPTIONS, type CountryInfo } from '@/types/i18n';
+import { ALL_COUNTRIES, type CountryInfo } from '@/types/i18n';
+import { countryLabel } from '@/lib/catalog';
 
 const PLATFORM_LANGUAGES = [
   ['ar','🇸🇦','العربية'],['en','🇬🇧','English'],['de','🇩🇪','Deutsch'],['ru','🇷🇺','Русский'],
@@ -25,12 +26,13 @@ function LanguageList({ onClose }: { onClose?: () => void }) {
 
 function CountryList({ onClose }: { onClose?: () => void }) {
   const { t, country, setCountry } = useApp();
+  const { lang } = useI18n();
   return <div className="max-h-72 overflow-y-auto scrollbar-thin">
     <div className="px-3 py-2 text-xs font-medium text-neutral-500 uppercase tracking-wide">{t.language.region}</div>
-    {COUNTRY_OPTIONS.map((c: CountryInfo) => (
+    {ALL_COUNTRIES.map((c: CountryInfo) => (
       <button key={c.code} onClick={() => { setCountry(c); onClose?.(); }}
         className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-all ${country.code === c.code ? 'bg-primary-50 text-primary-700 font-semibold' : 'text-neutral-700 hover:bg-neutral-50'}`}>
-        <span className="flex items-center gap-3"><span className="text-xl">{c.flag}</span><span>{t.countries[c.nameKey] || c.nameKey}</span></span>
+        <span className="flex items-center gap-3"><span className="text-xl">{c.flag}</span><span>{countryLabel(lang,c.code)}</span></span>
         <span className="text-xs text-neutral-500">{c.currencySymbol}</span>
       </button>
     ))}

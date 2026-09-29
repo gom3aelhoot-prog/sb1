@@ -1,0 +1,4 @@
+export type ContactSettings={email:string;phone:string;address:string;facebook:string;instagram:string;twitter:string;linkedin:string;youtube:string;telegram:string;whatsapp:string;website:string};
+export const defaultContactSettings:ContactSettings={email:'',phone:'',address:'',facebook:'',instagram:'',twitter:'',linkedin:'',youtube:'',telegram:'',whatsapp:'',website:''};
+export function readContactSettings():ContactSettings{if(typeof window==='undefined')return defaultContactSettings;try{return {...defaultContactSettings,...JSON.parse(localStorage.getItem('sb1_contact_settings')||'{}')}}catch{return defaultContactSettings}}
+export function saveContactSettings(v:ContactSettings){if(typeof window==='undefined')return;localStorage.setItem('sb1_contact_settings',JSON.stringify(v));window.dispatchEvent(new CustomEvent('sb1-contact-settings'))}

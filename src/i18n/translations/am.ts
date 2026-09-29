@@ -1,0 +1,3 @@
+import ar from './ar';
+const am={...ar,nav:{...ar.nav,home:'መነሻ',specialties:'ስፔሻሊቲዎች',howItWorks:'እንዴት ይሰራል',about:'ስለ እኛ',contact:'ያግኙን',blog:'የሕክምና ይዘት',search:'ስፔሻሊስት ወይም ስፔሻሊቲ ይፈልጉ...',signIn:'ግባ',signUp:'መለያ ፍጠር',dashboard:'ዳሽቦርድ',logout:'ውጣ',profile:'መገለጫ',appointments:'ቀጠሮዎች',settings:'ቅንብሮች',getDiscount:'10% ቅናሽ'},language:{...ar.language,selectLanguage:'ቋንቋ',selectCountry:'አገር',region:'አገሮች'},hero:{...ar.hero,badge:'የታመነ የሕክምና መድረክ',title:'የሕክምና ምክርዎ በማንኛውም ቦታ',ctaPrimary:'ምክር ይያዙ',ctaSecondary:'ስፔሻሊቲዎችን ይመልከቱ'}};
+export default am;

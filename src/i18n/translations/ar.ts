@@ -175,8 +175,6 @@ const ar: TranslationData = {
     mauritania: 'موريتانيا',
     sudan: 'السودان',
     somalia: 'الصومال',
-    comoros: 'جزر القمر',
-    djibouti: 'جيبوتي',
   },
   qa: {
     title: 'الأسئلة والاستشارات الطبية',

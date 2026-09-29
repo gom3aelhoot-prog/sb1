@@ -175,8 +175,6 @@ const az: TranslationData = {
     mauritania: 'Mavritaniya',
     sudan: 'Sudan',
     somalia: 'Somali',
-    comoros: 'Komor adaları',
-    djibouti: 'Cibuti',
   },
   qa: {
     title: 'Tibbi suallar və məsləhətlər',

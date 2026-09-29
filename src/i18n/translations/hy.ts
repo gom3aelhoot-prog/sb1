@@ -175,8 +175,6 @@ const hy: TranslationData = {
     mauritania: 'Մավրիտանիա',
     sudan: 'Սուդան',
     somalia: 'Սոմալի',
-    comoros: 'Կոմորներ',
-    djibouti: 'Ջիբութի',
   },
   qa: {
     title: 'Բժշկական հարցեր և խորհրդատվություններ',

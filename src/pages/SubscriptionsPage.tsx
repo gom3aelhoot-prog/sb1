@@ -3,28 +3,21 @@ import { Check, Crown, Sparkles, TrendingUp } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type SubscriptionPlan } from '@/lib/supabase';
 import { useRouter } from '@/lib/router';
-import { getCountryServicePrice } from '@/lib/countryPricing';
-import { useApp } from '@/i18n/AppContext';
 
 export default function SubscriptionsPage() {
   const { t, lang } = useI18n();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
-  const { country } = useApp();
-  const [subscriptionPrice, setSubscriptionPrice] = useState(9.99);
   const { navigate } = useRouter();
-
-  useEffect(() => { getCountryServicePrice(country,'subscription').then(p=>setSubscriptionPrice(p.local_price)); }, [country.code]);
 
   useEffect(() => {
     supabase.from('subscription_plans').select('*').eq('is_active', true).order('duration_months').then(({ data }) => {
-      const fallback:any[]=[
-        {id:'monthly',name:'Monthly',name_ar:'شهري',duration_months:1,price:9.99,features:'3 أسئلة يومياً، 1 كتاب، 1 ندوة، 1 دورة، 60 دقيقة فيديو'},
-        {id:'quarterly',name:'Quarterly',name_ar:'3 أشهر',duration_months:3,price:24.99,features:'5 أسئلة يومياً، 3 كتب، 3 ندوات، دورتان، 180 دقيقة فيديو'},
-        {id:'half_year',name:'Half Year',name_ar:'6 أشهر',duration_months:6,price:44.99,features:'8 أسئلة يومياً، 6 كتب، 6 ندوات، 4 دورات، 360 دقيقة فيديو'},
-        {id:'yearly',name:'Yearly',name_ar:'سنوي',duration_months:12,price:79.99,features:'12 سؤالاً يومياً، 12 كتاباً، 12 ندوة، 8 دورات، 720 دقيقة فيديو'}
-      ];
-      setPlans((data && data.length ? data : fallback) as SubscriptionPlan[]);setLoading(false);
+      setPlans((data && data.length ? data : [
+        { id:'sub-free', name:'Free', name_ar:'مجاني', duration_months:1, price:0, daily_questions_limit:1, weekly_questions_limit:3, free_courses_limit:0, free_books_limit:1, features:'سؤال مجاني، مكتبة أساسية', is_active:true, created_at:new Date().toISOString() },
+        { id:'sub-plus', name:'Plus', name_ar:'بلس', duration_months:1, price:9.99, daily_questions_limit:3, weekly_questions_limit:10, free_courses_limit:1, free_books_limit:5, features:'أسئلة أكثر، كتب ودورات مخفضة', is_active:true, created_at:new Date().toISOString() },
+        { id:'sub-pro', name:'Pro', name_ar:'احترافي', duration_months:1, price:24.99, daily_questions_limit:10, weekly_questions_limit:30, free_courses_limit:3, free_books_limit:20, features:'أولوية، مكتبة كاملة، خصومات', is_active:true, created_at:new Date().toISOString() },
+      ]) as SubscriptionPlan[]);
+      setLoading(false);
     });
   }, []);
 
@@ -37,19 +30,6 @@ export default function SubscriptionsPage() {
         <h1 className="text-3xl font-bold text-gray-800 text-center mb-2">{t('subs.title')}</h1>
         <p className="text-gray-500 text-center mb-10">{t('subs.subtitle')}</p>
 
-        <section className="mb-10 rounded-3xl border bg-white p-6">
-          <h2 className="text-2xl font-black">{lang==='ar'?'باقات VIP المجمعة':'VIP Bundles'}</h2>
-          <p className="mt-1 text-sm text-gray-500">{lang==='ar'?'باقات تجمع عدة خدمات في اشتراك واحد.':'Bundles combining several services.'}</p>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {[['VIP المعرفة','كتب + دورات + مكتبة طبية','39.99'],['VIP المحتوى','أسئلة + مقالات + فيديوهات + تسجيلات صوتية','29.99'],['VIP الشامل','كتب + دورات + أسئلة + محتوى + فيديوهات','59.99']].map(([name,desc,price])=><div key={name} className="rounded-2xl border p-5"><Crown className="h-7 w-7 text-amber-500"/><h3 className="mt-3 font-extrabold">{name}</h3><p className="mt-2 text-sm text-gray-500">{desc}</p><b className="mt-4 block text-xl">{price} {country.currencySymbol}</b><button onClick={()=>navigate('/payments?type=vip&amount='+price)} className="mt-4 w-full rounded-xl bg-teal-700 px-4 py-3 font-bold text-white">{lang==='ar'?'اشترك الآن':'Subscribe'}</button></div>)}
-          </div>
-        </section>
-        <section className="mb-10 rounded-3xl border bg-slate-50 p-6">
-          <h2 className="text-2xl font-black">{lang==='ar'?'باقات الأخصائيين':'Specialist Bundles'}</h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {[['باقة النمو','صفحة احترافية + نشر محتوى + أدوات تواصل','49.99'],['باقة التدريب','دورة + غرفة اجتماعات + دردشة الدورة','69.99'],['باقة العيادة','خدمات المؤسسة + محتوى + عروض للمرضى','89.99']].map(([name,desc,price])=><div key={name} className="rounded-2xl bg-white border p-5"><h3 className="font-extrabold">{name}</h3><p className="mt-2 text-sm text-gray-500">{desc}</p><b className="mt-4 block text-xl">{price} {country.currencySymbol}</b><button onClick={()=>navigate('/payments?type=specialist_bundle&amount='+price)} className="mt-4 w-full rounded-xl bg-indigo-700 px-4 py-3 font-bold text-white">{lang==='ar'?'عرض الباقة':'View bundle'}</button></div>)}
-          </div>
-        </section>
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
@@ -66,7 +46,7 @@ export default function SubscriptionsPage() {
             {plans.map((plan, i) => {
               const Icon = planIcons[i] || Sparkles;
               const color = planColors[i] || 'teal';
-              const features = (plan.features || '').split('،').filter(Boolean); const displayPrice = Number(plan.price||0);
+              const features = (plan.features || '').split('،').filter(Boolean);
               return (
                 <div key={plan.id} className={`card p-8 relative overflow-hidden ${i === 1 ? 'ring-2 ring-teal-500' : ''}`}>
                   {i === 1 && (
@@ -79,8 +59,8 @@ export default function SubscriptionsPage() {
                   </div>
                   <h3 className="text-lg font-bold text-gray-800 mb-1">{plan.name_ar || plan.name}</h3>
                   <div className="flex items-baseline gap-1 mb-4">
-                    <span className="text-3xl font-bold text-gray-800">{displayPrice===0?'0':displayPrice.toLocaleString(lang==='ar'?'ar-EG':'en-US')} {country.currencySymbol}</span>
-                    <span className="text-sm text-gray-400">{plan.duration_months===1?'شهرياً':`كل ${plan.duration_months} أشهر`}</span>
+                    <span className="text-3xl font-bold text-gray-800">${plan.price}</span>
+                    <span className="text-sm text-gray-400">{t('subs.per_month')}</span>
                   </div>
                   <ul className="space-y-2 mb-6">
                     {features.map((f, fi) => (
@@ -90,7 +70,7 @@ export default function SubscriptionsPage() {
                       </li>
                     ))}
                   </ul>
-                  <button onClick={() => navigate(plan.price === 0 ? '/register' : `/payments?type=subscription&plan=${plan.id}&amount=${displayPrice}`)} className={`btn-primary w-full ${i !== 1 ? 'btn-secondary' : ''}`}>
+                  <button onClick={() => navigate(plan.price === 0 ? '/register' : `/payments?type=subscription&plan=${plan.id}&amount=${plan.price}`)} className={`btn-primary w-full ${i !== 1 ? 'btn-secondary' : ''}`}>
                     {t('subs.choose')}
                   </button>
                 </div>

@@ -8,7 +8,6 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useApp } from '@/i18n/AppContext';
-import { Video, MessageCircle, Library } from 'lucide-react';
 
 interface QuickCard {
   icon: LucideIcon;
@@ -29,10 +28,54 @@ export function BottomActionCards() {
   const ArrowIcon = direction === 'rtl' ? ArrowLeft : ArrowRight;
 
   const cards: QuickCard[] = [
-    { icon: MessageCircle, titleKey: t.quickAccess.articles, descKey: 'جلسات مجانية نصية وأسئلة وأجوبة تجريبية', actionKey: 'فتح الجلسات المجانية', iconBg:'bg-primary-100',iconText:'text-primary-700',cardBg:'bg-white',border:'border-neutral-200',hoverBorder:'hover:border-primary-300' },
-    { icon: Video, titleKey: 'جلسات الفيديو المدفوعة', descKey: 'اختر طبيبك أو أرسل طلباً للأطباء ليقدموا عروضهم', actionKey: 'اختيار طبيب', iconBg:'bg-primary-100',iconText:'text-primary-700',cardBg:'bg-white',border:'border-neutral-200',hoverBorder:'hover:border-primary-300' },
-    { icon: MessageCircle, titleKey: 'طلب جلسة بمواصفاتك', descKey: 'حدد المشكلة والتخصص والمدة وعدد الأطباء المطلوب ردهم', actionKey: 'طلب للأطباء', iconBg:'bg-blue-100',iconText:'text-blue-700',cardBg:'bg-white',border:'border-blue-200',hoverBorder:'hover:border-blue-400' },
-    { icon: Library, titleKey: 'المحتوى الطبي والمكتبة', descKey: 'مقالات وفيديو وصوت وكتب ودورات حسب لغة المستخدم', actionKey: 'فتح المحتوى', iconBg:'bg-secondary-100',iconText:'text-secondary-700',cardBg:'bg-gradient-to-br from-secondary-50 to-primary-50',border:'border-secondary-200',hoverBorder:'hover:border-secondary-400',accent:true },
+    {
+      icon: FileText,
+      titleKey: t.quickAccess.articles,
+      descKey: t.quickAccess.articlesDesc,
+      countKey: t.quickAccess.articlesCount,
+      actionKey: t.quickAccess.explore,
+      iconBg: 'bg-primary-100',
+      iconText: 'text-primary-700',
+      cardBg: 'bg-white',
+      border: 'border-neutral-200',
+      hoverBorder: 'hover:border-primary-300',
+    },
+    {
+      icon: Building2,
+      titleKey: t.quickAccess.clinics,
+      descKey: t.quickAccess.clinicsDesc,
+      actionKey: t.quickAccess.bookNow,
+      iconBg: 'bg-primary-100',
+      iconText: 'text-primary-700',
+      cardBg: 'bg-white',
+      border: 'border-neutral-200',
+      hoverBorder: 'hover:border-primary-300',
+    },
+    {
+      icon: Users,
+      titleKey: t.quickAccess.specialists,
+      descKey: t.quickAccess.specialistsDesc,
+      countKey: t.quickAccess.specialistsCount,
+      actionKey: t.quickAccess.browse,
+      iconBg: 'bg-primary-100',
+      iconText: 'text-primary-700',
+      cardBg: 'bg-white',
+      border: 'border-neutral-200',
+      hoverBorder: 'hover:border-primary-300',
+    },
+    {
+      icon: Gem,
+      titleKey: t.quickAccess.subscribe,
+      descKey: t.quickAccess.subscribeDesc,
+      countKey: t.quickAccess.fromPrice,
+      actionKey: t.quickAccess.subscribeNow,
+      iconBg: 'bg-secondary-100',
+      iconText: 'text-secondary-700',
+      cardBg: 'bg-gradient-to-br from-secondary-50 to-primary-50',
+      border: 'border-secondary-200',
+      hoverBorder: 'hover:border-secondary-400',
+      accent: true,
+    },
   ];
 
   return (
@@ -49,7 +92,7 @@ export function BottomActionCards() {
             return (
               <a
                 key={i}
-                href={['/sessions', '/choose-doctor', '/choose-doctor?mode=request', '/media'][i]}
+                href={['/articles', '/clinics', '/doctors', '/subscriptions'][i]}
                 className={`group relative overflow-hidden rounded-2xl border ${card.border} ${card.cardBg} p-5 lg:p-6 text-start shadow-sm transition-all duration-300 ${card.hoverBorder} hover:shadow-xl hover:shadow-primary-500/5 hover:-translate-y-1`}
               >
                 {/* Icon */}

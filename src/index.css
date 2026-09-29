@@ -78,5 +78,3 @@
     text-wrap: balance;
   }
 }
-
-html,body,#root{max-width:100%;overflow-x:hidden;} @media (min-width:1024px){body{min-width:0;}}

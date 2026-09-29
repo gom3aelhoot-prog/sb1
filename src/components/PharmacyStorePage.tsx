@@ -19,12 +19,9 @@ import {
   AlertTriangle,
   Trash2,
   Navigation,
-  Heart,
-  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import { useApp } from '@/i18n/AppContext';
-import { addCart, toggleWishlist, isWishlisted } from '@/lib/commerce';
 
 type ProductCategory = 'sleep' | 'supplements' | 'vitamins' | 'painkillers';
 
@@ -105,8 +102,6 @@ export function PharmacyStorePage({ pharmacyId, onNavigate }: { pharmacyId: stri
   const [cartOpen, setCartOpen] = useState(false);
   const [address, setAddress] = useState('');
   const [orderState, setOrderState] = useState<'idle' | 'placing' | 'success' | 'error'>('idle');
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [, forceCommerce] = useState(0);
 
   const popularProducts = useMemo(() => PRODUCTS.filter((p) => p.popular), []);
 
@@ -121,8 +116,6 @@ export function PharmacyStorePage({ pharmacyId, onNavigate }: { pharmacyId: stri
   const grandTotalUSD = cartTotalUSD + deliveryFeeUSD;
 
   const addToCart = (product: Product) => {
-    addCart({item_type:'pharmacy',item_id:product.id,name:direction==='rtl'?product.nameAr:product.nameEn,image_url:product.image,unit_price:product.priceUSD,currency_code:'USD',quantity:1,metadata:{pharmacy_id:pharmacyId,category:product.category}});
-    forceCommerce(x=>x+1);
     setCart((prev) => {
       const existing = prev.find((i) => i.product.id === product.id);
       if (existing) return prev.map((i) => i.product.id === product.id ? { ...i, qty: i.qty + 1 } : i);
@@ -320,14 +313,14 @@ export function PharmacyStorePage({ pharmacyId, onNavigate }: { pharmacyId: stri
                   className="group bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/5 hover:border-primary-200"
                 >
                   {/* Product image */}
-                  <div onClick={() => setSelectedProduct(product)} className="relative aspect-square overflow-hidden bg-neutral-50 cursor-pointer">
+                  <div className="relative aspect-square overflow-hidden bg-neutral-50">
                     <img
                       src={product.image}
                       alt={product.nameEn}
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     {/* Category badge */}
-                    <button onClick={(e)=>{e.stopPropagation();toggleWishlist({item_type:'pharmacy',item_id:product.id,name:product.nameAr,image_url:product.image,unit_price:product.priceUSD,quantity:1});forceCommerce(x=>x+1)}} className="absolute top-2 end-2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow"><Heart className={'h-4 w-4 '+(isWishlisted('pharmacy',product.id)?'fill-rose-500 text-rose-500':'text-gray-500')}/></button><span className="absolute top-2 start-2 rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-bold text-neutral-600 shadow-sm">
+                    <span className="absolute top-2 start-2 rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-bold text-neutral-600 shadow-sm">
                       {t.pharmacyStore[`cat${product.category.charAt(0).toUpperCase() + product.category.slice(1)}` as keyof typeof t.pharmacyStore]}
                     </span>
                     {!product.inStock && (
@@ -341,7 +334,7 @@ export function PharmacyStorePage({ pharmacyId, onNavigate }: { pharmacyId: stri
 
                   {/* Product info */}
                   <div className="p-3">
-                    <button onClick={()=>setSelectedProduct(product)} className="text-sm font-bold text-neutral-900 leading-tight text-start hover:text-primary-700">{product.nameEn}</button>
+                    <p className="text-sm font-bold text-neutral-900 leading-tight">{product.nameEn}</p>
                     <p className="text-xs text-neutral-500 mt-0.5">{product.nameAr}</p>
                     <p className="text-[11px] text-neutral-400 mt-1">{product.doseEn}</p>
                     <p className="text-[11px] text-neutral-400">{product.doseAr}</p>
@@ -395,8 +388,6 @@ export function PharmacyStorePage({ pharmacyId, onNavigate }: { pharmacyId: stri
           )}
         </div>
       </div>
-
-      {selectedProduct && <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4" onClick={()=>setSelectedProduct(null)}><div className="max-w-2xl w-full rounded-3xl bg-white p-6 shadow-2xl" onClick={e=>e.stopPropagation()}><div className="flex items-start justify-between gap-4"><div><h2 className="text-2xl font-extrabold">{direction==='rtl'?selectedProduct.nameAr:selectedProduct.nameEn}</h2><p className="mt-1 text-gray-500">{direction==='rtl'?selectedProduct.doseAr:selectedProduct.doseEn}</p></div><button onClick={()=>setSelectedProduct(null)} className="rounded-xl p-2 hover:bg-gray-100"><X/></button></div><img src={selectedProduct.image} alt="" className="mt-5 h-64 w-full rounded-2xl object-cover"/><div className="mt-5 flex items-center justify-between"><b className="text-2xl text-primary-700">{formatPrice(selectedProduct.priceUSD)}</b><div className="flex gap-2"><button onClick={()=>{toggleWishlist({item_type:'pharmacy',item_id:selectedProduct.id,name:selectedProduct.nameAr,image_url:selectedProduct.image,unit_price:selectedProduct.priceUSD,quantity:1});forceCommerce(x=>x+1)}} className="rounded-xl border px-4 py-3 font-bold"><Heart className={isWishlisted('pharmacy',selectedProduct.id)?'inline fill-rose-500 text-rose-500':'inline'}/> المفضلة</button>{selectedProduct.inStock&&<button onClick={()=>{addToCart(selectedProduct);setSelectedProduct(null);setCartOpen(true)}} className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white"><ShoppingCart className="inline me-1"/>أضف إلى السلة</button>}</div></div><a href="/wallet" className="mt-4 inline-flex items-center gap-2 rounded-xl bg-teal-50 px-4 py-3 font-bold text-teal-700"><Wallet className="h-5 w-5"/> الدفع من المحفظة عند إنهاء الطلب</a></div></div>}
 
       {/* Cart drawer */}
       {cartOpen && (

@@ -175,8 +175,6 @@ const ka: TranslationData = {
     mauritania: 'მავრიტანია',
     sudan: 'სუდანი',
     somalia: 'სომალი',
-    comoros: 'კომორის კუნძულები',
-    djibouti: 'ჯიბუტი',
   },
   qa: {
     title: 'სამედიცინო კითხვები და კონსულტაციები',

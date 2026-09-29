@@ -1,32 +1,26 @@
 import { useState } from 'react';
-import { User, Stethoscope, Upload, Check, FileText, Shield, UserCircle, ArrowRight, Bike } from 'lucide-react';
+import { User, Stethoscope, Upload, Check, FileText, Shield, UserCircle, ArrowRight, Building2, Truck } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { useApp } from '@/i18n/AppContext';
+import { citiesForCountry } from '@/lib/cities';
 import { useRouter } from '@/lib/router';
 import { supabase, type Specialty } from '@/lib/supabase';
 import { useEffect } from 'react';
-import { COUNTRY_OPTIONS } from '@/types/i18n';
-import { useApp } from '@/i18n/AppContext';
-import { citiesForCountry } from '@/lib/catalog';
-
-const countryLabels: Record<string,string> = {SA:'السعودية',AE:'الإمارات',EG:'مصر',IQ:'العراق',JO:'الأردن',KW:'الكويت',LB:'لبنان',LY:'ليبيا',MA:'المغرب',OM:'عمان',PS:'فلسطين',QA:'قطر',SY:'سوريا',TN:'تونس',YE:'اليمن',DZ:'الجزائر',BH:'البحرين',MR:'موريتانيا',SD:'السودان',SO:'الصومال',KM:'جزر القمر',DJ:'جيبوتي',US:'United States',DE:'Deutschland',RU:'Россия',UZ:'Oʻzbekiston',AM:'Հայաստան',TJ:'Тоҷикистон',UA:'Україна',AZ:'Azərbaycan',GE:'საქართველო',ET:'ኢትዮጵያ'};
 
 export default function RegisterPage() {
-  const { t, specialtyName, lang } = useI18n();
-  const { country, setCountry } = useApp();
+  const { t, specialtyName } = useI18n();
+  const { country } = useApp();
+  const cities = citiesForCountry(country.code);
   const { navigate } = useRouter();
-  const [accountType, setAccountType] = useState<'client' | 'specialist' | 'institution' | 'delivery_worker' | null>(null);
+  const [accountType, setAccountType] = useState<'client' | 'specialist' | 'institution' | 'other_services' | 'delivery_worker' | null>(null);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [formData, setFormData] = useState({
-    name: '', email: '', password: '', phone: '', age: '', parentalConsent: false, specialty: '',
-    showName: true, anonymous: false, institutionType: 'clinic', address: '', city: '', services: '', deliveryEnabled: false, deliveryMethod: 'platform', schedule: '', documents: '',
+    name: '', email: '', password: '', phone: '', specialty: '', otherServiceType: 'clinic-rent', listingMode: 'rent', listingPrice: '', listingDuration: '30 يوم', listingDetails: '',
+    showName: true, anonymous: false, institutionType: 'clinic', address: '', city: '', services: '',
   });
   const [docUrls, setDocUrls] = useState<{ id?: string; cert?: string; license?: string }>({});
-  const [institutionFiles, setInstitutionFiles] = useState<string[]>([]);
-  const [registrationCountry, setRegistrationCountry] = useState(country);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [agreed, setAgreed] = useState(false);
-  const referralCode = new URLSearchParams(window.location.search).get('ref') || '';
 
   useEffect(() => {
     supabase.from('specialties').select('*').order('name').then(({ data }) => setSpecialties(data || []));
@@ -34,49 +28,58 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!agreed) { alert(lang === 'ar' ? 'يجب قراءة وقبول العقد والقواعد قبل التسجيل.' : 'Please accept the agreement and rules before registration.'); return; }
-    const age=Number(formData.age||0);
-    if(age>0 && age<18 && !formData.parentalConsent){ alert(lang==='ar'?'يجب إرفاق موافقة كتابية من ولي الأمر لمن هو دون 18 عاماً.':'Written parental consent is required for users under 18.'); return; }
-    setSubmitting(true); setSuccess(false);
+    setSubmitting(true);
     try {
-      const email = formData.email.trim().toLowerCase();
-      if (accountType === 'specialist') {
-        const { error } = await supabase.from('sb1_specialist_registration_requests').insert({
-          id: 'req-' + Date.now(), name: formData.name, email, phone: formData.phone,
-          specialty_id: formData.specialty || null, age: age || null, parental_consent: Boolean(formData.parentalConsent), country_code: registrationCountry.code,
-          language_code: lang, city: formData.city, documents: { id: docUrls.id || null, certificate: docUrls.cert || null, license: docUrls.license || null },
-          status: 'pending', created_at: new Date().toISOString()
-        });
-        if (error) throw error;
-        setSuccess(true);
-        return;
-      }
-      const authResult = await supabase.auth.signUp({ email, password: formData.password, options: { data: { name: formData.name, role: accountType, age: age || null, parental_consent: Boolean(formData.parentalConsent), country_code: registrationCountry.code, language_code: lang, city: formData.city } } });
+      const authResult = await supabase.auth.signUp({ email: formData.email.trim().toLowerCase(), password: formData.password, options: { data: { name: formData.name, role: accountType } } });
       if (authResult.error) throw authResult.error;
-      try {
-        let parentId:any = null;
-        if (referralCode) { const p = await supabase.from('affiliate_members').select('id,level').eq('referral_code',referralCode).maybeSingle(); parentId = p.data?.id || null; }
-        const parentLevel = parentId ? Number((await supabase.from('affiliate_members').select('level').eq('id',parentId).maybeSingle()).data?.level || 0) : -1;
-        await supabase.from('affiliate_members').insert({user_id:authResult.data.user?.id||null,name:formData.name,email,member_type:accountType||'client',referral_code:'SB1-'+Date.now().toString(36).toUpperCase(),parent_id:parentId,level:parentId?parentLevel+1:0,country_code:registrationCountry.code,language_code:lang,points:0,wallet_balance:0,total_sales:0,status:'active'});
-      } catch {}
-      try { await supabase.from('newsletter_subscribers').upsert({email,name:formData.name,language_code:lang,country_code:registrationCountry.code,is_active:true},{onConflict:'email'}); } catch {}
-      if (accountType === 'delivery_worker') { const { error } = await supabase.from('sb1_delivery_workers').insert({name:formData.name,phone:formData.phone,city:formData.address||'',status:'pending',documents:{files:institutionFiles},country_code:registrationCountry.code,language_code:lang}); if(error) throw error; }
+      localStorage.setItem('sb1_user_role', accountType || 'client');
       if (accountType === 'client') {
-        const { error } = await supabase.from('profiles').insert({ id: authResult.data.user?.id, name: formData.anonymous ? 'مجهول' : formData.name, email, phone: formData.phone, role: 'client', country_code: registrationCountry.code, language_code: lang, is_anonymous: formData.anonymous, city: formData.city, last_seen_at: new Date().toISOString() });
-        if (error) throw error;
+        const { error } = await supabase.from('profiles').insert({
+          id: authResult.data.user?.id,
+          name: formData.anonymous ? 'مجهول' : formData.name,
+          email: formData.email.trim().toLowerCase(),
+          phone: formData.phone,
+          role: 'client',
+          is_anonymous: formData.anonymous,
+        });
+        if (!error) setSuccess(true);
       } else if (accountType === 'institution') {
-        const { error } = await supabase.from('institutions').insert({ name: formData.name, type: formData.institutionType, address: formData.address, phone: formData.phone, email, service_info: formData.services, schedule_info: formData.schedule, documents_info: formData.documents, document_files: institutionFiles, delivery_enabled: formData.deliveryEnabled, delivery_method: formData.deliveryMethod, delivery_worker_policy: formData.deliveryMethod==='platform'?'all':'institution_workers', is_approved: false, subscription_plan: 'free', country_code: registrationCountry.code, language_code: lang, city: formData.city, owner_user_id: authResult.data.user?.id || null });
-        if (error) throw error;
+        const { error } = await supabase.from('institutions').insert({
+          name: formData.name,
+          type: formData.institutionType,
+          address: `${formData.city}${formData.address ? `، ${formData.address}` : ''}`,
+          phone: formData.phone,
+          email: formData.email.trim().toLowerCase(),
+          service_info: formData.services,
+          is_approved: false,
+          subscription_plan: 'free',
+        });
+        if (!error) setSuccess(true);
+      } else if (accountType === 'other_services') {
+        localStorage.setItem('sb1_pending_service_registration', JSON.stringify({ ...formData, accountType, createdAt: new Date().toISOString() }));
+        setSuccess(true);
+      } else if (accountType === 'specialist') {
+        const { data, error } = await supabase.from('doctors').insert({
+          name: formData.name,
+          specialty_id: formData.specialty || null,
+          bio: '',
+          education: '',
+          experience_years: 0,
+          photo_url: '',
+          city: '',
+          native_language: 'ar',
+          is_verified: false,
+          phone_number: formData.phone,
+        }).select().single();
+        if (!error && data) {
+          if (docUrls.id) await supabase.from('specialist_documents').insert({ doctor_id: data.id, doc_type: 'id', doc_url: docUrls.id });
+          if (docUrls.cert) await supabase.from('specialist_documents').insert({ doctor_id: data.id, doc_type: 'certificate', doc_url: docUrls.cert });
+          if (docUrls.license) await supabase.from('specialist_documents').insert({ doctor_id: data.id, doc_type: 'license', doc_url: docUrls.license });
+          setSuccess(true);
+        }
       }
-      try { await supabase.from('sb1_audience_profiles').insert({user_id:authResult.data.user?.id||null,name:formData.name,email,role:accountType||'client',country_code:registrationCountry.code,city:formData.city,language_code:lang,last_seen_at:new Date().toISOString(),notification_enabled:true}); } catch {}
-      localStorage.removeItem('sb1_guest_client');
-      localStorage.setItem('sb1_account_role', accountType || 'client');
-      localStorage.setItem('sb1_account_email', email);
-      if (authResult.data.user?.id) localStorage.setItem('sb1_account_user_id', authResult.data.user.id);
-      setSuccess(true);
-    } catch (err: any) {
-      alert(err?.message || 'تعذر إرسال الطلب');
-    } finally { setSubmitting(false); }
+    } catch { /* ignore */ }
+    setSubmitting(false);
   };
 
   if (success) {
@@ -88,7 +91,7 @@ export default function RegisterPage() {
           </div>
           <h2 className="text-xl font-bold text-gray-800 mb-2">{t('register.success')}</h2>
           {accountType === 'specialist' && (
-            <p className="text-sm text-gray-500 mb-4">تم استلام طلب الأخصائي للمراجعة. لا يتم إنشاء أو تفعيل حساب أخصائي ولا يظهر للجمهور قبل موافقة المالك أو الإدارة.</p>
+            <p className="text-sm text-gray-500 mb-4">{t('register.verify_note')}</p>
           )}
           <button onClick={() => navigate('/')} className="btn-primary">{t('common.back')}</button>
         </div>
@@ -103,12 +106,6 @@ export default function RegisterPage() {
         <p className="text-gray-500 text-center mb-8">{t('register.subtitle')}</p>
 
         {!accountType ? (
-          <>
-          <div className="mb-5 rounded-2xl border border-teal-200 bg-teal-50 p-5 text-center">
-            <h3 className="font-extrabold text-teal-900">عميل بدون إنشاء حساب</h3>
-            <p className="mt-1 text-sm text-teal-700">يمكن للعملاء فقط الدخول كزائر وتصفح الموقع وطرح الأسئلة العامة.</p>
-            <button type="button" onClick={()=>{localStorage.setItem('sb1_guest_client','true');localStorage.removeItem('sb1_account_role');window.location.href='/'}} className="btn-primary mt-3">الدخول كعميل بدون حساب</button>
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
               onClick={() => setAccountType('client')}
@@ -140,8 +137,18 @@ export default function RegisterPage() {
               <h3 className="text-lg font-bold text-gray-800 mb-1">تسجيل مؤسسة</h3>
               <p className="text-sm text-gray-500">عيادة، مختبر، أشعة، مستشفى، صيدلية أو مركز تأهيل</p>
             </button>
-          <button onClick={() => setAccountType('delivery_worker')} className="card p-8 text-center hover:shadow-lg transition-all group"><div className="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"><Bike className="w-8 h-8 text-orange-600" /></div><h3 className="text-lg font-bold text-gray-800 mb-1">تسجيل عامل توصيل</h3><p className="text-sm text-gray-500">حساب مستقل لاستلام طلبات التوصيل وإشعاراتها.</p></button></div>
-        </>
+            <button onClick={() => setAccountType('delivery_worker')} className="card p-8 text-center hover:shadow-lg transition-all group md:col-span-2"><div className="w-16 h-16 rounded-2xl bg-purple-100 flex items-center justify-center mx-auto mb-4"><Truck className="w-8 h-8 text-purple-600" /></div><h3 className="text-lg font-bold text-gray-800 mb-1">عامل توصيل</h3><p className="text-sm text-gray-500">الوصول إلى متجر العملاء وخدمات الخصم المخصصة لعمال التوصيل.</p></button>
+            <button
+              onClick={() => setAccountType('other_services')}
+              className="card p-8 text-center hover:shadow-lg transition-all group md:col-span-2"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Building2 className="w-8 h-8 text-orange-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">تسجيل كخدمات أخرى</h3>
+              <p className="text-sm text-gray-500">أماكن للبيع أو الإيجار، إسعاف، رعاية منزلية، أدوات طبية وخدمات مساندة</p>
+            </button>
+          </div>
         ) : (
           <form onSubmit={handleSubmit} className="card p-6 space-y-4">
             <button type="button" onClick={() => setAccountType(null)} className="text-sm text-teal-600 hover:text-teal-700 flex items-center gap-1">
@@ -149,13 +156,6 @@ export default function RegisterPage() {
               {t('common.back')}
             </button>
 
-            <div className="rounded-2xl border-2 border-teal-100 bg-teal-50 p-4">
-              <label className="block text-sm font-bold text-teal-900 mb-2">{lang === 'ar' ? 'الدولة — أساسي لتحديد الأسعار والخدمات' : 'Country — required for pricing and services'}</label>
-              <select required value={registrationCountry.code} onChange={(e)=>{const next=COUNTRY_OPTIONS.find(c=>c.code===e.target.value)||country;setRegistrationCountry(next);setCountry(next)}} className="input-field bg-white">
-                {COUNTRY_OPTIONS.map(c=><option key={c.code} value={c.code}>{c.flag} {countryLabels[c.code] || c.nameKey} — {c.currencySymbol}</option>)}
-              </select>
-              <p className="mt-2 text-xs text-teal-700">{lang === 'ar' ? 'سيتم استخدام الدولة لتحديد عملة وأسعار الخدمات عند الدفع.' : 'This country determines the currency and country-specific service prices at checkout.'}</p>
-            </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">{t('register.name')}</label>
               <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="input-field" />
@@ -173,14 +173,24 @@ export default function RegisterPage() {
               <input type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="input-field" />
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">المدينة — تُستخدم لتخصيص الخدمات والإعلانات المحلية</label>
-              <select required value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value, address: accountType==='delivery_worker'?e.target.value:formData.address })} className="input-field bg-white">
-                <option value="">اختر المدينة</option>
-                {citiesForCountry(registrationCountry.code, lang).map((x:any)=><option key={x.key} value={x.key}>{x.name}</option>)}
-              </select>
-              <p className="mt-1 text-xs text-gray-500">يتم حفظ المدينة فقط ولا نطلب عنوان المنزل أو الشارع.</p>
-            </div>
+            {accountType === 'other_services' && (
+              <>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">نوع الخدمة</label>
+                  <select value={formData.otherServiceType} onChange={(e) => setFormData({ ...formData, otherServiceType: e.target.value })} className="input-field">
+                    <option value="clinic-rent">عيادة أو مركز للإيجار</option><option value="medical-place-sale">مكان طبي للبيع</option><option value="medical-place-rent">مكان طبي للإيجار</option><option value="ambulance">إسعاف ونقل طبي</option><option value="home-care">رعاية منزلية وتمريض</option><option value="medical-equipment">أدوات ومعدات طبية</option><option value="delivery">توصيل وخدمات مساندة</option><option value="other">خدمة طبية أخرى</option>
+                  </select>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <select value={formData.listingMode} onChange={(e) => setFormData({ ...formData, listingMode: e.target.value })} className="input-field"><option value="rent">للإيجار</option><option value="sale">للبيع</option><option value="service">خدمة</option></select>
+                  <select value={formData.listingDuration} onChange={(e) => setFormData({ ...formData, listingDuration: e.target.value })} className="input-field"><option>7 أيام</option><option>30 يوم</option><option>90 يوم</option><option>180 يوم</option><option>365 يوم</option></select>
+                </div>
+                <input type="number" placeholder="سعر باقة العرض بالدولار" value={formData.listingPrice} onChange={(e) => setFormData({ ...formData, listingPrice: e.target.value })} className="input-field" required />
+                <textarea placeholder="تفاصيل المكان أو الخدمة ورقم الهاتف والموقع" value={formData.listingDetails} onChange={(e) => setFormData({ ...formData, listingDetails: e.target.value })} className="input-field" rows={4} />
+                <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">نسبة المنصة الافتراضية 30% ويمكن التحكم بها من الإدارة.</div>
+              </>
+            )}
+
             {accountType === 'institution' && (
               <>
                 <div>
@@ -189,23 +199,15 @@ export default function RegisterPage() {
                     <option value="clinic">عيادة / مستشفى</option><option value="lab">مختبر</option><option value="radiology">مركز أشعة</option><option value="rehab">تأهيل</option><option value="pharmacy">صيدلية</option><option value="elderly">رعاية كبار السن</option><option value="addiction">علاج الإدمان</option>
                   </select>
                 </div>
-                                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">المدينة</label>
-                  <select required value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value, address: e.target.value })} className="input-field bg-white">
-                    <option value="">اختر المدينة</option>
-                    {citiesForCountry(registrationCountry.code, lang).map((x:any)=><option key={x.key} value={x.key}>{x.name}</option>)}
-                  </select>
-                  <p className="mt-1 text-xs text-gray-500">يتم حفظ المدينة فقط في بيانات المؤسسة لاستخدامها كتصنيف للبحث. لا يتم طلب عنوان الشارع.</p>
+                <div className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-sm text-blue-800">هذه البيانات مالية خاصة. لا يراها العامة.</div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div><label className="block text-sm font-semibold text-gray-700 mb-2">المدينة</label><select required value={formData.city} onChange={(e)=>setFormData({...formData,city:e.target.value})} className="input-field"><option value="">اختر المدينة</option>{cities.map(city=><option key={city} value={city}>{city}</option>)}</select></div>
+                  <div><label className="block text-sm font-semibold text-gray-700 mb-2">العنوان / الحي</label><input placeholder="الحي أو العنوان" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="input-field" /></div>
                 </div>
                 <textarea placeholder="الخدمات والأسعار والمواعيد" value={formData.services} onChange={(e) => setFormData({ ...formData, services: e.target.value })} className="input-field" rows={4} />
-                <textarea placeholder="الوثائق والتراخيص وأرقامها" value={formData.documents} onChange={(e) => setFormData({ ...formData, documents: e.target.value })} className="input-field" rows={3} />
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4"><label className="block text-sm font-bold text-gray-700 mb-2">إرفاق وثائق المؤسسة</label><input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={e=>setInstitutionFiles(Array.from(e.target.files||[]).map(f=>f.name))} className="block w-full text-sm"/><p className="mt-2 text-xs text-gray-500">يتم تسجيل أسماء الملفات مع طلب المؤسسة. التخزين الآمن الفعلي للملفات يحتاج مساحة تخزين خاصة بالمشروع.</p>{institutionFiles.length>0&&<div className="mt-2 text-xs text-teal-700">{institutionFiles.join(' · ')}</div>}</div>
-                <textarea placeholder="جدول المواعيد وساعات العمل" value={formData.schedule} onChange={(e) => setFormData({ ...formData, schedule: e.target.value })} className="input-field" rows={3} />
-                {formData.institutionType === 'pharmacy' && <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4 space-y-3"><label className="flex items-center gap-2 font-bold"><input type="checkbox" checked={formData.deliveryEnabled} onChange={e=>setFormData({...formData,deliveryEnabled:e.target.checked})}/> أريد خدمة التوصيل</label>{formData.deliveryEnabled&&<><select value={formData.deliveryMethod} onChange={e=>setFormData({...formData,deliveryMethod:e.target.value})} className="input-field bg-white"><option value="platform">التوصيل من خلال SB1</option><option value="self">التوصيل بواسطة الصيدلية</option></select>{formData.deliveryMethod==='platform'&&<p className="text-sm text-orange-800">سيتم إنشاء حسابات مستقلة للعاملين في التوصيل واستقبال إشعارات الطلبات.</p>}</>}</div>}
               </>
             )}
 
-            {(accountType === 'institution' || accountType === 'specialist' || accountType === 'delivery_worker') && <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-900"><b>قواعد الخدمة والمخالفات:</b><p className="mt-1">يلتزم مقدم الخدمة بالمواعيد، صحة الوثائق، احترام العميل، حماية بياناته، والإبلاغ عن أي تعارض. التأخير أو الإلغاء غير المبرر أو الشكاوى المثبتة قد تؤدي إلى رسوم أو تعليق أو تصعيد وفق العقد والقانون.</p><a href="/contracts" className="inline-block mt-2 font-bold underline">قراءة العقود والتعهدات</a></div>}
             {accountType === 'client' && (
               <div className="space-y-2">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -259,7 +261,6 @@ export default function RegisterPage() {
               </>
             )}
 
-            <div className="rounded-2xl border bg-gray-50 p-4"><label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={agreed} onChange={e=>setAgreed(e.target.checked)} className="mt-1"/><span>أقر بقراءة قواعد SB1 والعقد الخاص بدوري، وبصحة بياناتي ووثائقي، وأوافق على معالجة الطلبات والشكاوى والعقوبات وفق الشروط والقانون المعمول به. <a href="/contracts" className="text-teal-700 font-bold underline">عرض العقود</a></span></label></div>
             <button type="submit" disabled={submitting} className="btn-primary w-full flex items-center justify-center gap-2">
               {submitting ? t('register.submitting') : t('register.submit')}
             </button>

@@ -16,39 +16,24 @@ import {
   Building2,
   Shield,
   ChevronDown,
-  Wallet,
-  ShoppingCart,
-  Globe2,
-  LockKeyhole,
 } from 'lucide-react';
 import { useApp } from '@/i18n/AppContext';
 import { useI18n } from '@/lib/i18n';
 import { MegaMenu } from '@/components/MegaMenu';
 import { LanguageSwitcher, MobileLanguageSwitcher } from '@/components/LanguageSwitcher';
 import { NotificationsPopover } from '@/components/NotificationsPopover';
-import PrivateNotificationsPopover from '@/components/PrivateNotificationsPopover';
 import { SPECIALTIES } from '@/types/i18n';
-import SessionNavCounter from '@/components/SessionNavCounter';
-import { getRole } from '@/lib/access';
-import { supabase } from '@/lib/supabase';
-import { COUNTRY_OPTIONS } from '@/types/i18n';
+import { DemoTransparencyNotice } from '@/components/DemoTransparencyNotice';
 
 export function Header() {
-  const { t, isAnonymous, setCountry } = useApp();
+  const { t, isAnonymous } = useApp();
   const { t: platformT, lang } = useI18n();
   const [scrolled, setScrolled] = useState(false);
+  const deliveryWorker = typeof window !== 'undefined' && localStorage.getItem('sb1_user_role') === 'delivery_worker';
   const [mobileOpen, setMobileOpen] = useState(false);
-  const role=getRole();
-  const isPrivate=(href:string)=>{if(['/dashboard'].includes(href))return ['client','owner'].includes(role);if(href.startsWith('/specialist'))return ['specialist','owner'].includes(role);if(href==='/delivery')return ['institution','delivery_worker','owner'].includes(role);if(href==='/complaints'||href==='/safety')return !['guest'].includes(role);if(href.startsWith('/owner')||href.startsWith('/admin'))return ['owner','moderator'].includes(role);return true};
+  const [showAuthNotice, setShowAuthNotice] = useState(false);
   const [mobileSection, setMobileSection] = useState<'main' | 'specialties' | 'language'>('main');
   const searchRef = useRef<HTMLInputElement>(null);
-  const [authOpen,setAuthOpen]=useState(false);
-  const [authMode,setAuthMode]=useState<'login'|'signup'>('login');
-  const [authEmail,setAuthEmail]=useState('');
-  const [authPassword,setAuthPassword]=useState('');
-  const [authCountry,setAuthCountry]=useState('EG');
-  const [authBusy,setAuthBusy]=useState(false);
-  const [authError,setAuthError]=useState('');
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -67,34 +52,33 @@ export function Header() {
     };
   }, [mobileOpen]);
 
-  const labels:any = { ar:['الأخصائيون والأطباء','المحتوى الطبي والمكتبة','المتجر','المكافآت'], en:['Specialists & Doctors','Medical Content & Library','Store','Rewards'], de:['Fachärzte & Ärzte','Medizinische Inhalte & Bibliothek','Facharzt-Shop','Belohnungen'], ru:['Специалисты и врачи','Медицинский контент и библиотека','Магазин','Награды'], uk:['Спеціалісти та лікарі','Медичний контент і бібліотека','Магазин спеціалістів','Нагороди'], uz:['Mutaxassislar va shifokorlar','Tibbiy kontent va kutubxona','Mutaxassislar do‘koni','Mukofotlar'], hy:['Մասնագետներ և բժիշկներ','Բժշկական բովանդակություն և գրադարան','Մասնագետների խանութ','Պարգևներ'], tg:['Мутахассисон ва табибон','Мундариҷаи тиббӣ ва китобхона','Дӯкони мутахассисон','Мукофотҳо'], az:['Mütəxəssislər və həkimlər','Tibbi məzmun və kitabxana','Mütəxəssis mağazası','Mükafatlar'], am:['ስፔሻሊስቶች እና ሐኪሞች','የሕክምና ይዘት እና ቤተ-መጽሐፍት','የስፔሻሊስቶች መደብር','ሽልማቶች'], ka:['სპეციალისტები და ექიმები','სამედიცინო კონტენტი და ბიბლიოთეკა','სპეციალისტების მაღაზია','ჯილდოები']}[lang] || ['Specialists & Doctors','Medical Content & Library','Store','Rewards'];
-  const platformSections = [
-    { label: lang==='ar'?'الأخصائيون والأطباء':lang==='ru'?'Специалисты и врачи':lang==='de'?'Fachärzte & Ärzte':'Specialists & Doctors', href: '/doctors' },
+  const labels:any = { ar:['الأخصائيون والأطباء','المحتوى الطبي والمكتبة','متجر الأخصائيين','المكافآت'], en:['Specialists & Doctors','Medical Content & Library','Specialist Store','Rewards'], de:['Fachärzte & Ärzte','Medizinische Inhalte & Bibliothek','Facharzt-Shop','Belohnungen'], ru:['Специалисты и врачи','Медицинский контент и библиотека','Магазин специалистов','Награды'], uk:['Спеціалісти та лікарі','Медичний контент і бібліотека','Магазин спеціалістів','Нагороди'], uz:['Mutaxassislar va shifokorlar','Tibbiy kontent va kutubxona','Mutaxassislar do‘koni','Mukofotlar'], hy:['Մասնագետներ և բժիշկներ','Բժշկական բովանդակություն և գրադարան','Մասնագետների խանութ','Պարգևներ'], tg:['Мутахассисон ва табибон','Мундариҷаи тиббӣ ва китобхона','Дӯкони мутахассисон','Мукофотҳо'], az:['Mütəxəssislər və həkimlər','Tibbi məzmun və kitabxana','Mütəxəssis mağazası','Mükafatlar'], am:['ስፔሻሊስቶች እና ሐኪሞች','የሕክምና ይዘት እና ቤተ-መጽሐፍት','የስፔሻሊስቶች መደብር','ሽልማቶች'], ka:['სპეციალისტები და ექიმები','სამედიცინო კონტენტი და ბიბლიოთეკა','სპეციალისტების მაღაზია','ჯილდოები']}[lang] || ['Specialists & Doctors','Medical Content & Library','Specialist Store','Rewards'];
+  const platformSections = deliveryWorker ? [{ label: labels[2], href: '/store' }] : [
+    { label: labels[0], href: '/doctors' },
     { label: platformT('nav.questions'), href: '/questions' },
-    { label: lang==='ar'?'جلسات الفيديو':lang==='ru'?'Видеосессии':lang==='de'?'Videositzungen':'Video Sessions', href: '/choose-doctor' },
-    { label: lang==='ar'?'الجلسات المجانية':lang==='ru'?'Бесплатные сессии':lang==='de'?'Kostenlose Sitzungen':'Free Sessions', href: '/sessions' },
     { label: labels[1], href: '/media' },
     { label: platformT('nav.courses'), href: '/courses' },
-    { label: lang==='ar'?'المرافق الطبية':lang==='ru'?'Медицинские учреждения':lang==='de'?'Medizinische Einrichtungen':'Medical Facilities', href: '/facilities' },
-    { label: lang==='ar'?'الاختبارات الطبية والنفسية':lang==='ru'?'Медицинские и психологические тесты':lang==='de'?'Medizinische & psychologische Tests':'Medical & Psychological Tests', href: '/tests' },
-    { label: lang==='ar'?'الألعاب والتطبيقات':lang==='ru'?'Игры и приложения':lang==='de'?'Spiele & Apps':'Games & Apps', href: '/apps' },
-    { label: lang==='ar'?'المتجر':lang==='ru'?'Магазин':lang==='de'?'Shop':'Store', href: '/store' },
+    { label: platformT('nav.sessions'), href: '/sessions' },
+    { label: platformT('nav.clinics'), href: '/clinics' },
+    { label: platformT('nav.labs'), href: '/labs' },
+    { label: platformT('nav.radiology'), href: '/radiology' },
+    { label: platformT('nav.facilities'), href: '/facilities' },
+    { label: 'الاختبارات الطبية والنفسية', href: '/tests' },
+    { label: labels[2], href: '/store' },
     { label: labels[3], href: '/referral' },
-    ...[
-      { label: lang==='ar'?'التوصيل والخرائط':'Delivery & Maps', href:'/delivery' },
-      { label: lang==='ar'?'الشكاوى':'Complaints', href:'/complaints' },
-      { label: lang==='ar'?'لوحة العميل':'Client Dashboard', href:'/dashboard' },
-      { label: lang==='ar'?'استوديو الأخصائي':'Specialist Studio', href:'/specialist/studio' },
-      { label: lang==='ar'?'باقات المتابعة':'Long-term Packages', href:'/specialist/packages' },
-    ].filter(item=>isPrivate(item.href))
+    { label: lang==='ar'?'المجتمع الاجتماعي':lang==='ru'?'Соцсеть':'Social', href: '/social' },
+    { label: 'الألعاب والتطبيقات', href: '/apps' },
+    { label: 'باقات الهدايا', href: '/gifts' },
   ];
   const navItems = [
     { label: t.nav.home, href: '/#home', icon: Home },
+    { label: t.specialists.title, href: '/#specialists', icon: Stethoscope },
+    { label: t.facilities.title, href: '/facilities', icon: Building2 },
     { label: t.nav.howItWorks, href: '/#how-it-works', icon: HelpCircle },
     { label: t.nav.about, href: '/#about', icon: Info },
+    { label: t.nav.blog, href: '/library', icon: BookOpen },
     { label: t.nav.contact, href: '/#contact', icon: Phone },
   ];
-  const submitAuth=async()=>{setAuthBusy(true);setAuthError('');try{const selected=COUNTRY_OPTIONS.find(x=>x.code===authCountry);if(selected)setCountry(selected);if(authMode==='signup'){const r=await supabase.auth.signUp({email:authEmail.trim().toLowerCase(),password:authPassword,options:{data:{country_code:authCountry,language_code:lang}}});if(r.error)throw r.error;}else{const r=await supabase.auth.signInWithPassword({email:authEmail.trim().toLowerCase(),password:authPassword});if(r.error)throw r.error;const u:any=r.data?.user;if(u?.user_metadata?.country_code){const saved=COUNTRY_OPTIONS.find(x=>x.code===u.user_metadata.country_code);if(saved)setCountry(saved)}}localStorage.setItem('sb1_country_code',authCountry);localStorage.setItem('sb1_account_email',authEmail.trim().toLowerCase());setAuthOpen(false);window.location.reload();}catch(e:any){setAuthError(e?.message||'تعذر تسجيل الدخول')}finally{setAuthBusy(false)}};
 
   return (
     <>
@@ -118,12 +102,38 @@ export function Header() {
               </div>
             </a>
 
-            {/* Desktop Nav: compact core links only; platform sections are in the full-width row below */}
-            <nav className="hidden lg:flex min-w-0 items-center gap-0.5">
-              <a href="/#home" className="rounded-lg px-2 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">{t.nav.home}</a>
-              <a href="/#how-it-works" className="rounded-lg px-2 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">{t.nav.howItWorks}</a>
-              <a href="/#about" className="rounded-lg px-2 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">{t.nav.about}</a>
-              <a href="/#contact" className="rounded-lg px-2 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">{t.nav.contact}</a>
+            {/* Desktop Nav */}
+            <nav className="hidden lg:flex items-center gap-1">
+              {navItems.slice(0, 1).map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-100 hover:text-primary-700"
+                  
+                >
+                  {item.label}
+                </a>
+              ))}
+              {navItems.slice(1, 3).map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-100 hover:text-primary-700"
+                >
+                  {item.label}
+                </a>
+              ))}
+              <MegaMenu />
+              {navItems.slice(3).map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-100 hover:text-primary-700"
+                  
+                >
+                  {item.label}
+                </a>
+              ))}
             </nav>
 
             {/* Right actions */}
@@ -134,8 +144,6 @@ export function Header() {
                   ref={searchRef}
                   type="text"
                   placeholder={t.nav.search}
-                  onKeyDown={(e)=>{if(e.key==='Enter'){const v=e.currentTarget.value.trim();window.location.href='/search'+(v?'?q='+encodeURIComponent(v):'');}}}
-                  onFocus={()=>{}}
                   className="w-56 rounded-xl border border-neutral-200 bg-neutral-50 py-2.5 ps-10 pe-4 text-sm text-neutral-900 placeholder:text-neutral-400 transition-all focus:border-primary-400 focus:bg-white focus:ring-2 focus:ring-primary-100 focus:outline-none"
                 />
                 <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
@@ -143,27 +151,17 @@ export function Header() {
 
               <LanguageSwitcher />
 
-              <a href="/wallet" className="hidden sm:flex items-center gap-1.5 rounded-xl border border-teal-100 bg-teal-50 px-3 py-2 text-sm font-bold text-teal-700 hover:bg-teal-100" title="المحفظة">
-                <Wallet className="h-4 w-4" />
-                <span className="hidden xl:inline">المحفظة</span>
-              </a>
-              <a href="/cart" className="group relative flex min-w-10 flex-col items-center justify-center rounded-xl px-1 py-1 text-neutral-700 hover:bg-neutral-100" title="سلة المشتريات">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="mt-0.5 text-[9px] font-bold leading-none text-neutral-500">{lang==='ar'?'سلة المشتريات':lang==='ru'?'Корзина':lang==='de'?'Warenkorb':'Cart'}</span>
-              </a>
-
-              <a href="/notifications/global" className="relative flex h-10 w-10 items-center justify-center rounded-xl text-sky-700 hover:bg-sky-50" title="الإشعارات العامة"><Globe2 className="h-5 w-5"/></a>
-              <PrivateNotificationsPopover />
+              <NotificationsPopover />
 
               {/* Auth buttons */}
               <div className="hidden md:flex items-center gap-2">
                 {isAnonymous && (
                   <>
-                    <button onClick={()=>{setAuthMode('login');setAuthOpen(true);setAuthError('')}} className="btn-ghost text-sm" >
+                    <button className="btn-ghost text-sm" onClick={() => setShowAuthNotice(true)} >
                       <LogIn className="h-4 w-4" />
                       {t.nav.signIn}
                     </button>
-                    <button onClick={()=>{window.location.href='/register'}} className="btn-primary text-sm" >
+                    <button className="btn-primary text-sm" onClick={() => setShowAuthNotice(true)} >
                       <UserPlus className="h-4 w-4" />
                       {t.nav.signUp}
                     </button>
@@ -183,9 +181,10 @@ export function Header() {
           </div>
         </div>
         <div className="hidden lg:block border-t border-neutral-100">
-          <div className="container-x grid grid-cols-[repeat(11,minmax(0,1fr))] gap-1 py-1.5">
-            {platformSections.slice(0,11).map((item) => (
-              <a key={item.href} href={item.href} className="min-w-0 rounded-lg px-1 py-2 text-center text-[11px] font-bold leading-tight text-neutral-600 hover:bg-primary-50 hover:text-primary-700 transition-colors">
+          <div className="container-x flex items-center gap-1 overflow-x-auto py-1.5 scrollbar-thin">
+            {platformSections.map((item) => (
+              <a key={item.href} href={item.href}
+                className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-primary-50 hover:text-primary-700 transition-colors">
                 {item.label}
               </a>
             ))}
@@ -193,7 +192,7 @@ export function Header() {
         </div>
       </header>
 
-      {authOpen&&<div className="fixed inset-0 z-[100] grid place-items-center bg-slate-900/50 p-4" dir={lang==='ar'?'rtl':'ltr'}><div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"><div className="flex items-center justify-between"><div><h2 className="text-2xl font-extrabold">{authMode==='login'?(lang==='ar'?'تسجيل الدخول':'Sign in'):(lang==='ar'?'إنشاء حساب':'Create account')}</h2><p className="mt-1 text-sm text-gray-500">{lang==='ar'?'اختر الدولة لتحديد محتوى وخدمات بلدك.':'Choose your country for country-specific content and services.'}</p></div><button onClick={()=>setAuthOpen(false)} className="rounded-xl p-2 hover:bg-gray-100"><X className="h-5 w-5"/></button></div><div className="mt-5 space-y-3"><select value={authCountry} onChange={e=>setAuthCountry(e.target.value)} className="input-field bg-white">{COUNTRY_OPTIONS.map(x=><option key={x.code} value={x.code}>{x.flag} {(()=>{try{return new Intl.DisplayNames([lang],{type:'region'}).of(x.code)||x.nameKey}catch{return x.nameKey}})()}</option>)}</select><input type="email" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} placeholder={lang==='ar'?'البريد الإلكتروني':'Email'} className="input-field"/><input type="password" value={authPassword} onChange={e=>setAuthPassword(e.target.value)} placeholder={lang==='ar'?'كلمة المرور':'Password'} className="input-field"/>{authError&&<div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{authError}</div>}<button disabled={authBusy} onClick={submitAuth} className="btn-primary w-full">{authBusy?'...':authMode==='login'?(lang==='ar'?'دخول':'Sign in'):(lang==='ar'?'إنشاء الحساب':'Create account')}</button><button onClick={()=>{setAuthMode(authMode==='login'?'signup':'login');setAuthError('')}} className="w-full text-sm font-bold text-teal-700">{authMode==='login'?(lang==='ar'?'ليس لديك حساب؟ إنشاء حساب':'Create an account'):(lang==='ar'?'لديك حساب؟ تسجيل الدخول':'Sign in instead')}</button></div></div></div>}
+      {showAuthNotice && <DemoTransparencyNotice mode="info" onClose={() => setShowAuthNotice(false)} />}
 
       {/* Mobile drawer */}
       {mobileOpen && (
@@ -231,7 +230,6 @@ export function Header() {
                   <input
                     type="text"
                     placeholder={t.nav.search}
-                    onKeyDown={(e)=>{if(e.key==='Enter'){const v=e.currentTarget.value.trim();window.location.href='/search'+(v?'?q='+encodeURIComponent(v):'');setMobileOpen(false);}}}
                     className="w-full rounded-xl border border-neutral-200 bg-neutral-50 py-3 ps-10 pe-4 text-sm placeholder:text-neutral-400 focus:border-primary-400 focus:bg-white focus:outline-none"
                   />
                   <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
@@ -263,7 +261,16 @@ export function Header() {
                 </div>
 
                 {/* Specialties */}
-                <a href="/specialties" onClick={()=>setMobileOpen(false)} className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50"><span className="flex items-center gap-3"><Shield className="h-4.5 w-4.5 text-neutral-400"/>{t.nav.specialties}</span><ChevronDown className="h-4 w-4 text-neutral-400"/></a>
+                <button
+                  onClick={() => setMobileSection('specialties')}
+                  className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+                >
+                  <span className="flex items-center gap-3">
+                    <Shield className="h-4.5 w-4.5 text-neutral-400" />
+                    {t.nav.specialties}
+                  </span>
+                  <ChevronDown className="h-4 w-4 rotate-[-90deg] text-neutral-400" />
+                </button>
 
                 {/* Language */}
                 <button
@@ -286,6 +293,7 @@ export function Header() {
                         onClick={(e) => {
                           e.preventDefault();
                           setMobileOpen(false);
+                          setShowAuthNotice(true);
                         }}
                       >
                         <LogIn className="h-4 w-4" />
@@ -296,6 +304,7 @@ export function Header() {
                         onClick={(e) => {
                           e.preventDefault();
                           setMobileOpen(false);
+                          setShowAuthNotice(true);
                         }}
                       >
                         <UserPlus className="h-4 w-4" />

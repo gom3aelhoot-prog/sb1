@@ -1,4 +1,3 @@
-import { resilientFetch } from '../src/lib/resilience';
 type Body = { amount: number; currency?: string; description?: string; reference_id?: string; customer_email?: string; success_url?: string; cancel_url?: string };
 
 function send(res:any, body:unknown, status=200) {
@@ -28,7 +27,7 @@ export default async function handler(req:any, res:any) {
     params.set('success_url', successUrl);
     params.set('cancel_url', cancelUrl);
     if (body.customer_email) params.set('customer_email', body.customer_email);
-    const feePercent = Math.max(0, Math.min(100, Number(process.env.SB1_PLATFORM_FEE_PERCENT || 20)));
+    const feePercent = Math.max(0, Math.min(100, Number(process.env.SB1_PLATFORM_FEE_PERCENT || 30)));
     const destination = process.env.STRIPE_CONNECT_ACCOUNT_ID;
     if (destination) {
       params.set('payment_intent_data[application_fee_amount]', String(Math.round(cents * feePercent / 100)));
@@ -36,11 +35,11 @@ export default async function handler(req:any, res:any) {
     }
     params.set('metadata[reference_id]', body.reference_id || '');
     params.set('metadata[platform]', 'SB1');
-    const stripeResponse = await resilientFetch({name:'stripe-checkout',url:'https://api.stripe.com/v1/checkout/sessions',enabled:true},{name:'payment-fallback',url:process.env.SB1_PAYMENT_FALLBACK_URL||'',enabled:!!process.env.SB1_PAYMENT_FALLBACK_URL},{
+    const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/x-www-form-urlencoded' },
       body: params.toString(),
-    }, 12000);
+    });
     const data = await stripeResponse.json();
     if (!stripeResponse.ok) return send(res, { error: data?.error?.message || 'Stripe checkout failed' }, stripeResponse.status);
     return send(res, { url: data.url, id: data.id, platform_fee_percent: destination ? feePercent : 0 });

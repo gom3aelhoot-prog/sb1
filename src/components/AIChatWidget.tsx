@@ -91,21 +91,16 @@ export default function AIChatWidget() {
     return c.fallback;
   };
 
-  const handleSend = async () => {
-    if (!input.trim() || thinking) return;
+  const handleSend = () => {
+    if (!input.trim()) return;
     const userMsg = input.trim();
-    const history = messages.slice(-8);
     setMessages((prev) => [...prev, { role: 'user', text: userMsg }]);
     setInput('');
     setThinking(true);
-    try {
-      const response = await fetch('/api/ai', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ message:userMsg, lang, history }) });
-      const data = await response.json();
-      if (!response.ok || !data?.text) throw new Error(data?.error || 'AI unavailable');
-      setMessages((prev) => [...prev, { role:'ai', text:data.text }]);
-    } catch {
-      setMessages((prev) => [...prev, { role:'ai', text:getAIResponse(userMsg) }]);
-    } finally { setThinking(false); }
+    window.setTimeout(() => {
+      setMessages((prev) => [...prev, { role: 'ai', text: getAIResponse(userMsg) }]);
+      setThinking(false);
+    }, 700);
   };
 
   return (
@@ -124,7 +119,7 @@ export default function AIChatWidget() {
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20"><Bot className="h-5 w-5" /></div>
               <div>
                 <h3 className="text-sm font-bold">{t('ai.assistant')}</h3>
-                <span className="flex items-center gap-1 text-xs text-teal-100"><span className="h-2 w-2 rounded-full bg-green-400" />{c.connected} · Gemini</span>
+                <span className="flex items-center gap-1 text-xs text-teal-100"><span className="h-2 w-2 rounded-full bg-green-400" />{c.connected}</span>
               </div>
             </div>
             <button aria-label={t('common.back')} onClick={() => setOpen(false)} className="text-white/80 hover:text-white"><X className="h-5 w-5" /></button>

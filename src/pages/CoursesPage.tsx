@@ -1,38 +1,25 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Clock, Users, Star, DollarSign, Check, Search, SlidersHorizontal } from 'lucide-react';
+import { BookOpen, Clock, Users, Star, DollarSign, Check } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Course, type Specialty } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
 import { demoCourses, demoSpecialties } from '@/lib/demoData';
-import { comprehensiveSpecialties } from '@/lib/comprehensiveSpecialties';
 import { virtualCoursesForSpecialty } from '@/lib/catalog';
-import { clientPrice, clientDiscountLabel } from '@/lib/pricing';
-import { getCountryServicePrice } from '@/lib/countryPricing';
-import { useApp } from '@/i18n/AppContext';
-import ShareButtons from '@/components/ShareButtons';
-import { learningRevenueDefaults } from '@/lib/learningCommerce';
+import { DemoTransparencyNotice } from '@/components/DemoTransparencyNotice';
 
 export default function CoursesPage() {
   const { navigate } = useRouter();
   const { t, specialtyName, lang, dir } = useI18n();
-  const { country } = useApp();
   const [courses, setCourses] = useState<Course[]>([]);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
-  const [priceSort, setPriceSort] = useState('none');
-  const [search, setSearch] = useState('');
-  const [priceFilter, setPriceFilter] = useState<'all'|'free'|'paid'>('all');
   const [enrollCourse, setEnrollCourse] = useState<Course | null>(null);
   const [enrollForm, setEnrollForm] = useState({ name: '', email: '' });
   const [enrolling, setEnrolling] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
-  const [contractAccepted,setContractAccepted]=useState(false);
-  const [deliveryMode,setDeliveryMode]=useState<'online'|'download'>('online');
-  const [courseBasePrice, setCourseBasePrice] = useState({price_usd:19,local_price:19,currency_symbol:"$"});
-
-  useEffect(() => { getCountryServicePrice(country,'course').then(p=>setCourseBasePrice(p)); }, [country.code]);
+  const [showDemoNotice, setShowDemoNotice] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -50,25 +37,16 @@ export default function CoursesPage() {
         if (spec) dbQuery = dbQuery.eq('specialty_id', spec.id);
       }
       const { data } = await dbQuery.order('created_at', { ascending: false });
-      const generated = selectedSpecialty ? virtualCoursesForSpecialty(selectedSpecialty, lang, 8) : comprehensiveSpecialties.flatMap(s => virtualCoursesForSpecialty(s.slug, lang, 2));
-      const localizedData=(data||[]).filter((x:any)=>!x.translations || x.translations?.[lang]).map((x:any)=>{const tr=x.translations?.[lang]||{};return {...x,title:tr.title||x.title,description:tr.description||x.description}}); const existingIds=new Set(localizedData.map((x:any)=>x.id)); const merged=[...localizedData,...generated.filter((x:any)=>!existingIds.has(x.id))]; setCourses((merged.length ? merged : demoCourses) as Course[]);
+      const generated = selectedSpecialty ? virtualCoursesForSpecialty(selectedSpecialty, lang, 6) : demoSpecialties.slice(0,12).flatMap(s => virtualCoursesForSpecialty(s.slug, lang, 3));
+      const merged = [...(data || []), ...generated];
+      setCourses((merged.length ? merged : demoCourses) as Course[]);
       setLoading(false);
     })().catch(() => { setCourses(demoCourses); setLoading(false); });
   }, [selectedSpecialty, lang]);
 
-  const filteredCourses = courses.filter((course:any) => {
-    const title = localizedField(course as unknown as Record<string, unknown>, 'title', lang, course.title);
-    const haystack = String(title || '').toLowerCase();
-    const q = search.trim().toLowerCase();
-    const matchesName = !q || haystack.includes(q);
-    const matchesPrice = priceFilter === 'all' || (priceFilter === 'free' ? Number(course.price || 0) === 0 : Number(course.price || 0) > 0);
-    return matchesName && matchesPrice;
-  });
-  const sortedCourses = [...filteredCourses].sort((a:any,b:any)=>priceSort==='low'?Number(a.price||0)-Number(b.price||0):priceSort==='high'?Number(b.price||0)-Number(a.price||0):0);
-
   const handleEnroll = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!enrollCourse || !enrollForm.name.trim() || !enrollForm.email.trim() || !contractAccepted) return;
+    if (!enrollCourse || !enrollForm.name.trim() || !enrollForm.email.trim()) return;
     setEnrolling(true);
     const { error } = await supabase.from('course_enrollments').insert({
       course_id: enrollCourse.id,
@@ -78,14 +56,14 @@ export default function CoursesPage() {
     if (!error) {
       await supabase.from('courses').update({ enrolled_count: (enrollCourse.enrolled_count || 0) + 1 }).eq('id', enrollCourse.id);
       await supabase.from('payments').insert({
-        payer_email: enrollForm.email.trim(), payer_name: enrollForm.name.trim(), amount: clientPrice(Number((enrollCourse.price * (courseBasePrice.local_price / courseBasePrice.price_usd)).toFixed(2))),
-        currency: country.currency, payment_type: 'course', reference_id: enrollCourse.id, status: 'pending',
+        payer_email: enrollForm.email.trim(), payer_name: enrollForm.name.trim(), amount: enrollCourse.price,
+        currency: 'USD', payment_type: 'course', reference_id: enrollCourse.id, status: 'pending',
       });
     }
     setEnrolling(false);
     setEnrolled(true);
     setTimeout(() => {
-      setEnrollCourse(null); setEnrolled(false); setEnrollForm({ name: '', email: '' }); setContractAccepted(false); setDeliveryMode('online');
+      setEnrollCourse(null); setEnrolled(false); setEnrollForm({ name: '', email: '' });
     }, 2500);
   };
 
@@ -95,46 +73,33 @@ export default function CoursesPage() {
     advanced: t('courses.advanced'),
   };
 
-  const successTitle: any = {
-    ar: 'تم التسجيل بنجاح!', ru: 'Регистрация прошла успешно!', de: 'Anmeldung erfolgreich!', en: 'Enrollment successful!'
-  }[lang as any] || 'Enrollment successful!';
-  const successBody: any = {
-    ar: 'ستصلك تفاصيل الدورة على بريدك الإلكتروني', ru: 'Детали курса будут отправлены на вашу электронную почту', de: 'Die Kursdetails werden an Ihre E-Mail-Adresse gesendet', en: 'Course details will be sent to your email'
-  }[lang] || 'Course details will be sent to your email';
-  const payLabel: any = {
-    ar: 'ادفع وسجل الآن', ru: 'Оплатить и записаться', de: 'Bezahlen und anmelden', en: 'Pay & enroll now'
-  }[lang] || 'Pay & enroll now';
+  const successTitles: Record<string,string> = { ar: 'تم التسجيل بنجاح!', ru: 'Регистрация прошла успешно!', de: 'Anmeldung erfolgreich!', en: 'Enrollment successful!' };
+  const successTitle = successTitles[lang] || 'Enrollment successful!';
+  const successBodies: Record<string,string> = { ar: 'ستصلك تفاصيل الدورة على بريدك الإلكتروني', ru: 'Детали курса будут отправлены на вашу электронную почту', de: 'Die Kursdetails werden an Ihre E-Mail-Adresse gesendet', en: 'Course details will be sent to your email' };
+  const successBody = successBodies[lang] || 'Course details will be sent to your email';
+  const payLabels: Record<string,string> = { ar: 'ادفع وسجل الآن', ru: 'Оплатить и записаться', de: 'Bezahlen und anmelden', en: 'Pay & enroll now' };
+  const payLabel = payLabels[lang] || 'Pay & enroll now';
 
   return (
     <div className="min-h-screen pt-24 pb-16" dir={dir}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-5 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-            <div className="shrink-0">
-              <h1 className="text-2xl font-extrabold text-gray-800">{t('courses.title')}</h1>
-              <p className="mt-1 text-xs text-gray-500">{lang==='ar'?'الدورات الطبية والنفسية حسب اللغة والتخصص.':'Medical and psychology courses by language and specialty.'}</p>
-            </div>
-            <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="relative">
-                <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"/>
-                <input value={search} onChange={e=>setSearch(e.target.value)} className="input-field h-11 w-full ps-9" placeholder={lang==='ar'?'ابحث باسم الدورة':'Search course name'} />
-              </div>
-              <select value={selectedSpecialty} onChange={e=>setSelectedSpecialty(e.target.value)} className="input-field h-11">
-                <option value="">{lang==='ar'?'كل التخصصات':'All specialties'}</option>
-                {specialties.map((spec) => <option key={spec.id} value={spec.slug}>{specialtyName(spec)}</option>)}
-              </select>
-              <select value={priceFilter} onChange={e=>setPriceFilter(e.target.value as any)} className="input-field h-11">
-                <option value="all">{lang==='ar'?'مجاني ومدفوع':'Free & paid'}</option>
-                <option value="free">{lang==='ar'?'مجاني فقط':'Free only'}</option>
-                <option value="paid">{lang==='ar'?'مدفوع فقط':'Paid only'}</option>
-              </select>
-              <select value={priceSort} onChange={e=>setPriceSort(e.target.value)} className="input-field h-11">
-                <option value="none">{lang==='ar'?'بدون ترتيب سعر':'No price sort'}</option>
-                <option value="low">{lang==='ar'?'الأقل سعراً':'Lowest price'}</option>
-                <option value="high">{lang==='ar'?'الأعلى سعراً':'Highest price'}</option>
-              </select>
-            </div>
+        <div className="mb-8 rounded-3xl border border-gray-100 bg-gradient-to-br from-amber-50 via-white to-white p-7 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100">
+            <BookOpen className="h-7 w-7 text-amber-600" />
           </div>
+          <h1 className="mb-2 text-3xl font-bold text-gray-800">{t('courses.title')}</h1>
+          <p className="text-gray-500">{t('courses.subtitle')}</p>
+        </div>
+
+        <div className="mb-8 flex flex-wrap justify-center gap-2">
+          <button onClick={() => setSelectedSpecialty('')} className={`badge ${!selectedSpecialty ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+            {t('common.all')}
+          </button>
+          {specialties.map((spec) => (
+            <button key={spec.id} onClick={() => setSelectedSpecialty(spec.slug)} className={`badge ${selectedSpecialty === spec.slug ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+              {specialtyName(spec)}
+            </button>
+          ))}
         </div>
 
         {loading ? (
@@ -142,7 +107,7 @@ export default function CoursesPage() {
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="card overflow-hidden animate-pulse">
                 <div className="h-40 bg-gray-100" />
-          <div className="p-5"><div className="mb-2 h-5 w-3/4 rounded bg-gray-100" /><div className="h-4 w-1/2 rounded bg-gray-100" /></div>
+                <div className="p-5"><div className="mb-2 h-5 w-3/4 rounded bg-gray-100" /><div className="h-4 w-1/2 rounded bg-gray-100" /></div>
               </div>
             ))}
           </div>
@@ -153,7 +118,7 @@ export default function CoursesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {sortedCourses.map((course) => {
+            {courses.map((course) => {
               const title = localizedField(course as unknown as Record<string, unknown>, 'title', lang, course.title);
               const description = localizedField(course as unknown as Record<string, unknown>, 'description', lang, course.description);
               return (
@@ -172,15 +137,12 @@ export default function CoursesPage() {
                       <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{course.enrolled_count}</span>
                       <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />{Number(course.rating).toFixed(1)}</span>
                     </div>
-                    <div className="mb-4 rounded-xl bg-gray-50 p-3 text-xs text-gray-600">{lang==='ar'?'طريقة الاستلام: اختر بين الدروس أونلاين أو ملف الدورة للتحميل.':'Delivery: choose online lessons or a downloadable course file.'}<div className="mt-2 flex gap-2"><button type="button" onClick={()=>setDeliveryMode('online')} className={`rounded-lg px-3 py-1 ${deliveryMode==='online'?'bg-teal-600 text-white':'bg-white border'}`}>Online</button><button type="button" onClick={()=>setDeliveryMode('download')} className={`rounded-lg px-3 py-1 ${deliveryMode==='download'?'bg-teal-600 text-white':'bg-white border'}`}>Download</button></div></div><div className="flex items-center justify-between border-t border-gray-100 pt-4">
-                      <span className="text-2xl font-bold text-teal-600">{clientPrice(Number((course.price * (courseBasePrice.local_price / courseBasePrice.price_usd)).toFixed(2))).toLocaleString(lang==='ar'?'ar-EG':'en-US')} {courseBasePrice.currency_symbol}</span>
-                      <div className="flex items-center gap-2">
-                        <button onClick={(e) => { e.stopPropagation(); navigate('/courses/'+course.id); }} className="btn-secondary text-sm">تفاصيل</button>
-                        <button onClick={() => { setEnrollCourse(course); setEnrolled(false); }} className="btn-primary flex items-center gap-2 text-sm">
-                          <Check className="h-4 w-4" />
-                          {t('courses.enroll')}
-                        </button>
-                      </div>
+                    <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+                      <span className="text-2xl font-bold text-teal-600">${course.price}</span>
+                      <button onClick={() => navigate('/courses/'+course.id)} className="btn-primary flex items-center gap-2 text-sm">
+                        <Check className="h-4 w-4" />
+                        {t('courses.enroll')}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -189,6 +151,8 @@ export default function CoursesPage() {
           </div>
         )}
       </div>
+
+      {showDemoNotice && <DemoTransparencyNotice mode="purchase" onClose={()=>setShowDemoNotice(false)} onContinue={()=>{setShowDemoNotice(false);}}/>}
 
       {enrollCourse && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setEnrollCourse(null)}>
@@ -216,9 +180,9 @@ export default function CoursesPage() {
                   </div>
                   <div className="flex items-center justify-between rounded-xl bg-teal-50 p-4">
                     <span className="font-medium text-gray-600">{t('courses.price')}</span>
-                    <span className="text-2xl font-bold text-teal-600">{Number((enrollCourse.price * (courseBasePrice.local_price / courseBasePrice.price_usd)).toFixed(2)).toLocaleString(lang==='ar'?'ar-EG':'en-US')} {courseBasePrice.currency_symbol}</span>
+                    <span className="text-2xl font-bold text-teal-600">${enrollCourse.price}</span>
                   </div>
-                  <label className="flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-900"><input type="checkbox" checked={contractAccepted} onChange={e=>setContractAccepted(e.target.checked)} className="mt-0.5"/><span>أوافق قبل الدفع على عقد المحتوى الإلكتروني: SB1 وسيط تقني، ومقدم الدورة مسؤول عن المحتوى والخدمة، مع بقاء الحقوق والالتزامات الإلزامية حسب القانون.</span></label><button type="submit" disabled={enrolling || !contractAccepted} className="btn-primary flex w-full items-center justify-center gap-2 disabled:opacity-50">
+                  <button type="submit" disabled={enrolling} className="btn-primary flex w-full items-center justify-center gap-2 disabled:opacity-50">
                     {enrolling ? t('sessions.booking') : <><DollarSign className="h-5 w-5" />{payLabel}</>}
                   </button>
                 </form>

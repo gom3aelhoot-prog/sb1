@@ -3,11 +3,10 @@ import { Send, CheckCircle, AlertCircle, User, Bot, ArrowRight, CreditCard, Cloc
 import { useRouter, parseQuery } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import { useApp } from '@/i18n/AppContext';
-import { getCountryServicePrice } from '@/lib/countryPricing';
+import { CURRENCY_RATES } from '@/types/i18n';
 import { supabase, type Specialty, type Doctor } from '@/lib/supabase';
 import DoctorCard from '@/components/DoctorCard';
 import { demoSpecialties, demoDoctors } from '@/lib/demoData';
-import { PAID_QUESTION_DURATIONS, moderateAndLog, recordUsage } from '@/lib/questionEconomy';
 
 type PricingTier = {
   id: string;
@@ -17,14 +16,18 @@ type PricingTier = {
   description_ar: string;
   duration_days: number;
   specialists_notified: number;
+  min_answers: number;
+  max_answers: number;
   response_speed: 'standard' | 'fast' | 'instant';
   price_usd: number;
   is_featured: boolean;
-  price_sar: number;
-  selectedSpecialties?: string[];
 };
 
-const fallbackTiers: PricingTier[] = PAID_QUESTION_DURATIONS.map((x)=>({id:x.id,name:x.label_en,name_ar:x.label_ar,description:`Visible for ${x.days} days to up to ${x.specialists_limit} specialists`,description_ar:`يظهر الطلب ${x.days} أيام لعدد يصل إلى ${x.specialists_limit} أطباء وأخصائيين`,duration_days:x.days,specialists_notified:x.specialists_limit,response_speed:'standard',price_usd:x.price_usd,price_sar:x.price_sar,is_featured:x.featured}));
+const fallbackTiers: PricingTier[] = [
+  { id: 'basic', name: 'Basic', name_ar: 'الأساسية', description: 'Standard response within 48 hours', description_ar: 'رد قياسي خلال 48 ساعة', duration_days: 7, specialists_notified: 10, min_answers: 1, max_answers: 3, response_speed: 'standard', price_usd: 9, is_featured: false },
+  { id: 'plus', name: 'Plus', name_ar: 'المعززة', description: 'Faster responses from more specialists', description_ar: 'ردود أسرع من عدد أكبر من الأخصائيين', duration_days: 14, specialists_notified: 25, min_answers: 2, max_answers: 5, response_speed: 'fast', price_usd: 19, is_featured: true },
+  { id: 'premium', name: 'Premium', name_ar: 'المميزة', description: 'Instant response and extended duration', description_ar: 'رد فوري ومدة ممتدة', duration_days: 30, specialists_notified: 50, min_answers: 3, max_answers: 10, response_speed: 'instant', price_usd: 39, is_featured: false },
+];
 
 const dataId = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `sb1-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
@@ -36,12 +39,9 @@ export default function AskPage() {
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [tiers, setTiers] = useState<PricingTier[]>(fallbackTiers);
   const [questionType, setQuestionType] = useState<'free' | 'paid'>('free');
-  const [selectedTierId, setSelectedTierId] = useState('basic');
+  const [selectedTierId, setSelectedTierId] = useState('plus');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
-  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>(query.specialty ? [query.specialty] : []);
-  const [specialtySearch, setSpecialtySearch] = useState('');
-  const [showSpecialtyPicker, setShowSpecialtyPicker] = useState(false);
-  const [contentLanguage, setContentLanguage] = useState(lang);
+  const [contentLang, setContentLang] = useState(lang as any);
   const [form, setForm] = useState({ author_name: '', age: '', gender: 'ذكر', title: '', body: '' });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -50,8 +50,6 @@ export default function AskPage() {
   const [specificDoctorId, setSpecificDoctorId] = useState<string | null>(null);
   const [specificDoctor, setSpecificDoctor] = useState<Doctor | null>(null);
   const [realDoctors, setRealDoctors] = useState<Doctor[]>([]);
-  const ownerMode = typeof window !== 'undefined' && localStorage.getItem('sb1_account_role')==='owner' && localStorage.getItem('sb1_preview_role')==='client';
-  const [questionBasePrice, setQuestionBasePrice] = useState<{price_usd:number;local_price:number;currency_code:string;currency_symbol:string}>({price_usd:9,local_price:9,currency_code:"USD",currency_symbol:"$"});
 
   useEffect(() => {
     (async () => {
@@ -61,11 +59,11 @@ export default function AskPage() {
           supabase.from('pricing_tiers').select('*').eq('is_active', true).order('sort_order'),
         ]);
         setSpecialties((specs && specs.length ? specs : demoSpecialties) as Specialty[]);
-
+        if (dbTiers?.length) setTiers(dbTiers as PricingTier[]);
       } catch {
         // Keep the page usable with the built-in pricing catalog when the database is unavailable.
       }
-      if (query.specialty) { setSelectedSpecialty(query.specialty); setSelectedSpecialties([query.specialty]); }
+      if (query.specialty) setSelectedSpecialty(query.specialty);
       if (query.virtual === '1') setIsVirtual(true);
       if (query.doctor) setSpecificDoctorId(query.doctor);
     })();
@@ -89,19 +87,15 @@ export default function AskPage() {
   }, [isVirtual, selectedSpecialty]);
 
   const selectedTier = tiers.find((tier) => tier.id === selectedTierId) || tiers[0];
-  const countryMultiplier = questionBasePrice.price_usd > 0 ? questionBasePrice.local_price / questionBasePrice.price_usd : 1;
-  const localAmount = selectedTier ? Number(((selectedTier.price_usd + Math.max(0,selectedSpecialties.length-1)*5) * countryMultiplier).toFixed(2)) : 0;
-
-  useEffect(() => { getCountryServicePrice(country,'question').then(setQuestionBasePrice); }, [country.code]);
+  const localAmount = selectedTier ? selectedTier.price_usd * (CURRENCY_RATES[country.currency] ?? 1) : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if ((!ownerMode && !form.author_name.trim()) || !form.title.trim() || !form.body.trim() || selectedSpecialties.length===0) {
+    if (!form.author_name.trim() || !form.title.trim() || !form.body.trim() || !selectedSpecialty) {
       setError(t('ask.required'));
       return;
     }
-    if (selectedSpecialties.length>5) { setError(lang==='ar'?'يمكن اختيار حتى 5 تخصصات فقط.':'You can choose up to 5 specialties.'); return; }
     if (questionType === 'paid' && !selectedTier) {
       setError(lang === 'ar' ? 'اختر باقة مدفوعة أولاً' : 'Please select a paid plan first.');
       return;
@@ -109,36 +103,30 @@ export default function AskPage() {
 
     setSubmitting(true);
     try {
-      const primarySpecialty = selectedSpecialties[0] || selectedSpecialty;
-      const { data: spec } = await supabase.from('specialties').select('id').eq('slug', primarySpecialty).maybeSingle();
-      const fallbackSpec = demoSpecialties.find((item) => item.slug === primarySpecialty) || demoSpecialties[0];
+      const { data: spec } = await supabase.from('specialties').select('id').eq('slug', selectedSpecialty).maybeSingle();
+      const fallbackSpec = demoSpecialties.find((item) => item.slug === selectedSpecialty) || demoSpecialties[0];
       const questionId = dataId();
       let dbQuestionId = '';
       try {
         const { data, error: insertError } = await supabase.from('questions').insert({
           specialty_id: spec?.id || fallbackSpec.id,
-          author_name: ownerMode ? 'عضو مجهول' : form.author_name.trim(),
+          author_name: form.author_name.trim(),
           title: form.title.trim(),
           body: form.body.trim(),
           age: form.age ? parseInt(form.age) : null,
           gender: form.gender,
-          country_code: country.code,
-          translations: { [contentLanguage]: { title: form.title.trim(), body: form.body.trim() } },
           status: questionType === 'paid' ? 'pending_payment' : 'pending',
+          content_language: contentLang,
         }).select('id').single();
         if (!insertError && data?.id) dbQuestionId = data.id;
       } catch {
         // Public demo fallback.
       }
       const id = dbQuestionId || questionId;
-      const expiresAt = questionType === 'paid' && selectedTier ? new Date(Date.now() + selectedTier.duration_days * 86400000).toISOString() : null;
-      try {
-        await supabase.from('consultation_requests').insert({ question_id: dbQuestionId || null, patient_name: ownerMode ? 'عضو مجهول' : form.author_name.trim(), specialty_id: spec?.id || fallbackSpec.id, country_code: country.code, language_code: contentLanguage, service_type: 'question', price_usd: (selectedTier?.price_usd || 0) + Math.max(0,selectedSpecialties.length-1)*5, local_price: localAmount, currency_code: country.currency, duration_days: selectedTier?.duration_days || 0, specialists_limit: 0, response_speed: 'standard', status: questionType === 'paid' ? 'pending' : 'active', expires_at: expiresAt });
-      } catch {}
-      if (questionType === 'free') await recordUsage('question',1);
       const localQuestion = {
-        id, language: contentLanguage, specialty_id: fallbackSpec.id, author_name: ownerMode ? 'عضو مجهول' : form.author_name.trim(), title: form.title.trim(), body: form.body.trim(),
+        id, specialty_id: fallbackSpec.id, author_name: form.author_name.trim(), title: form.title.trim(), body: form.body.trim(),
         age: form.age ? parseInt(form.age) : null, gender: form.gender, status: questionType === 'paid' ? 'pending_payment' : 'pending',
+        content_language: contentLang,
         views: 0, created_at: new Date().toISOString(), specialty: fallbackSpec, answers: [],
       };
       const existing = JSON.parse(localStorage.getItem('sb1_demo_questions') || '[]');
@@ -148,10 +136,9 @@ export default function AskPage() {
         const payment = { id: dataId(), amount: Number(localAmount.toFixed(2)), currency: country.currency, reference_id: id, status: 'pending' };
         const payments = JSON.parse(localStorage.getItem('sb1_demo_payments') || '[]');
         localStorage.setItem('sb1_demo_payments', JSON.stringify([payment, ...payments]));
-        localStorage.setItem('sb1_question_paid_'+id, String(payment.amount));
         if (dbQuestionId) {
           const { error: paymentError } = await supabase.from('payments').insert({
-            payer_email: '', payer_name: ownerMode ? 'عضو مجهول' : form.author_name.trim(), amount: payment.amount, currency: country.currency,
+            payer_email: '', payer_name: form.author_name.trim(), amount: payment.amount, currency: country.currency,
             payment_type: 'question', reference_id: id, status: 'pending',
           });
           if (paymentError) throw paymentError;
@@ -191,16 +178,6 @@ export default function AskPage() {
           <p className="text-gray-500">{lang === 'ar' ? 'اختر استشارة مجانية أو باقة مدفوعة بإجابة أسرع وعدد أكبر من الأطباء.' : t('ask.subtitle')}</p>
         </div>
 
-        <div className="card mb-6 border border-blue-100 bg-blue-50 p-6">
-          <h2 className="text-lg font-extrabold text-blue-900 mb-2">{lang === 'ar' ? 'ما الذي تحصل عليه عند إرسال الطلب؟' : 'What you get with your request'}</h2>
-          <div className="grid gap-3 sm:grid-cols-2 text-sm text-blue-900">
-            <div>✓ {lang === 'ar' ? 'إرسال الطلب إلى أخصائيين في التخصص الذي تختاره' : 'Your request is routed to specialists in the selected specialty'}</div>
-            <div>✓ {lang === 'ar' ? 'تحدد أنت مدة بقاء الطلب وعدد الأخصائيين المسموح لهم بفتح الطلب والرد عليك' : 'You choose the active duration and how many specialists may open the request and respond'}</div>
-            <div>✓ {lang === 'ar' ? 'يمكنك قراءة كل إجابة والرد على الأخصائي وطرح سؤال متابعة' : 'Read every answer, reply to the specialist and ask a follow-up'}</div>
-            <div>✓ {lang === 'ar' ? 'السعر يظهر بعملة الدولة التي اخترتها' : 'The price is shown in the currency of your selected country'}</div>
-          </div>
-        </div>
-
         {isVirtual && (
           <div className="card p-5 mb-6 bg-amber-50 border-amber-200">
             <div className="flex items-start gap-3">
@@ -229,24 +206,6 @@ export default function AskPage() {
         )}
 
         <div className="card p-5 mb-6">
-  <div className="flex items-center justify-between gap-3 mb-3">
-    <div>
-      <label className="block text-sm font-bold text-gray-700">{lang==='ar'?'التخصصات التي سيظهر فيها السؤال':'Specialties that will receive this question'}</label>
-      <p className="mt-1 text-xs text-gray-500">{lang==='ar'?'اضغط زر البحث واختر حتى 5 تخصصات فقط.':'Use search and select up to 5 specialties.'}</p>
-    </div>
-    <button type="button" onClick={()=>setShowSpecialtyPicker(v=>!v)} className="shrink-0 rounded-xl bg-teal-600 px-5 py-3 text-white font-bold shadow-sm hover:bg-teal-700">{lang==='ar'?'🔎 بحث عن تخصص':'🔎 Search specialty'}</button>
-  </div>
-  {selectedSpecialties.length>0 && <div className="flex flex-wrap gap-2 mb-3">{selectedSpecialties.map(slug=>{const spec:any=specialties.find((s:any)=>s.slug===slug);return <button type="button" key={slug} onClick={()=>{const v=selectedSpecialties.filter(x=>x!==slug);setSelectedSpecialties(v);setSelectedSpecialty(v[0]||'')}} className="rounded-full bg-teal-50 border border-teal-200 px-3 py-1.5 text-sm text-teal-800 hover:bg-red-50 hover:text-red-700">{spec?specialtyName(spec):slug} ×</button>})}</div>}
-  {showSpecialtyPicker && <div className="rounded-2xl border bg-white p-4 shadow-sm">
-    <input autoFocus value={specialtySearch} onChange={e=>setSpecialtySearch(e.target.value)} placeholder={lang==='ar'?'اكتب اسم التخصص للبحث...':'Type a specialty to search...'} className="input-field mb-3"/>
-    <div className="max-h-72 overflow-y-auto space-y-1">
-      {specialties.filter((spec:any)=>!selectedSpecialties.includes(spec.slug) && (!specialtySearch.trim() || specialtyName(spec).toLowerCase().includes(specialtySearch.toLowerCase()) || String(spec.slug).toLowerCase().includes(specialtySearch.toLowerCase()))).slice(0,30).map((spec:any)=><button type="button" key={spec.id} onClick={()=>{if(selectedSpecialties.length<5){const v=[...selectedSpecialties,spec.slug];setSelectedSpecialties(v);setSelectedSpecialty(v[0]||spec.slug);setSpecialtySearch('');if(v.length===5)setShowSpecialtyPicker(false)}}} className="w-full text-start rounded-xl border border-gray-100 px-4 py-3 hover:bg-teal-50">{specialtyName(spec)}</button>)}
-      {specialties.filter((spec:any)=>!selectedSpecialties.includes(spec.slug) && (!specialtySearch.trim() || specialtyName(spec).toLowerCase().includes(specialtySearch.toLowerCase()) || String(spec.slug).toLowerCase().includes(specialtySearch.toLowerCase()))).length===0 && <p className="py-4 text-center text-sm text-gray-500">{lang==='ar'?'لا توجد نتائج':'No results'}</p>}
-    </div>
-    <p className="mt-3 text-xs text-gray-500">{lang==='ar' ? ('تم اختيار '+selectedSpecialties.length+' من 5.') : (selectedSpecialties.length+' of 5 selected.')}</p>
-  </div>}
-</div>
-<div className="card p-5 mb-6"><label className="block text-sm font-bold text-gray-700 mb-2">{lang==='ar'?'لغة السؤال والمحتوى':'Question language'}</label><select value={contentLanguage} onChange={e=>setContentLanguage(e.target.value as typeof lang)} className="input-field mb-5"><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select>
           <div className="grid grid-cols-2 gap-3">
             <button type="button" onClick={() => setQuestionType('free')} className={`rounded-2xl border-2 p-4 text-start transition ${questionType === 'free' ? 'border-teal-500 bg-teal-50' : 'border-gray-100'}`}>
               <div className="font-bold text-gray-800">{lang === 'ar' ? 'سؤال مجاني' : 'Free question'}</div>
@@ -254,30 +213,25 @@ export default function AskPage() {
             </button>
             <button type="button" onClick={() => setQuestionType('paid')} className={`rounded-2xl border-2 p-4 text-start transition ${questionType === 'paid' ? 'border-teal-500 bg-teal-50' : 'border-gray-100'}`}>
               <div className="flex items-center gap-2 font-bold text-gray-800"><CreditCard className="w-4 h-4 text-teal-600" />{lang === 'ar' ? 'سؤال مدفوع' : 'Paid question'}</div>
-              <div className="text-xs text-gray-500 mt-1">{lang === 'ar' ? 'متاح لجميع أطباء هذا التخصص خلال المدة المحددة' : 'Available to all doctors in this specialty for the selected duration'}</div>
+              <div className="text-xs text-gray-500 mt-1">{lang === 'ar' ? 'أولوية وإجابات أكثر' : 'Priority and more answers'}</div>
             </button>
           </div>
         </div>
 
         {questionType === 'paid' && (
-          <div className="mb-6">
-            <div className="card border border-blue-100 bg-blue-50 p-5 mb-4">
-              <h2 className="font-extrabold text-blue-900">{lang==='ar'?'كيف تعمل باقات طلب الجلسة؟':'How request plans work'}</h2>
-              <p className="mt-2 text-sm leading-7 text-blue-800">{lang==='ar'?'اختر كم يوماً يظهر طلبك للأطباء والأخصائيين. ثم اختر كم طبيباً أو أخصائياً يحق له فتح الطلب وترك رد. عند انتهاء المدة أو وصول الطلب إلى الحد المحدد من الأطباء يُغلق الطلب، وبعدها تقارن الردود وتختار الأخصائي الذي تريد حجز الجلسة معه. لا يوجد تصنيف حسب عدد الإجابات ولا يوجد ضمان لعدد إجابات معين.':'Choose how many days your request stays visible and how many specialists may open it and respond. When the duration ends or the specialist limit is reached, the request closes. You can then compare responses and choose the specialist for your session. There is no answer-count ranking or guaranteed answer count.'}</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {tiers.map((tier) => (
-                <button key={tier.id} type="button" onClick={() => setSelectedTierId(tier.id)} className={`text-start rounded-2xl border-2 p-5 transition ${selectedTierId === tier.id ? 'border-teal-500 bg-teal-50 shadow-sm' : 'border-gray-100 bg-white'}`}>
-                  {tier.is_featured && <span className="text-[10px] font-bold text-teal-700 bg-teal-100 rounded-full px-2 py-1">{lang === 'ar' ? 'الأكثر طلباً' : 'Most requested'}</span>}
-                  <h3 className="mt-2 text-lg font-extrabold text-gray-800">{lang === 'ar' ? tier.name_ar : tier.name}</h3>
-                  <div className="mt-1 text-2xl font-extrabold text-teal-700">{Number((tier.price_usd * countryMultiplier).toFixed(2)).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')} {questionBasePrice.currency_symbol}</div>
-                  <div className="mt-3 space-y-2 text-sm text-gray-600">
-                    <div className="flex items-center gap-2"><Clock className="w-4 h-4" />{tier.duration_days} {lang === 'ar' ? 'يوم ظهور الطلب' : 'days visible'}</div>
-                    <div className="flex items-center gap-2"><Users className="w-4 h-4" />{tier.selectedSpecialties?.length || 0} {lang === 'ar' ? 'تخصصات مختارة' : 'selected specialties'}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
+          <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+            {tiers.map((tier) => (
+              <button key={tier.id} type="button" onClick={() => setSelectedTierId(tier.id)} className={`text-start rounded-2xl border-2 p-4 transition ${selectedTierId === tier.id ? 'border-teal-500 bg-teal-50 shadow-sm' : 'border-gray-100 bg-white'}`}>
+                {tier.is_featured && <span className="text-[10px] font-bold text-teal-700 bg-teal-100 rounded-full px-2 py-1">{lang === 'ar' ? 'الأكثر طلباً' : 'Featured'}</span>}
+                <h3 className="mt-2 font-bold text-gray-800">{lang === 'ar' ? tier.name_ar : tier.name}</h3>
+                <div className="mt-1 text-xl font-extrabold text-teal-700">{formatPrice(tier.price_usd)}</div>
+                <div className="mt-2 space-y-1 text-xs text-gray-500">
+                  <div className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{tier.duration_days} {lang === 'ar' ? 'يوم' : 'days'}</div>
+                  <div className="flex items-center gap-1"><Users className="w-3.5 h-3.5" />{tier.specialists_notified} {lang === 'ar' ? 'أطباء' : 'specialists'}</div>
+                  <div>{tier.min_answers}-{tier.max_answers} {lang === 'ar' ? 'إجابات' : 'answers'}</div>
+                </div>
+              </button>
+            ))}
           </div>
         )}
 
@@ -289,6 +243,7 @@ export default function AskPage() {
               {specialties.map((spec) => <option key={spec.id} value={spec.slug}>{specialtyName(spec)}</option>)}
             </select>
           </div>
+          <div><label className="block text-sm font-semibold text-gray-700 mb-2">لغة السؤال <span className="text-red-500">*</span></label><select value={contentLang} onChange={e=>setContentLang(e.target.value)} className="input-field" required><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="uz">O‘zbekcha</option><option value="hy">Հայերեն</option><option value="tg">Тоҷикӣ</option><option value="az">Azərbaycan</option><option value="am">አማርኛ</option><option value="ka">ქართული</option></select></div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">{t('ask.name')} <span className="text-red-500">*</span></label>
             <div className="relative"><User className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" /><input type="text" value={form.author_name} onChange={(e) => setForm({ ...form, author_name: e.target.value })} placeholder={t('ask.name_placeholder')} className="input-field pr-12" required /></div>
@@ -298,15 +253,15 @@ export default function AskPage() {
             <div><label className="block text-sm font-semibold text-gray-700 mb-2">{t('ask.gender')}</label><select value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })} className="input-field cursor-pointer"><option value="ذكر">{t('ask.male')}</option><option value="أنثى">{t('ask.female')}</option></select></div>
           </div>
           <div><label className="block text-sm font-semibold text-gray-700 mb-2">{t('ask.title_label')} <span className="text-red-500">*</span></label><input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={t('ask.title_placeholder')} className="input-field" required /></div>
-          <div><label className="block text-sm font-semibold text-gray-700 mb-2">{t('ask.body_label')} <span className="text-red-500">*</span></label><textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder={t('ask.body_placeholder')} rows={10} className="input-field min-h-[240px] resize-y leading-7" required /></div>
+          <div><label className="block text-sm font-semibold text-gray-700 mb-2">{t('ask.body_label')} <span className="text-red-500">*</span></label><textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder={t('ask.body_placeholder')} rows={6} className="input-field resize-none" required /></div>
 
           {questionType === 'paid' && selectedTier && (
             <div className="rounded-2xl bg-teal-50 border border-teal-100 p-4 text-sm text-teal-800">
               <div className="flex items-center justify-between gap-3">
                 <span className="font-semibold">{lang === 'ar' ? 'المبلغ المستحق' : 'Amount due'}</span>
-                <span className="text-lg font-extrabold">{localAmount.toLocaleString(lang==='ar'?'ar-EG':'en-US',{maximumFractionDigits:2})} {questionBasePrice.currency_symbol}</span>
+                <span className="text-lg font-extrabold">{formatPrice(selectedTier.price_usd)}</span>
               </div>
-              <p className="mt-1 text-xs text-teal-700">{lang === 'ar' ? `مدة الطلب: ${selectedTier.duration_days} يوم · حتى ${selectedTier.specialists_notified} أخصائي . السعر حسب دولة ${country.code}.` : `Request: ${selectedTier.duration_days} days · up to ${selectedTier.specialists_notified} specialists . Price follows country ${country.code}.`}</p>
+              <p className="mt-1 text-xs text-teal-700">{lang === 'ar' ? 'بعد الإرسال ستنتقل إلى صفحة الدفع. الدفع الحالي يعمل في وضع الاختبار إلى حين ربط مزود دفع فعلي.' : 'You will continue to checkout. Payment is currently in sandbox mode until a live provider is connected.'}</p>
             </div>
           )}
 

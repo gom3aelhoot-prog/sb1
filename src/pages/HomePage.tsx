@@ -77,25 +77,11 @@ export default function HomePage() {
     { icon: HeartPulse, label: t('stats.specialties'), value: '+25' },
   ];
 
-  const serviceCopy: Record<string, {doctor:string; video:string; doctorDesc:string; videoDesc:string}> = {
-    ar:{doctor:'اختار طبيبك',video:'جلسات الفيديو',doctorDesc:'اختر الطبيب أو الأخصائي المناسب لك حسب التخصص واللغة والبلد، ثم افتح صفحته واحجز الاستشارة.',videoDesc:'احجز جلسة فيديو أونلاين مع الطبيب أو الأخصائي المختار وانتقل إلى غرفة الاجتماع الخاصة بالجلسة.'},
-    en:{doctor:'Choose Your Doctor',video:'Video Sessions',doctorDesc:'Choose a doctor or specialist by specialty, language and country, then open the profile and book.',videoDesc:'Book an online video session and enter the private meeting room for your appointment.'},
-    de:{doctor:'Wählen Sie Ihren Arzt',video:'Videositzungen',doctorDesc:'Wählen Sie einen Arzt nach Fachgebiet, Sprache und Land und öffnen Sie sein Profil.',videoDesc:'Buchen Sie eine Online-Videositzung und treten Sie dem privaten Besprechungsraum bei.'},
-    ru:{doctor:'Выберите врача',video:'Видеосессии',doctorDesc:'Выберите врача или специалиста по специальности, языку и стране и откройте его профиль.',videoDesc:'Забронируйте онлайн-видеосессию и перейдите в комнату встречи.'},
-    uk:{doctor:'Оберіть лікаря',video:'Відеосесії',doctorDesc:'Оберіть лікаря або спеціаліста за спеціальністю, мовою та країною.',videoDesc:'Забронюйте онлайн-відеосесію та перейдіть до кімнати зустрічі.'},
-    uz:{doctor:'Shifokoringizni tanlang',video:'Video seanslar',doctorDesc:'Mutaxassislik, til va mamlakat bo‘yicha shifokorni tanlang va profilini oching.',videoDesc:'Onlayn video seansni bron qiling va uchrashuv xonasiga kiring.'},
-    hy:{doctor:'Ընտրեք ձեր բժշկին',video:'Տեսազանգի սեանսներ',doctorDesc:'Ընտրեք բժշկին ըստ մասնագիտության, լեզվի և երկրի և բացեք նրա էջը։',videoDesc:'Ամրագրեք առցանց տեսասեանս և մուտք գործեք հանդիպման սենյակ։'},
-    tg:{doctor:'Табиби худро интихоб кунед',video:'Ҷаласаҳои видеоӣ',doctorDesc:'Табибро аз рӯи ихтисос, забон ва кишвар интихоб кунед ва профили ӯро кушоед.',videoDesc:'Ҷаласаи видеоии онлайнро фармоиш диҳед ва ба утоқи вохӯрӣ ворид шавед.'},
-    az:{doctor:'Həkiminizi seçin',video:'Video seanslar',doctorDesc:'İxtisas, dil və ölkəyə görə həkim seçin və profilini açın.',videoDesc:'Onlayn video seans sifariş edin və görüş otağına daxil olun.'},
-    am:{doctor:'ሐኪምዎን ይምረጡ',video:'የቪዲዮ ክፍለ ጊዜዎች',doctorDesc:'በልዩ ሙያ፣ ቋንቋ እና አገር ሐኪም ይምረጡ።',videoDesc:'የመስመር ላይ ቪዲዮ ቀጠሮ ይያዙ እና ወደ ስብሰባ ክፍሉ ይግቡ።'},
-    ka:{doctor:'აირჩიეთ ექიმი',video:'ვიდეო სესიები',doctorDesc:'აირჩიეთ ექიმი სპეციალობის, ენისა და ქვეყნის მიხედვით და გახსენით პროფილი.',videoDesc:'დაჯავშნეთ ონლაინ ვიდეოსესია და შედით შეხვედრის ოთახში.'},
-  };
-  const copy = serviceCopy[lang] || serviceCopy.en;
   const services = [
-    { icon: MessageCircle, title: copy.doctor, desc: copy.doctorDesc, path: '/doctors', color: 'green', tip: copy.doctorDesc },
-    { icon: Video, title: copy.video, desc: copy.videoDesc, path: '/sessions', color: 'teal', tip: copy.videoDesc },
-    { icon: BookOpen, title: t('courses.title'), desc: t('courses.subtitle'), path: '/courses', color: 'amber', tip: t('courses.subtitle') },
-    { icon: Headphones, title: t('audio.title'), desc: t('audio.subtitle'), path: '/audio', color: 'blue', tip: t('audio.subtitle') },
+    { icon: Video, title: t('sessions.video_paid'), desc: t('sessions.video_paid_desc'), path: '/sessions', color: 'teal' },
+    { icon: MessageCircle, title: t('sessions.free_text'), desc: t('sessions.free_text_desc'), path: '/sessions', color: 'green' },
+    { icon: BookOpen, title: t('courses.title'), desc: t('courses.subtitle'), path: '/courses', color: 'amber' },
+    { icon: Headphones, title: t('audio.title'), desc: t('audio.subtitle'), path: '/audio', color: 'blue' },
   ];
 
   return (
@@ -237,15 +223,12 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {services.map((service, i) => (
-              <button key={i} onClick={() => navigate(service.path)} className="group relative card card-hover p-6 text-right">
+              <button key={i} onClick={() => navigate(service.path)} className="card card-hover p-6 text-right group">
                 <div className={`w-14 h-14 rounded-2xl bg-${service.color}-50 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`}>
                   <service.icon className={`w-7 h-7 text-${service.color}-600`} />
                 </div>
                 <h3 className="font-bold text-gray-800 mb-1">{service.title}</h3>
                 <p className="text-sm text-gray-500">{service.desc}</p>
-                <span className="pointer-events-none absolute inset-x-3 top-full z-30 mt-2 rounded-2xl bg-gray-900 px-4 py-3 text-center text-xs leading-6 text-white opacity-0 shadow-2xl transition-all duration-200 group-hover:translate-y-1 group-hover:opacity-100">
-                  {service.tip}
-                </span>
               </button>
             ))}
           </div>

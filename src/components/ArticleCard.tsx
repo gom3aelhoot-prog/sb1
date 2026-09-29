@@ -4,7 +4,6 @@ import { useRouter } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
 import type { Article } from '@/lib/supabase';
 import { localizedField } from '@/lib/localizedContent';
-import ShareButtons from '@/components/ShareButtons';
 
 export default function ArticleCard({ article }: { article: Article }) {
   const { navigate } = useRouter();
@@ -28,7 +27,6 @@ export default function ArticleCard({ article }: { article: Article }) {
       <div className="flex flex-1 flex-col p-5">
         <h3 className="mb-2 line-clamp-2 text-lg font-bold leading-snug text-gray-800 transition-colors group-hover:text-teal-600">{title}</h3>
         <p className="mb-4 line-clamp-2 flex-1 text-sm text-gray-500">{excerpt}</p>
-        <div className="mb-3"><ShareButtons compact title={title} url={window.location.origin + '/articles/' + article.id} /></div>
         <div className="flex items-center justify-between text-xs text-gray-400">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{article.reading_time_min} {t('articles.reading_time')}</span>

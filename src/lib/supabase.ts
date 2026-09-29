@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 import { demoSpecialties, demoDoctors, demoArticles, demoVideos, demoAudio, demoCourses, demoClinics, demoLabs, demoRadiology, demoFacilities, demoProducts, demoLibrary, demoQuestions, demoAnswers } from '@/lib/demoData';
-import { defaultStoreProducts } from '@/lib/storeCatalog';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY;
@@ -12,78 +11,29 @@ const demoTables: Record<string, DemoRow[]> = {
   courses: demoCourses, clinics: demoClinics, lab_centers: demoLabs, radiology_centers: demoRadiology,
   questions: demoQuestions, answers: demoAnswers,
   additional_facilities: demoFacilities, pharmacy_products: demoProducts, specialty_library_items: demoLibrary,
-  sb1_specialist_registration_requests: [
-    {id:'req-demo-1',name:'أخصائي تجريبي',email:'pending@sb1.demo',phone:'',specialty_id:demoSpecialties[0]?.id||null,country_code:'SY',language_code:'ar',documents:{},status:'pending',created_at:now},
-  ],
-  sb1_team_chat_rooms: [
-    {id:'team-owner',name:'المالك + المشرفون',description:'مجموعة خاصة يحدد المالك أعضاءها',member_count:3,created_at:now,is_active:true},
-    {id:'team-pediatrics',name:'فريق الأطفال المختار',description:'غرفة خاصة لأخصائيي الأطفال المختارين',member_count:4,created_at:now,is_active:true},
-  ],
-  sb1_team_chat_messages: [
-    {id:'tm1',room_id:'team-owner',sender_name:'المالك',sender_role:'owner',body:'مرحباً بفريق الإدارة.',created_at:now},
-  ],
-  sb1_pediatric_library_rooms: [
-    {id:'p-room-1',name:'التقييم والتشخيص',description:'صور وفيديوهات وملفات تعليمية',owner_id:'owner',is_active:true,created_at:now},
-    {id:'p-room-2',name:'إعادة التأهيل للأطفال',description:'مواد تبادل الخبرات',owner_id:'owner',is_active:true,created_at:now},
-  ],
-  sb1_pediatric_library_posts: [
-    {id:'p-post-1',room_id:'p-room-1',title:'مثال تعليمي',body:'مادة تجريبية لتبادل الخبرة بين الأخصائيين.',media_url:'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',media_type:'video',author_name:'SB1',likes_count:4,comments_count:1,shares_count:2,created_at:now},
-  ],
-  sb1_pediatric_library_comments: [
-    {id:'p-comment-1',post_id:'p-post-1',author_name:'أخصائي تجريبي',body:'مفيد، شكراً.',created_at:now},
-  ],
-  sb1_team_chat_members: [
-    {id:'tmember-owner',room_id:'team-owner',member_name:'المالك',member_role:'owner',created_at:now},
-    {id:'tmember-mod',room_id:'team-owner',member_name:'مشرف SB1',member_role:'moderator',created_at:now},
-  ],
-    question_pricing_rules: [{ id:'pricing-demo', country_code:null, currency_code:'USD', base_price:9, duration_days:7, notification_reach:10, min_answers:1, max_answers:3, response_speed:'standard', is_active:true }],
+  question_pricing_rules: [{ id:'pricing-demo', country_code:null, currency_code:'USD', base_price:9, duration_days:7, notification_reach:10, min_answers:1, max_answers:3, response_speed:'standard', is_active:true }],
   pricing_tiers: [
     { id:'basic', name:'Basic', name_ar:'الأساسية', description:'Standard response', description_ar:'رد قياسي', duration_days:7, specialists_notified:10, min_answers:1, max_answers:3, response_speed:'standard', price_usd:9, is_featured:false, is_active:true, sort_order:1 },
     { id:'plus', name:'Plus', name_ar:'المعززة', description:'Faster response', description_ar:'رد أسرع', duration_days:14, specialists_notified:25, min_answers:2, max_answers:5, response_speed:'fast', price_usd:19, is_featured:true, is_active:true, sort_order:2 },
     { id:'premium', name:'Premium', name_ar:'المميزة', description:'Priority response', description_ar:'أولوية', duration_days:30, specialists_notified:50, min_answers:3, max_answers:10, response_speed:'instant', price_usd:39, is_featured:false, is_active:true, sort_order:3 },
   ],
   subscription_plans: [
-    { id:'free', name:'Free', name_ar:'مجاني', duration_months:1, price:0, daily_questions_limit:10, weekly_questions_limit:null, free_courses_limit:0, free_books_limit:1, features:'10 أسئلة شهرياً', is_active:true, created_at:now },
-    { id:'pro', name:'Pro', name_ar:'Pro', duration_months:1, price:10, daily_questions_limit:500, weekly_questions_limit:null, free_courses_limit:2, free_books_limit:10, features:'500 سؤال + 50 صورة شهرياً', is_active:true, created_at:now },
-    { id:'business', name:'Business', name_ar:'Business', duration_months:1, price:30, daily_questions_limit:null, weekly_questions_limit:null, free_courses_limit:10, free_books_limit:50, features:'أسئلة وصور غير محدودة', is_active:true, created_at:now },
+    { id:'sub-free', name:'Free', name_ar:'مجاني', duration_months:1, price:0, daily_questions_limit:1, weekly_questions_limit:3, free_courses_limit:0, free_books_limit:1, features:'سؤال مجاني، مكتبة أساسية', is_active:true, created_at:now },
+    { id:'sub-plus', name:'Plus', name_ar:'بلس', duration_months:1, price:9.99, daily_questions_limit:3, weekly_questions_limit:10, free_courses_limit:1, free_books_limit:5, features:'أسئلة أكثر، كتب ودورات مخفضة', is_active:true, created_at:now },
+    { id:'sub-pro', name:'Pro', name_ar:'احترافي', duration_months:1, price:24.99, daily_questions_limit:10, weekly_questions_limit:30, free_courses_limit:3, free_books_limit:20, features:'أولوية، مكتبة كاملة، خصومات', is_active:true, created_at:now },
   ],
   site_settings: [{ id:1, site_name:'SB1', default_language:'ar', free_session_messages:3, video_session_price:25, currency:'USD', ai_moderation_enabled:true, stripe_enabled:false, updated_at:now }],
   admin_users: [],
-  complaints: [],
-  provider_wallets: [],
-  sb1_session_packages: [
-    {id:'pkg-demo-1',specialist_id:null,title:'باقة متابعة 6 جلسات',description:'متابعة ممتدة مع سعر مخفض لكل جلسة.',session_count:6,regular_price:300,package_price:240,discount_percent:20,duration_days:60,currency_code:'USD',is_active:true,created_at:now},
-    {id:'pkg-demo-2',specialist_id:null,title:'باقة متابعة 12 جلسة',description:'خطة متابعة طويلة المدى قابلة للتخصيص.',session_count:12,regular_price:600,package_price:450,discount_percent:25,duration_days:120,currency_code:'USD',is_active:true,created_at:now},
-  ],
-  sb1_session_package_quotes: [],
-  sb1_social_saves: [],
-  sb1_social_likes: [],
-  sb1_social_comments: [],
-  sb1_social_archive: [],
-  sb1_profile_follows: [],
-  sb1_profile_privacy: [],
-  provider_sanctions: [],
-  session_holds: [],
-  sanction_rules: [
-    {id:'demo-rule-no-show',rule_key:'video_no_show',name:'عدم حضور جلسة الفيديو',description:'غرامة وتجميد عند عدم الحضور دون عذر',enabled:true,penalty_amount:25,hold_percent:100,freeze_hours:72,freeze_account:true,complaint_threshold:1,review_threshold:0,compensation_discount_percent:30,compensation_free_questions:1,compensation_free_consultations:1},
-    {id:'demo-rule-review',rule_key:'negative_review',name:'تقييم سلبي يحتاج تحقيقاً',description:'حجز جزئي وتحقيق',enabled:true,penalty_amount:0,hold_percent:30,freeze_hours:24,freeze_account:false,complaint_threshold:1,review_threshold:2,compensation_discount_percent:20,compensation_free_questions:1,compensation_free_consultations:0},
-    {id:'demo-rule-complaints',rule_key:'complaint_threshold',name:'تراكم الشكاوى',description:'تصعيد عند تراكم الشكاوى',enabled:true,penalty_amount:50,hold_percent:50,freeze_hours:168,freeze_account:true,complaint_threshold:3,review_threshold:0,compensation_discount_percent:30,compensation_free_questions:2,compensation_free_consultations:1},
-  ],
-  complaint_assistant_actions: [],
-  compensation_codes: [],
-
   payments: [], video_sessions: [], text_sessions: [], specialist_planner: [], planner_reminders: [], lab_bookings: [], radiology_bookings: [], clinic_bookings: [],
   specialist_documents: [], specialist_posts: [], specialist_diary: [], post_comments: [], user_follows: [],
   medical_tests: [], test_results: [], ai_report_analysis: [], favorites: [], advertisements: [], jobs: [], job_applications: [], referral_rewards: [],
   country_pricing: [], institutions: [], delivery_workers: [], admin_chat_messages: [],
-  store_products: defaultStoreProducts, store_orders: [],
+  vip_links: [], gift_packages: [
+    {id:'gift-basic',name:'باقة هدية الاستشارة',description:'هدية تمنح صاحبها استشارتين مجانيتين وخصم 10% على الخدمات التالية.',free_services:2,discount_percent:10,account_type:'client',duration_days:30,is_active:true},
+    {id:'gift-plus',name:'باقة هدية Plus',description:'هدية تمنح 5 خدمات مجانية وخصم 20%.',free_services:5,discount_percent:20,account_type:'client',duration_days:60,is_active:true},
+    {id:'gift-pro',name:'باقة هدية Pro',description:'هدية مرنة يمكن للمالك تحديد نوع الحساب والخدمات والخصم.',free_services:10,discount_percent:30,account_type:'client',duration_days:90,is_active:true},
+  ], gift_claims: [],
   signup_promotions: [{ id:'promo-demo', code:'SB1-FIRST-SIGNUP', discount_percent:10, is_active:true }],
-  question_pricing_durations: [3,5,10,15].map((days,i)=>({id:`q-duration-${days}`,days,price_usd:[3,5,9,12][i],is_active:true})),
-  question_answer_selections: [], question_answer_ratings: [], question_earnings: [], question_accounting_reports: [], question_report_shares: [], sb1_notifications: [], sb1_moderation_events: [], sb1_credit_transactions: [],
-  sb1_audience_profiles: Array.from({length:180},(_,i)=>{const cities=[['DE','Frankfurt'],['DE','Berlin'],['RU','Moscow'],['AM','Yerevan'],['GE','Tbilisi'],['UZ','Tashkent'],['SY','Damascus'],['SA','Riyadh'],['AE','Dubai'],['EG','Cairo']];const [country,city]=cities[i%cities.length];return {id:'aud-demo-'+i,user_id:'demo-user-'+i,name:'مستخدم تجريبي '+(i+1),email:'user'+i+'@sb1.demo',role:['client','specialist','institution'][i%3],country_code:country,city,language_code:{DE:'de',RU:'ru',AM:'hy',GE:'ka',UZ:'uz',SY:'ar',SA:'ar',AE:'ar',EG:'ar'}[country]||'en',last_seen_at:i%4===0?new Date(Date.now()-45*86400000).toISOString():new Date(Date.now()-i%10*86400000).toISOString(),notification_enabled:true,created_at:new Date(Date.now()-i*86400000).toISOString()};}),
-  sb1_notification_campaigns: [],
-  sb1_notification_deliveries: [],
-  sb1_credit_wallets: [], sb1_subscription_usage: [],
 };
 
 const demoStorageKey = 'sb1_demo_db_v2';
@@ -184,8 +134,6 @@ export type Doctor = {
   city: string;
   rating: number;
   consultation_count: number;
-  session_price?: number;
-  consultation_price?: number;
   native_language: string | null;
   is_online: boolean;
   is_verified: boolean;
@@ -193,9 +141,6 @@ export type Doctor = {
   phone_number: string | null;
   follower_count: number;
   nationality: string | null;
-  country_code?: string | null;
-  language_code?: string | null;
-  approval_status?: string;
   created_at: string;
   specialty?: Specialty;
 };
@@ -211,7 +156,6 @@ export type Question = {
   status: string;
   views: number;
   created_at: string;
-  language?: string;
   specialty?: Specialty;
   answers?: Answer[];
 };
@@ -803,18 +747,16 @@ export type AdditionalFacility = {
 
 export type PharmacyProduct = {
   id: string;
-  pharmacy_id?: string | null;
-  facility_id?: string | null;
+  pharmacy_id: string | null;
   name: string;
   description: string | null;
   image_url: string | null;
   price: number;
   currency: string;
-  delivery_option?: string;
-  pickup_address?: string | null;
+  delivery_option: string;
+  pickup_address: string | null;
   is_active: boolean;
-  stock?: number;
-  stock_quantity?: number;
+  stock: number;
   created_at: string;
 };
 

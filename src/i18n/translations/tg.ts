@@ -175,8 +175,6 @@ const tg: TranslationData = {
     mauritania: 'Мавритания',
     sudan: 'Судон',
     somalia: 'Сомалӣ',
-    comoros: 'Комор',
-    djibouti: 'Ҷибутӣ',
   },
   qa: {
     title: 'Саволҳои тиббӣ ва маслиҳатҳо',

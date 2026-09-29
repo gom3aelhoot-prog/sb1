@@ -1,6 +1,5 @@
-name: SB1 Source Archive
+name: SB1 source archive
 on:
-  workflow_dispatch:
   push:
     branches: [main]
 jobs:
@@ -8,12 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Create source archive
-        run: |
-          zip -r sb1-source-main.zip . \
-            -x ".git/*" "node_modules/*" "dist/*" ".vercel/*" "*.DS_Store"
+      - name: Create source manifest
+        run: printf "SB1 source archive\nCommit: %s\nCreated: %s\n" "$GITHUB_SHA" "$(date -u)" > SB1-SOURCE-MANIFEST.txt
+      - name: Create source ZIP
+        run: zip -r "/tmp/SB1-latest-${GITHUB_SHA::7}.zip" . -x ".git/*" "node_modules/*" "dist/*" "SB1-latest-*.zip"
       - uses: actions/upload-artifact@v4
         with:
-          name: sb1-source-main
-          path: sb1-source-main.zip
-          retention-days: 90
+          name: SB1-latest-source
+          path: /tmp/SB1-latest-*.zip
+          retention-days: 30

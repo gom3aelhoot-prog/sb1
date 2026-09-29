@@ -10,22 +10,11 @@ import {
   Sparkles,
   Video,
   Star,
-  MessageCircle,
-  ListFilter,
-  X,
 } from 'lucide-react';
-import { useState } from 'react';
 import { useApp } from '@/i18n/AppContext';
-import { useI18n } from '@/lib/i18n';
-import { useRouter } from '@/lib/router';
 
 export function Hero() {
   const { t, direction } = useApp();
-  const { lang } = useI18n();
-  const { navigate } = useRouter();
-  const [query, setQuery] = useState('');
-  const [modal, setModal] = useState<'ask'|'consult'|null>(null);
-  const ownerNames:any = { ar:'دكتور جمال نادي', ru:'ДОКТОР ДЖЕЙМС', en:'Dr. James', de:'Dr. James', uk:'Доктор Джеймс', uz:'Doktor Jeyms', hy:'Դոկտոր Ջեյմս', tg:'Доктор Ҷеймс', az:'Doktor Ceyms', am:'ዶክተር ጄምስ', ka:'დოქტორი ჯეიმსი' };
   const ArrowIcon = direction === 'rtl' ? ArrowLeft : ArrowRight;
 
   const stats = [
@@ -70,27 +59,42 @@ export function Hero() {
 
             {/* Search bar */}
             <div className="mt-8 max-w-xl mx-auto lg:mx-0 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              <form onSubmit={(e)=>{e.preventDefault();navigate(query.trim()?'/search?q='+encodeURIComponent(query.trim()):'/search')}}>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={query}
-                    onChange={(e)=>setQuery(e.target.value)}
-                    placeholder={lang==='ar'?'ابحث عن طبيب أو تخصص':lang==='ru'?'Найдите врача или специальность':lang==='de'?'Arzt oder Fachgebiet suchen':'Search for a doctor or specialty'}
-                    className="w-full rounded-2xl border border-neutral-200 bg-white py-4 ps-12 pe-32 text-sm shadow-lg shadow-neutral-900/5 placeholder:text-neutral-400 focus:border-primary-400 focus:ring-4 focus:ring-primary-100/50 focus:outline-none transition-all"
-                  />
-                  <Search className="pointer-events-none absolute start-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
-                  <button type="submit" className="absolute end-2 top-1/2 -translate-y-1/2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary-700 active:scale-95">
-                    {lang==='ar'?'بحث':lang==='ru'?'Поиск':lang==='de'?'Suchen':'Search'}
-                  </button>
-                </div>
-              </form>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder={t.nav.search}
+                  className="w-full rounded-2xl border border-neutral-200 bg-white py-4 ps-12 pe-32 text-sm shadow-lg shadow-neutral-900/5 placeholder:text-neutral-400 focus:border-primary-400 focus:ring-4 focus:ring-primary-100/50 focus:outline-none transition-all"
+                />
+                <Search className="pointer-events-none absolute start-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
+                <button className="absolute end-2 top-1/2 -translate-y-1/2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary-700 active:scale-95">
+                  {t.nav.search}
+                </button>
+              </div>
             </div>
-            {/* Only the three requested actions */}
-            <div className="mt-7 flex flex-wrap justify-center lg:justify-start gap-3">
-              <button onClick={()=>setModal('consult')} className="btn-primary flex items-center gap-2"><Video className="h-4 w-4"/>{lang==='ar'?'احجز الاستشارة الآن':lang==='ru'?'Записаться на консультацию':lang==='de'?'Jetzt Beratung buchen':'Book a consultation now'}</button>
-              <button onClick={()=>setModal('ask')} className="btn-secondary flex items-center gap-2"><MessageCircle className="h-4 w-4"/>{lang==='ar'?'اسأل سؤالاً الآن':lang==='ru'?'Задать вопрос':lang==='de'?'Jetzt Frage stellen':'Ask a question now'}</button>
-              <button onClick={()=>navigate('/specialties')} className="btn-secondary flex items-center gap-2"><ListFilter className="h-4 w-4"/>{lang==='ar'?'التخصصات':lang==='ru'?'Специальности':lang==='de'?'Fachgebiete':'Specialties'}</button>
+
+            {/* Quick specialties */}
+            <div className="mt-6 flex flex-wrap justify-center lg:justify-start gap-2 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+              {quickSpecialties.map((spec, i) => (
+                <a
+                  key={i}
+                  href="/specialties"
+                  className="inline-flex items-center gap-2 rounded-full bg-white border border-neutral-200 px-3.5 py-2 text-xs font-medium text-neutral-700 shadow-sm transition-all hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700"
+                >
+                  <spec.icon className="h-3.5 w-3.5 text-primary-500" />
+                  {spec.label}
+                </a>
+              ))}
+            </div>
+
+            {/* CTA buttons */}
+            <div className="mt-8 flex flex-wrap justify-center lg:justify-start gap-3 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+              <a href="/doctors" className="btn-primary">
+                {t.hero.ctaPrimary}
+                <ArrowIcon className="h-4 w-4" />
+              </a>
+              <a href="/sessions" className="btn-secondary">
+                {t.hero.ctaSecondary}
+              </a>
             </div>
           </div>
 
@@ -105,8 +109,8 @@ export function Hero() {
                       <Stethoscope className="h-8 w-8 text-primary-600" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-neutral-900">{ownerNames[lang]||ownerNames.en}</h3>
-                      <p className="text-sm text-neutral-500">{lang==='ar'?'استشارات طبية أونلاين':lang==='ru'?'Онлайн-консультация':lang==='de'?'Online-Beratung':'Online consultation'}</p>
+                      <h3 className="text-lg font-bold text-neutral-900">Dr. Ahmed Hassan</h3>
+                      <p className="text-sm text-neutral-500">Cardiology • 15 years exp.</p>
                       <div className="mt-1 flex items-center gap-1">
                         <Star className="h-3.5 w-3.5 fill-accent-400 text-accent-400" />
                         <Star className="h-3.5 w-3.5 fill-accent-400 text-accent-400" />
@@ -123,12 +127,12 @@ export function Hero() {
                       <Video className="h-4 w-4" />
                       Video consultation
                     </div>
-                    <span className="text-lg font-bold text-primary-700">$25</span>
+                    <span className="text-lg font-bold text-primary-700">$49</span>
                   </div>
 
-                  <a href="/consult" className="mt-4 block w-full rounded-xl bg-primary-600 py-3 text-center text-sm font-semibold text-white transition-all hover:bg-primary-700 active:scale-95">
+                  <button className="mt-4 w-full rounded-xl bg-primary-600 py-3 text-sm font-semibold text-white transition-all hover:bg-primary-700 active:scale-95">
                     {t.mega.bookConsultation}
-                  </a>
+                  </button>
                 </div>
               </div>
 
@@ -173,21 +177,6 @@ export function Hero() {
           ))}
         </div>
       </div>
-      {modal && <div className="fixed inset-0 z-[90] grid place-items-center bg-black/50 p-4" onClick={()=>setModal(null)}>
-        <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl" onClick={e=>e.stopPropagation()}>
-          <div className="flex items-center justify-between"><h2 className="text-xl font-extrabold">{modal==='ask'?(lang==='ar'?'كيف تريد طرح السؤال؟':'How would you like to ask?'):(lang==='ar'?'جلسات الفيديو المدفوعة':'Paid video sessions')}</h2><button onClick={()=>setModal(null)} className="rounded-xl p-2 hover:bg-gray-100"><X className="h-5 w-5"/></button></div>
-          <div className="mt-5 grid gap-3">
-            {modal==='ask' ? <>
-              <button onClick={()=>navigate('/ask?mode=free')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'مجاني':'Free'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'طرح سؤال مجاني.':'Ask a free question.'}</p></button>
-              <button onClick={()=>navigate('/ask?mode=paid')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'مدفوع':'Paid'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'سؤال مدفوع يصل إلى الأخصائيين حسب التخصص.':'A paid question routed by specialty.'}</p></button>
-            </> : <>
-              <button onClick={()=>navigate('/choose-doctor')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'اختار الطبيب':'Choose a doctor'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'اختر الطبيب وطريقة الاستشارة.':'Choose the doctor and consultation method.'}</p></button>
-              <button onClick={()=>navigate('/requests')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'طلب جلسة بمواصفاتك الخاصة':'Request a custom session'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'حدد التخصص والوقت والمواصفات.':'Specify specialty, time and requirements.'}</p></button>
-              <button onClick={()=>navigate('/sessions')} className="rounded-2xl border p-5 text-start hover:border-primary-400"><b>{lang==='ar'?'جلسة مجانية':'Free session'}</b><p className="mt-1 text-sm text-neutral-500">{lang==='ar'?'عرض الجلسات المجانية المتاحة.':'View available free sessions.'}</p></button>
-            </>}
-          </div>
-        </div>
-      </div>}
     </section>
   );
 }
