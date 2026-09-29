@@ -101,19 +101,12 @@ export function virtualAnswersForQuestion(question:Question,lang:string,count=8)
   }));
 }
 
-export function virtualArticlesForSpecialty(slug:string,lang:string,count=3): Article[] {
-  const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
-  const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const doc=virtualDoctorsForSpecialty(slug,lang,5)[0]; const copy=lc(lang);
-  const topics:any={ar:['الأعراض والعلامات المهمة','الفحوصات والتقييم','المتابعة والوقاية','متى يجب طلب المساعدة','أسئلة شائعة'],en:['Symptoms and warning signs','Evaluation and common tests','Follow-up and prevention','When to seek care','Frequently asked questions'],de:['Symptome und Warnzeichen','Untersuchung und Diagnostik','Nachsorge und Prävention','Wann Hilfe nötig ist','Häufige Fragen'],ru:['Симптомы и тревожные признаки','Обследование и диагностика','Наблюдение и профилактика','Когда обращаться за помощью','Частые вопросы']}[lang]||['Medical overview','Evaluation and tests','Follow-up','When to seek care','Frequently asked questions'];
-  return Array.from({length:count},(_,i)=>({
-    id:`catalog-art-${lang}-${slug}-${i+1}`,specialty_id:sp.id,doctor_id:doc.id,
-    title:`${copy.article[i%copy.article.length]}: ${localizedSpecialty(s,lang)} — ${topics[i%topics.length]}`,
-    excerpt:`${topics[i%topics.length]} — ${copy.body}`,
-    body:`${topics[i%topics.length]}: ${localizedSpecialty(s,lang)}. ${copy.body} ${localizedSpecialty(s,lang)}. ${i%2===0?copy.body:''}`,
-    image_url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80',reading_time_min:5+i,views:1000+i*300,created_at:new Date().toISOString(),specialty:sp,doctor:doc
-  })) as Article[];
+const ARTICLE_TOPICS:any={ar:['نظرة عامة','الأعراض والعلامات','الأسباب وعوامل الخطورة','التقييم والفحوصات','مبادئ التعامل','نمط الحياة والوقاية','المتابعة','متى تطلب المساعدة','أسئلة شائعة','خلاصة عملية'],en:['Overview','Symptoms and signs','Causes and risk factors','Assessment and tests','Management principles','Lifestyle and prevention','Follow-up','When to seek help','Frequently asked questions','Practical summary'],de:['Überblick','Symptome und Zeichen','Ursachen und Risikofaktoren','Abklärung','Behandlungsprinzipien','Lebensstil und Prävention','Nachsorge','Wann Hilfe nötig ist','Häufige Fragen','Zusammenfassung'],ru:['Обзор','Симптомы и признаки','Причины и факторы риска','Обследование','Принципы ведения','Образ жизни и профилактика','Наблюдение','Когда нужна помощь','Частые вопросы','Итог'],uk:['Огляд','Симптоми та ознаки','Причини та фактори ризику','Обстеження','Принципи ведення','Спосіб життя і профілактика','Спостереження','Коли потрібна допомога','Поширені запитання','Підсумок']};
+export function virtualArticlesForSpecialty(slug:string,lang:string,count=10): Article[] {
+ const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
+ const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const doc=virtualDoctorsForSpecialty(slug,lang,5)[0]; const copy=lc(lang); const topics=ARTICLE_TOPICS[lang]||ARTICLE_TOPICS.en;
+ return Array.from({length:count},(_,i)=>({id:`catalog-art-${lang}-${slug}-${i+1}`,specialty_id:sp.id,doctor_id:doc.id,title:`${copy.article[i%copy.article.length]}: ${localizedSpecialty(s,lang)} — ${topics[i%topics.length]}`,excerpt:`${topics[i%topics.length]} — ${copy.body}`,body:`${topics[i%topics.length]}: ${localizedSpecialty(s,lang)}. ${copy.body} ${copy.body}`,image_url:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80',reading_time_min:5+i,views:1000+i*300,created_at:new Date().toISOString(),specialty:sp,doctor:doc})) as Article[];
 }
-
 export function virtualVideosForSpecialty(slug:string,lang:string,count=2): DoctorVideo[] {
   const s=comprehensiveSpecialties.find(x=>x.slug===slug); if(!s) return [];
   const sp=specialtyCatalog(lang).find(x=>x.slug===slug)!; const doc=virtualDoctorsForSpecialty(slug,lang,5)[0];
