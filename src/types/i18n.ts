@@ -938,6 +938,16 @@ export const CURRENCY_RATES: Record<string, number> = {
   MRU: 39.5,
   SDG: 550,
   SOS: 570,
+  EUR: 0.92,
+  RUB: 92,
+  UZS: 12600,
+  AMD: 390,
+  TJS: 10.9,
+  UAH: 41,
+  AZN: 1.7,
+  GEL: 2.7,
+  ETB: 150,
+  GBP: 0.75,
 };
 
 export const SPECIALTIES: SpecialtyCategory[] = [
