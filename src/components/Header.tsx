@@ -86,8 +86,9 @@ export function Header() {
       { label: lang==='ar'?'الشكاوى':'Complaints', href:'/complaints' },
       { label: lang==='ar'?'لوحة العميل':'Client Dashboard', href:'/dashboard' },
       { label: lang==='ar'?'استوديو الأخصائي':'Specialist Studio', href:'/specialist/studio' },
+      { label: lang==='ar'?'مراجعة فحص الوجه':'Face Verification Review', href:'/admin/face-verification' },
       { label: lang==='ar'?'باقات المتابعة':'Long-term Packages', href:'/specialist/packages' },
-    ].filter(item=>isPrivate(item.href))
+    ].filter(item=>item.href==='/admin/face-verification' ? ['owner','moderator'].includes(role) : isPrivate(item.href))
   ];
   const navItems = [
     { label: t.nav.home, href: '/#home', icon: Home },
