@@ -912,7 +912,7 @@ export const ALL_COUNTRIES: CountryInfo[] = [
   { code:'TG', nameKey:'tajikistan', currency:'TJS', currencySymbol:'ЅМ', flag:'🇹🇯' },
   { code:'UA', nameKey:'ukraine', currency:'UAH', currencySymbol:'₴', flag:'🇺🇦' },
   { code:'AZ', nameKey:'azerbaijan', currency:'AZN', currencySymbol:'₼', flag:'🇦🇿' },
-  { code:'GE', nameKey:'georgia', currency:'GEL', currencySymbol:'₾', flag:'🇬🇪' },
+  { code:'KA', nameKey:'georgia', currency:'GEL', currencySymbol:'₾', flag:'🇬🇪' },
   { code:'ET', nameKey:'ethiopia', currency:'ETB', currencySymbol:'Br', flag:'🇪🇹' },
   { code:'GB', nameKey:'unitedKingdom', currency:'GBP', currencySymbol:'£', flag:'🇬🇧' },
   { code:'US', nameKey:'unitedStates', currency:'USD', currencySymbol:'$ ', flag:'🇺🇸' },
