@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Home, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, BadgeCheck, PenLine, Share2, ExternalLink, Copy, Briefcase as BriefcaseIcon, Settings as SettingsIcon, Bookmark, Archive, Coins, Wallet, Bell, ShieldCheck, Library, Plus, X, Upload } from 'lucide-react';
+import { ArrowRight, Home, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, BadgeCheck, PenLine, Share2, ExternalLink, Copy, Briefcase as BriefcaseIcon, Settings as SettingsIcon, Bookmark, Archive, Coins, Wallet, Bell, ShieldCheck, Library, Plus, X, Upload, CalendarDays as CalendarDaysIcon } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { getRole } from '@/lib/access';
 import PageProfileTools from '@/components/PageProfileTools';
@@ -8,7 +8,7 @@ import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Question, type SpecialistPost, type PostComment, type Article, type DoctorAudio } from '@/lib/supabase';
 import QuestionCard from '@/components/QuestionCard';
 import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty, virtualArticlesForSpecialty, virtualAudioForSpecialty, virtualVideosForSpecialty, virtualCoursesForSpecialty } from '@/lib/catalog';
-import { toggleSaved, isSaved, toggleLiked, isLiked, archiveItem, addComment, toggleFollowing, isFollowing as isFollowingVault } from '@/lib/socialVault';
+import { toggleSaved, isSaved, toggleLiked, isLiked, archiveItem, addComment, toggleFollowing, isFollowing as isFollowingVault, getSaved } from '@/lib/socialVault';
 
 type Tab = 'home' | 'sessions' | 'articles' | 'questions' | 'recordings' | 'courses' | 'certificates' | 'portfolio';
 type MainSection = 'home' | 'favorites' | 'albums' | 'social' | 'phone' | 'settings' | 'clone' | 'wallet';
@@ -53,8 +53,21 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const [mainSection, setMainSection] = useState<MainSection>('home');
   const [loading, setLoading] = useState(true);
   const [imgError, setImgError] = useState(false);
+  const [coverUrl,setCoverUrl]=useState(()=>localStorage.getItem('sb1_cover_'+id)||'');
+  const [coverChooser,setCoverChooser]=useState(false);
+  const [showFollowers,setShowFollowers]=useState(false);
+  const [followers,setFollowers]=useState(()=>[
+    {id:'catalog-doctor-ar-clinical-psychology-2',name:'د. ليان',online:true},
+    {id:'catalog-doctor-ar-clinical-psychology-3',name:'د. أحمد',online:true},
+    {id:'catalog-doctor-ar-clinical-psychology-4',name:'سارة',online:false},
+    {id:'catalog-doctor-ar-clinical-psychology-5',name:'محمد',online:true},
+    {id:'catalog-doctor-ar-clinical-psychology-6',name:'مركز الحياة',online:false},
+  ]);
   const [isFollowing, setIsFollowing] = useState(()=>isFollowingVault(id));
   const profileAvatar = doctor?.photo_url || ('https://api.dicebear.com/9.x/personas/svg?seed=' + encodeURIComponent(id));
+  const savedCoverImages=getSaved().filter(x=>x.kind==='image'&&x.url).map(x=>x.url as string);
+  const selectMain=(section:MainSection)=>{setMainSection(section);setTimeout(()=>document.getElementById('profile-tabs')?.scrollIntoView({behavior:'smooth',block:'start'}),0)};
+  const saveCover=(url:string)=>{setCoverUrl(url);localStorage.setItem('sb1_cover_'+id,url);setCoverChooser(false)};
   const [wallet,setWallet] = useState(()=>{try{return JSON.parse(localStorage.getItem('sb1_specialist_wallet')||'{"balance":1250,"points":340,"due":180}')}catch{return {balance:1250,points:340,due:180}}});
 
   useEffect(() => {
@@ -159,33 +172,42 @@ export default function DoctorProfilePage({ id }: { id: string }) {
 
   return (
     <div className="min-h-screen pt-20 pb-16">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-3 sm:px-5 lg:px-8">
         <button onClick={() => navigate('/doctors')} className="flex items-center gap-2 text-gray-500 hover:text-teal-600 transition-colors mb-4 mt-4">
           <ArrowRight className="w-4 h-4" />
           {t('common.back')}
         </button>
 
-        <div className="mb-4 min-h-[90px] rounded-xl border border-dashed border-slate-200 bg-slate-50/60" aria-label="مساحة إعلانية" />
+        <div className="mb-2 min-h-[58px] rounded-xl border border-dashed border-slate-200 bg-slate-50/60" aria-label="مساحة إعلانية" />
 
-        <aside className="fixed top-24 z-40 hidden w-60 xl:block end-6 2xl:end-10" aria-label="قائمة SB1 الرئيسية">
+        <aside className="fixed top-24 bottom-6 z-40 hidden w-60 xl:block end-4 2xl:end-8 overflow-y-auto" aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
-            {canSeePrivate&&<button onClick={()=>setMainSection('wallet')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm"><Wallet className="h-4 w-4"/>الحساب والمحفظة</button>}
-            {canManagePage&&<button onClick={()=>setMainSection('clone')} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm"><Copy className="h-4 w-4"/>الاستنساخ</button>}
+            {canSeePrivate&&<button onClick={()=>selectMain('wallet')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm active:bg-slate-900"><Wallet className="h-4 w-4"/>الحساب والمحفظة</button>}
+            {canManagePage&&<button onClick={()=>selectMain('clone')} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm active:bg-emerald-200"><Copy className="h-4 w-4"/>الاستنساخ</button>}
             <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
-              <button onClick={()=>setMainSection('home')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Home className="h-4 w-4"/>الرئيسية</button>
-              <button onClick={()=>setMainSection('favorites')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Heart className="h-4 w-4"/>مفضلتي</button>
-              <button onClick={()=>setMainSection('albums')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Library className="h-4 w-4"/>الألبومات</button>
-              <button onClick={()=>setMainSection('social')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><ExternalLink className="h-4 w-4"/>منصات التواصل</button>
-              <button onClick={()=>setMainSection('phone')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Share2 className="h-4 w-4"/>الهاتف وQR</button>
-              {canManagePage&&<button onClick={()=>setMainSection('settings')} className="flex w-full items-center gap-2 px-4 py-3 text-sm font-bold hover:bg-slate-50"><SettingsIcon className="h-4 w-4"/>الإعدادات</button>}
+              <button onClick={()=>selectMain('home')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><Home className="h-4 w-4"/>الرئيسية</button>
+              <button onClick={()=>selectMain('favorites')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><Heart className="h-4 w-4"/>مفضلتي</button>
+              <button onClick={()=>selectMain('albums')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><Library className="h-4 w-4"/>الألبومات</button>
+              <button onClick={()=>selectMain('social')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><ExternalLink className="h-4 w-4"/>منصات التواصل</button>
+              <button onClick={()=>selectMain('phone')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><Share2 className="h-4 w-4"/>الهاتف وQR</button>
+              {canManagePage&&<button onClick={()=>selectMain('settings')} className="flex w-full items-center gap-2 px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><SettingsIcon className="h-4 w-4"/>الإعدادات</button>}
+            </div>
+            <div className="mt-3 rounded-xl border bg-white p-3 shadow-sm">
+              <button onClick={()=>setShowFollowers(v=>!v)} className="flex w-full items-center justify-between active:bg-slate-100 rounded-lg p-1">
+                <span className="text-sm font-extrabold">المتابعون</span><span className="text-xs text-slate-400">{doctor.follower_count||followers.length}</span>
+              </button>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {followers.slice(0,showFollowers?followers.length:5).map(f=><button key={f.id} title={f.name} onClick={()=>navigate('/doctors/'+f.id)} className="relative grid h-9 w-9 place-items-center rounded-full bg-emerald-100 text-xs font-extrabold text-emerald-800 ring-2 ring-white shadow-sm active:bg-emerald-200">{f.name.replace('د. ','').charAt(0)}{f.online&&<span className="absolute -bottom-0.5 -left-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500"/>}</button>)}
+              </div>
+              {showFollowers&&<div className="mt-3 space-y-1 border-t pt-2">{followers.map(f=><button key={f.id} onClick={()=>navigate('/doctors/'+f.id)} className="flex w-full items-center gap-2 rounded-lg p-2 text-right text-xs font-bold hover:bg-slate-50 active:bg-slate-100"><span className="grid h-7 w-7 place-items-center rounded-full bg-emerald-100 text-emerald-800">{f.name.replace('د. ','').charAt(0)}</span>{f.name}</button>)}</div>}
             </div>
           </div>
         </aside>
-        <div className="xl:me-64">
-          <StoryBar pageId={id} canManage={canManagePage} />
+        <div className="xl:me-[17rem] min-w-0">
+          <div className="mb-2"><StoryBar pageId={id} canManage={canManagePage} /></div>
         {/* Cover + Profile Header */}
         <div className="card overflow-hidden mb-6">
-          <div className="h-32 bg-gradient-to-l from-teal-500 via-teal-600 to-teal-700" />
+          <div className="relative h-32 overflow-hidden bg-gradient-to-l from-teal-500 via-teal-600 to-teal-700">{coverUrl&&<img src={coverUrl} alt="" className="h-full w-full object-cover"/>}{canManagePage&&<div className="absolute bottom-3 left-3 flex gap-2"><label className="cursor-pointer rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white backdrop-blur active:bg-black/70">تغيير الغلاف<input type="file" accept="image/*" className="hidden" onChange={e=>{const f=e.target.files?.[0];if(f){const u=URL.createObjectURL(f);saveCover(u)}}}/></label><button onClick={()=>setCoverChooser(true)} className="rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white backdrop-blur active:bg-black/70">من المفضلة</button></div>}</div>
           <div className="px-6 pb-6">
             <div className="flex flex-col md:flex-row gap-4 -mt-12">
               <div className="w-28 h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center shrink-0 ring-4 ring-white mx-auto md:mx-0">
@@ -195,7 +217,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
                   <span className="text-4xl font-bold text-teal-600">{doctor.name.replace('د. ', '').charAt(0)}</span>
                 )}
               </div>
-              <div className="flex-1 text-center md:text-right pt-2">
+              <div className="flex-1 text-center md:text-right pt-2"><div className="mb-1 text-[10px] font-bold text-slate-400">الصورة الرسمية للأخصائي</div>
                 <div className="flex items-center justify-center md:justify-start gap-2">
                   <h1 className="text-xl font-bold text-gray-800">{doctor.name}</h1>
                   {doctor.is_verified && <BadgeCheck className="w-5 h-5 text-teal-500" />}
@@ -221,7 +243,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           </div>
         </div>
 
-        <div className="mb-5 overflow-x-auto rounded-xl border bg-white shadow-sm">
+        <div id="profile-tabs" className="mb-5 overflow-x-auto rounded-xl border bg-white shadow-sm">
           <div className="flex min-w-max items-center" dir={lang==='ar'?'rtl':'ltr'}>
             {tabs.map((tab,i)=>{const Icon=tab.icon;return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key)}} className={`flex items-center gap-2 border-e px-4 py-3 text-sm font-bold transition ${activeTab===tab.key?'bg-teal-50 text-teal-700':'text-slate-600 hover:bg-slate-50 hover:text-teal-700'}`}><Icon className="h-4 w-4"/>{tab.label}</button>})}
             <button onClick={()=>navigate('/notifications/private')} className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-teal-700"><Bell className="h-4 w-4"/>إشعارات</button>
@@ -245,10 +267,10 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         {mainSection === 'clone' && canManagePage && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} focusSection="clone" />}
 
         {mainSection === 'home' && activeTab === 'sessions' && (
-          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} focusSection="medical" />
+          <div className="card p-5"><div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">جلساتي</h2><p className="text-xs text-slate-500">الجلسات المجانية التي تمت مع المتابعين، وليست فيديوهات.</p></div><CalendarDaysIcon className="text-teal-700"/></div><div className="space-y-3">{(diary.length?diary:Array.from({length:4},(_,i)=>({id:'demo-session-'+i,title:'جلسة مجانية '+(i+1),body:'جلسة تعريفية مجانية مع المتابعين',created_at:new Date(Date.now()-i*86400000).toISOString()}))).map((s:any)=><article key={s.id} className="rounded-xl border bg-white p-4"><div className="flex items-center justify-between gap-3"><div><b>{s.title||'جلسة مجانية'}</b><p className="mt-1 text-xs text-slate-500">{s.body}</p></div><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">مجانية</span></div><div className="mt-2 text-xs text-slate-400">{new Date(s.created_at).toLocaleDateString()}</div></article>)}</div></div>
         )}
         {mainSection === 'home' && activeTab === 'recordings' && (
-          <div className="card p-5"><h2 className="text-xl font-extrabold mb-4">تسجيلاتي</h2>{audios.length ? <div className="space-y-3">{audios.map(a=><div key={a.id} className="rounded-xl border p-4"><b>{a.title}</b></div>)}</div> : <p className="text-slate-500">لا توجد تسجيلات منشورة بعد.</p>}</div>
+          <div className="card p-5"><h2 className="text-xl font-extrabold mb-4">تسجيلاتي</h2>{audios.length ? <div className="space-y-3">{audios.map(a=><div key={a.id} className="rounded-xl border p-4"><div className="flex items-center justify-between gap-3"><div><b>{a.title}</b><p className="mt-1 text-xs text-slate-500">{a.description}</p></div><Bookmark className="h-4 w-4 text-teal-700"/></div><audio src={a.audio_url} controls className="mt-3 w-full"/><button onClick={()=>toggleSaved({id:a.id,kind:'recording',title:a.title,body:a.description,author:doctor.name,url:a.audio_url,created_at:a.created_at})} className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs font-bold active:bg-slate-200">حفظ في مفضلتي</button></div>)}</div> : <p className="text-slate-500">لا توجد تسجيلات منشورة بعد.</p>}</div>
         )}
         {mainSection === 'home' && activeTab === 'certificates' && (
           <div className="card p-5"><h2 className="text-xl font-extrabold mb-4">شهاداتي</h2><div className="grid gap-3 md:grid-cols-2"><div className="rounded-xl border p-4"><Award className="text-teal-700"/><b className="mt-2 block">شهادات الاعتماد والإنجاز</b><p className="mt-1 text-sm text-slate-500">تظهر هنا الشهادات المرتبطة بصفحة الأخصائي.</p></div></div></div>
@@ -281,14 +303,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           </div>
         )}
 
-        {/* CTA */}
-        <div className="card p-6 mt-6 bg-gradient-to-l from-teal-50 to-white">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h3 className="font-bold text-gray-800 mb-1">{lang === 'ar' ? 'لديك سؤال لهذا الأخصائي؟' : 'Have a question?'}</h3>
-              <p className="text-gray-500 text-sm">{lang === 'ar' ? 'اطرح سؤالك واحصل على إجابة احترافية' : 'Ask and get a professional answer'}</p>
-            </div>
-            <button onClick={() => navigate(`/ask?specialty=${doctor.specialty?.slug || ''}`)} className="btn-primary flex items-center gap-2">
+          <button onClick={() => navigate(`/ask?specialty=${doctor.specialty?.slug || ''}`)} className="btn-primary flex items-center gap-2">
               <MessageCircle className="w-5 h-5" />
               {t('hero.ask_now')}
             </button>
