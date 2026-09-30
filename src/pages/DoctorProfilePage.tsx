@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Home, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, BadgeCheck, PenLine, Share2, ExternalLink, Copy, Briefcase as BriefcaseIcon, Settings as SettingsIcon, Bookmark, Archive, Coins, Wallet, Bell, ShieldCheck, Library } from 'lucide-react';
+import { ArrowRight, Home, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, BadgeCheck, PenLine, Share2, ExternalLink, Copy, Briefcase as BriefcaseIcon, Settings as SettingsIcon, Bookmark, Archive, Coins, Wallet, Bell, ShieldCheck, Library, Plus, X, Upload } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { getRole } from '@/lib/access';
 import PageProfileTools from '@/components/PageProfileTools';
@@ -10,6 +10,26 @@ import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty, virtualArticl
 import { toggleSaved, isSaved, toggleLiked, isLiked, archiveItem, addComment, toggleFollowing, isFollowing as isFollowingVault } from '@/lib/socialVault';
 
 type Tab = 'home' | 'articles' | 'questions' | 'courses' | 'portfolio';
+
+
+function StoryBar({pageId,canManage}:{pageId:string;canManage:boolean}) {
+  type S={id:string;name:string;text:string;mediaUrl?:string;mediaKind?:'image'|'video';own?:boolean;expiresAt:string};
+  const [stories,setStories]=useState<S[]>(()=>{try{return JSON.parse(localStorage.getItem('sb1_fb_stories_'+pageId)||'[]')}catch{return[]}});
+  const [viewer,setViewer]=useState<S|null>(null),[compose,setCompose]=useState(false),[text,setText]=useState(''),[file,setFile]=useState<File|null>(null),[url,setUrl]=useState(''),[video,setVideo]=useState(false);
+  useEffect(()=>{if(file){const u=URL.createObjectURL(file);setUrl(u);return()=>URL.revokeObjectURL(u)}setUrl('')},[file]);
+  useEffect(()=>{try{localStorage.setItem('sb1_fb_stories_'+pageId,JSON.stringify(stories))}catch{}},[stories,pageId]);
+  const demo=['د. ليان','د. أحمد','مركز الحياة','سارة','محمد'];
+  const visible=[...stories.filter(s=>new Date(s.expiresAt)>new Date()),...demo.map((name,i)=>({id:'story-demo-'+i,name,text:['معلومة جديدة','جلسة تعليمية','سؤال وجواب','فيديو جديد','تسجيل جديد'][i],expiresAt:new Date(Date.now()+86400000).toISOString()} as S))];
+  const create=()=>{if(!text.trim()&&!url)return;const s:S={id:'story-'+Date.now(),name:'قصتي',text:text.trim(),mediaUrl:url||undefined,mediaKind:video?'video':'image',own:true,expiresAt:new Date(Date.now()+86400000).toISOString()};setStories(v=>[s,...v]);setText('');setFile(null);setCompose(false);setViewer(s)};
+  return <>
+    <div className="mb-4 rounded-xl border bg-white p-3 shadow-sm"><div className="flex gap-3 overflow-x-auto pb-1" dir="rtl">
+      {canManage&&<button onClick={()=>setCompose(true)} className="min-w-[112px] overflow-hidden rounded-xl border bg-slate-50"><div className="grid h-28 place-items-center bg-gradient-to-br from-teal-600 to-teal-800 text-white"><Plus className="h-8 w-8"/></div><div className="p-2 text-center text-xs font-bold">قصتك</div></button>}
+      {visible.map(s=><button key={s.id} onClick={()=>setViewer(s)} className="min-w-[112px] overflow-hidden rounded-xl border bg-white text-right"><div className="relative grid h-28 place-items-center overflow-hidden bg-gradient-to-br from-slate-800 to-teal-900 text-white">{s.mediaUrl?(s.mediaKind==='video'?<video src={s.mediaUrl} className="h-full w-full object-cover"/>:<img src={s.mediaUrl} className="h-full w-full object-cover" alt=""/>):<span className="p-3 text-xs font-bold">{s.text}</span>}<span className="absolute bottom-2 right-2 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-slate-800">{s.name}</span></div></button>)}
+    </div></div>
+    {compose&&<div className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4" onClick={()=>setCompose(false)}><div className="w-full max-w-lg rounded-2xl bg-white p-5" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between"><b className="text-lg">قصتي</b><button onClick={()=>setCompose(false)}><X/></button></div><textarea value={text} onChange={e=>setText(e.target.value)} className="mt-4 min-h-28 w-full rounded-xl border p-3" placeholder="اكتب قصتك..."/><label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-bold"><Upload className="h-4 w-4"/> صورة أو فيديو<input type="file" accept="image/*,video/*" className="hidden" onChange={e=>{const f=e.target.files?.[0]||null;setFile(f);setVideo(!!f?.type.startsWith('video/'))}}/></label><button onClick={create} className="mt-3 w-full rounded-xl bg-teal-700 py-3 font-bold text-white">نشر</button></div></div>}
+    {viewer&&<div className="fixed inset-0 z-[110] grid place-items-center bg-black/80 p-4" onClick={()=>setViewer(null)}><div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-slate-950 text-white" onClick={e=>e.stopPropagation()}><button onClick={()=>setViewer(null)} className="absolute left-3 top-3 z-10 rounded-full bg-black/50 p-2"><X/></button>{viewer.mediaUrl?(viewer.mediaKind==='video'?<video src={viewer.mediaUrl} controls autoPlay className="max-h-[72vh] w-full bg-black object-contain"/>:<img src={viewer.mediaUrl} alt="" className="max-h-[72vh] w-full object-contain"/>):<div className="grid min-h-[55vh] place-items-center p-8 text-center text-2xl font-extrabold">{viewer.text}</div>}<div className="p-4"><b>{viewer.name}</b><p className="mt-1 text-xs opacity-70">{viewer.text}</p></div></div></div>}
+  </>;
+}
 
 export default function DoctorProfilePage({ id }: { id: string }) {
   const { navigate } = useRouter();
@@ -125,22 +145,13 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   }
 
   const tabs: { key: Tab; label: string; icon: typeof FileText; scroll?: string }[] = [
-    { key: 'home', label: lang==='ar'?'الرئيسية':lang==='ru'?'Главная':'Home', icon: Home },
-    { key: 'articles', label: lang==='ar'?'مقالاتي':lang==='ru'?'Мои статьи':'My Articles', icon: BookOpen },
-    { key: 'questions', label: lang==='ar'?'الأسئلة المجابة':lang==='ru'?'Отвеченные вопросы':'Answered Questions', icon: MessageCircle },
-    { key: 'courses', label: lang==='ar'?'الدورات والكورسات':lang==='ru'?'Курсы':'Courses', icon: GraduationCap },
-    { key: 'home', label: lang==='ar'?'المحتوى الطبي':'Medical Content', icon: Library, scroll:'fb-medical-content' },
-    { key: 'home', label: lang==='ar'?'عرض الكل':'View all', icon: FileText, scroll:'fb-medical-content' },
-    { key: 'home', label: lang==='ar'?'فيديوهات طبية وتعليمية':'Medical Videos', icon: Video, scroll:'fb-medical-content' },
-    { key: 'home', label: lang==='ar'?'شاهداتي':'Watched', icon: Bookmark, scroll:'fb-medical-content' },
-    { key: 'home', label: lang==='ar'?'الألبومات':'Albums', icon: FileText, scroll:'fb-albums' },
-    { key: 'home', label: lang==='ar'?'منصات التواصل':'Social Platforms', icon: ExternalLink, scroll:'fb-social' },
-    { key: 'home', label: lang==='ar'?'الهاتف وQR':'Phone & QR', icon: Share2, scroll:'fb-phone' },
-    ...(canManagePage ? [
-      { key: 'home' as Tab, label: 'Clone / Gift', icon: Copy, scroll:'fb-clone' },
-      { key: 'home' as Tab, label: lang==='ar'?'الإعدادات':'Settings', icon: SettingsIcon, scroll:'fb-settings' },
-    ] : []),
-    ...(canSeePrivate ? [{ key: 'portfolio' as Tab, label: lang==='ar'?'الحسابات والمال':lang==='ru'?'Счета и финансы':'Accounts & Money', icon: BriefcaseIcon }] : []),
+    { key:'home', label:lang==='ar'?'الرئيسية':'Home', icon:Home },
+    { key:'home', label:lang==='ar'?'جلساتي':'My Sessions', icon:Video, scroll:'fb-medical-content' },
+    { key:'articles', label:lang==='ar'?'مقالتي':'My Articles', icon:BookOpen },
+    { key:'questions', label:lang==='ar'?'الأسئلة المجابة':'Answered Questions', icon:MessageCircle },
+    { key:'home', label:lang==='ar'?'تسجيلاتي':'My Recordings', icon:Video, scroll:'fb-medical-content' },
+    { key:'courses', label:lang==='ar'?'الدورات والكورسات':'Courses', icon:GraduationCap },
+    { key:'home', label:lang==='ar'?'شهاداتي':'My Certificates', icon:Award, scroll:'fb-medical-content' },
   ];
 
   return (
@@ -153,28 +164,22 @@ export default function DoctorProfilePage({ id }: { id: string }) {
 
         <div className="mb-4 min-h-[90px] rounded-xl border border-dashed border-slate-200 bg-slate-50/60" aria-label="مساحة إعلانية" />
 
-        {/* Single main navigation: between the ad space and the profile image */}
-        <div className="mb-4 rounded-xl border bg-white shadow-sm">
-          <div className="flex flex-col">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.label}
-                  onClick={() => {
-                    setActiveTab(tab.key);
-                    if (tab.scroll) setTimeout(() => document.getElementById(tab.scroll!)?.scrollIntoView({behavior:'smooth',block:'start'}), 0);
-                  }}
-                  className={`flex w-full items-center justify-between gap-3 border-b px-4 py-3 text-right text-sm font-bold transition-all last:border-b-0 ${activeTab === tab.key ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-teal-700'}`}
-                >
-                  <span className="flex items-center gap-2"><Icon className="h-4 w-4" />{tab.label}</span>
-                  {activeTab === tab.key && <span className="h-2 w-2 rounded-full bg-teal-600" />}
-                </button>
-              );
-            })}
+        <aside className="fixed top-24 z-40 hidden w-60 xl:block end-6 2xl:end-10" aria-label="قائمة SB1 الرئيسية">
+          <div className="space-y-2">
+            {canSeePrivate&&<button onClick={()=>setActiveTab('portfolio')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm"><Wallet className="h-4 w-4"/>الحساب والمحفظة</button>}
+            {canManagePage&&<button onClick={()=>document.getElementById('fb-clone')?.scrollIntoView({behavior:'smooth',block:'start'})} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm"><Copy className="h-4 w-4"/>الاستنساخ</button>}
+            <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+              <button onClick={()=>setActiveTab('home')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Home className="h-4 w-4"/>الرئيسية</button>
+              <button onClick={()=>navigate('/favorites')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Heart className="h-4 w-4"/>مفضلتي</button>
+              <button onClick={()=>document.getElementById('fb-albums')?.scrollIntoView({behavior:'smooth',block:'start'})} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Library className="h-4 w-4"/>الألبومات</button>
+              <button onClick={()=>document.getElementById('fb-social')?.scrollIntoView({behavior:'smooth',block:'start'})} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><ExternalLink className="h-4 w-4"/>منصات التواصل</button>
+              <button onClick={()=>document.getElementById('fb-phone')?.scrollIntoView({behavior:'smooth',block:'start'})} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Share2 className="h-4 w-4"/>الهاتف وQR</button>
+              {canManagePage&&<button onClick={()=>document.getElementById('fb-settings')?.scrollIntoView({behavior:'smooth',block:'start'})} className="flex w-full items-center gap-2 px-4 py-3 text-sm font-bold hover:bg-slate-50"><SettingsIcon className="h-4 w-4"/>الإعدادات</button>}
+            </div>
           </div>
-        </div>
-
+        </aside>
+        <div className="xl:me-64">
+          <StoryBar pageId={id} canManage={canManagePage} />
         {/* Cover + Profile Header */}
         <div className="card overflow-hidden mb-6">
           <div className="h-32 bg-gradient-to-l from-teal-500 via-teal-600 to-teal-700" />
@@ -213,8 +218,14 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           </div>
         </div>
 
+        <div className="mb-5 overflow-x-auto rounded-xl border bg-white shadow-sm">
+          <div className="flex min-w-max items-center" dir={lang==='ar'?'rtl':'ltr'}>
+            {tabs.map((tab,i)=>{const Icon=tab.icon;return <button key={tab.label+'-'+i} onClick={()=>{setActiveTab(tab.key);if(tab.scroll)setTimeout(()=>document.getElementById(tab.scroll!)?.scrollIntoView({behavior:'smooth',block:'start'}),0)}} className={`flex items-center gap-2 border-e px-4 py-3 text-sm font-bold transition ${activeTab===tab.key?'bg-teal-50 text-teal-700':'text-slate-600 hover:bg-slate-50 hover:text-teal-700'}`}><Icon className="h-4 w-4"/>{tab.label}</button>})}
+            <button onClick={()=>navigate('/notifications/private')} className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-teal-700"><Bell className="h-4 w-4"/>إشعارات</button>
+          </div>
+        </div>
         {activeTab === 'home' && (
-          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} />
+          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} hideStories />
         )}
 
         {canSeePrivate && activeTab === 'portfolio' && (
@@ -274,6 +285,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
