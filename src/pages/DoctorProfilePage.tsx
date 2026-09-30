@@ -133,6 +133,13 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     { key: 'home', label: lang==='ar'?'عرض الكل':'View all', icon: FileText, scroll:'fb-medical-content' },
     { key: 'home', label: lang==='ar'?'فيديوهات طبية وتعليمية':'Medical Videos', icon: Video, scroll:'fb-medical-content' },
     { key: 'home', label: lang==='ar'?'شاهداتي':'Watched', icon: Bookmark, scroll:'fb-medical-content' },
+    { key: 'home', label: lang==='ar'?'الألبومات':'Albums', icon: FileText, scroll:'fb-albums' },
+    { key: 'home', label: lang==='ar'?'منصات التواصل':'Social Platforms', icon: ExternalLink, scroll:'fb-social' },
+    { key: 'home', label: lang==='ar'?'الهاتف وQR':'Phone & QR', icon: Share2, scroll:'fb-phone' },
+    ...(canManagePage ? [
+      { key: 'home' as Tab, label: 'Clone / Gift', icon: Copy, scroll:'fb-clone' },
+      { key: 'home' as Tab, label: lang==='ar'?'الإعدادات':'Settings', icon: SettingsIcon, scroll:'fb-settings' },
+    ] : []),
     ...(canSeePrivate ? [{ key: 'portfolio' as Tab, label: lang==='ar'?'الحسابات والمال':lang==='ru'?'Счета и финансы':'Accounts & Money', icon: BriefcaseIcon }] : []),
   ];
 
@@ -143,6 +150,8 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           <ArrowRight className="w-4 h-4" />
           {t('common.back')}
         </button>
+
+        <div className="mb-4 min-h-[90px] rounded-xl border border-dashed border-slate-200 bg-slate-50/60" aria-label="مساحة إعلانية" />
 
         {/* Single main navigation: between the ad space and the profile image */}
         <div className="mb-4 rounded-xl border bg-white shadow-sm">
