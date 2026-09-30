@@ -194,6 +194,9 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           </div>
         </div>
 
+        {/* Complete page workspace — intentionally placed before the profile tabs so it is visible immediately after the profile header. */}
+        <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} />
+
         {canSeePrivate && <div className="sticky top-16 z-20 mb-4 rounded-2xl border bg-slate-900 text-white shadow-lg">
           <div className="grid grid-cols-3 divide-x divide-white/10">
             <div className="p-3 text-center"><Wallet className="mx-auto h-5 w-5"/><span className="mt-1 block text-[11px] text-white/60">رصيد الأموال</span><b>{wallet.balance} USD</b></div>
@@ -201,14 +204,6 @@ export default function DoctorProfilePage({ id }: { id: string }) {
             <div className="p-3 text-center"><BadgeCheck className="mx-auto h-5 w-5"/><span className="mt-1 block text-[11px] text-white/60">المستحقات</span><b>{wallet.due} USD</b></div>
           </div>
         </div>}
-
-        {/* Reels strip: always above the horizontal profile menu */}
-        <div className="mb-5 grid grid-cols-2 md:grid-cols-5 gap-4">
-          {posts.filter((p)=>p.video_url || p.post_type==='reel').slice(0,5).map((p,i)=><button key={p.id} onClick={()=>setActiveTab('home')} className="relative overflow-hidden rounded-2xl aspect-[3/5] bg-gradient-to-br from-teal-600 to-cyan-500 text-white p-4 text-start shadow-sm">
-            {p.image_url&&<img src={p.image_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-70"/>}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"/><span className="relative z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-teal-700 font-bold">{i+1}</span><span className="absolute bottom-3 start-3 end-3 z-10 text-xs font-semibold">{p.body}</span>
-          </button>)}
-        </div>
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 border-b border-gray-100 overflow-x-auto">
@@ -226,7 +221,6 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         {/* Tab Content */}
         {activeTab === 'home' && (
           <div className="space-y-6">
-            <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} />
             <div className="space-y-4">
             {posts.map((post) => (
               <div key={post.id} className="card p-5">
