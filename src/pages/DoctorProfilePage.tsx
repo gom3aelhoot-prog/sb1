@@ -314,7 +314,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
                     const remaining=Math.max(0,s.startsAt-workNow); const mins=Math.floor(remaining/60000); const hh=Math.floor(mins/60); const mm=mins%60; const urgent=remaining<=50*60000; const red=remaining<=60*60000;
                     return <div key={s.id} className="rounded-xl border bg-white p-3">
                       <div className="flex items-start justify-between gap-2"><div><b className="text-sm">{s.title}</b><p className="mt-1 text-xs text-slate-500">{s.client} · {new Date(s.startsAt).toLocaleString('ar')}</p></div><span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">{s.status}</span></div>
-                      <div className="mt-3 flex items-center justify-between gap-2"><span className="text-xs text-slate-500">الوقت المتبقي</span><span className={`font-mono text-sm font-black ${urgent?'animate-[sb1pulse_.55s_ease-in-out_infinite] text-red-600':'${red?'text-red-600':'text-black'}'}`}>{hh}:{String(mm).padStart(2,'0')}</span></div>
+                      <div className="mt-3 flex items-center justify-between gap-2"><span className="text-xs text-slate-500">الوقت المتبقي</span><span className={`font-mono text-sm font-black ${urgent?'animate-[sb1pulse_.55s_ease-in-out_infinite] text-red-600':red?'text-red-600':'text-black'}`}>{hh}:{String(mm).padStart(2,'0')}</span></div>
                       {urgent&&<div className="mt-1 text-[10px] font-bold text-red-600">اقترب موعد الجلسة — المنبه مفعل</div>}
                     </div>
                   })}
@@ -387,7 +387,6 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           </div>
         )}
 
-        }
       </div>
       </div>
       </div>
