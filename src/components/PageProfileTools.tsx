@@ -198,10 +198,14 @@ export default function PageProfileTools({
     <nav className="sticky top-[72px] z-30 rounded-xl border bg-white/95 shadow-sm backdrop-blur">
       <div className="flex overflow-x-auto px-2 py-1">
         {sectionButton('home','الرئيسية',BookOpen)}
-        {sectionButton('reels','Reels',Video)}
-        {sectionButton('posts','المنشورات',MessageCircle)}
-        {sectionButton('albums','الألبومات',Album)}
+        {sectionButton('articles','مقالاتي',BookOpen)}
+        {sectionButton('questions','الأسئلة المجابة',MessageCircle)}
+        {sectionButton('courses','الدورات والكورسات',BookOpen)}
         {sectionButton('medical','المحتوى الطبي',Library)}
+        {sectionButton('medical-content','عرض الكل',Library)}
+        {sectionButton('medical-content','فيديوهات طبية وتعليمية',Video)}
+        {sectionButton('medical-content','شاهداتي',Heart)}
+        {sectionButton('albums','الألبومات',Album)}
         {sectionButton('social','منصات التواصل',ExternalLink)}
         {sectionButton('phone','الهاتف وQR',QrCode)}
         {canManage&&sectionButton('clone','Clone / Gift',Wand2)}
@@ -214,8 +218,8 @@ export default function PageProfileTools({
         {/* Stories row */}
         <div className="rounded-xl border bg-white p-3 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-extrabold">القصص</h2>
-            <button onClick={()=>setStoryComposer(true)} className="text-sm font-bold text-teal-700"><Plus className="inline h-4 w-4"/> إنشاء قصة</button>
+            <h2 className="sr-only">القصص</h2>
+            <button onClick={()=>setStoryComposer(true)} className="rounded-full bg-teal-50 p-2 text-teal-700" aria-label="إنشاء قصة"><Plus className="h-4 w-4"/></button>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-1">
             <button onClick={()=>setStoryComposer(true)} className="min-w-[112px] overflow-hidden rounded-xl border bg-slate-50">
@@ -246,7 +250,7 @@ export default function PageProfileTools({
 
         {/* Reels strip is part of Home, not a separate bottom page */}
         <div id="fb-reels" className="rounded-xl border bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between"><h2 className="font-extrabold">Reels</h2><button onClick={()=>jump('reels')} className="text-xs font-bold text-teal-700">عرض الكل</button></div>
+          <div className="mb-3 flex items-center justify-between"><h2 className="sr-only">Reels</h2><button onClick={()=>jump('reels')} className="text-xs font-bold text-teal-700">عرض الكل</button></div>
           <div className="flex gap-3 overflow-x-auto">
             {reels.slice(0,10).map(r=><button key={r.id} onClick={()=>openShare(r.text)} className="min-w-[145px] overflow-hidden rounded-xl bg-slate-900 text-white text-right">
               <div className="grid aspect-[3/4] place-items-center bg-gradient-to-br from-teal-900 to-slate-950 p-3"><Video className="h-8 w-8 opacity-80"/><span className="text-xs font-bold">{r.text.slice(0,55)}</span></div>
@@ -287,34 +291,21 @@ export default function PageProfileTools({
         </div>
       </div>
 
-      <aside className="hidden lg:block">
-        <div className="sticky top-28 space-y-3">
-          <div className="rounded-xl border bg-white p-4 shadow-sm"><b>اختصارات الصفحة</b><div className="mt-3 space-y-1">
-            {sectionButton('posts','المنشورات',MessageCircle)}
-            {sectionButton('reels','Reels',Video)}
-            {sectionButton('albums','الألبومات',Album)}
-            {sectionButton('medical','المحتوى الطبي',Library)}
-            {sectionButton('social','منصات التواصل',ExternalLink)}
-            {sectionButton('phone','الهاتف وQR',QrCode)}
-            {canManage&&sectionButton('clone','Clone / Gift',Wand2)}
-            {canManage&&sectionButton('settings','الإعدادات',Settings)}
-          </div></div>
-        </div>
-      </aside>
+      
     </section>
 
     <section id="fb-reels-all" className="rounded-xl border bg-white p-5 shadow-sm">
-      <div className="mb-3 flex items-center justify-between"><h2 className="text-xl font-extrabold">Reels</h2><span className="text-xs text-slate-400">{reels.length} Reel</span></div>
+      <div className="mb-3 flex items-center justify-between"><h2 className="sr-only">Reels</h2><span className="text-xs text-slate-400">{reels.length} Reel</span></div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">{reels.slice(0,18).map(r=><button key={r.id} onClick={()=>openShare(r.text)} className="overflow-hidden rounded-xl bg-slate-900 text-white text-right"><div className="grid aspect-[3/5] place-items-center bg-gradient-to-br from-teal-900 to-slate-950 p-3"><Video/><span className="text-xs font-bold">{r.text.slice(0,60)}</span></div></button>)}</div>
     </section>
 
     <section id="fb-albums" className="rounded-xl border bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-center justify-between"><h2 className="text-xl font-extrabold">الألبومات</h2><Album className="text-teal-700"/></div>
+      <div className="mb-4 flex items-center justify-between"><h2 className="sr-only">الألبومات</h2><Album className="text-teal-700"/></div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{['الصور','الفيديوهات','التسجيلات','الصوتيات'].map((name,i)=><button key={name} className="rounded-xl border bg-slate-50 p-3 text-right hover:bg-teal-50"><div className="grid h-28 place-items-center rounded-lg bg-white">{i===0?<ImageIcon/>:i===1?<FileVideo/>:<AudioLines/>}</div><b className="mt-2 block">{name}</b><span className="text-xs text-slate-500">محتوى الصفحة</span></button>)}</div>
     </section>
 
-    <section id="fb-medical-all" className="rounded-xl border bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">المحتوى الطبي</h2><p className="text-xs text-slate-500">فيديوهات طبية وتعليمية داخل SB1</p></div><Library className="text-teal-700"/></div>
+    <section id="fb-medical-content" className="rounded-xl border bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-center justify-between"><div><h2 className="sr-only">المحتوى الطبي</h2><p className="text-xs text-slate-500">فيديوهات طبية وتعليمية داخل SB1</p></div><Library className="text-teal-700"/></div>
       <div className="grid gap-3 md:grid-cols-3">{Array.from({length:9},(_,i)=>({title:demoTexts[i%demoTexts.length],specialty:['علم النفس','الصحة النفسية','التقييم السريري'][i%3]})).map((v,i)=><article key={i} className="rounded-xl border p-3"><div className="grid aspect-video place-items-center rounded-lg bg-slate-900 text-white"><Video/></div><b className="mt-2 block text-sm">{v.title}</b><span className="text-xs text-slate-500">{v.specialty}</span><div className="mt-2 flex gap-2"><button className="rounded-lg bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700">فيديوهاتي</button><button className="rounded-lg bg-slate-50 px-3 py-1 text-xs font-bold">شاهداتي</button></div></article>)}</div>
     </section>
 
