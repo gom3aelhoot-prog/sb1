@@ -184,15 +184,15 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           <div className="space-y-2">
             {canSeePrivate&&<button onClick={()=>selectMain('wallet')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm active:bg-slate-900"><Wallet className="h-4 w-4"/>الحساب والمحفظة</button>}
             {canManagePage&&<button onClick={()=>selectMain('clone')} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm active:bg-emerald-200"><Copy className="h-4 w-4"/>الاستنساخ</button>}
-            <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+            {canSeePrivate&&<div className="overflow-hidden rounded-xl border bg-white shadow-sm">
               <button onClick={()=>selectMain('home')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><Home className="h-4 w-4"/>الرئيسية</button>
               <button onClick={()=>selectMain('favorites')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><Heart className="h-4 w-4"/>مفضلتي</button>
               <button onClick={()=>selectMain('albums')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><Library className="h-4 w-4"/>الألبومات</button>
               <button onClick={()=>selectMain('social')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><ExternalLink className="h-4 w-4"/>منصات التواصل</button>
               <button onClick={()=>selectMain('phone')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><Share2 className="h-4 w-4"/>الهاتف وQR</button>
               {canManagePage&&<button onClick={()=>selectMain('settings')} className="flex w-full items-center gap-2 px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><SettingsIcon className="h-4 w-4"/>الإعدادات</button>}
-            </div>
-            {canSeePrivate&&<div className="mt-3 rounded-xl border bg-white p-3 shadow-sm">
+            </div>}
+            <div className="mt-3 rounded-xl border bg-white p-3 shadow-sm">
               <button onClick={()=>setShowFollowers(v=>!v)} className="flex w-full items-center justify-between active:bg-slate-100 rounded-lg p-1">
                 <span className="text-sm font-extrabold">المتابعون</span><span className="text-xs text-slate-400">{doctor.follower_count||followers.length}</span>
               </button>
