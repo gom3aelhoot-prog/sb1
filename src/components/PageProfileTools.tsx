@@ -194,25 +194,6 @@ export default function PageProfileTools({
     <button key={key} onClick={()=>jump(key)} className={'shrink-0 rounded-lg px-3 py-2 text-sm font-bold transition '+(active===key?'bg-teal-700 text-white':'text-slate-700 hover:bg-teal-50')}>{Icon&&<Icon className="inline h-4 w-4 ml-1"/>}{label}</button>;
 
   return <div dir="rtl" className="mt-4 space-y-4">
-    {/* Facebook-style navigation: one clean bar directly below the green profile header */}
-    <nav className="sticky top-[72px] z-30 rounded-xl border bg-white/95 shadow-sm backdrop-blur">
-      <div className="flex overflow-x-auto px-2 py-1">
-        {sectionButton('home','الرئيسية',BookOpen)}
-        {sectionButton('articles','مقالاتي',BookOpen)}
-        {sectionButton('questions','الأسئلة المجابة',MessageCircle)}
-        {sectionButton('courses','الدورات والكورسات',BookOpen)}
-        {sectionButton('medical','المحتوى الطبي',Library)}
-        {sectionButton('medical-content','عرض الكل',Library)}
-        {sectionButton('medical-content','فيديوهات طبية وتعليمية',Video)}
-        {sectionButton('medical-content','شاهداتي',Heart)}
-        {sectionButton('albums','الألبومات',Album)}
-        {sectionButton('social','منصات التواصل',ExternalLink)}
-        {sectionButton('phone','الهاتف وQR',QrCode)}
-        {canManage&&sectionButton('clone','Clone / Gift',Wand2)}
-        {canManage&&sectionButton('settings','الإعدادات',Settings)}
-      </div>
-    </nav>
-
     <section id="fb-home" className="grid gap-4 lg:grid-cols-[1fr_280px]">
       <div className="space-y-4">
         {/* Stories row */}
@@ -249,8 +230,7 @@ export default function PageProfileTools({
         </div>}
 
         {/* Reels strip is part of Home, not a separate bottom page */}
-        <div id="fb-reels" className="rounded-xl border bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between"><h2 className="sr-only">Reels</h2><button onClick={()=>jump('reels')} className="text-xs font-bold text-teal-700">عرض الكل</button></div>
+        <div id="fb-reels" className="rounded-xl border bg-white p-4 shadow-sm"><div className="mb-3 flex justify-end"><button onClick={()=>jump("reels")} className="text-xs font-bold text-teal-700">عرض الكل</button></div>
           <div className="flex gap-3 overflow-x-auto">
             {reels.slice(0,10).map(r=><button key={r.id} onClick={()=>openShare(r.text)} className="min-w-[145px] overflow-hidden rounded-xl bg-slate-900 text-white text-right">
               <div className="grid aspect-[3/4] place-items-center bg-gradient-to-br from-teal-900 to-slate-950 p-3"><Video className="h-8 w-8 opacity-80"/><span className="text-xs font-bold">{r.text.slice(0,55)}</span></div>
