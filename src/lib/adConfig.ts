@@ -9,6 +9,6 @@ export const DEFAULT_AD_SLOTS:AdSlot[]=[
 const DISCOUNT_KEY='sb1_discount_config_v3',SLOTS_KEY='sb1_ad_slots_v3';
 export function getDiscountConfig():DiscountConfig{try{return {...DEFAULT_DISCOUNT,...JSON.parse(localStorage.getItem(DISCOUNT_KEY)||'{}')}}catch{return DEFAULT_DISCOUNT}}
 export function saveDiscountConfig(v:DiscountConfig){localStorage.setItem(DISCOUNT_KEY,JSON.stringify(v));window.dispatchEvent(new Event('sb1-ad-config-change'))}
-export function getAdSlots():AdSlot[]{try{const v=JSON.parse(localStorage.getItem(SLOTS_KEY)||'null');return Array.isArray(v)&&v.length?v:DEFAULT_AD_SLOTS}catch{return DEFAULT_AD_SLOTS}}
+export function getAdSlots():AdSlot[]{try{const v=JSON.parse(localStorage.getItem(SLOTS_KEY)||'null');const slots=Array.isArray(v)&&v.length?v:DEFAULT_AD_SLOTS;return slots.map((s:AdSlot)=>s.id==='home-top'?{...s,enabled:false}:s)}catch{return DEFAULT_AD_SLOTS}}
 export function saveAdSlots(v:AdSlot[]){localStorage.setItem(SLOTS_KEY,JSON.stringify(v));window.dispatchEvent(new Event('sb1-ad-config-change'))}
 export function adPrice(slot:AdSlot,durationDays:number){return Math.max(0,slot.pricePerDay)*Math.max(1,durationDays)}
