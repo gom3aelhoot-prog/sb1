@@ -104,7 +104,7 @@ export default function PageProfileTools({
       createdAt:p.created_at, likes:p.likes_count||0, comments:[], public:true, demo:false, author:pageName
     }));
     const demo = Array.from({length:60},(_,i)=>({
-      id:'demo-'+i, kind:(i%10===0?'reel':i%5===0?'video':i%4===0?'image':'post') as MediaKind,
+      id:'demo-'+i, kind:(i%4===0?'reel':i%5===0?'video':i%3===0?'image':'post') as MediaKind,
       text:demoPostTexts[i%demoPostTexts.length], createdAt:new Date(Date.now()-i*3600000).toISOString(),
       likes:8+(i*7)%95, comments:[{id:'c'+i+'a',name:'مستخدم تجريبي',body:'معلومة مفيدة، شكراً.'},{id:'c'+i+'b',name:'عضو SB1',body:'ننتظر المزيد من هذا المحتوى.'}],
       public:true,demo:true,author:pageName
