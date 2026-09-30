@@ -144,6 +144,28 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           {t('common.back')}
         </button>
 
+        {/* Single main navigation: between the ad space and the profile image */}
+        <div className="mb-4 rounded-xl border bg-white shadow-sm">
+          <div className="flex flex-col">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.label}
+                  onClick={() => {
+                    setActiveTab(tab.key);
+                    if (tab.scroll) setTimeout(() => document.getElementById(tab.scroll!)?.scrollIntoView({behavior:'smooth',block:'start'}), 0);
+                  }}
+                  className={`flex w-full items-center justify-between gap-3 border-b px-4 py-3 text-right text-sm font-bold transition-all last:border-b-0 ${activeTab === tab.key ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-teal-700'}`}
+                >
+                  <span className="flex items-center gap-2"><Icon className="h-4 w-4" />{tab.label}</span>
+                  {activeTab === tab.key && <span className="h-2 w-2 rounded-full bg-teal-600" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Cover + Profile Header */}
         <div className="card overflow-hidden mb-6">
           <div className="h-32 bg-gradient-to-l from-teal-500 via-teal-600 to-teal-700" />
@@ -179,20 +201,6 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               </div>
             </div>
             {doctor.bio && <p className="text-sm text-gray-600 mt-4 leading-relaxed">{doctor.bio}</p>}
-          </div>
-        </div>
-
-        {/* Main profile navigation — directly under the green profile header */}
-        <div className="mb-5 overflow-x-auto rounded-xl border bg-white shadow-sm">
-          <div className="flex min-w-max">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button key={tab.label} onClick={() => { setActiveTab(tab.key); if (tab.scroll) setTimeout(() => document.getElementById(tab.scroll!)?.scrollIntoView({behavior:'smooth',block:'start'}), 0); }} className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-bold transition-all ${activeTab === tab.key ? 'border-teal-600 bg-teal-50 text-teal-700' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-teal-700'}`}>
-                  <Icon className="h-4 w-4" />{tab.label}
-                </button>
-              );
-            })}
           </div>
         </div>
 
