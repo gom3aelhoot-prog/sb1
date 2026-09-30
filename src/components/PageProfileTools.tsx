@@ -40,7 +40,7 @@ export default function PageProfileTools({
   canManage?:boolean;
   pageId?:string;
   pageName?:string;
-  seedPosts?:Array<{id:string;body:string;image_url?:string|null;video_url?:string|null;post_type?:string;created_at:string;likes_count?:number}>;
+  seedPosts?:Array<{id:string;body:string;image_url?:string|null;video_url?:string|null;post_type?:string;created_at:string;likes_count?:number}>;\n  hideStories?:boolean;
 }) {
   const initial = useMemo<FeedItem[]>(() => {
     const saved = read<FeedItem[]>('sb1_fb_posts_'+pageId, []);
@@ -196,25 +196,27 @@ export default function PageProfileTools({
   return <div dir="rtl" className="mt-4 space-y-4">
     <section id="fb-home" className="grid gap-4 lg:grid-cols-[1fr_280px]">
       <div className="space-y-4">
-        {/* Stories row */}
-        <div className="rounded-xl border bg-white p-3 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="sr-only">القصص</h2>
-            <button onClick={()=>setStoryComposer(true)} className="rounded-full bg-teal-50 p-2 text-teal-700" aria-label="إنشاء قصة"><Plus className="h-4 w-4"/></button>
+        {!hideStories&&(
+          {/* Stories row */}
+          <div className="rounded-xl border bg-white p-3 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="sr-only">القصص</h2>
+              <button onClick={()=>setStoryComposer(true)} className="rounded-full bg-teal-50 p-2 text-teal-700" aria-label="إنشاء قصة"><Plus className="h-4 w-4"/></button>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-1">
+              <button onClick={()=>setStoryComposer(true)} className="min-w-[112px] overflow-hidden rounded-xl border bg-slate-50">
+                <div className="grid h-28 place-items-center bg-gradient-to-br from-teal-600 to-teal-800 text-white"><Plus className="h-8 w-8"/></div>
+                <div className="p-2 text-center text-xs font-bold">قصتك</div>
+              </button>
+              {activeStories.map(s=><button key={s.id} onClick={()=>setStoryViewer(s)} className="min-w-[112px] overflow-hidden rounded-xl border bg-white text-right">
+                <div className="relative grid h-28 place-items-center overflow-hidden bg-gradient-to-br from-slate-800 to-teal-900 text-white">
+                  {s.mediaUrl?<img src={s.mediaUrl} className="h-full w-full object-cover" alt=""/>:<span className="p-3 text-xs font-bold">{s.text}</span>}
+                  <span className="absolute bottom-2 right-2 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-slate-800">{s.name}</span>
+                </div>
+              </button>)}
+            </div>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-1">
-            <button onClick={()=>setStoryComposer(true)} className="min-w-[112px] overflow-hidden rounded-xl border bg-slate-50">
-              <div className="grid h-28 place-items-center bg-gradient-to-br from-teal-600 to-teal-800 text-white"><Plus className="h-8 w-8"/></div>
-              <div className="p-2 text-center text-xs font-bold">قصتك</div>
-            </button>
-            {activeStories.map(s=><button key={s.id} onClick={()=>setStoryViewer(s)} className="min-w-[112px] overflow-hidden rounded-xl border bg-white text-right">
-              <div className="relative grid h-28 place-items-center overflow-hidden bg-gradient-to-br from-slate-800 to-teal-900 text-white">
-                {s.mediaUrl?<img src={s.mediaUrl} className="h-full w-full object-cover" alt=""/>:<span className="p-3 text-xs font-bold">{s.text}</span>}
-                <span className="absolute bottom-2 right-2 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-slate-800">{s.name}</span>
-              </div>
-            </button>)}
-          </div>
-        </div>
+        )}
 
         {/* Facebook-style composer */}
         {canManage&&<div className="rounded-xl border bg-white p-4 shadow-sm">
@@ -238,14 +240,6 @@ export default function PageProfileTools({
           </div>
         </div>
 
-        {/* Medical content appears in Home as a compact horizontal module */}
-        <div id="fb-medical" className="rounded-xl border bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between"><h2 className="font-extrabold">المحتوى الطبي</h2><button onClick={()=>jump('medical')} className="text-xs font-bold text-teal-700">عرض الكل</button></div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {['فيديوهات طبية وتعليمية','شاهداتي','فيديوهاتي'].map((x,i)=><button key={x} onClick={()=>jump('medical')} className="rounded-xl bg-slate-50 p-4 text-right hover:bg-teal-50"><Library className="mb-2 h-5 w-5 text-teal-700"/><b className="text-sm">{x}</b><span className="mt-1 block text-xs text-slate-500">{i===0?'محتوى مرئي داخل SB1':'قائمة خاصة بالحساب'}</span></button>)}
-          </div>
-        </div>
-
         {/* Feed */}
         <div id="fb-posts" className="space-y-4">
           <div className="flex items-center justify-between px-1"><h2 className="text-xl font-extrabold">المنشورات</h2><span className="text-xs text-slate-400">{publicFeed.length}</span></div>
@@ -266,7 +260,6 @@ export default function PageProfileTools({
                 <button onClick={()=>openShare(p.text)} className="flex-1 rounded-lg py-2 hover:bg-slate-50"><Share2 className="inline h-4 w-4 ml-1"/> مشاركة</button>
               </div>
             </article>
-            {(i+1)%20===0&&i<publicFeed.length-1&&<div className="rounded-xl border bg-white p-4 shadow-sm"><div className="mb-3 flex items-center justify-between"><b>Reels</b><button onClick={()=>jump('reels')} className="text-xs font-bold text-teal-700">عرض الكل</button></div><div className="flex gap-3 overflow-x-auto">{reels.slice(Math.floor(i/20)*5,Math.floor(i/20)*5+5).map(r=><button key={r.id} onClick={()=>openShare(r.text)} className="min-w-[130px] rounded-xl bg-slate-900 p-4 text-right text-xs font-bold text-white">{r.text.slice(0,48)}</button>)}</div></div>}
           </div>)}
         </div>
       </div>
