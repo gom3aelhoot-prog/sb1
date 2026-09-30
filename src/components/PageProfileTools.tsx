@@ -255,6 +255,17 @@ export default function PageProfileTools({
         </div>
       </div>
 
+      <div className="border-b bg-white p-3">
+        <div className="flex flex-wrap gap-2">
+          {[
+            ['reels','Reels',Video],['posts','المنشورات',MessageCircle],['albums','الألبومات',Album],
+            ['social','منصات التواصل',ExternalLink],['clone','Clone / Gift',Wand2],['phone','الهاتف وQR',QrCode],['settings','الإعدادات',Settings]
+          ].map(([id,label,Icon]:any)=><button key={id} onClick={()=>jump(id)} className={'flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold transition '+(section===id?'bg-teal-700 text-white':'border bg-white text-gray-700 hover:bg-teal-50')}>
+            <Icon className="h-4 w-4"/>{label}
+          </button>)}
+        </div>
+      </div>
+
       <div className="p-5">
         <div className="mb-3 flex items-center justify-between"><h3 className="text-lg font-extrabold">Stories — القصص</h3><span className="text-xs text-gray-500">تختفي تلقائياً بعد 24 ساعة</span></div>
         <div className="flex gap-4 overflow-x-auto pb-2">
