@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Home, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, BadgeCheck, PenLine, Share2, ExternalLink, Copy, Briefcase as BriefcaseIcon, Settings as SettingsIcon, Bookmark, Archive, Coins, Wallet, Bell, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Home, Star, MapPin, Clock, MessageCircle, GraduationCap, Award, Heart, Users, FileText, Video, BookOpen, Send, BadgeCheck, PenLine, Share2, ExternalLink, Copy, Briefcase as BriefcaseIcon, Settings as SettingsIcon, Bookmark, Archive, Coins, Wallet, Bell, ShieldCheck, Library } from 'lucide-react';
 import { useRouter } from '@/lib/router';
 import { getRole } from '@/lib/access';
 import PageProfileTools from '@/components/PageProfileTools';
@@ -124,11 +124,15 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     );
   }
 
-  const tabs: { key: Tab; label: string; icon: typeof FileText }[] = [
+  const tabs: { key: Tab; label: string; icon: typeof FileText; scroll?: string }[] = [
     { key: 'home', label: lang==='ar'?'الرئيسية':lang==='ru'?'Главная':'Home', icon: Home },
     { key: 'articles', label: lang==='ar'?'مقالاتي':lang==='ru'?'Мои статьи':'My Articles', icon: BookOpen },
     { key: 'questions', label: lang==='ar'?'الأسئلة المجابة':lang==='ru'?'Отвеченные вопросы':'Answered Questions', icon: MessageCircle },
     { key: 'courses', label: lang==='ar'?'الدورات والكورسات':lang==='ru'?'Курсы':'Courses', icon: GraduationCap },
+    { key: 'home', label: lang==='ar'?'المحتوى الطبي':'Medical Content', icon: Library, scroll:'fb-medical-content' },
+    { key: 'home', label: lang==='ar'?'عرض الكل':'View all', icon: FileText, scroll:'fb-medical-content' },
+    { key: 'home', label: lang==='ar'?'فيديوهات طبية وتعليمية':'Medical Videos', icon: Video, scroll:'fb-medical-content' },
+    { key: 'home', label: lang==='ar'?'شاهداتي':'Watched', icon: Bookmark, scroll:'fb-medical-content' },
     ...(canSeePrivate ? [{ key: 'portfolio' as Tab, label: lang==='ar'?'الحسابات والمال':lang==='ru'?'Счета и финансы':'Accounts & Money', icon: BriefcaseIcon }] : []),
   ];
 
@@ -184,7 +188,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
-                <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-bold transition-all ${activeTab === tab.key ? 'border-teal-600 bg-teal-50 text-teal-700' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-teal-700'}`}>
+                <button key={tab.label} onClick={() => { setActiveTab(tab.key); if (tab.scroll) setTimeout(() => document.getElementById(tab.scroll!)?.scrollIntoView({behavior:'smooth',block:'start'}), 0); }} className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-bold transition-all ${activeTab === tab.key ? 'border-teal-600 bg-teal-50 text-teal-700' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-teal-700'}`}>
                   <Icon className="h-4 w-4" />{tab.label}
                 </button>
               );
