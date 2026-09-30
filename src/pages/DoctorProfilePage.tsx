@@ -302,7 +302,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
 
         {activeTab === 'questions' && (
           <div className="space-y-4">
-            {questions.map(q=><div key={q.id} className="rounded-xl border bg-white p-3"><QuestionCard question={q}/><button onClick={()=>toggleSaved({id:q.id,kind:'question',title:(q as any).title||(q as any).question||(q as any).body||'سؤال وأجابة',body:(q as any).answer||(q as any).body,author:doctor.name,created_at:(q as any).created_at||new Date().toISOString()})} className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs font-bold active:bg-slate-200"><Bookmark className="inline h-4 w-4 me-1"/>حفظ في مفضلتي</button></div>}
+            {questions.map(q=>(<div key={q.id} className="rounded-xl border bg-white p-3"><QuestionCard question={q}/><button onClick={()=>toggleSaved({id:q.id,kind:'question',title:(q as any).title||(q as any).question||(q as any).body||'سؤال وأجابة',body:(q as any).answer||(q as any).body,author:doctor.name,created_at:(q as any).created_at||new Date().toISOString()})} className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs font-bold active:bg-slate-200"><Bookmark className="inline h-4 w-4 me-1"/>حفظ في مفضلتي</button></div>))}
             <a href={'/questions?specialty='+(doctor.specialty?.slug||'')} className="inline-block rounded-xl bg-teal-700 px-4 py-2 text-white font-bold">كل الأسئلة والإجابات</a>
           </div>
         )}
