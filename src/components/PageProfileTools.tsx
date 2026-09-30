@@ -128,7 +128,6 @@ export default function PageProfileTools({
   const [postFontColor,setPostFontColor]=useState('#334155');
   const [postFontSize,setPostFontSize]=useState('18px');
   const [postFontWeight,setPostFontWeight]=useState('700');
-  const [discountOpen,setDiscountOpen]=useState(()=>read('sb1_discount_10_open',true));
   const [clonePermissions,setClonePermissions]=useState<string[]>([]);
   const [cloneType,setCloneType]=useState('specialist');
   const [cloneCount,setCloneCount]=useState(1);
