@@ -162,9 +162,10 @@ export default function PageProfileTools({
   };
 
   const openSocial=(url:string)=>{
-    if(!/^https?:\\/\\//.test(url))return;
-    window.open(url,'_blank','noopener,noreferrer,width=1100,height=800');
-    setSocialOpen(v=>[url,...v]);if(!favorites.includes(url))setFavorites(v=>[url,...v]);
+    if(!/^https?:\/\//.test(url))return;
+    setSocialOpen(v=>[url,...v.filter(x=>x!==url)]);
+    setSocialEmbedded(url);
+    if(!favorites.includes(url))setFavorites(v=>[url,...v]);
   };
   const searchSocial=()=>{
     if(!socialSearch.trim())return;
@@ -277,16 +278,9 @@ export default function PageProfileTools({
               {p.mediaUrl&&p.kind==='audio'&&<audio src={p.mediaUrl} controls className="mt-3 w-full"/>}
               <div className="mt-3 flex items-center border-t pt-2 text-sm text-slate-500">
                 <button onClick={()=>like(p.id)} className="flex-1 rounded-lg py-2 hover:bg-slate-50 hover:text-teal-700"><Heart className="inline h-4 w-4 ml-1"/> {p.likes}</button>
-                <button onClick={()=>document.getElementById('comment-'+p.id)?.focus()} className="flex-1 rounded-lg py-2 hover:bg-slate-50"><MessageCircle className="inline h-4 w-4 ml-1"/> {p.comments.length}</button>
+                <button onClick={()=>setOpenComments(p.id)} className="flex-1 rounded-lg py-2 hover:bg-slate-50" aria-label="التعليقات"><MessageCircle className="inline h-4 w-4 ml-1"/> {p.comments.length}</button>
                 <button onClick={()=>openShare(p.text)} className="flex-1 rounded-lg py-2 hover:bg-slate-50"><Share2 className="inline h-4 w-4 ml-1"/> مشاركة</button>
               </div>
-              <button
-                onClick={()=>setOpenComments(p.id)}
-                className="mt-2 w-full rounded-lg px-3 py-2 text-right text-sm font-bold text-slate-500 hover:bg-slate-50"
-                aria-label="فتح التعليقات"
-              >
-                {p.comments.length ? p.comments.length+' تعليق' : 'التعليقات'}
-              </button>
             </article>
             {(i+1)%20===0&&i<publicFeed.length-1&&<div className="rounded-xl border bg-white p-4 shadow-sm"><div className="mb-3 flex items-center justify-between"><b>Reels</b><button onClick={()=>jump('reels')} className="text-xs font-bold text-teal-700">عرض الكل</button></div><div className="flex gap-3 overflow-x-auto">{reels.slice(Math.floor(i/20)*5,Math.floor(i/20)*5+5).map(r=><button key={r.id} onClick={()=>openShare(r.text)} className="min-w-[130px] rounded-xl bg-slate-900 p-4 text-right text-xs font-bold text-white">{r.text.slice(0,48)}</button>)}</div></div>}
           </div>)}
