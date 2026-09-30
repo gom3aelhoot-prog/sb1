@@ -199,7 +199,6 @@ export default function PageProfileTools({
     {show('home') && (<section id="fb-home" className="grid gap-4 lg:grid-cols-[1fr_280px]">
       <div className="space-y-4">
         {!hideStories&&(
-          {/* Stories row */}
           <div className="rounded-xl border bg-white p-3 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="sr-only">القصص</h2>
@@ -313,7 +312,7 @@ export default function PageProfileTools({
       {canManage&&<div className="grid gap-5 md:grid-cols-2"><div><label className="text-sm font-bold">رقم الهاتف</label><input value={phone} onChange={e=>{setPhone(e.target.value);localStorage.setItem('sb1_private_phone',e.target.value)}} className="mt-2 w-full rounded-xl border p-3" placeholder="+49 ..."/><button onClick={()=>setNotice('تم حفظ الرقم بشكل خاص.')} className="mt-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white">حفظ</button></div><div className="grid place-items-center rounded-xl bg-slate-50 p-4"><img src={'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(window.location.origin+'/doctors/'+pageId)} alt="QR" className="h-44 w-44"/><span className="mt-2 text-xs">QR لفتح صفحة SB1</span></div></div>}
     </section>) }
 
-    {canManage&&show('clone')&&<section id="fb-clone" className="rounded-xl border bg-white p-5 shadow-sm">
+    {canManage&&show('clone')&&(<section id="fb-clone" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">Clone / Gift</h2><p className="text-xs text-slate-500">ينسخ نوع الحساب والعدد فقط، ثم يمكن تغيير الاسم والصلاحيات.</p></div><Wand2 className="text-teal-700"/></div>
       <div className="grid gap-3 md:grid-cols-4"><select value={cloneType} onChange={e=>setCloneType(e.target.value)} className="rounded-xl border p-3"><option value="specialist">أخصائي</option><option value="institution">مؤسسة</option><option value="delivery_worker">عامل توصيل</option><option value="service">خدمة</option><option value="pharmacy">صيدلية</option><option value="facility">مرفق طبي</option><option value="content_creator">صانع محتوى</option><option value="admin">إداري</option></select><input type="number" min={1} max={50} value={cloneCount} onChange={e=>setCloneCount(Number(e.target.value))} className="rounded-xl border p-3"/><input value={cloneName} onChange={e=>setCloneName(e.target.value)} className="rounded-xl border p-3" placeholder="اسم الصفحة"/><input type="date" value={cloneExpiry} onChange={e=>setCloneExpiry(e.target.value)} className="rounded-xl border p-3"/></div>
       <div className="mt-4 rounded-xl border bg-slate-50 p-4"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><b>صلاحيات الصفحة المستنسخة — كل وظائف SB1</b><div className="flex gap-2"><button onClick={()=>setClonePermissions(allPermissionKeys)} className="rounded-lg bg-teal-700 px-3 py-1 text-xs font-bold text-white">تفعيل الكل</button><button onClick={()=>setClonePermissions([])} className="rounded-lg bg-white px-3 py-1 text-xs font-bold">إلغاء الكل</button></div></div>
@@ -323,7 +322,7 @@ export default function PageProfileTools({
       {clones.slice(0,8).map(c=><div key={c.id} className="mt-3 rounded-xl border p-3"><div className="flex justify-between"><b>{c.name}</b><span className="text-xs">{c.type}</span></div><div className="mt-2 text-xs">PIN: {c.pin} • كلمة المرور: {c.password} • {c.expires||'بدون انتهاء'}</div><button onClick={()=>setShare({title:c.name+' | PIN '+c.pin, url:c.link})} className="mt-2 rounded-lg bg-teal-700 px-3 py-2 text-xs font-bold text-white"><Gift className="inline h-4 w-4 ml-1"/> إرسال</button></div>)}
     </section>) }
 
-    {canManage&&show('settings')&&<section id="fb-settings" className="rounded-xl border bg-white p-5 shadow-sm">
+    {canManage&&show('settings')&&(<section id="fb-settings" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">الإعدادات</h2><p className="text-xs text-slate-500">تظهر لصاحب الصفحة والمالك/المشرف فقط.</p></div><Settings className="text-teal-700"/></div>
       <button onClick={()=>setSettingsOpen(v=>!v)} className="mt-3 rounded-xl bg-teal-700 px-4 py-2 font-bold text-white">{settingsOpen?'إغلاق':'فتح الإعدادات'}</button>
       {settingsOpen&&<div className="mt-3 grid gap-3 md:grid-cols-2"><label className="rounded-xl bg-slate-50 p-4 text-sm"><b>المحتوى الطبي العام</b><p className="mt-1 text-xs text-slate-500">يمكن للزوار مشاهدة المحتوى الطبي المجاني.</p><input type="checkbox" defaultChecked className="mt-3 h-5 w-5"/></label><label className="rounded-xl bg-slate-50 p-4 text-sm"><b>السماح بالقصص</b><p className="mt-1 text-xs text-slate-500">إظهار القصص في أعلى الصفحة.</p><input type="checkbox" defaultChecked className="mt-3 h-5 w-5"/></label></div>}
