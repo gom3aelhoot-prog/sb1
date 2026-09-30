@@ -178,106 +178,40 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* SB1 profile sharing / external social platforms */}
-        <div className="card p-5 mb-6 bg-gradient-to-l from-white to-teal-50">
-          <div className="flex items-start gap-3">
-            <div className="w-11 h-11 rounded-xl bg-teal-100 flex items-center justify-center shrink-0"><Share2 className="w-5 h-5 text-teal-700"/></div>
-            <div className="flex-1">
-              <h2 className="font-extrabold text-gray-800">تابع الأخصائي على SB1</h2>
-              <p className="text-sm text-gray-500 mt-1">يمكن للأخصائي مشاركة رابط صفحته على منصات التواصل الأخرى. لا نستخدم أو نقلد واجهات تلك المنصات ولا ننشر بالنيابة عنها.</p>
-              <div className="flex flex-wrap gap-2 mt-4">
-                <button onClick={shareProfile} className="rounded-xl bg-teal-600 text-white px-4 py-2 text-sm font-semibold flex items-center gap-2"><Share2 className="w-4 h-4"/>مشاركة</button>
-                <button onClick={async()=>{await navigator.clipboard?.writeText(window.location.href);alert('تم نسخ رابط صفحة SB1')}} className="rounded-xl border bg-white px-4 py-2 text-sm font-semibold flex items-center gap-2"><Copy className="w-4 h-4"/>نسخ الرابط</button>
-                
-                <a target="_blank" rel="noreferrer" href={`https://t.me/share/url?url=${encodeURIComponent(window.location.origin+'/doctors/'+id)}&text=${encodeURIComponent('تابع '+doctor.name+' على SB1')}`} className="rounded-xl border bg-white px-4 py-2 text-sm font-semibold flex items-center gap-2"><ExternalLink className="w-4 h-4"/>Telegram</a>
-              </div>
-            </div>
+        {/* Main profile navigation — directly under the green profile header */}
+        <div className="mb-5 overflow-x-auto rounded-xl border bg-white shadow-sm">
+          <div className="flex min-w-max">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-bold transition-all ${activeTab === tab.key ? 'border-teal-600 bg-teal-50 text-teal-700' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-teal-700'}`}>
+                  <Icon className="h-4 w-4" />{tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} />
-
-        {canSeePrivate && <div className="sticky top-16 z-20 mb-4 rounded-2xl border bg-slate-900 text-white shadow-lg">
-          <div className="grid grid-cols-3 divide-x divide-white/10">
-            <div className="p-3 text-center"><Wallet className="mx-auto h-5 w-5"/><span className="mt-1 block text-[11px] text-white/60">رصيد الأموال</span><b>{wallet.balance} USD</b></div>
-            <div className="p-3 text-center"><Coins className="mx-auto h-5 w-5"/><span className="mt-1 block text-[11px] text-white/60">محفظة النقاط</span><b>{wallet.points}</b></div>
-            <div className="p-3 text-center"><BadgeCheck className="mx-auto h-5 w-5"/><span className="mt-1 block text-[11px] text-white/60">المستحقات</span><b>{wallet.due} USD</b></div>
-          </div>
-        </div>}
-
-        {/* Tabs */}
-        <div className="flex gap-1 mb-6 border-b border-gray-100 overflow-x-auto">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${activeTab === tab.key ? 'text-teal-600 border-teal-600' : 'text-gray-500 border-transparent hover:text-teal-600'}`}>
-                <Icon className="w-4 h-4" />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Tab Content */}
         {activeTab === 'home' && (
-          <div className="space-y-6">
-            <div className="space-y-4">
-            {posts.map((post) => (
-              <div key={post.id} className="card p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-bold text-sm">{doctor.name.charAt(0)}</div>
-                  <div>
-                    <p className="font-semibold text-sm text-gray-800">{doctor.name}</p>
-                    <p className="text-xs text-gray-400">{new Date(post.created_at).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-700 mb-3">{post.body}</p>
-                <div className="flex gap-2 mb-3"><button onClick={()=>toggleSaved({id:post.id,kind:post.video_url?'reel':'post',title:post.body,body:post.body,author:doctor.name,created_at:post.created_at})} className="rounded-lg bg-slate-50 px-3 py-2 text-xs"><Bookmark className="inline h-4 w-4 me-1"/>{isSaved(post.id)?'محفوظ':'حفظ'}</button><button onClick={()=>{archiveItem({id:post.id,kind:post.video_url?'reel':'post',title:post.body,body:post.body,author:doctor.name,created_at:post.created_at});setPosts(x=>x.filter(y=>y.id!==post.id))}} className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700"><Archive className="inline h-4 w-4 me-1"/>أرشفة خاصة</button></div>
-                {post.image_url && <img src={post.image_url} alt="" className="w-full rounded-xl mb-3 max-h-96 object-cover" />}
-                {post.video_url && <video src={post.video_url} controls className="w-full rounded-xl mb-3" />}
-                <div className="flex items-center gap-4 text-sm text-gray-500 pb-3 border-b border-gray-50">
-                  <button onClick={() => handleLike(post.id)} className="flex items-center gap-1.5 hover:text-rose-500 transition-colors">
-                    <Heart className={`w-4 h-4 ${likedPosts.has(post.id) ? 'fill-rose-500 text-rose-500' : ''}`} />
-                    {(post.likes_count || 0) + (likedPosts.has(post.id) ? 1 : 0)}
-                  </button>
-                  <span className="flex items-center gap-1.5"><MessageCircle className="w-4 h-4" />{(comments[post.id] || []).length}</span>
-                </div>
-                <div className="space-y-2 mt-3">
-                  {(comments[post.id] || []).map((c) => (
-                    <div key={c.id} className="flex gap-2">
-                      <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 flex-shrink-0">{c.author_name.charAt(0)}</div>
-                      <div className="bg-gray-50 rounded-xl px-3 py-2 flex-1">
-                        <p className="text-xs font-semibold text-gray-700">{c.author_name}</p>
-                        <p className="text-sm text-gray-600">{c.body}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex gap-2 mt-3">
-                  <input
-                    type="text"
-                    value={commentInputs[post.id] || ''}
-                    onChange={(e) => setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))}
-                    onKeyDown={(e) => e.key === 'Enter' && handleComment(post.id)}
-                    placeholder={t('profile.comment_placeholder')}
-                    className="flex-1 px-3 py-2 rounded-xl border border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none text-sm"
-                  />
-                  <button onClick={() => handleComment(post.id)} className="bg-teal-600 text-white p-2 rounded-xl"><Send className="w-4 h-4" /></button>
-                </div>
-              </div>
-            ))}
-            {posts.length === 0 && <p className="text-center text-gray-400 py-8">{t('common.loading')}</p>}
-            </div>
+          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} />
+        )}
+
+        {canSeePrivate && activeTab === 'portfolio' && (
+          <div className="mb-5 grid gap-4 md:grid-cols-3">
+            <div className="card p-5"><Wallet className="text-teal-600"/><b className="block mt-3">الرصيد</b><strong>{wallet.balance} USD</strong></div>
+            <div className="card p-5"><Coins className="text-indigo-600"/><b className="block mt-3">النقاط</b><strong>{wallet.points}</strong></div>
+            <div className="card p-5"><BadgeCheck className="text-amber-500"/><b className="block mt-3">المستحقات</b><strong>{wallet.due} USD</strong></div>
           </div>
         )}
 
         {activeTab === 'articles' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {articles.map((a) => (
               <div key={a.id} className="card p-5 hover:shadow-lg transition-all cursor-pointer" onClick={() => navigate(`/articles/${a.id}`)}>
                 {a.image_url && <img src={a.image_url} alt="" className="w-full h-32 rounded-xl object-cover mb-3" />}
                 <h3 className="font-bold text-gray-800 text-sm mb-1">{a.title}</h3>
-                <p className="text-xs text-gray-500 line-clamp-2">{a.excerpt}</p><button onClick={(e)=>{e.stopPropagation();toggleSaved({id:a.id,kind:'article',title:a.title,body:a.excerpt,author:doctor.name,created_at:a.created_at})}} className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs"><Bookmark className="inline h-4 w-4 me-1"/>{isSaved(a.id)?'محفوظ':'حفظ المقال'}</button>
+                <p className="text-xs text-gray-500 line-clamp-2">{a.excerpt}</p>
+                <button onClick={(e)=>{e.stopPropagation();toggleSaved({id:a.id,kind:'article',title:a.title,body:a.excerpt,author:doctor.name,created_at:a.created_at})}} className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs"><Bookmark className="inline h-4 w-4 me-1"/>{isSaved(a.id)?'محفوظ':'حفظ المقال'}</button>
               </div>
             ))}
             {articles.length === 0 && <p className="text-center text-gray-400 py-8 col-span-full">{t('common.loading')}</p>}
@@ -285,15 +219,16 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         )}
 
         {activeTab === 'courses' && (
-          <div className="grid gap-4 md:grid-cols-2">{virtualCoursesForSpecialty(doctor.specialty?.slug||'',lang,6).map(c=><div key={c.id} className="card p-5"><h3 className="font-bold">{c.title}</h3><p className="mt-2 text-sm text-gray-500">{c.description}</p><div className="mt-3 flex justify-between"><b>{c.price} USD</b><button onClick={()=>navigate('/courses/'+c.id)} className="rounded-xl bg-teal-700 px-3 py-2 text-white">فتح الدورة</button></div></div>)}</div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {virtualCoursesForSpecialty(doctor.specialty?.slug||'',lang,6).map(c=><div key={c.id} className="card p-5"><h3 className="font-bold">{c.title}</h3><p className="mt-2 text-sm text-gray-500">{c.description}</p><div className="mt-3 flex justify-between"><b>{c.price} USD</b><button onClick={()=>navigate('/courses/'+c.id)} className="rounded-xl bg-teal-700 px-3 py-2 text-white">فتح الدورة</button></div></div>)}
+          </div>
         )}
 
         {activeTab === 'questions' && (
-          <div className="space-y-4">{questions.map(q=><QuestionCard key={q.id} question={q}/>)}<a href={'/questions?specialty='+(doctor.specialty?.slug||'')} className="inline-block rounded-xl bg-teal-700 px-4 py-2 text-white font-bold">كل الأسئلة والإجابات</a></div>
-        )}
-
-        {canSeePrivate && activeTab === 'portfolio' && (
-          <div className="grid gap-4 md:grid-cols-3"><div className="card p-5"><Wallet className="text-teal-600"/><b className="block mt-3">الرصيد</b><strong>{wallet.balance} USD</strong></div><div className="card p-5"><Coins className="text-indigo-600"/><b className="block mt-3">النقاط</b><strong>{wallet.points}</strong></div><div className="card p-5"><BadgeCheck className="text-amber-500"/><b className="block mt-3">المستحقات</b><strong>{wallet.due} USD</strong></div><div className="card p-5 md:col-span-3"><b>أدوات الأخصائي</b><div className="mt-3 flex flex-wrap gap-2"><button onClick={()=>navigate('/specialist/packages')} className="rounded-xl bg-teal-50 px-4 py-2 text-teal-700">باقات المتابعة</button><button onClick={()=>navigate('/specialist/studio')} className="rounded-xl bg-indigo-50 px-4 py-2 text-indigo-700">استوديو الأخصائي</button><button onClick={()=>navigate('/wallet')} className="rounded-xl bg-slate-100 px-4 py-2">المحفظة</button></div></div></div>
+          <div className="space-y-4">
+            {questions.map(q=><QuestionCard key={q.id} question={q}/>)}
+            <a href={'/questions?specialty='+(doctor.specialty?.slug||'')} className="inline-block rounded-xl bg-teal-700 px-4 py-2 text-white font-bold">كل الأسئلة والإجابات</a>
+          </div>
         )}
 
         {/* CTA */}
