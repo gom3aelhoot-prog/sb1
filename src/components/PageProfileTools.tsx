@@ -98,6 +98,21 @@ export default function PageProfileTools({ canManage=false, pageId='current', pa
  const togglePermission=(p:string)=>setPermissions(v=>v.includes(p)?v.filter(x=>x!==p):[...v,p]);
 
  return <div className="mt-8 space-y-6" dir="rtl">
+   <section className="rounded-3xl border-2 border-slate-200 bg-white p-4 shadow-sm" id="page-workspace-nav">
+     <div className="flex flex-wrap items-center justify-between gap-3">
+       <div>
+         <div className="text-xs font-bold text-teal-700">SB1 • لوحة الصفحة</div>
+         <h2 className="mt-1 text-lg font-extrabold text-gray-900">كل أدوات الصفحة في مكان واحد</h2>
+       </div>
+       <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-gray-600">{canManage?'وضع إدارة الصفحة':'وضع الزائر'}</span>
+     </div>
+     <div className="mt-3 flex flex-wrap gap-2">
+       {[
+         ['reels','Reels'],['feed','المنشورات'],['albums','الألبومات'],['external','منصات التواصل'],['history','الهيستوري'],
+         ...(canManage?[['clone','Clone / Gift'],['phone','الهاتف وQR'],['settings','الإعدادات']]:[])
+       ].map(([target,label])=><button key={target} onClick={()=>document.getElementById('sb1-'+target)?.scrollIntoView({behavior:'smooth',block:'start'})} className="rounded-xl border bg-white px-3 py-2 text-sm font-bold hover:border-teal-500 hover:text-teal-700">{label}</button>)}
+     </div>
+   </section>
    {note&&<div className="rounded-2xl border border-teal-200 bg-teal-50 p-4 text-sm font-semibold text-teal-800 flex items-center gap-2"><CheckCircle2 className="h-5 w-5"/>{note}<button className="mr-auto" onClick={()=>setNote('')}><X className="h-4 w-4"/></button></div>}
 
    {canManage&&<section className="card p-6 border-2 border-teal-100">
@@ -166,6 +181,17 @@ export default function PageProfileTools({ canManage=false, pageId='current', pa
      <button onClick={()=>setSettingsOpen(v=>!v)} className="mt-3 rounded-xl border px-4 py-2 font-bold">{settingsOpen?'إخفاء الإعدادات':'فتح الإعدادات'}</button>
      {settingsOpen&&<div className="mt-4 grid gap-3 md:grid-cols-2"><div className="rounded-2xl bg-slate-50 p-4"><Lock className="h-5 w-5"/><b className="block mt-2">الخصوصية</b><p className="text-xs text-gray-500 mt-1">المحتوى الخاص والمفضلة وبيانات الهاتف لا تظهر للعامة.</p></div><div className="rounded-2xl bg-slate-50 p-4"><KeyRound className="h-5 w-5"/><b className="block mt-2">صلاحيات الإدارة</b><p className="text-xs text-gray-500 mt-1">المالك والمشرفون المصرح لهم فقط يمكنهم فتح هذا القسم.</p></div></div>}
    </section>}
+
+   <section id="sb1-history" className="card p-6">
+     <div className="flex items-center justify-between gap-3">
+       <div><h2 className="text-xl font-extrabold">الهيستوري</h2><p className="mt-1 text-sm text-gray-500">سجل محلي للمعاينة: نشر المحتوى، التعليقات، فتح النوافذ، وإنشاء الصفحات.</p></div>
+       <Clock3 className="h-6 w-6 text-teal-600"/>
+     </div>
+     <div className="mt-4 space-y-2">
+       {[...feed.slice(0,8).map(p=>({t:p.createdAt,x:`نشر ${p.kind} على الصفحة`})),...externalWindows.map((u,i)=>({t:new Date().toISOString(),x:`فتح نافذة تواصل ${i+1}`})),...clones.slice(0,8).map(c=>({t:c.createdAt,x:`إنشاء صفحة ${c.name}`}))].sort((a,b)=>b.t.localeCompare(a.t)).slice(0,20).map((e,i)=><div key={i} className="flex items-center gap-3 rounded-xl bg-slate-50 p-3 text-sm"><Clock3 className="h-4 w-4 text-gray-400"/><span className="flex-1">{e.x}</span><time className="text-xs text-gray-400">{new Date(e.t).toLocaleString()}</time></div>)}
+       {feed.length===0&&externalWindows.length===0&&clones.length===0&&<div className="rounded-xl bg-slate-50 p-4 text-center text-sm text-gray-500">لا يوجد نشاط بعد.</div>}
+     </div>
+   </section>
 
    {!canManage&&<div className="rounded-2xl border bg-slate-50 p-4 text-center text-sm text-gray-500">المحتوى العام ظاهر للزوار. إعدادات الصفحة، المفضلة الخارجية، Clone/Gift، الهاتف وQR وإدارة المحتوى الخاص مخفية عن الزوار.</div>}
  </div>;
