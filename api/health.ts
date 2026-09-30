@@ -1,4 +1,4 @@
-import { providerConfig, probeProviders } from '../src/lib/resilience';
+import { providerConfig, probeProviders } from '../src/lib/resilience.js';
 export default async function handler(req:any,res:any){
  if(req.method!=='GET')return res.status(405).json({ok:false,error:'Method not allowed'});
  const cfg=providerConfig(process.env as any);const results:any[]=[];
