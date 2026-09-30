@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Album, AudioLines, BookOpen, CheckCircle2, ExternalLink, FileVideo, Gift, Heart,
   Image as ImageIcon, Library, MessageCircle, Mic, Plus, QrCode, Search, Send,
-  Settings, Share2, Trash2, Upload, Video, X, Wand2
+  Settings, Share2, Trash2, Upload, Video, X, Wand2, Bookmark
 } from 'lucide-react';
 
 type MediaKind = 'post' | 'image' | 'video' | 'reel' | 'audio';
@@ -11,6 +12,7 @@ type FeedItem = {
   id:string; kind:MediaKind; text:string; mediaUrl?:string; mediaName?:string;
   createdAt:string; likes:number; comments:{id:string;name:string;body:string}[];
   public:boolean; demo?:boolean; author:string;
+  style?:{background:string;color:string;fontSize:string;fontWeight:string};
 };
 
 const read = <T,>(key:string, fallback:T):T => {
@@ -84,11 +86,23 @@ export default function PageProfileTools({
   const [share,setShare]=useState<{title:string;url:string}|null>(null);
 
   const [phone,setPhone]=useState(()=>localStorage.getItem('sb1_private_phone')||'');
+  const [phoneLinked,setPhoneLinked]=useState(()=>localStorage.getItem('sb1_phone_linked')==='true');
+  const [pairCode]=useState(()=>read('sb1_pair_code_'+pageId,String(Math.floor(100000+Math.random()*900000))));
   const [socialSearch,setSocialSearch]=useState('');
   const [socialUrl,setSocialUrl]=useState('');
   const [socialOpen,setSocialOpen]=useState<string[]>([]);
   const [socialEmbedded,setSocialEmbedded]=useState<string|null>(null);
   const [favorites,setFavorites]=useState<string[]>(()=>read('sb1_fb_social_favorites',[]));
+  const [albums,setAlbums]=useState<any[]>(()=>read('sb1_fb_albums_'+pageId,[]));
+  const [albumName,setAlbumName]=useState('');
+  const [albumModal,setAlbumModal]=useState(false);
+  const [albumPicker,setAlbumPicker]=useState<FeedItem|null>(null);
+  const [reelViewer,setReelViewer]=useState<FeedItem|null>(null);
+  const [postBackground,setPostBackground]=useState('#ffffff');
+  const [postFontColor,setPostFontColor]=useState('#334155');
+  const [postFontSize,setPostFontSize]=useState('18px');
+  const [postFontWeight,setPostFontWeight]=useState('700');
+  const [discountOpen,setDiscountOpen]=useState(()=>read('sb1_discount_10_open',true));
   const [clonePermissions,setClonePermissions]=useState<string[]>([]);
   const [cloneType,setCloneType]=useState('specialist');
   const [cloneCount,setCloneCount]=useState(1);
@@ -105,6 +119,7 @@ export default function PageProfileTools({
   useEffect(()=>write('sb1_fb_posts_'+pageId,feed),[feed,pageId]);
   useEffect(()=>write('sb1_fb_stories_'+pageId,stories),[stories,pageId]);
   useEffect(()=>write('sb1_fb_social_favorites',favorites),[favorites]);
+  useEffect(()=>write('sb1_fb_albums_'+pageId,albums),[albums,pageId]);
   useEffect(()=>write('sb1_fb_clones',clones),[clones]);
   useEffect(()=>{if(postFile){const u=URL.createObjectURL(postFile);setPostUrl(u);return()=>URL.revokeObjectURL(u)}setPostUrl('')},[postFile]);
   useEffect(()=>{if(storyFile){const u=URL.createObjectURL(storyFile);setStoryUrl(u);return()=>URL.revokeObjectURL(u)}setStoryUrl('')},[storyFile]);
@@ -153,6 +168,9 @@ export default function PageProfileTools({
     setFeed(v=>v.map(p=>p.id===postId?{...p,comments:[...p.comments,{id:id(),name:'مستخدم SB1',body}]}:p));
     setComments(v=>({...v,[postId]:''}));
   };
+  const saveToFavorites=(p:FeedItem)=>{toggleSaved({id:p.id,kind:p.kind==='image'?'image':p.kind==='reel'?'reel':p.kind==='video'?'video':p.kind==='audio'?'recording':'post',title:p.text,body:p.text,author:p.author,url:p.mediaUrl,image_url:p.kind==='image'?p.mediaUrl:undefined,created_at:p.createdAt});setNotice('تم الحفظ في مفضلتي تلقائياً ضمن القسم المناسب.');};
+  const createAlbum=()=>{const n=albumName.trim();if(!n){setNotice('اكتب اسم الألبوم أولاً.');return}const a={id:id(),name:n,items:[]};setAlbums(v=>[a,...v]);setAlbumName('');setAlbumModal(false);setNotice('تم إنشاء الألبوم.');};
+  const addToAlbum=(p:FeedItem,albumId:string)=>{setAlbums(v=>v.map(a=>a.id===albumId?{...a,items:[p,...(a.items||[]).filter((x:any)=>x.id!==p.id)]}:a));setAlbumPicker(null);setNotice('تمت إضافة المحتوى إلى الألبوم.');};
 
   const openShare=(title:string)=>{
     setShare({title,url:window.location.origin+'/doctors/'+pageId});
@@ -199,6 +217,7 @@ export default function PageProfileTools({
   return <div dir="rtl" className="mt-4 space-y-4">
     {show('home') && (<section id="fb-home" className="grid gap-4 lg:grid-cols-[1fr_280px]">
       <div className="space-y-4">
+        {discountOpen&&<div className="rounded-xl border border-amber-200 bg-amber-50 p-3 shadow-sm"><div className="flex items-center gap-3"><div className="flex-1"><b className="text-sm">خصم 10% على الباقة الحالية</b><p className="text-xs text-amber-800">العرض ظاهر للتجربة ويمكن إغلاقه من زر ×.</p></div><button onClick={()=>{setDiscountOpen(false);write('sb1_discount_10_open',false)}} className="rounded-full p-1 text-slate-500 hover:bg-white active:bg-slate-200" aria-label="إغلاق">×</button></div></div>}
         {!hideStories&&(
           <div className="rounded-xl border bg-white p-3 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
@@ -243,7 +262,7 @@ export default function PageProfileTools({
 
         <div id="fb-reels" className="rounded-xl border bg-white p-4 shadow-sm"><div className="mb-3 flex justify-end"><button onClick={()=>jump("reels")} className="text-xs font-bold text-teal-700">عرض الكل</button></div>
           <div className="flex gap-3 overflow-x-auto">
-            {reels.slice(0,10).map(r=><button key={r.id} onClick={()=>openShare(r.text)} className="min-w-[145px] overflow-hidden rounded-xl bg-slate-900 text-white text-right">
+            {reels.slice(0,10).map(r=><button key={r.id} onClick={()=>setReelViewer(r)} className="min-w-[145px] overflow-hidden rounded-xl bg-slate-900 text-white text-right">
               <div className="grid aspect-[3/4] place-items-center bg-gradient-to-br from-teal-900 to-slate-950 p-3"><Video className="h-8 w-8 opacity-80"/><span className="text-xs font-bold">{r.text.slice(0,55)}</span></div>
             </button>)}
           </div>
@@ -259,14 +278,16 @@ export default function PageProfileTools({
                 <div className="flex-1"><b className="text-sm">{p.author}</b><div className="text-xs text-slate-400">{new Date(p.createdAt).toLocaleString()}</div></div>
                 {p.demo&&<span className="rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">تجريبي</span>}
               </div>
-              <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-700">{p.text}</p>
+              <div className="mt-3 rounded-xl px-4 py-5 whitespace-pre-wrap leading-8" style={p.style||{}}>{p.text}</div>
               {p.mediaUrl&&p.kind==='image'&&<img src={p.mediaUrl} alt="" className="mt-3 max-h-[560px] w-full rounded-xl object-cover"/>}
               {p.mediaUrl&&(p.kind==='video'||p.kind==='reel')&&<video src={p.mediaUrl} controls className="mt-3 max-h-[560px] w-full rounded-xl bg-black"/>}
               {p.mediaUrl&&p.kind==='audio'&&<audio src={p.mediaUrl} controls className="mt-3 w-full"/>}
               <div className="mt-3 flex items-center border-t pt-2 text-sm text-slate-500">
                 <button onClick={()=>like(p.id)} className="flex-1 rounded-lg py-2 hover:bg-slate-50 hover:text-teal-700"><Heart className="inline h-4 w-4 ml-1"/> {p.likes}</button>
                 <button onClick={()=>setOpenComments(p.id)} className="flex-1 rounded-lg py-2 hover:bg-slate-50" aria-label="التعليقات"><MessageCircle className="inline h-4 w-4 ml-1"/> {p.comments.length}</button>
-                <button onClick={()=>openShare(p.text)} className="flex-1 rounded-lg py-2 hover:bg-slate-50"><Share2 className="inline h-4 w-4 ml-1"/> مشاركة</button>
+                <button onClick={()=>openShare(p.text)} className="flex-1 rounded-lg py-2 hover:bg-slate-50 active:bg-slate-100"><Share2 className="inline h-4 w-4 ml-1"/> مشاركة</button>
+                <button onClick={()=>saveToFavorites(p)} className="rounded-lg px-3 py-2 hover:bg-slate-50 active:bg-slate-100" aria-label="حفظ"><Bookmark className="inline h-4 w-4"/></button>
+                <button onClick={()=>setAlbumPicker(p)} className="rounded-lg px-3 py-2 hover:bg-slate-50 active:bg-slate-100" aria-label="إضافة إلى ألبوم"><Album className="inline h-4 w-4"/></button>
               </div>
             </article>
           </div>)}
@@ -278,7 +299,7 @@ export default function PageProfileTools({
 
     {show('reels') && (<section id="fb-reels-all" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-3 flex items-center justify-between"><h2 className="sr-only">Reels</h2><span className="text-xs text-slate-400">{reels.length} Reel</span></div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">{reels.slice(0,18).map(r=><button key={r.id} onClick={()=>openShare(r.text)} className="overflow-hidden rounded-xl bg-slate-900 text-white text-right"><div className="grid aspect-[3/5] place-items-center bg-gradient-to-br from-teal-900 to-slate-950 p-3"><Video/><span className="text-xs font-bold">{r.text.slice(0,60)}</span></div></button>)}</div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">{reels.slice(0,18).map(r=><button key={r.id} onClick={()=>setReelViewer(r)} className="overflow-hidden rounded-xl bg-slate-900 text-white text-right"><div className="grid aspect-[3/5] place-items-center bg-gradient-to-br from-teal-900 to-slate-950 p-3"><Video/><span className="text-xs font-bold">{r.text.slice(0,60)}</span></div></button>)}</div>
     </section>) }
 
     {show('albums') && (<section id="fb-albums" className="rounded-xl border bg-white p-5 shadow-sm">
@@ -310,7 +331,7 @@ export default function PageProfileTools({
 
     {show('phone') && (<section id="fb-phone" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">الهاتف وQR</h2><p className="text-xs text-slate-500">الرقم خاص بالحساب.</p></div><QrCode className="text-teal-700"/></div>
-      {canManage&&<div className="grid gap-5 md:grid-cols-2"><div><label className="text-sm font-bold">رقم الهاتف</label><input value={phone} onChange={e=>{setPhone(e.target.value);localStorage.setItem('sb1_private_phone',e.target.value)}} className="mt-2 w-full rounded-xl border p-3" placeholder="+49 ..."/><button onClick={()=>setNotice('تم حفظ الرقم بشكل خاص.')} className="mt-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white">حفظ</button></div><div className="grid place-items-center rounded-xl bg-slate-50 p-4"><img src={'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(window.location.origin+'/doctors/'+pageId)} alt="QR" className="h-44 w-44"/><span className="mt-2 text-xs">QR لفتح صفحة SB1</span></div></div>}
+      {canManage&&<div className="grid gap-5 md:grid-cols-2"><div><label className="text-sm font-bold">رقم الهاتف</label><input value={phone} onChange={e=>setPhone(e.target.value)} className="mt-2 w-full rounded-xl border p-3" placeholder="+49 ..."/><div className="mt-2 flex gap-2"><button onClick={()=>{localStorage.setItem('sb1_private_phone',phone);setNotice('تم حفظ رقم الهاتف.')}} className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white active:bg-teal-800">حفظ</button><button onClick={()=>{if(!phone.trim()){setNotice('اكتب رقم الهاتف أولاً.');return}localStorage.setItem('sb1_private_phone',phone);localStorage.setItem('sb1_phone_linked','true');setPhoneLinked(true);setNotice('تم ربط الهاتف بهذا الحساب.')}} className="rounded-lg border px-4 py-2 text-sm font-bold active:bg-slate-200">{phoneLinked?'الهاتف مربوط':'ربط الهاتف'}</button></div><div className="mt-3 rounded-xl bg-slate-50 p-3 text-xs">رمز الربط: <b>{pairCode}</b></div></div><div className="grid place-items-center rounded-xl bg-slate-50 p-4"><img src={'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(window.location.origin+'/doctors/'+pageId+'?pair='+pairCode)} alt="QR" className="h-44 w-44"/><span className="mt-2 text-xs">QR لفتح الصفحة وربط الهاتف</span></div></div>}
     </section>) }
 
     {canManage&&show('clone')&&(<section id="fb-clone" className="rounded-xl border bg-white p-5 shadow-sm">
@@ -353,6 +374,9 @@ export default function PageProfileTools({
     </div>})()}
     {share&&<div className="fixed inset-0 z-[120] grid place-items-center bg-black/60 p-4" onClick={()=>setShare(null)}><div className="w-full max-w-lg rounded-2xl bg-white p-5" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between"><h3 className="text-xl font-extrabold">إرسال</h3><button onClick={()=>setShare(null)}><X/></button></div><button onClick={async()=>{try{await navigator.share?.({title:share.title,url:share.url});}catch{}}} className="mt-4 w-full rounded-xl bg-teal-700 py-3 font-bold text-white"><Share2 className="inline ml-1"/>مشاركة من الجهاز</button><div className="mt-3 grid grid-cols-2 gap-2">{[['telegram','Telegram'],['whatsapp','WhatsApp'],['facebook','Facebook'],['x','X'],['email','البريد'],['sms','الرسائل']].map(([k,l])=><button key={k} onClick={()=>send(k)} className="rounded-xl border p-3 font-bold hover:border-teal-500 hover:text-teal-700">{l}</button>)}</div></div></div>}
 
+    {albumModal&&<div className="fixed inset-0 z-[140] grid place-items-center bg-black/60 p-4" onClick={()=>setAlbumModal(false)}><div className="w-full max-w-md rounded-2xl bg-white p-5" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between"><b className="text-lg">إنشاء ألبوم</b><button onClick={()=>setAlbumModal(false)}><X/></button></div><input autoFocus value={albumName} onChange={e=>setAlbumName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&createAlbum()} className="mt-4 w-full rounded-xl border p-3" placeholder="اسم الألبوم الجديد"/><button onClick={createAlbum} className="mt-3 w-full rounded-xl bg-teal-700 py-3 font-bold text-white active:bg-teal-800">حفظ الألبوم</button></div></div>}
+    {albumPicker&&<div className="fixed inset-0 z-[140] grid place-items-center bg-black/60 p-4" onClick={()=>setAlbumPicker(null)}><div className="w-full max-w-md rounded-2xl bg-white p-5" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between"><b>إضافة إلى ألبوم</b><button onClick={()=>setAlbumPicker(null)}><X/></button></div>{albums.length===0?<p className="py-6 text-center text-sm text-slate-500">أنشئ ألبوماً أولاً.</p>:<div className="mt-4 space-y-2">{albums.map(a=><button key={a.id} onClick={()=>addToAlbum(albumPicker,a.id)} className="flex w-full items-center justify-between rounded-xl border p-3 text-right hover:bg-slate-50 active:bg-slate-100"><b>{a.name}</b><span className="text-xs text-slate-400">{a.items?.length||0}</span></button>)}</div>}<button onClick={()=>{setAlbumPicker(null);setAlbumModal(true)}} className="mt-3 w-full rounded-xl bg-slate-100 py-3 font-bold active:bg-slate-200">+ إنشاء ألبوم جديد</button></div></div>}
+    {reelViewer&&<div className="fixed inset-0 z-[145] grid place-items-center bg-black/85 p-4" onClick={()=>setReelViewer(null)}><div className="relative w-full max-w-xl overflow-hidden rounded-2xl bg-black" onClick={e=>e.stopPropagation()}><button onClick={()=>setReelViewer(null)} className="absolute left-3 top-3 z-10 rounded-full bg-black/60 p-2 text-white"><X/></button>{reelViewer.mediaUrl?<video src={reelViewer.mediaUrl} controls autoPlay className="max-h-[80vh] w-full object-contain"/>:<div className="grid min-h-[65vh] place-items-center p-8 text-center text-2xl font-extrabold text-white">{reelViewer.text}</div>}<div className="flex items-center justify-between bg-slate-950 p-4 text-white"><div><b>{reelViewer.author}</b><p className="mt-1 text-xs text-slate-300">{reelViewer.text}</p></div><button onClick={()=>saveToFavorites(reelViewer)} className="rounded-lg bg-white/10 px-3 py-2 active:bg-white/20"><Bookmark className="inline h-4 w-4 ml-1"/>حفظ</button></div></div></div>}
     {notice&&<div className="fixed bottom-5 left-1/2 z-[130] -translate-x-1/2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-xl">{notice}<button onClick={()=>setNotice('')} className="mr-3"><CheckCircle2 className="inline h-4 w-4"/></button></div>}
   </div>;
 }
