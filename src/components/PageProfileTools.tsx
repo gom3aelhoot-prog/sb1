@@ -269,7 +269,7 @@ export default function PageProfileTools({
     <button key={key} onClick={()=>jump(key)} className={'shrink-0 rounded-lg px-3 py-2 text-sm font-bold transition active:bg-slate-200 '+(active===key?'bg-teal-700 text-white':'text-slate-700 hover:bg-teal-50')}>{Icon&&<Icon className="inline h-4 w-4 ml-1"/>}{label}</button>;
 
   return <div dir="rtl" className="mt-4 space-y-4">
-    {show('home') && (<section id="fb-home" className="grid gap-4 lg:grid-cols-[1fr_280px]">
+    {show('home') && (<section id="fb-home" className="grid min-w-0 grid-cols-1 gap-4 overflow-hidden">
       <div className="space-y-4">
         {!hideStories&&(
           <div className="bg-transparent p-0">
