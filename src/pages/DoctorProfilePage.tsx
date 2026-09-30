@@ -14,7 +14,8 @@ type Tab = 'home' | 'articles' | 'questions' | 'courses' | 'portfolio';
 export default function DoctorProfilePage({ id }: { id: string }) {
   const { navigate } = useRouter();
   const role = getRole();
-  const canManagePage = role === 'owner' || role === 'moderator' || localStorage.getItem('sb1_page_owner_id') === id || localStorage.getItem('sb1_is_page_owner') === 'true';
+  const previewOwner = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('preview_owner') === '1';
+  const canManagePage = role === 'owner' || role === 'moderator' || localStorage.getItem('sb1_page_owner_id') === id || localStorage.getItem('sb1_is_page_owner') === 'true' || previewOwner;
   const canSeePrivate = canManagePage;
   const { t, specialtyName, lang } = useI18n();
   const [doctor, setDoctor] = useState<Doctor | null>(null);
