@@ -55,6 +55,8 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const [coverUrl,setCoverUrl]=useState(()=>localStorage.getItem('sb1_cover_'+id)||'');
   const [coverChooser,setCoverChooser]=useState(false);
   const [showFollowers,setShowFollowers]=useState(false);
+  const [unreadNotifications,setUnreadNotifications]=useState(()=>Number(localStorage.getItem('sb1_unread_notifications')||'0'));
+  const [bellAnimating,setBellAnimating]=useState(false);
   const [followers,setFollowers]=useState(()=>[
     {id:'catalog-doctor-ar-clinical-psychology-2',name:'د. ليان',online:true},
     {id:'catalog-doctor-ar-clinical-psychology-3',name:'د. أحمد',online:true},
@@ -66,6 +68,11 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const profileAvatar = doctor?.photo_url || ('https://api.dicebear.com/9.x/personas/svg?seed=' + encodeURIComponent(id));
   const savedCoverImages=getSaved().filter(x=>x.kind==='image'&&x.url).map(x=>x.url as string);
   const selectMain=(section:MainSection)=>{setMainSection(section);setTimeout(()=>document.getElementById('profile-tabs')?.scrollIntoView({behavior:'smooth',block:'start'}),0)};
+  useEffect(()=>{
+    const onNotification=()=>{setUnreadNotifications(v=>{const next=v+1;localStorage.setItem('sb1_unread_notifications',String(next));return next});setBellAnimating(true);window.setTimeout(()=>setBellAnimating(false),15000)};
+    const onStorage=(e:StorageEvent)=>{if(e.key==='sb1_unread_notifications'){const next=Number(e.newValue||'0');if(next>unreadNotifications){setBellAnimating(true);window.setTimeout(()=>setBellAnimating(false),15000)}setUnreadNotifications(next)}};
+    window.addEventListener('sb1:new-notification',onNotification as EventListener);window.addEventListener('storage',onStorage);return()=>{window.removeEventListener('sb1:new-notification',onNotification as EventListener);window.removeEventListener('storage',onStorage)};
+  },[unreadNotifications]);
   const saveCover=(url:string)=>{setCoverUrl(url);localStorage.setItem('sb1_cover_'+id,url);setCoverChooser(false)};
   const [wallet,setWallet] = useState(()=>{try{return JSON.parse(localStorage.getItem('sb1_specialist_wallet')||'{"balance":1250,"points":340,"due":180}')}catch{return {balance:1250,points:340,due:180}}});
 
@@ -170,16 +177,16 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   ];
 
   return (
-    <div className="min-h-screen pt-20 pb-16">
+    <div className="min-h-screen pt-20 pb-16"><style>{`@keyframes sb1bell{0%,100%{transform:rotate(0)}25%{transform:rotate(10deg)}75%{transform:rotate(-10deg)}}`}</style>
       <div className="max-w-6xl mx-auto px-3 sm:px-5 lg:px-8">
         <button onClick={() => navigate('/doctors')} className="flex items-center gap-2 text-gray-500 hover:text-teal-600 transition-colors mb-4 mt-4">
           <ArrowRight className="w-4 h-4" />
           {t('common.back')}
         </button>
 
-        <div className="mb-2 min-h-[58px] rounded-xl border border-dashed border-slate-200 bg-slate-50/60" aria-label="مساحة إعلانية" />
+        <div className="mb-1 min-h-[42px] rounded-xl border border-dashed border-slate-200 bg-slate-50/60" aria-label="مساحة إعلانية" />
 
-        <aside className="fixed top-24 bottom-6 z-40 hidden w-60 xl:block end-4 2xl:end-8 overflow-y-auto" aria-label="قائمة SB1 الرئيسية">
+        <aside className="fixed top-24 bottom-6 z-40 hidden w-60 xl:block end-4 2xl:end-8 overflow-y-auto border-s border-slate-300 ps-4" aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
             {canSeePrivate&&<button onClick={()=>selectMain('wallet')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm active:bg-slate-900"><Wallet className="h-4 w-4"/>الحساب والمحفظة</button>}
             {canManagePage&&<button onClick={()=>selectMain('clone')} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm active:bg-emerald-200"><Copy className="h-4 w-4"/>الاستنساخ</button>}
@@ -196,9 +203,9 @@ export default function DoctorProfilePage({ id }: { id: string }) {
                 <span className="text-sm font-extrabold">المتابعون</span><span className="text-xs text-slate-400">{doctor.follower_count||followers.length}</span>
               </button>
               <div className="mt-3 flex flex-wrap gap-2">
-                {followers.slice(0,showFollowers?followers.length:5).map(f=><button key={f.id} title={f.name} onClick={()=>navigate('/doctors/'+f.id)} className="relative grid h-9 w-9 place-items-center rounded-full bg-emerald-100 text-xs font-extrabold text-emerald-800 ring-2 ring-white shadow-sm active:bg-emerald-200">{f.name.replace('د. ','').charAt(0)}{f.online&&<span className="absolute -bottom-0.5 -left-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500"/>}</button>)}
+                {followers.slice(0,showFollowers?followers.length:5).map(f=><button key={f.id} title={f.name} onClick={()=>navigate('/doctors/'+f.id)} className="relative h-9 w-9 overflow-hidden rounded-full bg-slate-100 ring-2 ring-white shadow-sm active:opacity-80"><img src={'https://api.dicebear.com/9.x/personas/svg?seed='+encodeURIComponent(f.id)} alt={f.name} className="h-full w-full object-cover"/>{f.online&&<span className="absolute -bottom-0.5 -left-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500"/>}</button>)}
               </div>
-              {showFollowers&&<div className="mt-3 space-y-1 border-t pt-2">{followers.map(f=><button key={f.id} onClick={()=>navigate('/doctors/'+f.id)} className="flex w-full items-center gap-2 rounded-lg p-2 text-right text-xs font-bold hover:bg-slate-50 active:bg-slate-100"><span className="grid h-7 w-7 place-items-center rounded-full bg-emerald-100 text-emerald-800">{f.name.replace('د. ','').charAt(0)}</span>{f.name}</button>)}</div>}
+              {showFollowers&&<div className="mt-3 space-y-1 border-t pt-2">{followers.map(f=><button key={f.id} onClick={()=>navigate('/doctors/'+f.id)} className="flex w-full items-center gap-2 rounded-lg p-2 text-right text-xs font-bold hover:bg-slate-50 active:bg-slate-100"><img src={'https://api.dicebear.com/9.x/personas/svg?seed='+encodeURIComponent(f.id)} alt={f.name} className="h-7 w-7 rounded-full object-cover"/>{f.name}</button>)}</div>}
             </div>
             <div className="mt-3 rounded-xl border bg-white p-3 text-center shadow-sm">
               <p className="mb-2 text-xs font-extrabold text-slate-700">QR الصفحة</p>
@@ -211,9 +218,9 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           <div className="mb-2"><StoryBar pageId={id} canManage={canManagePage} /></div>
         {/* Cover + Profile Header */}
         <div className="card overflow-hidden mb-6">
-          <div className="relative h-32 overflow-hidden bg-gradient-to-l from-teal-500 via-teal-600 to-teal-700">{coverUrl&&<img src={coverUrl} alt="" className="h-full w-full object-cover"/>}{canManagePage&&<div className="absolute bottom-3 left-3 flex gap-2"><label className="cursor-pointer rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white backdrop-blur active:bg-black/70">تغيير الغلاف<input type="file" accept="image/*" className="hidden" onChange={e=>{const f=e.target.files?.[0];if(f){const u=URL.createObjectURL(f);saveCover(u)}}}/></label><button onClick={()=>setCoverChooser(true)} className="rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white backdrop-blur active:bg-black/70">من المفضلة</button></div>}</div>
+          <div className="relative h-28 overflow-hidden bg-gradient-to-l from-teal-500 via-teal-600 to-teal-700">{coverUrl&&<img src={coverUrl} alt="" className="h-full w-full object-cover"/>}{canManagePage&&<div className="absolute bottom-3 left-3 flex gap-2"><label className="cursor-pointer rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white backdrop-blur active:bg-black/70">تغيير الغلاف<input type="file" accept="image/*" className="hidden" onChange={e=>{const f=e.target.files?.[0];if(f){const u=URL.createObjectURL(f);saveCover(u)}}}/></label><button onClick={()=>setCoverChooser(true)} className="rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white backdrop-blur active:bg-black/70">من المفضلة</button></div>}</div>
           <div className="px-6 pb-6">
-            <div className="flex flex-col md:flex-row gap-4 -mt-12">
+            <div className="flex flex-col md:flex-row gap-4 -mt-8">
               <div className="w-28 h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center shrink-0 ring-4 ring-white mx-auto md:mx-0">
                 {!imgError ? (
                   <img src={profileAvatar} alt={doctor.name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
@@ -238,9 +245,9 @@ export default function DoctorProfilePage({ id }: { id: string }) {
                 <button onClick={handleFollow} className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all ${isFollowing ? 'bg-gray-100 text-gray-600' : 'bg-teal-600 text-white hover:bg-teal-700'}`}>
                   {isFollowing ? t('profile.following') : t('profile.follow')}
                 </button>
-                <button onClick={shareProfile} className="px-6 py-2.5 rounded-xl border border-teal-200 text-teal-700 bg-teal-50 font-semibold text-sm flex items-center justify-center gap-2">
+                <div className="flex items-center justify-center gap-2"><button onClick={shareProfile} className="px-6 py-2.5 rounded-xl border border-teal-200 text-teal-700 bg-teal-50 font-semibold text-sm flex items-center justify-center gap-2">
                   <Share2 className="w-4 h-4" /> مشاركة صفحة SB1
-                </button>
+                </button><button onClick={()=>setUnreadNotifications(0)} aria-label="الإشعارات" className={`relative grid h-11 w-11 place-items-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-600 transition ${unreadNotifications>0?'text-red-600 border-red-200 bg-red-50':''} ${bellAnimating?'animate-[sb1bell_.5s_ease-in-out_infinite]':''}`}><Bell className="h-5 w-5"/>{unreadNotifications>0&&<span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-extrabold text-white">{unreadNotifications}</span>}</button></div>
               </div>
             </div>
             {doctor.bio && <p className="text-sm text-gray-600 mt-4 leading-relaxed">{doctor.bio}</p>}
@@ -250,7 +257,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         <div id="profile-tabs" className="mb-5 overflow-x-auto rounded-xl border bg-white shadow-sm">
           <div className="flex min-w-max items-center" dir={lang==='ar'?'rtl':'ltr'}>
             {tabs.map((tab,i)=>{const Icon=tab.icon;return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key)}} className={`flex items-center gap-2 border-e px-4 py-3 text-sm font-bold transition ${activeTab===tab.key?'bg-teal-50 text-teal-700':'text-slate-600 hover:bg-slate-50 hover:text-teal-700'}`}><Icon className="h-4 w-4"/>{tab.label}</button>})}
-            <button onClick={()=>navigate('/notifications/private')} className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-teal-700"><Bell className="h-4 w-4"/>إشعارات</button>
+            
           </div>
         </div>
         {mainSection === 'wallet' && canSeePrivate && (
