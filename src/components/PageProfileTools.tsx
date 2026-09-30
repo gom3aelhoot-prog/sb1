@@ -3,7 +3,7 @@ import {
   Album, AudioLines, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Copy,
   ExternalLink, FileVideo, Gift, Globe2, Heart, Image as ImageIcon, Library,
   MessageCircle, Mic, Pause, Phone, Play, Plus, QrCode, Search, Send, Settings,
-  Share2, Smartphone, Sparkles, Story, Upload, Video, X, Youtube, Wand2
+  Share2, Smartphone, Sparkles, BookOpen, Upload, Video, X, Youtube, Wand2
 } from 'lucide-react';
 
 type MediaKind = 'post' | 'image' | 'video' | 'reel' | 'audio';
@@ -271,7 +271,7 @@ export default function PageProfileTools({
     </section>
 
     <section id="sb1-story-create" className="card p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="text-lg font-extrabold">إنشاء قصتي</h3><p className="text-sm text-gray-500">نص أو صورة أو فيديو. القصة خاصة بحسابك ويمكن حذفها لاحقاً.</p></div><Story className="h-6 w-6 text-teal-700"/></div>
+      <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="text-lg font-extrabold">إنشاء قصتي</h3><p className="text-sm text-gray-500">نص أو صورة أو فيديو. القصة خاصة بحسابك ويمكن حذفها لاحقاً.</p></div><BookOpen className="h-6 w-6 text-teal-700"/></div>
       <textarea value={storyText} onChange={e=>setStoryText(e.target.value)} className="mt-3 min-h-20 w-full rounded-xl border p-3" placeholder="اكتب قصتك..."/>
       <div className="mt-3 flex flex-wrap gap-2">
         <label className="cursor-pointer rounded-xl bg-slate-50 px-4 py-2 text-sm font-bold"><Upload className="inline h-4 w-4 ml-1"/>إضافة صورة/فيديو<input type="file" accept="image/*,video/*" className="hidden" onChange={e=>setStoryFile(e.target.files?.[0]||null)}/></label>
