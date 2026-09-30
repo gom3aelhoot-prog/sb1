@@ -40,7 +40,8 @@ export default function PageProfileTools({
   canManage?:boolean;
   pageId?:string;
   pageName?:string;
-  seedPosts?:Array<{id:string;body:string;image_url?:string|null;video_url?:string|null;post_type?:string;created_at:string;likes_count?:number}>;\n  hideStories?:boolean;
+  seedPosts?:Array<{id:string;body:string;image_url?:string|null;video_url?:string|null;post_type?:string;created_at:string;likes_count?:number}>;
+  hideStories?:boolean;
   focusSection?:'home'|'reels'|'albums'|'medical'|'social'|'phone'|'clone'|'settings';
 }) {
   const show=(section:string)=>focusSection===section;
