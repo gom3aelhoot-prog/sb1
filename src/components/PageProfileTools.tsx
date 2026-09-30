@@ -35,7 +35,7 @@ const demoStoryTexts = ['معلومة طبية جديدة اليوم','جلسة 
 
 export default function PageProfileTools({
   canManage=false, pageId='current', pageName='SB1',
-  seedPosts=[], focusSection='home'
+  seedPosts=[], hideStories=false, focusSection='home'
 }:{
   canManage?:boolean;
   pageId?:string;
