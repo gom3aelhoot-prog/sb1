@@ -233,7 +233,14 @@ export default function PageProfileTools({
           </div>
         </div>}
 
-        {/* Reels strip is part of Home, not a separate bottom page */}
+        {/* Home order requested: posts heading -> horizontal Reels -> posts feed */}
+        <div className="rounded-xl border bg-white p-4 shadow-sm">
+          <h2 className="text-xl font-extrabold">المنشورات</h2>
+          <p className="mt-1 text-xs text-slate-500">المنشورات والتحديثات الأخيرة للأخصائي.</p>
+        </div>
+
+        {/* Reels strip is part of Home, directly below the posts heading */}
+
         <div id="fb-reels" className="rounded-xl border bg-white p-4 shadow-sm"><div className="mb-3 flex justify-end"><button onClick={()=>jump("reels")} className="text-xs font-bold text-teal-700">عرض الكل</button></div>
           <div className="flex gap-3 overflow-x-auto">
             {reels.slice(0,10).map(r=><button key={r.id} onClick={()=>openShare(r.text)} className="min-w-[145px] overflow-hidden rounded-xl bg-slate-900 text-white text-right">
