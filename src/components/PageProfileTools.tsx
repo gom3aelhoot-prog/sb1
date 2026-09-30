@@ -83,7 +83,9 @@ export default function PageProfileTools({
   const [socialSearch,setSocialSearch]=useState('');
   const [socialUrl,setSocialUrl]=useState('');
   const [socialOpen,setSocialOpen]=useState<string[]>([]);
+  const [socialEmbedded,setSocialEmbedded]=useState<string|null>(null);
   const [favorites,setFavorites]=useState<string[]>(()=>read('sb1_fb_social_favorites',[]));
+  const [clonePermissions,setClonePermissions]=useState<string[]>([]);
   const [cloneType,setCloneType]=useState('specialist');
   const [cloneCount,setCloneCount]=useState(1);
   const [cloneName,setCloneName]=useState('');
@@ -169,10 +171,21 @@ export default function PageProfileTools({
     openSocial(url);
   };
 
+  const permissionGroups=[
+    {title:'الحساب والهوية',items:[['profile_view','عرض الملف الشخصي'],['profile_edit','تعديل بيانات الصفحة'],['profile_media','إدارة صورة وغلاف الصفحة'],['profile_settings','إعدادات الصفحة'],['verification','التحقق والوثائق والعقود']]},
+    {title:'المحتوى والنشر',items:[['posts_view','عرض المنشورات'],['posts_create','إنشاء المنشورات'],['posts_edit','تعديل المنشورات'],['posts_delete','حذف المنشورات'],['stories_create','إنشاء القصص'],['stories_delete','حذف القصص'],['reels_create','إنشاء Reels'],['reels_manage','إدارة Reels'],['albums_manage','إدارة الألبومات'],['media_upload','رفع الصور والفيديو والصوت والتسجيلات']]},
+    {title:'التفاعل والمجتمع',items:[['likes_manage','الإعجابات والتفاعلات'],['comments_manage','التعليقات والردود'],['followers_manage','المتابعون والمتابَعون'],['messages_manage','الرسائل'],['notifications_manage','الإشعارات'],['reports_manage','الشكاوى والبلاغات']]},
+    {title:'المحتوى الطبي والعلمي',items:[['articles_view','عرض المقالات'],['articles_manage','إنشاء وتعديل المقالات'],['questions_view','عرض الأسئلة والإجابات'],['questions_answer','الإجابة عن الأسئلة'],['sessions_manage','الجلسات والاستشارات'],['courses_manage','الدورات والكورسات'],['books_manage','الكتب والمكتبة'],['medical_videos_manage','المحتوى الطبي والفيديوهات'],['audio_manage','الصوتيات والتسجيلات'],['dictionary_manage','القاموس والمصطلحات']]},
+    {title:'الخدمات والمنصة',items:[['services_manage','الخدمات'],['facilities_manage','المؤسسات والمرافق'],['pharmacy_manage','الصيدلية والمنتجات'],['delivery_manage','التوصيل والتتبع'],['marketplace_manage','السوق الطبي'],['pricing_manage','الأسعار والباقات'],['payments_manage','المدفوعات'],['gifts_manage','الهدايا'],['vip_manage','VIP']]},
+    {title:'الاجتماعي والخارجي',items:[['social_platforms','منصات التواصل الخارجية'],['external_favorites','المفضلة الخارجية الخاصة'],['sharing','المشاركة والنشر الخارجي'],['phone_qr','الهاتف وQR']]},
+    {title:'الإدارة والتقارير',items:[['dashboard_view','لوحة التحكم'],['analytics_view','الإحصائيات والتقارير'],['admin_users','إدارة المستخدمين'],['admin_content','إدارة المحتوى'],['admin_permissions','إدارة الصلاحيات'],['admin_penalties','العقوبات والتنبيهات'],['backups','النسخ الاحتياطي'],['audit_log','سجل العمليات']]},
+  ];
+  const allPermissionKeys=permissionGroups.flatMap(g=>g.items.map(x=>x[0]));
   const makeClones=()=>{
     const count=Math.min(50,Math.max(1,Number(cloneCount)||1));
-    const next=Array.from({length:count},(_,i)=>({id:id(),type:cloneType,name:(cloneName.trim()||'صفحة '+cloneType)+(count>1?' '+(i+1):''),pin:String(1000+Math.floor(Math.random()*9000)),password:Math.random().toString(36).slice(2,10),link:window.location.origin+'/clone/'+id(),expires:cloneExpiry,permissions:['free_articles','free_services','video_monitoring'],createdAt:new Date().toISOString()}));
-    setClones(v=>[...next,...v]);setNotice('تم إنشاء الصفحات المستنسخة.');
+    const permissions=clonePermissions.length?clonePermissions:allPermissionKeys;
+    const next=Array.from({length:count},(_,i)=>({id:id(),type:cloneType,name:(cloneName.trim()||'صفحة '+cloneType)+(count>1?' '+(i+1):''),pin:String(1000+Math.floor(Math.random()*9000)),password:Math.random().toString(36).slice(2,10),link:window.location.origin+'/clone/'+id(),expires:cloneExpiry,permissions,createdAt:new Date().toISOString()}));
+    setClones(v=>[...next,...v]);setNotice('تم إنشاء الصفحات المستنسخة بالصلاحيات المحددة.');
   };
 
   const sectionButton=(key:string,label:string,Icon:any)=>
@@ -307,9 +320,19 @@ export default function PageProfileTools({
 
     <section id="fb-social" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">منصات التواصل</h2><p className="text-xs text-slate-500">تفتح كل منصة في نافذة مستقلة مع إمكانية فتح أكثر من نافذة.</p></div><ExternalLink className="text-teal-700"/></div>
-      {canManage&&<div className="flex gap-2"><input value={socialSearch} onChange={e=>setSocialSearch(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchSocial()} className="flex-1 rounded-xl border p-3" placeholder="ابحث في YouTube / VK / OK / Rutube..."/><button onClick={searchSocial} className="rounded-xl bg-teal-700 px-4 text-white"><Search/></button></div>}
-      <div className="mt-3 flex flex-wrap gap-2">{['YouTube','VK','OK','Rutube','Mail.ru'].map(n=><button key={n} onClick={()=>openSocial('https://www.google.com/search?q='+encodeURIComponent(n+' medical'))} className="rounded-lg border px-3 py-2 text-sm font-bold">{n}</button>)}</div>
-      {socialOpen.length>0&&<div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs"><b>النوافذ المفتوحة</b>{socialOpen.slice(0,6).map(u=><div key={u} className="mt-1 truncate">{u}</div>)}</div>}
+      {canManage&&<div className="grid gap-2 md:grid-cols-[1fr_auto]">
+        <input value={socialSearch} onChange={e=>setSocialSearch(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchSocial()} className="rounded-xl border p-3" placeholder="ابحث داخل المنصة المطلوبة..."/>
+        <button onClick={searchSocial} className="rounded-xl bg-teal-700 px-4 text-white"><Search/></button>
+      </div>}
+      <div className="mt-3 flex flex-wrap gap-2">{[
+        ['YouTube','https://www.youtube.com'],['VK','https://vk.com'],['OK','https://ok.ru'],['Rutube','https://rutube.ru'],['Mail.ru','https://mail.ru']
+      ].map(([n,u])=><button key={n} onClick={()=>openSocial(u)} className={'rounded-lg border px-3 py-2 text-sm font-bold '+(socialEmbedded===u?'border-teal-600 bg-teal-50 text-teal-700':'')}>{n}</button>)}</div>
+      {socialOpen.length>0&&<div className="mt-4 flex gap-2 overflow-x-auto">{socialOpen.slice(0,8).map(u=><button key={u} onClick={()=>setSocialEmbedded(u)} className={'max-w-[220px] truncate rounded-lg border px-3 py-2 text-xs '+(socialEmbedded===u?'border-teal-600 bg-teal-50':'')}>{u}</button>)}</div>}
+      {socialEmbedded&&<div className="mt-4 overflow-hidden rounded-2xl border bg-slate-100">
+        <div className="flex items-center justify-between border-b bg-white px-3 py-2"><b>منصة داخل SB1</b><button onClick={()=>setSocialEmbedded(null)}><X/></button></div>
+        <iframe title="social-platform" src={socialEmbedded} className="h-[720px] w-full border-0 bg-white" referrerPolicy="strict-origin-when-cross-origin"/>
+        <div className="border-t bg-amber-50 p-2 text-xs text-amber-800">بعض المنصات تمنع التضمين داخل المواقع من طرفها؛ في هذه الحالة قد تظهر صفحة منع التضمين داخل هذه النافذة بدلاً من فتح متصفح خارجي.</div>
+      </div>}
     </section>
 
     <section id="fb-phone" className="rounded-xl border bg-white p-5 shadow-sm">
@@ -319,8 +342,11 @@ export default function PageProfileTools({
 
     {canManage&&<section id="fb-clone" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">Clone / Gift</h2><p className="text-xs text-slate-500">ينسخ نوع الحساب والعدد فقط، ثم يمكن تغيير الاسم والصلاحيات.</p></div><Wand2 className="text-teal-700"/></div>
-      <div className="grid gap-3 md:grid-cols-4"><select value={cloneType} onChange={e=>setCloneType(e.target.value)} className="rounded-xl border p-3"><option value="specialist">أخصائي</option><option value="institution">مؤسسة</option><option value="delivery_worker">عامل توصيل</option><option value="service">خدمة</option></select><input type="number" min={1} max={50} value={cloneCount} onChange={e=>setCloneCount(Number(e.target.value))} className="rounded-xl border p-3"/><input value={cloneName} onChange={e=>setCloneName(e.target.value)} className="rounded-xl border p-3" placeholder="اسم الصفحة"/><input type="date" value={cloneExpiry} onChange={e=>setCloneExpiry(e.target.value)} className="rounded-xl border p-3"/></div>
-      <button onClick={makeClones} className="mt-3 rounded-xl bg-teal-700 px-5 py-2 font-bold text-white">إنشاء</button>
+      <div className="grid gap-3 md:grid-cols-4"><select value={cloneType} onChange={e=>setCloneType(e.target.value)} className="rounded-xl border p-3"><option value="specialist">أخصائي</option><option value="institution">مؤسسة</option><option value="delivery_worker">عامل توصيل</option><option value="service">خدمة</option><option value="pharmacy">صيدلية</option><option value="facility">مرفق طبي</option><option value="content_creator">صانع محتوى</option><option value="admin">إداري</option></select><input type="number" min={1} max={50} value={cloneCount} onChange={e=>setCloneCount(Number(e.target.value))} className="rounded-xl border p-3"/><input value={cloneName} onChange={e=>setCloneName(e.target.value)} className="rounded-xl border p-3" placeholder="اسم الصفحة"/><input type="date" value={cloneExpiry} onChange={e=>setCloneExpiry(e.target.value)} className="rounded-xl border p-3"/></div>
+      <div className="mt-4 rounded-xl border bg-slate-50 p-4"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><b>صلاحيات الصفحة المستنسخة — كل وظائف SB1</b><div className="flex gap-2"><button onClick={()=>setClonePermissions(allPermissionKeys)} className="rounded-lg bg-teal-700 px-3 py-1 text-xs font-bold text-white">تفعيل الكل</button><button onClick={()=>setClonePermissions([])} className="rounded-lg bg-white px-3 py-1 text-xs font-bold">إلغاء الكل</button></div></div>
+        <div className="grid gap-3 md:grid-cols-2">{permissionGroups.map(group=><div key={group.title} className="rounded-xl bg-white p-3"><b className="text-sm">{group.title}</b><div className="mt-2 space-y-2">{group.items.map(([key,label])=><label key={key} className="flex items-center gap-2 text-xs"><input type="checkbox" checked={clonePermissions.includes(key)} onChange={e=>setClonePermissions(v=>e.target.checked?[...v,key]:v.filter(x=>x!==key))} className="h-4 w-4"/>{label}</label>)}</div></div>)}</div>
+      </div>
+      <button onClick={makeClones} className="mt-3 rounded-xl bg-teal-700 px-5 py-2 font-bold text-white">إنشاء الصفحة بالصلاحيات المحددة</button>
       {clones.slice(0,8).map(c=><div key={c.id} className="mt-3 rounded-xl border p-3"><div className="flex justify-between"><b>{c.name}</b><span className="text-xs">{c.type}</span></div><div className="mt-2 text-xs">PIN: {c.pin} • كلمة المرور: {c.password} • {c.expires||'بدون انتهاء'}</div><button onClick={()=>setShare({title:c.name+' | PIN '+c.pin, url:c.link})} className="mt-2 rounded-lg bg-teal-700 px-3 py-2 text-xs font-bold text-white"><Gift className="inline h-4 w-4 ml-1"/> إرسال</button></div>)}
     </section>}
 
