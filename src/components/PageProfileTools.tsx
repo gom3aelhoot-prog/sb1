@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { toggleSaved } from '@/lib/socialVault';
 import {
   Album, AudioLines, BookOpen, CheckCircle2, ExternalLink, FileVideo, Gift, Heart,
   Image as ImageIcon, Library, MessageCircle, Mic, Plus, QrCode, Search, Send,
