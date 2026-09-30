@@ -121,8 +121,8 @@ export default function PageProfileTools({
   useEffect(()=>write('sb1_fb_social_favorites',favorites),[favorites]);
   useEffect(()=>write('sb1_fb_albums_'+pageId,albums),[albums,pageId]);
   useEffect(()=>write('sb1_fb_clones',clones),[clones]);
-  useEffect(()=>{if(postFile){const u=URL.createObjectURL(postFile);setPostUrl(u);return()=>URL.revokeObjectURL(u)}setPostUrl('')},[postFile]);
-  useEffect(()=>{if(storyFile){const u=URL.createObjectURL(storyFile);setStoryUrl(u);return()=>URL.revokeObjectURL(u)}setStoryUrl('')},[storyFile]);
+  useEffect(()=>{if(postFile){const u=URL.createObjectURL(postFile);setPostUrl(u)}else setPostUrl('')},[postFile]);
+  useEffect(()=>{if(storyFile){const u=URL.createObjectURL(storyFile);setStoryUrl(u)}else setStoryUrl('')},[storyFile]);
   useEffect(()=>()=>stream.current?.getTracks().forEach(t=>t.stop()),[]);
 
   const publicFeed=feed.filter(p=>p.public);
@@ -218,7 +218,7 @@ export default function PageProfileTools({
   return <div dir="rtl" className="mt-4 space-y-4">
     {show('home') && (<section id="fb-home" className="grid gap-4 lg:grid-cols-[1fr_280px]">
       <div className="space-y-4">
-        {discountOpen&&<div className="rounded-xl border border-amber-200 bg-amber-50 p-3 shadow-sm"><div className="flex items-center gap-3"><div className="flex-1"><b className="text-sm">خصم 10% على الباقة الحالية</b><p className="text-xs text-amber-800">العرض ظاهر للتجربة ويمكن إغلاقه من زر ×.</p></div><button onClick={()=>{setDiscountOpen(false);write('sb1_discount_10_open',false)}} className="rounded-full p-1 text-slate-500 hover:bg-white active:bg-slate-200" aria-label="إغلاق">×</button></div></div>}
+        {discountOpen&&<div className="relative overflow-hidden rounded-xl border bg-[#0879c9] shadow-sm"><img src="/jamal-james.jpg" alt="د. جمال نادي" className="h-28 w-full object-cover object-center"/><div className="absolute inset-0 bg-gradient-to-l from-[#0879c9]/90 via-[#0879c9]/35 to-transparent"/><div className="absolute inset-y-0 right-0 flex items-center gap-3 p-4 text-white"><div><b className="block text-lg font-extrabold">خصم 10%</b><span className="text-xs font-bold">على الباقة الحالية</span></div></div><button onClick={()=>{setDiscountOpen(false);write('sb1_discount_10_open',false)}} className="absolute left-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/45 text-xl font-bold text-white hover:bg-black/60 active:bg-black/70" aria-label="إغلاق">×</button></div>
         {!hideStories&&(
           <div className="rounded-xl border bg-white p-3 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
@@ -263,8 +263,8 @@ export default function PageProfileTools({
 
         <div id="fb-reels" className="rounded-xl border bg-white p-4 shadow-sm"><div className="mb-3 flex justify-end"><button onClick={()=>jump("reels")} className="text-xs font-bold text-teal-700">عرض الكل</button></div>
           <div className="flex gap-3 overflow-x-auto">
-            {reels.slice(0,10).map(r=><button key={r.id} onClick={()=>setReelViewer(r)} className="min-w-[145px] overflow-hidden rounded-xl bg-slate-900 text-white text-right">
-              <div className="grid aspect-[3/4] place-items-center bg-gradient-to-br from-teal-900 to-slate-950 p-3"><Video className="h-8 w-8 opacity-80"/><span className="text-xs font-bold">{r.text.slice(0,55)}</span></div>
+            {reels.slice(0,10).map(r=><button key={r.id} onClick={()=>setReelViewer(r)} className="min-w-[118px] overflow-hidden rounded-xl bg-slate-900 text-white text-right">
+              <div className="grid aspect-[3/4] max-h-40 place-items-center bg-gradient-to-br from-teal-900 to-slate-950 p-2"><Video className="h-8 w-8 opacity-80"/><span className="text-xs font-bold">{r.text.slice(0,55)}</span></div>
             </button>)}
           </div>
         </div>
@@ -273,15 +273,15 @@ export default function PageProfileTools({
         <div id="fb-posts" className="space-y-4">
           <div className="flex items-center justify-between px-1"><h2 className="text-xl font-extrabold">المنشورات</h2><span className="text-xs text-slate-400">{publicFeed.length}</span></div>
           {publicFeed.map((p,i)=><div key={p.id}>
-            <article className="rounded-xl border bg-white p-4 shadow-sm">
+            <article className="mx-auto max-w-3xl rounded-xl border bg-white p-3 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="grid h-10 w-10 place-items-center rounded-full bg-teal-100 font-extrabold text-teal-700">{p.author.charAt(0)}</div>
                 <div className="flex-1"><b className="text-sm">{p.author}</b><div className="text-xs text-slate-400">{new Date(p.createdAt).toLocaleString()}</div></div>
                 {p.demo&&<span className="rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">تجريبي</span>}
               </div>
-              <div className="mt-3 rounded-xl px-4 py-5 whitespace-pre-wrap leading-8" style={p.style||{}}>{p.text}</div>
-              {p.mediaUrl&&p.kind==='image'&&<img src={p.mediaUrl} alt="" className="mt-3 max-h-[560px] w-full rounded-xl object-cover"/>}
-              {p.mediaUrl&&(p.kind==='video'||p.kind==='reel')&&<video src={p.mediaUrl} controls className="mt-3 max-h-[560px] w-full rounded-xl bg-black"/>}
+              <div className="mt-3 rounded-xl px-3 py-4 whitespace-pre-wrap leading-7 text-sm" style={p.style||{}}>{p.text}</div>
+              {p.mediaUrl&&p.kind==='image'&&<img src={p.mediaUrl} alt="" className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl object-contain"/>}
+              {p.mediaUrl&&(p.kind==='video'||p.kind==='reel')&&<video src={p.mediaUrl} controls className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl bg-black object-contain"/>}
               {p.mediaUrl&&p.kind==='audio'&&<audio src={p.mediaUrl} controls className="mt-3 w-full"/>}
               <div className="mt-3 flex items-center border-t pt-2 text-sm text-slate-500">
                 <button onClick={()=>like(p.id)} className="flex-1 rounded-lg py-2 hover:bg-slate-50 hover:text-teal-700"><Heart className="inline h-4 w-4 ml-1"/> {p.likes}</button>
