@@ -309,9 +309,7 @@ export default function PageProfileTools({
         </div>}
 
         {/* Home order requested: posts heading -> horizontal Reels -> posts feed */}
-        <div className="px-1"><span className="text-sm font-extrabold text-slate-700">منشورات</span></div>
-
-        {/* Reels strip is part of Home, directly below the posts heading */}
+        {/* Reels strip appears directly after the composer */}
 
         <div id="fb-reels" className="rounded-xl border bg-white p-4 shadow-sm"><div className="mb-3 flex justify-end"><button onClick={()=>jump("reels")} className="text-xs font-bold text-teal-700">عرض الكل</button></div>
           <div className="flex gap-3 overflow-x-auto">
@@ -327,7 +325,6 @@ export default function PageProfileTools({
 
         {/* Feed */}
         <div id="fb-posts" className="space-y-4">
-          <div className="flex items-center justify-between px-1"><h2 className="text-xl font-extrabold">المنشورات</h2><span className="text-xs text-slate-400">{publicFeed.length}</span></div>
           {publicFeed.map((p,i)=><div key={p.id}>
             <article className="mx-auto max-w-3xl rounded-xl border bg-white p-3 shadow-sm">
               <div className="flex items-center gap-3">
