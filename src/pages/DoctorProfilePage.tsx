@@ -204,7 +204,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               <p className="mb-2 text-xs font-extrabold text-slate-700">QR الصفحة</p>
               <img src={'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent(window.location.origin+'/doctors/'+id)} alt="QR" className="mx-auto h-36 w-36 rounded-lg"/>
               <p className="mt-2 text-[10px] text-slate-400">ظاهر دائماً تحت المتابعين</p>
-            </div>}
+            </div>
           </div>
         </aside>
         <div className="xl:me-[17rem] min-w-0">
