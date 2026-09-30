@@ -6,11 +6,11 @@ import {
   Settings, Share2, Trash2, Upload, Video, X, Wand2, Bookmark
 } from 'lucide-react';
 
-type MediaKind = 'post' | 'image' | 'video' | 'reel' | 'audio';
+type MediaKind = 'post' | 'image' | 'video' | 'reel' | 'audio' | 'article';
 type StoryItem = { id:string; name:string; text:string; mediaUrl?:string; mediaKind?:'image'|'video'; createdAt:string; expiresAt:string; own?:boolean };
 type FeedItem = {
   id:string; kind:MediaKind; text:string; mediaUrl?:string; mediaName?:string;
-  createdAt:string; likes:number; comments:{id:string;name:string;body:string}[];
+  createdAt:string; likes:number; views?:number; comments:{id:string;name:string;body:string}[];
   public:boolean; demo?:boolean; author:string;
   style?:{background:string;color:string;fontSize:string;fontWeight:string};
 };
@@ -34,6 +34,21 @@ const demoTexts = [
 
 const demoNames = ['د. ليان','د. أحمد','مركز الحياة','سارة','محمد','عيادة الأسرة'];
 const demoStoryTexts = ['معلومة طبية جديدة اليوم','جلسة تعليمية قصيرة','سؤال وجواب مع المتابعين','فيديو جديد في المحتوى الطبي','تسجيل صوتي جديد','موعد جلسة تعليمية هذا الأسبوع'];
+const demoPeopleImages = [
+  'https://randomuser.me/api/portraits/women/44.jpg',
+  'https://randomuser.me/api/portraits/men/32.jpg',
+  'https://randomuser.me/api/portraits/women/68.jpg',
+  'https://randomuser.me/api/portraits/men/75.jpg',
+  'https://randomuser.me/api/portraits/women/65.jpg',
+  'https://randomuser.me/api/portraits/men/52.jpg'
+];
+const demoPostImages = [
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=900&q=80'
+];
+const demoVideoUrl='https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
 
 export default function PageProfileTools({
   canManage=false, pageId='current', pageName='SB1',
@@ -49,19 +64,27 @@ export default function PageProfileTools({
   const show=(section:string)=>focusSection===section;
   const initial = useMemo<FeedItem[]>(() => {
     const saved = read<FeedItem[]>('sb1_fb_posts_'+pageId, []);
-    if (saved.length) return saved;
+    if (saved.length) return saved.map((p,i)=>p.demo && !p.mediaUrl ? {
+      ...p,
+      mediaUrl:p.kind==='image'?demoPostImages[i%demoPostImages.length]:(p.kind==='video'||p.kind==='reel'?demoVideoUrl:undefined),
+      views:p.views||120+i*31
+    } : p);
     const seeded = seedPosts.map(p=>({
       id:p.id, kind:(p.video_url ? (p.post_type==='reel'?'reel':'video') : p.image_url ? 'image':'post') as MediaKind,
       text:p.body, mediaUrl:p.video_url||p.image_url||undefined, createdAt:p.created_at,
-      likes:p.likes_count||0, comments:[], public:true, demo:false, author:pageName
+      likes:p.likes_count||0, views:120, comments:[], public:true, demo:false, author:pageName
     }));
-    const demo = Array.from({length:60},(_,i)=>({
-      id:'demo-'+i, kind:(i%4===0?'reel':i%5===0?'video':i%3===0?'image':'post') as MediaKind,
-      text:demoTexts[i%demoTexts.length], createdAt:new Date(Date.now()-i*3600000).toISOString(),
-      likes:12+(i*7)%120,
-      comments:[{id:'c'+i+'a',name:'مستخدم تجريبي',body:'معلومة مفيدة، شكراً.'}],
-      public:true,demo:true,author:pageName
-    }));
+    const demo = Array.from({length:24},(_,i)=>{
+      const kind=(i%4===0?'reel':i%5===0?'video':i%3===0?'image':'post') as MediaKind;
+      return {
+        id:'demo-'+i, kind,
+        text:demoTexts[i%demoTexts.length], createdAt:new Date(Date.now()-i*3600000).toISOString(),
+        mediaUrl:kind==='image'?demoPostImages[i%demoPostImages.length]:(kind==='video'||kind==='reel'?demoVideoUrl:undefined),
+        likes:12+(i*7)%120, views:180+i*27,
+        comments:[{id:'c'+i+'a',name:'مستخدم SB1',body:'معلومة مفيدة، شكراً.'}],
+        public:true,demo:true,author:pageName
+      };
+    });
     return [...seeded,...demo];
   },[pageId,pageName,seedPosts.length]);
 
@@ -80,6 +103,9 @@ export default function PageProfileTools({
   const [postFile,setPostFile]=useState<File|null>(null);
   const [postUrl,setPostUrl]=useState('');
   const [comments,setComments]=useState<Record<string,string>>({});
+  const [likedIds,setLikedIds]=useState<string[]>(()=>read('sb1_fb_liked_'+pageId,[]));
+  const [viewedIds,setViewedIds]=useState<string[]>([]);
+  const hoverTimers=useRef<Record<string,number>>({});
   const [openComments,setOpenComments]=useState<string|null>(null);
   const [notice,setNotice]=useState('');
   const [active,setActive]=useState('home');
@@ -117,6 +143,8 @@ export default function PageProfileTools({
   const chunks=useRef<Blob[]>([]);
 
   useEffect(()=>write('sb1_fb_posts_'+pageId,feed),[feed,pageId]);
+  useEffect(()=>write('sb1_fb_liked_'+pageId,likedIds),[likedIds,pageId]);
+  useEffect(()=>()=>Object.values(hoverTimers.current).forEach(t=>window.clearTimeout(t)),[]);
   useEffect(()=>write('sb1_fb_stories_'+pageId,stories),[stories,pageId]);
   useEffect(()=>write('sb1_fb_social_favorites',favorites),[favorites]);
   useEffect(()=>write('sb1_fb_albums_'+pageId,albums),[albums,pageId]);
@@ -129,7 +157,13 @@ export default function PageProfileTools({
   const reels=publicFeed.filter(p=>p.kind==='reel');
   const activeStories=useMemo(()=>[
     ...stories.filter(s=>new Date(s.expiresAt)>new Date()),
-    ...demoNames.map((name,i)=>({id:'demo-story-'+i,name,text:demoStoryTexts[i],createdAt:new Date(Date.now()-i*3600000).toISOString(),expiresAt:new Date(Date.now()+86400000).toISOString()}))
+    ...demoNames.map((name,i)=>({
+      id:'demo-story-'+i,name,text:demoStoryTexts[i],
+      mediaUrl:i%3===0?demoVideoUrl:demoPeopleImages[i%demoPeopleImages.length],
+      mediaKind:i%3===0?'video':'image',
+      createdAt:new Date(Date.now()-i*3600000).toISOString(),
+      expiresAt:new Date(Date.now()+86400000).toISOString()
+    }))
   ],[stories]);
 
   const jump=(target:string)=>{setActive(target);document.getElementById('fb-'+target)?.scrollIntoView({behavior:'smooth',block:'start'})};
@@ -162,14 +196,31 @@ export default function PageProfileTools({
   };
   const stopRecord=()=>{recorder.current?.stop();setRecording(false)};
 
-  const like=(postId:string)=>setFeed(v=>v.map(p=>p.id===postId?{...p,likes:p.likes+1}:p));
+  const like=(postId:string)=>{
+    if(likedIds.includes(postId)) return;
+    setLikedIds(v=>[...v,postId]);
+    setFeed(v=>v.map(p=>p.id===postId?{...p,likes:p.likes+1}:p));
+  };
+  const startHoverView=(itemId:string,video?:HTMLVideoElement|null)=>{
+    if(video) video.play().catch(()=>{});
+    if(viewedIds.includes(itemId)||hoverTimers.current[itemId]) return;
+    hoverTimers.current[itemId]=window.setTimeout(()=>{
+      setViewedIds(v=>v.includes(itemId)?v:[...v,itemId]);
+      setFeed(v=>v.map(p=>p.id===itemId?{...p,views:(p.views||0)+1}:p));
+      delete hoverTimers.current[itemId];
+    },1000);
+  };
+  const stopHoverView=(itemId:string,video?:HTMLVideoElement|null)=>{
+    if(hoverTimers.current[itemId]){window.clearTimeout(hoverTimers.current[itemId]);delete hoverTimers.current[itemId];}
+    if(video){video.pause();video.currentTime=0;}
+  };
   const addComment=(postId:string)=>{
     const body=(comments[postId]||'').trim();if(!body)return;
     setFeed(v=>v.map(p=>p.id===postId?{...p,comments:[...p.comments,{id:id(),name:'مستخدم SB1',body}]}:p));
     setComments(v=>({...v,[postId]:''}));
   };
   const saveStoryToFavorites=(s:StoryItem)=>{toggleSaved({id:s.id,kind:s.mediaKind==='video'?'video':'image',title:s.text||s.name,body:s.text,author:s.name,url:s.mediaUrl,image_url:s.mediaKind==='image'?s.mediaUrl:undefined,created_at:s.createdAt});setNotice('تم حفظ القصة في مفضلتي.');};
-  const saveToFavorites=(p:FeedItem)=>{toggleSaved({id:p.id,kind:p.kind==='image'?'image':p.kind==='reel'?'reel':p.kind==='video'?'video':p.kind==='audio'?'recording':'post',title:p.text,body:p.text,author:p.author,url:p.mediaUrl,image_url:p.kind==='image'?p.mediaUrl:undefined,created_at:p.createdAt});setNotice('تم الحفظ في مفضلتي تلقائياً ضمن القسم المناسب.');};
+  const saveToFavorites=(p:FeedItem)=>{toggleSaved({id:p.id,kind:p.kind==='image'?'image':p.kind==='reel'?'reel':p.kind==='video'?'video':p.kind==='audio'?'recording':p.kind==='article'?'article':'post',title:p.text,body:p.text,author:p.author,url:p.mediaUrl,image_url:p.kind==='image'?p.mediaUrl:undefined,created_at:p.createdAt});setNotice('تم الحفظ في مفضلتي تلقائياً ضمن القسم المناسب.');};
   const createAlbum=()=>{const n=albumName.trim();if(!n){setNotice('اكتب اسم الألبوم أولاً.');return}const a={id:id(),name:n,items:[]};setAlbums(v=>[a,...v]);setAlbumName('');setAlbumModal(false);setNotice('تم إنشاء الألبوم.');};
   const addToAlbum=(p:FeedItem,albumId:string)=>{setAlbums(v=>v.map(a=>a.id===albumId?{...a,items:[p,...(a.items||[]).filter((x:any)=>x.id!==p.id)]}:a));setAlbumPicker(null);setNotice('تمت إضافة المحتوى إلى الألبوم.');};
 
@@ -190,9 +241,12 @@ export default function PageProfileTools({
     if(!favorites.includes(url))setFavorites(v=>[url,...v]);
   };
   const searchSocial=()=>{
-    if(!socialSearch.trim())return;
-    const url='https://www.google.com/search?q='+encodeURIComponent(socialSearch+' site:youtube.com OR site:vk.com OR site:ok.ru OR site:rutube.ru OR site:mail.ru');
-    openSocial(url);
+    const q=socialSearch.trim();
+    if(!q)return;
+    const providers=[['YouTube','https://www.youtube.com/embed/'+encodeURIComponent(q)],['Rutube','https://rutube.ru/play/embed/'+encodeURIComponent(q)]];
+    const found=providers.find(([n])=>q.toLowerCase().includes(String(n).toLowerCase()));
+    if(found) openSocial(found[1]);
+    else setNotice('اختر منصة قابلة للعرض داخل SB1 ثم أدخل رابط/معرّف المحتوى.');
   };
 
   const permissionGroups=[
@@ -218,21 +272,23 @@ export default function PageProfileTools({
   return <div dir="rtl" className="mt-4 space-y-4">
     {show('home') && (<section id="fb-home" className="grid gap-4 lg:grid-cols-[1fr_280px]">
       <div className="space-y-4">
-        {discountOpen&&<div className="relative overflow-hidden rounded-xl border bg-[#0879c9] shadow-sm"><img src="/jamal-james.jpg" alt="د. جمال نادي" className="h-28 w-full object-cover object-center"/><div className="absolute inset-0 bg-gradient-to-l from-[#0879c9]/90 via-[#0879c9]/35 to-transparent"/><div className="absolute inset-y-0 right-0 flex items-center gap-3 p-4 text-white"><div><b className="block text-lg font-extrabold">خصم 10%</b><span className="text-xs font-bold">على الباقة الحالية</span></div></div><button onClick={()=>{setDiscountOpen(false);write('sb1_discount_10_open',false)}} className="absolute left-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/45 text-xl font-bold text-white hover:bg-black/60 active:bg-black/70" aria-label="إغلاق">×</button></div>}
         {!hideStories&&(
-          <div className="rounded-xl border bg-white p-3 shadow-sm">
+          <div className="bg-transparent p-0">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="sr-only">القصص</h2>
               <button onClick={()=>setStoryComposer(true)} className="rounded-full bg-teal-50 p-2 text-teal-700" aria-label="إنشاء قصة"><Plus className="h-4 w-4"/></button>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-1">
-              <button onClick={()=>setStoryComposer(true)} className="min-w-[112px] overflow-hidden rounded-xl border bg-slate-50">
+              <button onClick={()=>setStoryComposer(true)} className="min-w-[104px] overflow-hidden rounded-xl bg-slate-50">
                 <div className="grid h-28 place-items-center bg-gradient-to-br from-teal-600 to-teal-800 text-white"><Plus className="h-8 w-8"/></div>
                 <div className="p-2 text-center text-xs font-bold">قصتك</div>
               </button>
-              {activeStories.map(s=><button key={s.id} onClick={()=>setStoryViewer(s)} className="min-w-[112px] overflow-hidden rounded-xl border bg-white text-right">
-                <div className="relative grid h-28 place-items-center overflow-hidden bg-gradient-to-br from-slate-800 to-teal-900 text-white">
-                  {s.mediaUrl?<img src={s.mediaUrl} className="h-full w-full object-cover" alt=""/>:<span className="p-3 text-xs font-bold">{s.text}</span>}
+              {activeStories.map(s=><button key={s.id} onClick={()=>setStoryViewer(s)} className="min-w-[104px] overflow-hidden rounded-xl bg-white text-right">
+                <div className="relative grid h-28 place-items-center overflow-hidden bg-slate-900 text-white">
+                  {s.mediaUrl ? (s.mediaKind==='video'
+                    ? <video src={s.mediaUrl} muted playsInline className="h-full w-full object-cover" onMouseEnter={e=>startHoverView(s.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(s.id,e.currentTarget)}/>
+                    : <img src={s.mediaUrl} className="h-full w-full object-cover" alt="" onMouseEnter={()=>startHoverView(s.id)} onMouseLeave={()=>stopHoverView(s.id)}/>)
+                    : <span className="p-3 text-xs font-bold">{s.text}</span>}
                   <span className="absolute bottom-2 right-2 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-slate-800">{s.name}</span>
                 </div>
               </button>)}
@@ -254,17 +310,18 @@ export default function PageProfileTools({
         </div>}
 
         {/* Home order requested: posts heading -> horizontal Reels -> posts feed */}
-        <div className="rounded-xl border bg-white p-4 shadow-sm">
-          <h2 className="text-xl font-extrabold">المنشورات</h2>
-          <p className="mt-1 text-xs text-slate-500">المنشورات والتحديثات الأخيرة للأخصائي.</p>
-        </div>
+        <div className="px-1"><span className="text-sm font-extrabold text-slate-700">منشورات</span></div>
 
         {/* Reels strip is part of Home, directly below the posts heading */}
 
         <div id="fb-reels" className="rounded-xl border bg-white p-4 shadow-sm"><div className="mb-3 flex justify-end"><button onClick={()=>jump("reels")} className="text-xs font-bold text-teal-700">عرض الكل</button></div>
           <div className="flex gap-3 overflow-x-auto">
             {reels.slice(0,10).map(r=><button key={r.id} onClick={()=>setReelViewer(r)} className="min-w-[118px] overflow-hidden rounded-xl bg-slate-900 text-white text-right">
-              <div className="grid aspect-[3/4] max-h-40 place-items-center bg-gradient-to-br from-teal-900 to-slate-950 p-2"><Video className="h-8 w-8 opacity-80"/><span className="text-xs font-bold">{r.text.slice(0,55)}</span></div>
+              <div className="relative grid aspect-[3/4] max-h-40 place-items-center overflow-hidden bg-slate-950 p-2">
+  <video src={r.mediaUrl||demoVideoUrl} muted playsInline className="absolute inset-0 h-full w-full object-cover" onMouseEnter={e=>startHoverView(r.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(r.id,e.currentTarget)}/>
+  <div className="absolute inset-0 bg-black/30"/>
+  <span className="relative z-10 px-2 text-xs font-bold">{r.text.slice(0,55)}</span>
+</div>
             </button>)}
           </div>
         </div>
@@ -276,15 +333,15 @@ export default function PageProfileTools({
             <article className="mx-auto max-w-3xl rounded-xl border bg-white p-3 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="grid h-10 w-10 place-items-center rounded-full bg-teal-100 font-extrabold text-teal-700">{p.author.charAt(0)}</div>
-                <div className="flex-1"><b className="text-sm">{p.author}</b><div className="text-xs text-slate-400">{new Date(p.createdAt).toLocaleString()}</div></div>
-                {p.demo&&<span className="rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">تجريبي</span>}
+                <div className="flex-1"><b className="text-sm">{p.author}</b><div className="text-xs text-slate-400">{new Date(p.createdAt).toLocaleString()} · {p.views||0} مشاهدة</div></div>
+
               </div>
               <div className="mt-3 rounded-xl px-3 py-4 whitespace-pre-wrap leading-7 text-sm" style={p.style||{}}>{p.text}</div>
               {p.mediaUrl&&p.kind==='image'&&<img src={p.mediaUrl} alt="" className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl object-contain"/>}
-              {p.mediaUrl&&(p.kind==='video'||p.kind==='reel')&&<video src={p.mediaUrl} controls className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl bg-black object-contain"/>}
+              {p.mediaUrl&&(p.kind==='video'||p.kind==='reel')&&<video src={p.mediaUrl} controls muted playsInline className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl bg-black object-contain" onMouseEnter={e=>startHoverView(p.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(p.id,e.currentTarget)}/>} 
               {p.mediaUrl&&p.kind==='audio'&&<audio src={p.mediaUrl} controls className="mt-3 w-full"/>}
               <div className="mt-3 flex items-center border-t pt-2 text-sm text-slate-500">
-                <button onClick={()=>like(p.id)} className="flex-1 rounded-lg py-2 hover:bg-slate-50 hover:text-teal-700"><Heart className="inline h-4 w-4 ml-1"/> {p.likes}</button>
+                <button onClick={()=>like(p.id)} disabled={likedIds.includes(p.id)} className={'flex-1 rounded-lg py-2 transition '+(likedIds.includes(p.id)?'text-red-600':'text-slate-500 hover:bg-slate-50 hover:text-teal-700')}><Heart className="inline h-4 w-4 ml-1" fill={likedIds.includes(p.id)?'currentColor':'none'}/> {p.likes}</button>
                 <button onClick={()=>setOpenComments(p.id)} className="flex-1 rounded-lg py-2 hover:bg-slate-50" aria-label="التعليقات"><MessageCircle className="inline h-4 w-4 ml-1"/> {p.comments.length}</button>
                 <button onClick={()=>openShare(p.text)} className="flex-1 rounded-lg py-2 hover:bg-slate-50 active:bg-slate-100"><Share2 className="inline h-4 w-4 ml-1"/> مشاركة</button>
                 <button onClick={()=>saveToFavorites(p)} className="rounded-lg px-3 py-2 hover:bg-slate-50 active:bg-slate-100" aria-label="حفظ"><Bookmark className="inline h-4 w-4"/></button>
@@ -320,13 +377,13 @@ export default function PageProfileTools({
         <button onClick={searchSocial} className="rounded-xl bg-teal-700 px-4 text-white"><Search/></button>
       </div>}
       <div className="mt-3 flex flex-wrap gap-2">{[
-        ['YouTube','https://www.youtube.com'],['VK','https://vk.com'],['OK','https://ok.ru'],['Rutube','https://rutube.ru'],['Mail.ru','https://mail.ru']
+        ['YouTube','https://www.youtube.com/embed/dQw4w9WgXcQ'],['Rutube','https://rutube.ru/play/embed/00000000000000000000000000000000']
       ].map(([n,u])=><button key={n} onClick={()=>openSocial(u)} className={'rounded-lg border px-3 py-2 text-sm font-bold '+(socialEmbedded===u?'border-teal-600 bg-teal-50 text-teal-700':'')}>{n}</button>)}</div>
       {socialOpen.length>0&&<div className="mt-4 flex gap-2 overflow-x-auto">{socialOpen.slice(0,8).map(u=><button key={u} onClick={()=>setSocialEmbedded(u)} className={'max-w-[220px] truncate rounded-lg border px-3 py-2 text-xs '+(socialEmbedded===u?'border-teal-600 bg-teal-50':'')}>{u}</button>)}</div>}
       {socialEmbedded&&<div className="mt-4 overflow-hidden rounded-2xl border bg-slate-100">
         <div className="flex items-center justify-between border-b bg-white px-3 py-2"><b>منصة داخل SB1</b><button onClick={()=>setSocialEmbedded(null)}><X/></button></div>
         <iframe title="social-platform" src={socialEmbedded} className="h-[720px] w-full border-0 bg-white" referrerPolicy="strict-origin-when-cross-origin"/>
-        <div className="border-t bg-amber-50 p-2 text-xs text-amber-800">بعض المنصات تمنع التضمين داخل المواقع من طرفها؛ في هذه الحالة قد تظهر صفحة منع التضمين داخل هذه النافذة بدلاً من فتح متصفح خارجي.</div>
+
       </div>}
     </section>) }
 
@@ -357,7 +414,7 @@ export default function PageProfileTools({
 
     {storyComposer&&<div className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4" onClick={()=>setStoryComposer(false)}><div className="w-full max-w-lg rounded-2xl bg-white p-5" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between"><h3 className="text-xl font-extrabold">إنشاء قصة</h3><button onClick={()=>setStoryComposer(false)}><X/></button></div><textarea value={storyText} onChange={e=>setStoryText(e.target.value)} className="mt-4 min-h-28 w-full rounded-xl border p-3" placeholder="اكتب ما تريد في قصتك..."/><div className="mt-3 flex flex-wrap gap-2"><label className="cursor-pointer rounded-lg bg-slate-100 px-3 py-2 text-sm font-bold"><Upload className="inline h-4 w-4 ml-1"/> صورة / فيديو<input type="file" accept="image/*,video/*" className="hidden" onChange={e=>{const f=e.target.files?.[0]||null;setStoryFile(f);setStoryVideo(f?.type.startsWith('video/')||false)}}/></label><button onClick={createStory} className="rounded-lg bg-teal-700 px-4 py-2 font-bold text-white">نشر القصة</button></div>{storyFile&&<div className="mt-2 text-xs text-slate-500">{storyFile.name}</div>}</div></div>}
 
-    {composer&&<div className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4" onClick={()=>setComposer(false)}><div className="w-full max-w-xl rounded-2xl bg-white p-5" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between"><h3 className="text-xl font-extrabold">إنشاء منشور</h3><button onClick={()=>setComposer(false)}><X/></button></div><textarea value={postText} onChange={e=>setPostText(e.target.value)} className="mt-4 min-h-32 w-full rounded-xl border p-3" placeholder="اكتب منشوراً..."/><div className="mt-3 flex flex-wrap gap-2">{(['post','image','video','reel'] as MediaKind[]).map(k=><button key={k} onClick={()=>setPostKind(k)} className={'rounded-lg px-3 py-2 text-sm font-bold active:bg-slate-200 '+(postKind===k?'bg-teal-700 text-white':'bg-slate-100')}>{k==='post'?'نص':k==='image'?'صورة':k==='video'?'فيديو':'Reel'}</button>)}<label className="cursor-pointer rounded-lg bg-slate-100 px-3 py-2 text-sm font-bold"><Upload className="inline h-4 w-4 ml-1"/> اختيار ملف<input type="file" accept={postKind==='image'?'image/*':postKind==='video'||postKind==='reel'?'video/*':'*/*'} className="hidden" onChange={e=>setPostFile(e.target.files?.[0]||null)}/></label><div className="mt-3 rounded-xl border bg-slate-50 p-3"><div className="mb-2 text-xs font-extrabold">تنسيق المنشور الكتابي</div><div className="flex flex-wrap gap-2"><label className="flex items-center gap-2 rounded-lg bg-white px-2 py-2 text-xs font-bold">الخلفية <input type="color" value={postBackground} onChange={e=>setPostBackground(e.target.value)} className="h-7 w-7 cursor-pointer rounded"/></label><label className="flex items-center gap-2 rounded-lg bg-white px-2 py-2 text-xs font-bold">الخط <input type="color" value={postFontColor} onChange={e=>setPostFontColor(e.target.value)} className="h-7 w-7 cursor-pointer rounded"/></label><select value={postFontSize} onChange={e=>setPostFontSize(e.target.value)} className="rounded-lg border bg-white px-2 py-2 text-xs font-bold"><option value="14px">صغير</option><option value="18px">متوسط</option><option value="24px">كبير</option><option value="32px">كبير جداً</option></select><button onClick={()=>setPostFontWeight(v=>v==='700'?'900':'700')} className="rounded-lg border bg-white px-3 py-2 text-xs font-black active:bg-slate-200">{postFontWeight==='900'?'عريض جداً':'عريض'}</button></div><div className="mt-3 rounded-xl px-4 py-4" style={{background:postBackground,color:postFontColor,fontSize:postFontSize,fontWeight:postFontWeight}}>{postText||'معاينة المنشور'}</div></div><button onClick={recording?stopRecord:startRecord} className={'rounded-lg px-3 py-2 text-sm font-bold '+(recording?'bg-red-600 text-white':'bg-slate-100')}><Mic className="inline h-4 w-4 ml-1"/>{recording?'إيقاف':'تسجيل صوت'}</button></div>{(postUrl||recordUrl)&&<div className="mt-3 rounded-xl bg-slate-50 p-3 text-sm">{postFile?.name||'تسجيل صوتي جاهز'}</div>}<button onClick={publish} className="mt-4 w-full rounded-xl bg-teal-700 py-3 font-bold text-white">نشر الآن</button></div></div>}
+    {composer&&<div className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4" onClick={()=>setComposer(false)}><div className="w-full max-w-xl rounded-2xl bg-white p-5" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between"><h3 className="text-xl font-extrabold">إنشاء منشور</h3><button onClick={()=>setComposer(false)}><X/></button></div><textarea value={postText} onChange={e=>setPostText(e.target.value)} className="mt-4 min-h-32 w-full rounded-xl border p-3" placeholder="اكتب منشوراً..."/><div className="mt-3 flex flex-wrap gap-2">{(['post','image','video','reel','article'] as MediaKind[]).map(k=><button key={k} onClick={()=>setPostKind(k)} className={'rounded-lg px-3 py-2 text-sm font-bold active:bg-slate-200 '+(postKind===k?'bg-teal-700 text-white':'bg-slate-100')}>{k==='post'?'نص':k==='image'?'صورة':k==='video'?'فيديو':k==='reel'?'Reel':'مقالة'}</button>)}<label className="cursor-pointer rounded-lg bg-slate-100 px-3 py-2 text-sm font-bold"><Upload className="inline h-4 w-4 ml-1"/> رفع ملف<input type="file" accept={postKind==='image'?'image/*':postKind==='video'||postKind==='reel'?'video/*':'*/*'} className="hidden" onChange={e=>setPostFile(e.target.files?.[0]||null)}/></label><div className="mt-3 rounded-xl border bg-slate-50 p-3"><div className="mb-2 text-xs font-extrabold">تنسيق المنشور الكتابي</div><div className="flex flex-wrap gap-2"><label className="flex items-center gap-2 rounded-lg bg-white px-2 py-2 text-xs font-bold">الخلفية <input type="color" value={postBackground} onChange={e=>setPostBackground(e.target.value)} className="h-7 w-7 cursor-pointer rounded"/></label><label className="flex items-center gap-2 rounded-lg bg-white px-2 py-2 text-xs font-bold">الخط <input type="color" value={postFontColor} onChange={e=>setPostFontColor(e.target.value)} className="h-7 w-7 cursor-pointer rounded"/></label><select value={postFontSize} onChange={e=>setPostFontSize(e.target.value)} className="rounded-lg border bg-white px-2 py-2 text-xs font-bold"><option value="14px">صغير</option><option value="18px">متوسط</option><option value="24px">كبير</option><option value="32px">كبير جداً</option></select><button onClick={()=>setPostFontWeight(v=>v==='700'?'900':'700')} className="rounded-lg border bg-white px-3 py-2 text-xs font-black active:bg-slate-200">{postFontWeight==='900'?'عريض جداً':'عريض'}</button></div><div className="mt-3 rounded-xl px-4 py-4" style={{background:postBackground,color:postFontColor,fontSize:postFontSize,fontWeight:postFontWeight}}>{postText||'معاينة المنشور'}</div></div><button onClick={recording?stopRecord:startRecord} className={'rounded-lg px-3 py-2 text-sm font-bold '+(recording?'bg-red-600 text-white':'bg-slate-100')}><Mic className="inline h-4 w-4 ml-1"/>{recording?'إيقاف':'تسجيل صوت'}</button></div>{(postUrl||recordUrl)&&<div className="mt-3 rounded-xl bg-slate-50 p-3 text-sm">{postFile?.name||'تسجيل صوتي جاهز'}</div>}<button onClick={publish} className="mt-4 w-full rounded-xl bg-teal-700 py-3 font-bold text-white">نشر الآن</button></div></div>}
 
     {storyViewer&&<div className="fixed inset-0 z-[110] grid place-items-center bg-black/80 p-4" onClick={()=>setStoryViewer(null)}><div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-slate-950 text-white" onClick={e=>e.stopPropagation()}><button onClick={()=>setStoryViewer(null)} className="absolute left-3 top-3 z-10 rounded-full bg-black/50 p-2"><X/></button>{storyViewer.mediaUrl ? (storyViewer.mediaKind==='video' ? <video src={storyViewer.mediaUrl} controls autoPlay className="max-h-[72vh] w-full bg-black object-contain"/> : <img src={storyViewer.mediaUrl} alt="" className="max-h-[72vh] w-full object-contain"/>) : <div className="grid min-h-[60vh] place-items-center p-8 text-center text-2xl font-extrabold">{storyViewer.text}</div>}<div className="flex items-center justify-between p-4"><div><b>{storyViewer.name}</b><p className="text-xs opacity-70">{storyViewer.text}</p></div><div className="flex gap-2">{<button onClick={()=>saveStoryToFavorites(storyViewer)} className="rounded-lg bg-white/10 px-3 py-2 text-xs font-bold active:bg-white/20"><Bookmark className="inline h-4 w-4 ml-1"/>حفظ</button>}{storyViewer.own&&<button onClick={()=>deleteStory(storyViewer)} className="rounded-lg bg-red-600 px-3 py-2 text-xs font-bold"><Trash2 className="inline h-4 w-4 ml-1"/>حذف</button>}</div></div></div></div>}
 
