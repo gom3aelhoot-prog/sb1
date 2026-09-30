@@ -303,21 +303,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           </div>
         )}
 
-          <button onClick={() => navigate(`/ask?specialty=${doctor.specialty?.slug || ''}`)} className="btn-primary flex items-center gap-2">
-              <MessageCircle className="w-5 h-5" />
-              {t('hero.ask_now')}
-            </button>
-          </div>
-        </div>
-
-        {questions.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">{lang === 'ar' ? 'الأسئلة المجابة' : 'Answered Questions'}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {questions.map((q) => <QuestionCard key={q.id} question={q} />)}
-            </div>
-          </div>
-        )}
+        {coverChooser&&<div className="fixed inset-0 z-[150] grid place-items-center bg-black/60 p-4" onClick={()=>setCoverChooser(false)}><div className="w-full max-w-lg rounded-2xl bg-white p-5" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between"><b className="text-lg">اختيار صورة الغلاف</b><button onClick={()=>setCoverChooser(false)}><X/></button></div><p className="mt-2 text-xs text-slate-500">يمكن اختيار صورة محفوظة في مفضلتك.</p>{savedCoverImages.length===0?<div className="py-8 text-center text-sm text-slate-400">لا توجد صور محفوظة في المفضلة.</div>:<div className="mt-4 grid grid-cols-3 gap-2">{savedCoverImages.map((u,i)=><button key={u+i} onClick={()=>saveCover(u)} className="overflow-hidden rounded-xl border active:opacity-80"><img src={u} alt="" className="aspect-square w-full object-cover"/></button>)}</div>}</div></div>}
       </div>
       </div>
     </div>
