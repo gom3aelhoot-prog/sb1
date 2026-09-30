@@ -1,21 +1,27 @@
+import { useState } from 'react';
 import { BookOpen, Camera, FileText, GraduationCap, Heart, MessageCircle, UserRound, Users } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useRouter } from '@/lib/router';
 import { lt } from '@/lib/featureText';
+import { getSaved } from '@/lib/socialVault';
 
 export default function ProfilePage() {
   const { lang } = useI18n();
   const { navigate } = useRouter();
   const role = 'student';
+  const [photo,setPhoto]=useState(()=>localStorage.getItem('sb1_generic_profile_photo')||'');
+  const [cover,setCover]=useState(()=>localStorage.getItem('sb1_generic_profile_cover')||'');
+  const savedImages=getSaved().filter(x=>x.kind==='image'&&x.url).map(x=>x.url as string);
+  const pick=(kind:'photo'|'cover',file?:File)=>{if(!file)return;const u=URL.createObjectURL(file);if(kind==='photo'){setPhoto(u);localStorage.setItem('sb1_generic_profile_photo',u)}else{setCover(u);localStorage.setItem('sb1_generic_profile_cover',u)}};
   const title = lt(lang,{ar:'الملف الشخصي',ru:'Профиль',en:'Profile',de:'Profil'});
   return (
     <div className="min-h-screen pt-24 pb-16 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="card overflow-hidden">
-          <div className="h-40 bg-gradient-to-r from-teal-600 via-cyan-600 to-sky-600" />
+          <div className="relative h-40 overflow-hidden bg-gradient-to-r from-teal-600 via-cyan-600 to-sky-600">{cover&&<img src={cover} alt="" className="h-full w-full object-cover"/>}<label className="absolute bottom-3 left-3 cursor-pointer rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white">تغيير الغلاف<input type="file" accept="image/*" className="hidden" onChange={e=>pick('cover',e.target.files?.[0])}/></label>{savedImages[0]&&<button onClick={()=>{setCover(savedImages[0]);localStorage.setItem('sb1_generic_profile_cover',savedImages[0])}} className="absolute bottom-3 left-28 rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white">من المفضلة</button>}</div>
           <div className="px-6 pb-7">
             <div className="-mt-12 flex flex-col gap-4 md:flex-row md:items-end">
-              <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border-4 border-white bg-teal-100 text-2xl font-extrabold text-teal-700 shadow-lg">GA</div>
+              <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl border-4 border-white bg-teal-100 text-2xl font-extrabold text-teal-700 shadow-lg">{photo?<img src={photo} alt="" className="h-full w-full object-cover"/>:'GA'}<label className="absolute inset-x-1 bottom-1 cursor-pointer rounded-lg bg-black/55 px-1 py-1 text-center text-[9px] font-bold text-white">تغيير<input type="file" accept="image/*" className="hidden" onChange={e=>pick('photo',e.target.files?.[0])}/></label></div>
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-2"><h1 className="text-2xl font-bold text-gray-800">{role === 'student' ? lt(lang,{ar:'طالب SB1',ru:'Студент SB1',en:'SB1 Student',de:'SB1 Student'}) : 'Specialist'}</h1><span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">{role === 'student' ? lt(lang,{ar:'طالب',ru:'Студент',en:'Student',de:'Student'}) : lt(lang,{ar:'أخصائي',ru:'Специалист',en:'Specialist',de:'Spezialist'})}</span></div>
                 <p className="mt-1 text-sm text-gray-500">{lt(lang,{ar:'مهتم بالعلاج النفسي والعلوم السلوكية',ru:'Интересуется психотерапией и поведенческими науками',en:'Interested in psychotherapy and behavioral sciences',de:'Interesse an Psychotherapie und Verhaltenswissenschaften'})}</p>
