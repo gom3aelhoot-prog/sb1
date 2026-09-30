@@ -42,6 +42,7 @@ export default function HomePage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [newAccountGuide,setNewAccountGuide]=useState(()=>localStorage.getItem('sb1_new_account_onboarding')==='true');
 
   useEffect(() => {
     (async () => {
@@ -100,6 +101,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
+      {newAccountGuide&&<div className="fixed inset-0 z-[200] grid place-items-center bg-black/55 p-4" onClick={()=>{localStorage.removeItem('sb1_new_account_onboarding');setNewAccountGuide(false)}}><div className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl" onClick={e=>e.stopPropagation()} dir="rtl"><div className="flex items-start justify-between gap-4"><div><span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700">مرحباً بك في SB1</span><h2 className="mt-3 text-2xl font-extrabold text-slate-900">الرئيسية وكيف تعمل صفحتي</h2><p className="mt-2 text-sm leading-7 text-slate-500">ابدأ من هنا لتتعرف بسرعة على حسابك وصفحتك والمحتوى الذي يمكنك نشره وحفظه.</p></div><button onClick={()=>{localStorage.removeItem('sb1_new_account_onboarding');setNewAccountGuide(false)}} className="rounded-full p-2 hover:bg-slate-100 active:bg-slate-200">×</button></div><div className="mt-5 grid gap-3 sm:grid-cols-2"><div className="rounded-2xl border p-4"><b>الرئيسية</b><p className="mt-1 text-xs leading-6 text-slate-500">تصفح الأطباء والمقالات والفيديوهات والدورات والأسئلة والخدمات.</p></div><div className="rounded-2xl border p-4"><b>صفحتي</b><p className="mt-1 text-xs leading-6 text-slate-500">أنشئ منشوراتك، أضف الصور والفيديو والريلز، واحفظ المحتوى في مفضلتك.</p></div><div className="rounded-2xl border p-4"><b>مفضلتي وألبوماتي</b><p className="mt-1 text-xs leading-6 text-slate-500">احفظ أي محتوى من رمز الحفظ وسيصنف تلقائياً، وأنشئ ألبوماتك الخاصة.</p></div><div className="rounded-2xl border p-4"><b>الحساب</b><p className="mt-1 text-xs leading-6 text-slate-500">خيارات الإدارة الخاصة بالحساب تظهر لصاحب الحساب والمشرفين فقط.</p></div></div><button onClick={()=>{localStorage.removeItem('sb1_new_account_onboarding');setNewAccountGuide(false)}} className="mt-5 w-full rounded-xl bg-teal-700 py-3 font-bold text-white active:bg-teal-800">ابدأ استخدام SB1</button></div></div>
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary-50 via-white to-teal-50/40">
         <div className="pointer-events-none absolute inset-0">
