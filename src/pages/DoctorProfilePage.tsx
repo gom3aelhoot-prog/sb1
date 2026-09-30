@@ -66,11 +66,11 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     {id:'n3',title:'سؤال جديد',body:'وصل سؤال جديد ويمكنك فتحه من قسم الأسئلة.',time:'منذ 20 دقيقة',read:false}
   ]);
   const [followers,setFollowers]=useState(()=>[
-    {id:'catalog-doctor-ar-clinical-psychology-2',name:'د. ليان',online:true},
-    {id:'catalog-doctor-ar-clinical-psychology-3',name:'د. أحمد',online:true},
-    {id:'catalog-doctor-ar-clinical-psychology-4',name:'سارة',online:false},
-    {id:'catalog-doctor-ar-clinical-psychology-5',name:'محمد',online:true},
-    {id:'catalog-doctor-ar-clinical-psychology-6',name:'مركز الحياة',online:false},
+    {id:'catalog-doctor-ar-clinical-psychology-2',name:'د. ليان',online:true,photo:'https://randomuser.me/api/portraits/women/44.jpg'},
+    {id:'catalog-doctor-ar-clinical-psychology-3',name:'د. أحمد',online:true,photo:'https://randomuser.me/api/portraits/men/32.jpg'},
+    {id:'catalog-doctor-ar-clinical-psychology-4',name:'سارة',online:false,photo:'https://randomuser.me/api/portraits/women/68.jpg'},
+    {id:'catalog-doctor-ar-clinical-psychology-5',name:'محمد',online:true,photo:'https://randomuser.me/api/portraits/men/75.jpg'},
+    {id:'catalog-doctor-ar-clinical-psychology-6',name:'مركز الحياة',online:false,photo:'https://randomuser.me/api/portraits/women/65.jpg'},
   ]);
   const [isFollowing, setIsFollowing] = useState(()=>isFollowingVault(id));
   const profileAvatar = doctor?.photo_url || ('https://api.dicebear.com/9.x/personas/svg?seed=' + encodeURIComponent(id));
@@ -209,7 +209,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
                 <span className="text-sm font-extrabold">المتابعون</span><span className="text-xs text-slate-400">{doctor.follower_count||followers.length}</span>
               </button>
               <div className="mt-3 flex flex-wrap gap-2">
-                {followers.slice(0,showFollowers?followers.length:5).map(f=><button key={f.id} title={f.name} onClick={()=>navigate('/doctors/'+f.id)} className="relative h-9 w-9 overflow-hidden rounded-full bg-slate-100 ring-2 ring-white shadow-sm active:opacity-80"><img src={'https://api.dicebear.com/9.x/personas/svg?seed='+encodeURIComponent(f.id)} alt={f.name} className="h-full w-full object-cover"/>{f.online&&<span className="absolute -bottom-0.5 -left-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500"/>}</button>)}
+                {followers.slice(0,showFollowers?followers.length:5).map(f=><button key={f.id} title={f.name} onClick={()=>navigate('/doctors/'+f.id)} className="relative h-9 w-9 overflow-hidden rounded-full bg-slate-100 ring-2 ring-white shadow-sm active:opacity-80"><img src={f.photo} alt={f.name} className="h-full w-full object-cover"/>{f.online&&<span className="absolute -bottom-0.5 -left-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500"/>}</button>)}
               </div>
               {showFollowers&&<div className="mt-3 space-y-1 border-t pt-2">{followers.map(f=><button key={f.id} onClick={()=>navigate('/doctors/'+f.id)} className="flex w-full items-center gap-2 rounded-lg p-2 text-right text-xs font-bold hover:bg-slate-50 active:bg-slate-100"><img src={'https://api.dicebear.com/9.x/personas/svg?seed='+encodeURIComponent(f.id)} alt={f.name} className="h-7 w-7 rounded-full object-cover"/>{f.name}</button>)}</div>}
             </div>
@@ -224,7 +224,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           <div className="mb-2"><StoryBar pageId={id} canManage={canManagePage} /></div>
         {/* Cover + Profile Header */}
         <div className="card overflow-hidden mb-6">
-          <div className="relative h-24 overflow-hidden bg-gradient-to-l from-teal-500 via-teal-600 to-teal-700">{coverUrl&&<img src={coverUrl} alt="" className="h-full w-full object-cover"/>}{canManagePage&&<div className="absolute bottom-3 left-3 flex gap-2"><label className="cursor-pointer rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white backdrop-blur active:bg-black/70">تغيير الغلاف<input type="file" accept="image/*" className="hidden" onChange={e=>{const f=e.target.files?.[0];if(f){const u=URL.createObjectURL(f);saveCover(u)}}}/></label><button onClick={()=>setCoverChooser(true)} className="rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white backdrop-blur active:bg-black/70">من المفضلة</button></div>}</div>
+          <div className="relative h-24 overflow-hidden bg-gradient-to-l from-teal-500 via-teal-600 to-teal-700">{coverUrl&&<img src={coverUrl} alt="" className="h-full w-full object-cover"/>}{canManagePage&&<div className="absolute bottom-3 left-3 flex gap-2"><label className="cursor-pointer rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white backdrop-blur active:bg-black/70">تغيير الغلاف<input type="file" accept="image/*" className="hidden" onChange={e=>{const f=e.target.files?.[0];if(f){const r=new FileReader();r.onload=()=>saveCover(String(r.result));r.readAsDataURL(f)}}}/></label><button onClick={()=>setCoverChooser(true)} className="rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white backdrop-blur active:bg-black/70">من المفضلة</button></div>}</div>
           <div className="px-6 pb-6">
             <div className="flex flex-col md:flex-row gap-4 mt-0 pt-4">
               <div className="w-28 h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center shrink-0 ring-4 ring-white mx-auto md:mx-0">
