@@ -275,29 +275,25 @@ export default function PageProfileTools({
 
       
     </section>
-
-    </section>)}
+    </section>) }
 
     {show('reels') && (<section id="fb-reels-all" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-3 flex items-center justify-between"><h2 className="sr-only">Reels</h2><span className="text-xs text-slate-400">{reels.length} Reel</span></div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">{reels.slice(0,18).map(r=><button key={r.id} onClick={()=>openShare(r.text)} className="overflow-hidden rounded-xl bg-slate-900 text-white text-right"><div className="grid aspect-[3/5] place-items-center bg-gradient-to-br from-teal-900 to-slate-950 p-3"><Video/><span className="text-xs font-bold">{r.text.slice(0,60)}</span></div></button>)}</div>
     </section>
-
-    </section>)}
+    </section>) }
 
     {show('albums') && (<section id="fb-albums" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between"><h2 className="sr-only">الألبومات</h2><Album className="text-teal-700"/></div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{['الصور','الفيديوهات','التسجيلات','الصوتيات'].map((name,i)=><button key={name} className="rounded-xl border bg-slate-50 p-3 text-right hover:bg-teal-50"><div className="grid h-28 place-items-center rounded-lg bg-white">{i===0?<ImageIcon/>:i===1?<FileVideo/>:<AudioLines/>}</div><b className="mt-2 block">{name}</b><span className="text-xs text-slate-500">محتوى الصفحة</span></button>)}</div>
     </section>
-
-    </section>)}
+    </section>) }
 
     {show('medical') && (<section id="fb-medical-content" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between"><div><h2 className="sr-only">المحتوى الطبي</h2><p className="text-xs text-slate-500">فيديوهات طبية وتعليمية داخل SB1</p></div><Library className="text-teal-700"/></div>
       <div className="grid gap-3 md:grid-cols-3">{Array.from({length:9},(_,i)=>({title:demoTexts[i%demoTexts.length],specialty:['علم النفس','الصحة النفسية','التقييم السريري'][i%3]})).map((v,i)=><article key={i} className="rounded-xl border p-3"><div className="grid aspect-video place-items-center rounded-lg bg-slate-900 text-white"><Video/></div><b className="mt-2 block text-sm">{v.title}</b><span className="text-xs text-slate-500">{v.specialty}</span><div className="mt-2 flex gap-2"><button className="rounded-lg bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700">فيديوهاتي</button><button className="rounded-lg bg-slate-50 px-3 py-1 text-xs font-bold">شاهداتي</button></div></article>)}</div>
     </section>
-
-    </section>)}
+    </section>) }
 
     {show('social') && (<section id="fb-social" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">منصات التواصل</h2><p className="text-xs text-slate-500">تبقى كل منصة داخل SB1 ويمكن فتح أكثر من منصة داخل الصفحة نفسها.</p></div><ExternalLink className="text-teal-700"/></div>
@@ -315,8 +311,7 @@ export default function PageProfileTools({
         <div className="border-t bg-amber-50 p-2 text-xs text-amber-800">بعض المنصات تمنع التضمين داخل المواقع من طرفها؛ في هذه الحالة قد تظهر صفحة منع التضمين داخل هذه النافذة بدلاً من فتح متصفح خارجي.</div>
       </div>}
     </section>
-
-    </section>)}
+    </section>) }
 
     {show('phone') && (<section id="fb-phone" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">الهاتف وQR</h2><p className="text-xs text-slate-500">الرقم خاص بالحساب.</p></div><QrCode className="text-teal-700"/></div>
