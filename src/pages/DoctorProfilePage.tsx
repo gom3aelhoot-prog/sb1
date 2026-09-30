@@ -180,7 +180,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
 
         <div className="mb-2 min-h-[58px] rounded-xl border border-dashed border-slate-200 bg-slate-50/60" aria-label="مساحة إعلانية" />
 
-        {canSeePrivate&&<aside className="fixed top-24 bottom-6 z-40 hidden w-60 xl:block end-4 2xl:end-8 overflow-y-auto" aria-label="قائمة SB1 الرئيسية">
+        <aside className="fixed top-24 bottom-6 z-40 hidden w-60 xl:block end-4 2xl:end-8 overflow-y-auto" aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
             {canSeePrivate&&<button onClick={()=>selectMain('wallet')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm active:bg-slate-900"><Wallet className="h-4 w-4"/>الحساب والمحفظة</button>}
             {canManagePage&&<button onClick={()=>selectMain('clone')} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm active:bg-emerald-200"><Copy className="h-4 w-4"/>الاستنساخ</button>}
@@ -192,7 +192,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               <button onClick={()=>selectMain('phone')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><Share2 className="h-4 w-4"/>الهاتف وQR</button>
               {canManagePage&&<button onClick={()=>selectMain('settings')} className="flex w-full items-center gap-2 px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><SettingsIcon className="h-4 w-4"/>الإعدادات</button>}
             </div>
-            <div className="mt-3 rounded-xl border bg-white p-3 shadow-sm">
+            {canSeePrivate&&<div className="mt-3 rounded-xl border bg-white p-3 shadow-sm">
               <button onClick={()=>setShowFollowers(v=>!v)} className="flex w-full items-center justify-between active:bg-slate-100 rounded-lg p-1">
                 <span className="text-sm font-extrabold">المتابعون</span><span className="text-xs text-slate-400">{doctor.follower_count||followers.length}</span>
               </button>
@@ -205,7 +205,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               <p className="mb-2 text-xs font-extrabold text-slate-700">QR الصفحة</p>
               <img src={'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent(window.location.origin+'/doctors/'+id)} alt="QR" className="mx-auto h-36 w-36 rounded-lg"/>
               <p className="mt-2 text-[10px] text-slate-400">ظاهر دائماً تحت المتابعين</p>
-            </div>
+            </div>}
           </div>
         </aside>
         <div className="xl:me-[17rem] min-w-0">
