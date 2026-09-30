@@ -1,4 +1,5 @@
-export type VaultItem={id:string;kind:'article'|'reel'|'post';title:string;body?:string;author?:string;url?:string;created_at:string};
+export type VaultKind='article'|'reel'|'post'|'image'|'session'|'book'|'game'|'facility'|'question'|'doctor'|'course'|'video'|'recording';
+export type VaultItem={id:string;kind:VaultKind;title:string;body?:string;author?:string;url?:string;image_url?:string;created_at:string};
 const key=(name:string)=>'sb1_social_'+name;
 const read=<T,>(name:string, fallback:T):T=>{try{return JSON.parse(localStorage.getItem(key(name))||JSON.stringify(fallback))}catch{return fallback}};
 const write=(name:string,value:any)=>{localStorage.setItem(key(name),JSON.stringify(value));window.dispatchEvent(new Event('sb1-social-change'))};
