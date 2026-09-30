@@ -180,7 +180,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
 
         <div className="mb-2 min-h-[58px] rounded-xl border border-dashed border-slate-200 bg-slate-50/60" aria-label="مساحة إعلانية" />
 
-        <aside className="fixed top-24 bottom-6 z-40 hidden w-60 xl:block end-4 2xl:end-8 overflow-y-auto" aria-label="قائمة SB1 الرئيسية">
+        {canSeePrivate&&<aside className="fixed top-24 bottom-6 z-40 hidden w-60 xl:block end-4 2xl:end-8 overflow-y-auto" aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
             {canSeePrivate&&<button onClick={()=>selectMain('wallet')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm active:bg-slate-900"><Wallet className="h-4 w-4"/>الحساب والمحفظة</button>}
             {canManagePage&&<button onClick={()=>selectMain('clone')} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm active:bg-emerald-200"><Copy className="h-4 w-4"/>الاستنساخ</button>}
@@ -200,6 +200,11 @@ export default function DoctorProfilePage({ id }: { id: string }) {
                 {followers.slice(0,showFollowers?followers.length:5).map(f=><button key={f.id} title={f.name} onClick={()=>navigate('/doctors/'+f.id)} className="relative grid h-9 w-9 place-items-center rounded-full bg-emerald-100 text-xs font-extrabold text-emerald-800 ring-2 ring-white shadow-sm active:bg-emerald-200">{f.name.replace('د. ','').charAt(0)}{f.online&&<span className="absolute -bottom-0.5 -left-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500"/>}</button>)}
               </div>
               {showFollowers&&<div className="mt-3 space-y-1 border-t pt-2">{followers.map(f=><button key={f.id} onClick={()=>navigate('/doctors/'+f.id)} className="flex w-full items-center gap-2 rounded-lg p-2 text-right text-xs font-bold hover:bg-slate-50 active:bg-slate-100"><span className="grid h-7 w-7 place-items-center rounded-full bg-emerald-100 text-emerald-800">{f.name.replace('د. ','').charAt(0)}</span>{f.name}</button>)}</div>}
+            </div>
+            <div className="mt-3 rounded-xl border bg-white p-3 text-center shadow-sm">
+              <p className="mb-2 text-xs font-extrabold text-slate-700">QR الصفحة</p>
+              <img src={'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent(window.location.origin+'/doctors/'+id)} alt="QR" className="mx-auto h-36 w-36 rounded-lg"/>
+              <p className="mt-2 text-[10px] text-slate-400">ظاهر دائماً تحت المتابعين</p>
             </div>
           </div>
         </aside>
