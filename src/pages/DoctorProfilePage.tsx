@@ -195,6 +195,30 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         </div>
 
         {/* Complete page workspace — intentionally placed before the profile tabs so it is visible immediately after the profile header. */}
+        <section className="mb-6 rounded-3xl border-2 border-teal-200 bg-white p-6 shadow-sm" dir="rtl">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="text-xs font-bold text-teal-700">SB1 • مساحة الصفحة</div>
+              <h2 className="mt-1 text-2xl font-extrabold text-gray-900">الرئيسية — المحتوى والمنشورات</h2>
+              <p className="mt-1 text-sm text-gray-500">من هنا تظهر منشورات الصفحة وReels والألبومات والمحتوى العام.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={()=>setActiveTab('home')} className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-bold text-white">الرئيسية</button>
+              <button onClick={()=>setActiveTab('articles')} className="rounded-xl border px-4 py-2 text-sm font-bold">مقالاتي</button>
+              <button onClick={()=>setActiveTab('questions')} className="rounded-xl border px-4 py-2 text-sm font-bold">الأسئلة المجابة</button>
+              <button onClick={()=>setActiveTab('courses')} className="rounded-xl border px-4 py-2 text-sm font-bold">الدورات والكورسات</button>
+            </div>
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-5">
+            {[
+              ['Reels','فيديوهات قصيرة'],
+              ['منشورات','نصوص وصور وفيديو وصوت'],
+              ['ألبومات','صور وفيديو وتسجيلات'],
+              ['تعليقات وإعجابات','تفاعل الصفحة'],
+              ['محتوى عام','متاح للزوار']
+            ].map(([title,desc])=><div key={title} className="rounded-2xl bg-slate-50 p-4"><b className="block text-sm">{title}</b><span className="mt-1 block text-xs text-gray-500">{desc}</span></div>)}
+          </div>
+        </section>
         <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} />
 
         {canSeePrivate && <div className="sticky top-16 z-20 mb-4 rounded-2xl border bg-slate-900 text-white shadow-lg">
