@@ -1,4 +1,4 @@
-import { resilientFetch } from '../src/lib/resilience';
+import { resilientFetch } from '../src/lib/resilience.js';
 type Body = { amount: number; currency?: string; description?: string; reference_id?: string; customer_email?: string; success_url?: string; cancel_url?: string };
 
 function send(res:any, body:unknown, status=200) {
