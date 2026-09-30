@@ -90,7 +90,10 @@ export default function RegisterPage() {
           {accountType === 'specialist' && (
             <p className="text-sm text-gray-500 mb-4">تم استلام طلب الأخصائي للمراجعة. لا يتم إنشاء أو تفعيل حساب أخصائي ولا يظهر للجمهور قبل موافقة المالك أو الإدارة.</p>
           )}
-          <button onClick={() => navigate('/')} className="btn-primary">{t('common.back')}</button>
+          <div className="mt-5 grid gap-3">
+            <button onClick={() => { localStorage.setItem('sb1_new_account_onboarding','true'); navigate('/'); }} className="btn-primary w-full">الذهاب إلى الرئيسية والتعرّف على كيفية عمل صفحتي</button>
+            <button onClick={() => navigate('/profile')} className="btn-secondary w-full">فتح صفحتي الشخصية</button>
+          </div>
         </div>
       </div>
     );
