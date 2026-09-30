@@ -75,6 +75,7 @@ export default function PageProfileTools({
   const [postFile,setPostFile]=useState<File|null>(null);
   const [postUrl,setPostUrl]=useState('');
   const [comments,setComments]=useState<Record<string,string>>({});
+  const [openComments,setOpenComments]=useState<string|null>(null);
   const [notice,setNotice]=useState('');
   const [active,setActive]=useState('home');
   const [share,setShare]=useState<{title:string;url:string}|null>(null);
@@ -279,8 +280,13 @@ export default function PageProfileTools({
                 <button onClick={()=>document.getElementById('comment-'+p.id)?.focus()} className="flex-1 rounded-lg py-2 hover:bg-slate-50"><MessageCircle className="inline h-4 w-4 ml-1"/> {p.comments.length}</button>
                 <button onClick={()=>openShare(p.text)} className="flex-1 rounded-lg py-2 hover:bg-slate-50"><Share2 className="inline h-4 w-4 ml-1"/> مشاركة</button>
               </div>
-              {p.comments.map(c=><div key={c.id} className="mt-2 rounded-lg bg-slate-50 p-2 text-sm"><b>{c.name}</b><div>{c.body}</div></div>)}
-              <div className="mt-2 flex gap-2"><input id={'comment-'+p.id} value={comments[p.id]||''} onChange={e=>setComments(v=>({...v,[p.id]:e.target.value}))} onKeyDown={e=>e.key==='Enter'&&addComment(p.id)} className="flex-1 rounded-full border bg-slate-50 px-4 py-2 text-sm" placeholder="اكتب تعليقاً..."/><button onClick={()=>addComment(p.id)} className="grid h-10 w-10 place-items-center rounded-full bg-teal-700 text-white"><Send className="h-4 w-4"/></button></div>
+              <button
+                onClick={()=>setOpenComments(p.id)}
+                className="mt-2 w-full rounded-lg px-3 py-2 text-right text-sm font-bold text-slate-500 hover:bg-slate-50"
+                aria-label="فتح التعليقات"
+              >
+                {p.comments.length ? p.comments.length+' تعليق' : 'التعليقات'}
+              </button>
             </article>
             {(i+1)%20===0&&i<publicFeed.length-1&&<div className="rounded-xl border bg-white p-4 shadow-sm"><div className="mb-3 flex items-center justify-between"><b>Reels</b><button onClick={()=>jump('reels')} className="text-xs font-bold text-teal-700">عرض الكل</button></div><div className="flex gap-3 overflow-x-auto">{reels.slice(Math.floor(i/20)*5,Math.floor(i/20)*5+5).map(r=><button key={r.id} onClick={()=>openShare(r.text)} className="min-w-[130px] rounded-xl bg-slate-900 p-4 text-right text-xs font-bold text-white">{r.text.slice(0,48)}</button>)}</div></div>}
           </div>)}
@@ -319,7 +325,7 @@ export default function PageProfileTools({
     </section>
 
     <section id="fb-social" className="rounded-xl border bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">منصات التواصل</h2><p className="text-xs text-slate-500">تفتح كل منصة في نافذة مستقلة مع إمكانية فتح أكثر من نافذة.</p></div><ExternalLink className="text-teal-700"/></div>
+      <div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">منصات التواصل</h2><p className="text-xs text-slate-500">تبقى كل منصة داخل SB1 ويمكن فتح أكثر من منصة داخل الصفحة نفسها.</p></div><ExternalLink className="text-teal-700"/></div>
       {canManage&&<div className="grid gap-2 md:grid-cols-[1fr_auto]">
         <input value={socialSearch} onChange={e=>setSocialSearch(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchSocial()} className="rounded-xl border p-3" placeholder="ابحث داخل المنصة المطلوبة..."/>
         <button onClick={searchSocial} className="rounded-xl bg-teal-700 px-4 text-white"><Search/></button>
@@ -362,6 +368,22 @@ export default function PageProfileTools({
 
     {storyViewer&&<div className="fixed inset-0 z-[110] grid place-items-center bg-black/80 p-4" onClick={()=>setStoryViewer(null)}><div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-slate-950 text-white" onClick={e=>e.stopPropagation()}><button onClick={()=>setStoryViewer(null)} className="absolute left-3 top-3 z-10 rounded-full bg-black/50 p-2"><X/></button>{storyViewer.mediaUrl ? (storyViewer.mediaKind==='video' ? <video src={storyViewer.mediaUrl} controls autoPlay className="max-h-[72vh] w-full bg-black object-contain"/> : <img src={storyViewer.mediaUrl} alt="" className="max-h-[72vh] w-full object-contain"/>) : <div className="grid min-h-[60vh] place-items-center p-8 text-center text-2xl font-extrabold">{storyViewer.text}</div>}<div className="flex items-center justify-between p-4"><div><b>{storyViewer.name}</b><p className="text-xs opacity-70">{storyViewer.text}</p></div>{storyViewer.own&&<button onClick={()=>deleteStory(storyViewer)} className="rounded-lg bg-red-600 px-3 py-2 text-xs font-bold"><Trash2 className="inline h-4 w-4 ml-1"/>حذف</button>}</div></div></div>}
 
+    {openComments&&(()=>{const post=feed.find(x=>x.id===openComments); if(!post)return null; return <div className="fixed inset-0 z-[120] grid place-items-center bg-black/60 p-4" onClick={()=>setOpenComments(null)}>
+      <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl" onClick={e=>e.stopPropagation()}>
+        <div className="flex items-center justify-between border-b pb-3">
+          <b className="text-lg">التعليقات</b>
+          <button onClick={()=>setOpenComments(null)} aria-label="إغلاق"><X/></button>
+        </div>
+        <div className="max-h-[55vh] space-y-2 overflow-y-auto py-4">
+          {post.comments.length===0&&<div className="py-8 text-center text-sm text-slate-500">لا توجد تعليقات بعد.</div>}
+          {post.comments.map(c=><div key={c.id} className="rounded-xl bg-slate-50 p-3 text-sm"><b>{c.name}</b><div className="mt-1">{c.body}</div></div>)}
+        </div>
+        <div className="flex gap-2 border-t pt-3">
+          <input autoFocus value={comments[post.id]||''} onChange={e=>setComments(v=>({...v,[post.id]:e.target.value}))} onKeyDown={e=>e.key==='Enter'&&addComment(post.id)} className="flex-1 rounded-full border bg-slate-50 px-4 py-2 text-sm" placeholder="اكتب تعليقاً..."/>
+          <button onClick={()=>addComment(post.id)} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-teal-700 text-white" aria-label="إرسال التعليق"><Send className="h-4 w-4"/></button>
+        </div>
+      </div>
+    </div>})()}
     {share&&<div className="fixed inset-0 z-[120] grid place-items-center bg-black/60 p-4" onClick={()=>setShare(null)}><div className="w-full max-w-lg rounded-2xl bg-white p-5" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between"><h3 className="text-xl font-extrabold">إرسال</h3><button onClick={()=>setShare(null)}><X/></button></div><button onClick={async()=>{try{await navigator.share?.({title:share.title,url:share.url});}catch{}}} className="mt-4 w-full rounded-xl bg-teal-700 py-3 font-bold text-white"><Share2 className="inline ml-1"/>مشاركة من الجهاز</button><div className="mt-3 grid grid-cols-2 gap-2">{[['telegram','Telegram'],['whatsapp','WhatsApp'],['facebook','Facebook'],['x','X'],['email','البريد'],['sms','الرسائل']].map(([k,l])=><button key={k} onClick={()=>send(k)} className="rounded-xl border p-3 font-bold hover:border-teal-500 hover:text-teal-700">{l}</button>)}</div></div></div>}
 
     {notice&&<div className="fixed bottom-5 left-1/2 z-[130] -translate-x-1/2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-xl">{notice}<button onClick={()=>setNotice('')} className="mr-3"><CheckCircle2 className="inline h-4 w-4"/></button></div>}
