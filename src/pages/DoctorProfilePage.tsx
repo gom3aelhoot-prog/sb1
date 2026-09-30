@@ -36,7 +36,7 @@ function StoryBar({pageId,canManage}:{pageId:string;canManage:boolean}) {
 export default function DoctorProfilePage({ id }: { id: string }) {
   const { navigate } = useRouter();
   const role = getRole();
-  const canManagePage = role === 'owner' || role === 'moderator' || localStorage.getItem('sb1_page_owner_id') === id || localStorage.getItem('sb1_is_page_owner') === 'true';
+  const canManagePage = role === 'owner' || role === 'moderator' || (role === 'specialist' && id.startsWith('catalog-doctor-')) || localStorage.getItem('sb1_page_owner_id') === id || localStorage.getItem('sb1_is_page_owner') === 'true';
   const canSeePrivate = canManagePage;
   const { t, specialtyName, lang } = useI18n();
   const [doctor, setDoctor] = useState<Doctor | null>(null);
@@ -55,8 +55,14 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const [coverUrl,setCoverUrl]=useState(()=>localStorage.getItem('sb1_cover_'+id)||'');
   const [coverChooser,setCoverChooser]=useState(false);
   const [showFollowers,setShowFollowers]=useState(false);
-  const [unreadNotifications,setUnreadNotifications]=useState(()=>Number(localStorage.getItem('sb1_unread_notifications')||'0'));
+  const [unreadNotifications,setUnreadNotifications]=useState(()=>{const v=localStorage.getItem('sb1_unread_notifications');return v===null?3:Number(v||'0')});
   const [bellAnimating,setBellAnimating]=useState(false);
+  const [notificationOpen,setNotificationOpen]=useState(false);
+  const [notifications,setNotifications]=useState(()=>[
+    {id:'n1',title:'جلسة جديدة',body:'تمت إضافة جلسة مجانية جديدة إلى صفحتك.',time:'منذ 5 دقائق',read:false},
+    {id:'n2',title:'إعجاب جديد',body:'أحد المتابعين أعجب بأحد منشوراتك.',time:'منذ 12 دقيقة',read:false},
+    {id:'n3',title:'سؤال جديد',body:'وصل سؤال جديد ويمكنك فتحه من قسم الأسئلة.',time:'منذ 20 دقيقة',read:false}
+  ]);
   const [followers,setFollowers]=useState(()=>[
     {id:'catalog-doctor-ar-clinical-psychology-2',name:'د. ليان',online:true},
     {id:'catalog-doctor-ar-clinical-psychology-3',name:'د. أحمد',online:true},
@@ -69,7 +75,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const savedCoverImages=getSaved().filter(x=>x.kind==='image'&&x.url).map(x=>x.url as string);
   const selectMain=(section:MainSection)=>{setMainSection(section);setTimeout(()=>document.getElementById('profile-tabs')?.scrollIntoView({behavior:'smooth',block:'start'}),0)};
   useEffect(()=>{
-    const onNotification=()=>{setUnreadNotifications(v=>{const next=v+1;localStorage.setItem('sb1_unread_notifications',String(next));return next});setBellAnimating(true);window.setTimeout(()=>setBellAnimating(false),15000)};
+    const onNotification=()=>{setNotifications(v=>[{id:'n-'+Date.now(),title:'إشعار جديد',body:'لديك إشعار جديد في صفحة الأخصائي.',time:'الآن',read:false},...v]);setUnreadNotifications(v=>{const next=v+1;localStorage.setItem('sb1_unread_notifications',String(next));return next});setBellAnimating(true);window.setTimeout(()=>setBellAnimating(false),15000)};
     const onStorage=(e:StorageEvent)=>{if(e.key==='sb1_unread_notifications'){const next=Number(e.newValue||'0');if(next>unreadNotifications){setBellAnimating(true);window.setTimeout(()=>setBellAnimating(false),15000)}setUnreadNotifications(next)}};
     window.addEventListener('sb1:new-notification',onNotification as EventListener);window.addEventListener('storage',onStorage);return()=>{window.removeEventListener('sb1:new-notification',onNotification as EventListener);window.removeEventListener('storage',onStorage)};
   },[unreadNotifications]);
@@ -170,7 +176,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     { key:'home', label:lang==='ar'?'الرئيسية':'Home', icon:Home },
     { key:'sessions', label:lang==='ar'?'جلساتي':'My Sessions', icon:Video },
     { key:'articles', label:lang==='ar'?'مقالتي':'My Articles', icon:BookOpen },
-    { key:'questions', label:lang==='ar'?'الأسئلة المجابة':'Answered Questions', icon:MessageCircle },
+    { key:'questions', label:lang==='ar'?'الأسئلة':'Questions', icon:MessageCircle },
     { key:'recordings', label:lang==='ar'?'تسجيلاتي':'My Recordings', icon:Video },
     { key:'courses', label:lang==='ar'?'الدورات والكورسات':'Courses', icon:GraduationCap },
     { key:'certificates', label:lang==='ar'?'شهاداتي':'My Certificates', icon:Award },
@@ -184,9 +190,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           {t('common.back')}
         </button>
 
-        <div className="mb-1 min-h-[42px] rounded-xl border border-dashed border-slate-200 bg-slate-50/60" aria-label="مساحة إعلانية" />
-
-        <aside className="fixed top-24 bottom-6 z-40 hidden w-60 xl:block end-4 2xl:end-8 overflow-y-auto border-s border-slate-300 ps-4" aria-label="قائمة SB1 الرئيسية">
+        <aside className="fixed top-24 bottom-6 z-40 hidden w-60 xl:block end-4 2xl:end-8 overflow-y-auto border-s border-slate-300 bg-white ps-4 pe-1" aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
             {canSeePrivate&&<button onClick={()=>selectMain('wallet')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm active:bg-slate-900"><Wallet className="h-4 w-4"/>الحساب والمحفظة</button>}
             {canManagePage&&<button onClick={()=>selectMain('clone')} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm active:bg-emerald-200"><Copy className="h-4 w-4"/>الاستنساخ</button>}
@@ -214,13 +218,13 @@ export default function DoctorProfilePage({ id }: { id: string }) {
             </div>
           </div>
         </aside>
-        <div className="xl:me-[17rem] min-w-0">
+        <div className="xl:me-[17rem] min-w-0 overflow-hidden">
           <div className="mb-2"><StoryBar pageId={id} canManage={canManagePage} /></div>
         {/* Cover + Profile Header */}
         <div className="card overflow-hidden mb-6">
-          <div className="relative h-28 overflow-hidden bg-gradient-to-l from-teal-500 via-teal-600 to-teal-700">{coverUrl&&<img src={coverUrl} alt="" className="h-full w-full object-cover"/>}{canManagePage&&<div className="absolute bottom-3 left-3 flex gap-2"><label className="cursor-pointer rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white backdrop-blur active:bg-black/70">تغيير الغلاف<input type="file" accept="image/*" className="hidden" onChange={e=>{const f=e.target.files?.[0];if(f){const u=URL.createObjectURL(f);saveCover(u)}}}/></label><button onClick={()=>setCoverChooser(true)} className="rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white backdrop-blur active:bg-black/70">من المفضلة</button></div>}</div>
+          <div className="relative h-24 overflow-hidden bg-gradient-to-l from-teal-500 via-teal-600 to-teal-700">{coverUrl&&<img src={coverUrl} alt="" className="h-full w-full object-cover"/>}{canManagePage&&<div className="absolute bottom-3 left-3 flex gap-2"><label className="cursor-pointer rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white backdrop-blur active:bg-black/70">تغيير الغلاف<input type="file" accept="image/*" className="hidden" onChange={e=>{const f=e.target.files?.[0];if(f){const u=URL.createObjectURL(f);saveCover(u)}}}/></label><button onClick={()=>setCoverChooser(true)} className="rounded-lg bg-black/60 px-3 py-2 text-xs font-bold text-white backdrop-blur active:bg-black/70">من المفضلة</button></div>}</div>
           <div className="px-6 pb-6">
-            <div className="flex flex-col md:flex-row gap-4 -mt-8">
+            <div className="flex flex-col md:flex-row gap-4 mt-0 pt-4">
               <div className="w-28 h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center shrink-0 ring-4 ring-white mx-auto md:mx-0">
                 {!imgError ? (
                   <img src={profileAvatar} alt={doctor.name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
@@ -247,17 +251,29 @@ export default function DoctorProfilePage({ id }: { id: string }) {
                 </button>
                 <div className="flex items-center justify-center gap-2"><button onClick={shareProfile} className="px-6 py-2.5 rounded-xl border border-teal-200 text-teal-700 bg-teal-50 font-semibold text-sm flex items-center justify-center gap-2">
                   <Share2 className="w-4 h-4" /> مشاركة صفحة SB1
-                </button><button onClick={()=>{setUnreadNotifications(0);localStorage.setItem('sb1_unread_notifications','0')}} aria-label="الإشعارات" className={`relative grid h-11 w-11 place-items-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-600 transition ${unreadNotifications>0?'text-red-600 border-red-200 bg-red-50':''} ${bellAnimating?'animate-[sb1bell_.5s_ease-in-out_infinite]':''}`}><Bell className="h-5 w-5"/>{unreadNotifications>0&&<span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-extrabold text-white">{unreadNotifications}</span>}</button></div>
+                </button><div className="relative">
+  <button onClick={()=>setNotificationOpen(v=>!v)} aria-label="الإشعارات" className={`relative grid h-11 w-11 place-items-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-600 transition ${unreadNotifications>0?'text-red-600 border-red-200 bg-red-50':''} ${bellAnimating?'animate-[sb1bell_.5s_ease-in-out_infinite]':''}`}><Bell className="h-5 w-5"/>{unreadNotifications>0&&<span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-extrabold text-white">{unreadNotifications}</span>}</button>
+  {notificationOpen&&<div className="absolute left-0 top-12 z-[160] w-80 max-w-[80vw] overflow-hidden rounded-2xl border bg-white text-right shadow-xl">
+    <div className="flex items-center justify-between border-b px-4 py-3"><b>الإشعارات</b><button onClick={()=>{setNotifications(v=>v.map(n=>({...n,read:true})));setUnreadNotifications(0);localStorage.setItem('sb1_unread_notifications','0')}} className="text-[11px] font-bold text-teal-700">قراءة الكل</button></div>
+    <div className="max-h-80 overflow-y-auto">
+      {notifications.map(n=><button key={n.id} onClick={()=>{setNotifications(v=>v.map(x=>x.id===n.id?{...x,read:true}:x));setUnreadNotifications(v=>Math.max(0,v-(n.read?0:1)));localStorage.setItem('sb1_unread_notifications',String(Math.max(0,unreadNotifications-(n.read?0:1))))}} className={`flex w-full gap-3 border-b px-4 py-3 text-right hover:bg-slate-50 ${n.read?'bg-white':'bg-emerald-50/60'}`}>
+        <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.read?'bg-slate-300':'bg-red-500'}`}/>
+        <span className="min-w-0"><b className="block text-sm">{n.title}</b><span className="mt-1 block text-xs text-slate-600">{n.body}</span><span className="mt-1 block text-[10px] text-slate-400">{n.time}</span></span>
+      </button>)}
+    </div>
+  </div>}
+</div></div>
               </div>
             </div>
             {doctor.bio && <p className="text-sm text-gray-600 mt-4 leading-relaxed">{doctor.bio}</p>}
           </div>
         </div>
 
-        <div id="profile-tabs" className="mb-5 overflow-x-auto rounded-xl border bg-white shadow-sm">
-          <div className="flex min-w-max items-center" dir={lang==='ar'?'rtl':'ltr'}>
-            {tabs.map((tab,i)=>{const Icon=tab.icon;return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key)}} className={`flex items-center gap-2 border-e px-4 py-3 text-sm font-bold transition ${activeTab===tab.key?'bg-teal-50 text-teal-700':'text-slate-600 hover:bg-slate-50 hover:text-teal-700'}`}><Icon className="h-4 w-4"/>{tab.label}</button>})}
-            
+        <div id="profile-tabs" className="mb-5 w-full overflow-hidden rounded-xl border bg-white shadow-sm">
+          <div className="grid w-full grid-cols-7" dir={lang==='ar'?'rtl':'ltr'}>
+            {tabs.map((tab,i)=>{const Icon=tab.icon;const colors=['text-teal-600','text-rose-500','text-indigo-500','text-amber-500','text-sky-500','text-violet-500','text-emerald-500'];return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key)}} className={`min-w-0 border-e px-1 py-2 text-[11px] font-bold leading-4 transition active:bg-slate-200 ${activeTab===tab.key?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`}>
+              <span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Icon className={`h-4 w-4 ${colors[i]}`}/><span className="break-words">{tab.label}</span></span>
+            </button>})}
           </div>
         </div>
         {mainSection === 'wallet' && canSeePrivate && (
@@ -278,7 +294,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         {mainSection === 'clone' && canManagePage && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} focusSection="clone" />}
 
         {mainSection === 'home' && activeTab === 'sessions' && (
-          <div className="card p-5"><div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">جلساتي</h2><p className="text-xs text-slate-500">الجلسات المجانية التي تمت مع المتابعين، وليست فيديوهات.</p></div><CalendarDaysIcon className="text-teal-700"/></div><div className="space-y-3">{(diary.length?diary:Array.from({length:4},(_,i)=>({id:'demo-session-'+i,title:'جلسة مجانية '+(i+1),body:'جلسة تعريفية مجانية مع المتابعين',created_at:new Date(Date.now()-i*86400000).toISOString()}))).map((s:any)=><article key={s.id} className="rounded-xl border bg-white p-4"><div className="flex items-center justify-between gap-3"><div><b>{s.title||'جلسة مجانية'}</b><p className="mt-1 text-xs text-slate-500">{s.body}</p></div><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">مجانية</span></div><div className="mt-2 text-xs text-slate-400">{new Date(s.created_at).toLocaleDateString()}</div></article>)}</div></div>
+          <div className="card p-5"><div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">جلساتي</h2><p className="text-xs text-slate-500">الجلسات المجانية التي تمت مع المتابعين، وليست فيديوهات.</p></div><CalendarDaysIcon className="text-teal-700"/></div><div className="space-y-3">{(diary.length?diary:Array.from({length:4},(_,i)=>({id:'demo-session-'+i,title:'جلسة مجانية '+(i+1),body:'جلسة تعريفية مجانية مع المتابعين',created_at:new Date(Date.now()-i*86400000).toISOString()}))).map((s:any)=><article key={s.id} className="rounded-xl border bg-white p-4"><div className="flex items-center justify-between gap-3"><div><b>{s.title||'جلسة مجانية'}</b><p className="mt-1 text-xs text-slate-500">{s.body}</p></div><div className="flex items-center gap-2"><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">مجانية</span><button onClick={()=>toggleSaved({id:s.id,kind:'session',title:s.title||'جلسة',body:s.body,author:doctor.name,created_at:s.created_at})} className="rounded-lg bg-slate-50 p-2 text-teal-700" aria-label="إضافة إلى مفضلتي"><Bookmark className="h-4 w-4"/></button></div></div><div className="mt-2 text-xs text-slate-400">{new Date(s.created_at).toLocaleDateString()}</div></article>)}</div></div>
         )}
         {mainSection === 'home' && activeTab === 'recordings' && (
           <div className="card p-5"><h2 className="text-xl font-extrabold mb-4">تسجيلاتي</h2>{audios.length ? <div className="space-y-3">{audios.map(a=><div key={a.id} className="rounded-xl border p-4"><div className="flex items-center justify-between gap-3"><div><b>{a.title}</b><p className="mt-1 text-xs text-slate-500">{a.description}</p></div><Bookmark className="h-4 w-4 text-teal-700"/></div><audio src={a.audio_url} controls className="mt-3 w-full"/><button onClick={()=>toggleSaved({id:a.id,kind:'recording',title:a.title,body:a.description,author:doctor.name,url:a.audio_url,created_at:a.created_at})} className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs font-bold active:bg-slate-200">حفظ في مفضلتي</button></div>)}</div> : <p className="text-slate-500">لا توجد تسجيلات منشورة بعد.</p>}</div>
@@ -303,14 +319,14 @@ export default function DoctorProfilePage({ id }: { id: string }) {
 
         {activeTab === 'courses' && (
           <div className="grid gap-4 md:grid-cols-2">
-            {virtualCoursesForSpecialty(doctor.specialty?.slug||'',lang,6).map(c=><div key={c.id} className="card p-5"><h3 className="font-bold">{c.title}</h3><p className="mt-2 text-sm text-gray-500">{c.description}</p><div className="mt-3 flex justify-between"><b>{c.price} USD</b><button onClick={()=>navigate('/courses/'+c.id)} className="rounded-xl bg-teal-700 px-3 py-2 text-white">فتح الدورة</button></div></div>)}
+            {virtualCoursesForSpecialty(doctor.specialty?.slug||'',lang,6).map(c=><div key={c.id} className="card p-5"><h3 className="font-bold">{c.title}</h3><p className="mt-2 text-sm text-gray-500">{c.description}</p><div className="mt-3 flex items-center justify-between gap-2"><b>{c.price} USD</b><div className="flex items-center gap-2"><button onClick={()=>toggleSaved({id:c.id,kind:'course',title:c.title,body:c.description,created_at:new Date().toISOString()})} className="rounded-lg bg-slate-50 p-2 text-teal-700" aria-label="إضافة إلى مفضلتي"><Bookmark className="h-4 w-4"/></button><button onClick={()=>navigate('/courses/'+c.id)} className="rounded-xl bg-teal-700 px-3 py-2 text-white">فتح الدورة</button></div></div></div>)}
           </div>
         )}
 
         {activeTab === 'questions' && (
           <div className="space-y-4">
-            {questions.map(q=>(<div key={q.id} className="rounded-xl border bg-white p-3"><QuestionCard question={q}/><button onClick={()=>toggleSaved({id:q.id,kind:'question',title:(q as any).title||(q as any).question||(q as any).body||'سؤال وأجابة',body:(q as any).answer||(q as any).body,author:doctor.name,created_at:(q as any).created_at||new Date().toISOString()})} className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs font-bold active:bg-slate-200"><Bookmark className="inline h-4 w-4 me-1"/>حفظ في مفضلتي</button></div>))}
-            <a href={'/questions?specialty='+(doctor.specialty?.slug||'')} className="inline-block rounded-xl bg-teal-700 px-4 py-2 text-white font-bold">كل الأسئلة والإجابات</a>
+            {(questions.length?questions:Array.from({length:6},(_,i)=>({id:'demo-question-'+i,title:['كيف أتعامل مع القلق؟','هل اضطراب النوم يحتاج تقييماً؟','متى أطلب استشارة متخصصة؟','هل الجلسة الأولى مدفوعة؟','كيف أدعم أحد أفراد الأسرة؟','ما الفرق بين الحزن والقلق؟'][i],body:'سؤال توضيحي تجريبي لعرض شكل الأسئلة المجانية والمدفوعة.',answer:'إجابة نموذجية من الأخصائي.',created_at:new Date(Date.now()-i*86400000).toISOString(),is_paid:i%2===1,price:i%2===1?25:0})) as any[]).map((q:any)=><div key={q.id} className="rounded-xl border bg-white p-3"><div className="mb-2 flex items-center justify-between gap-2"><span className={`rounded-full px-2 py-1 text-[10px] font-bold ${q.is_paid||q.price>0?'bg-amber-50 text-amber-700':'bg-emerald-50 text-emerald-700'}`}>{q.is_paid||q.price>0?'مدفوع':'مجاني'}</span>{(q.price||0)>0&&<span className="text-xs font-bold text-slate-500">{q.price} USD</span>}</div><QuestionCard question={q}/><button onClick={()=>toggleSaved({id:q.id,kind:'question',title:q.title||q.question||q.body||'سؤال',body:q.answer||q.body,author:doctor.name,created_at:q.created_at||new Date().toISOString()})} className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs font-bold text-teal-700 active:bg-slate-200" aria-label="إضافة إلى مفضلتي"><Bookmark className="inline h-4 w-4 me-1"/>مفضلتي</button></div>)}
+            <a href={'/questions?specialty='+(doctor.specialty?.slug||'')} className="inline-block rounded-xl bg-teal-700 px-4 py-2 text-white font-bold">كل الأسئلة</a>
           </div>
         )}
 
