@@ -3,13 +3,15 @@ import { ArrowRight, Home, Star, MapPin, Clock, MessageCircle, GraduationCap, Aw
 import { useRouter } from '@/lib/router';
 import { getRole } from '@/lib/access';
 import PageProfileTools from '@/components/PageProfileTools';
+import FavoritesPage from '@/pages/FavoritesPage';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Question, type SpecialistPost, type PostComment, type Article, type DoctorAudio } from '@/lib/supabase';
 import QuestionCard from '@/components/QuestionCard';
 import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty, virtualArticlesForSpecialty, virtualAudioForSpecialty, virtualVideosForSpecialty, virtualCoursesForSpecialty } from '@/lib/catalog';
 import { toggleSaved, isSaved, toggleLiked, isLiked, archiveItem, addComment, toggleFollowing, isFollowing as isFollowingVault } from '@/lib/socialVault';
 
-type Tab = 'home' | 'articles' | 'questions' | 'courses' | 'portfolio';
+type Tab = 'home' | 'sessions' | 'articles' | 'questions' | 'recordings' | 'courses' | 'certificates' | 'portfolio';
+type MainSection = 'home' | 'favorites' | 'albums' | 'social' | 'phone' | 'settings' | 'clone' | 'wallet';
 
 
 function StoryBar({pageId,canManage}:{pageId:string;canManage:boolean}) {
@@ -48,6 +50,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<Tab>('home');
+  const [mainSection, setMainSection] = useState<MainSection>('home');
   const [loading, setLoading] = useState(true);
   const [imgError, setImgError] = useState(false);
   const [isFollowing, setIsFollowing] = useState(()=>isFollowingVault(id));
@@ -144,14 +147,14 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     );
   }
 
-  const tabs: { key: Tab; label: string; icon: typeof FileText; scroll?: string }[] = [
+  const tabs: { key: Tab; label: string; icon: typeof FileText }[] = [
     { key:'home', label:lang==='ar'?'الرئيسية':'Home', icon:Home },
-    { key:'home', label:lang==='ar'?'جلساتي':'My Sessions', icon:Video, scroll:'fb-medical-content' },
+    { key:'sessions', label:lang==='ar'?'جلساتي':'My Sessions', icon:Video },
     { key:'articles', label:lang==='ar'?'مقالتي':'My Articles', icon:BookOpen },
     { key:'questions', label:lang==='ar'?'الأسئلة المجابة':'Answered Questions', icon:MessageCircle },
-    { key:'home', label:lang==='ar'?'تسجيلاتي':'My Recordings', icon:Video, scroll:'fb-medical-content' },
+    { key:'recordings', label:lang==='ar'?'تسجيلاتي':'My Recordings', icon:Video },
     { key:'courses', label:lang==='ar'?'الدورات والكورسات':'Courses', icon:GraduationCap },
-    { key:'home', label:lang==='ar'?'شهاداتي':'My Certificates', icon:Award, scroll:'fb-medical-content' },
+    { key:'certificates', label:lang==='ar'?'شهاداتي':'My Certificates', icon:Award },
   ];
 
   return (
@@ -166,15 +169,15 @@ export default function DoctorProfilePage({ id }: { id: string }) {
 
         <aside className="fixed top-24 z-40 hidden w-60 xl:block end-6 2xl:end-10" aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
-            {canSeePrivate&&<button onClick={()=>setActiveTab('portfolio')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm"><Wallet className="h-4 w-4"/>الحساب والمحفظة</button>}
-            {canManagePage&&<button onClick={()=>document.getElementById('fb-clone')?.scrollIntoView({behavior:'smooth',block:'start'})} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm"><Copy className="h-4 w-4"/>الاستنساخ</button>}
+            {canSeePrivate&&<button onClick={()=>setMainSection('wallet')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm"><Wallet className="h-4 w-4"/>الحساب والمحفظة</button>}
+            {canManagePage&&<button onClick={()=>setMainSection('clone')} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm"><Copy className="h-4 w-4"/>الاستنساخ</button>}
             <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
-              <button onClick={()=>setActiveTab('home')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Home className="h-4 w-4"/>الرئيسية</button>
-              <button onClick={()=>navigate('/favorites')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Heart className="h-4 w-4"/>مفضلتي</button>
-              <button onClick={()=>document.getElementById('fb-albums')?.scrollIntoView({behavior:'smooth',block:'start'})} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Library className="h-4 w-4"/>الألبومات</button>
-              <button onClick={()=>document.getElementById('fb-social')?.scrollIntoView({behavior:'smooth',block:'start'})} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><ExternalLink className="h-4 w-4"/>منصات التواصل</button>
-              <button onClick={()=>document.getElementById('fb-phone')?.scrollIntoView({behavior:'smooth',block:'start'})} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Share2 className="h-4 w-4"/>الهاتف وQR</button>
-              {canManagePage&&<button onClick={()=>document.getElementById('fb-settings')?.scrollIntoView({behavior:'smooth',block:'start'})} className="flex w-full items-center gap-2 px-4 py-3 text-sm font-bold hover:bg-slate-50"><SettingsIcon className="h-4 w-4"/>الإعدادات</button>}
+              <button onClick={()=>setMainSection('home')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Home className="h-4 w-4"/>الرئيسية</button>
+              <button onClick={()=>setMainSection('favorites')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Heart className="h-4 w-4"/>مفضلتي</button>
+              <button onClick={()=>setMainSection('albums')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Library className="h-4 w-4"/>الألبومات</button>
+              <button onClick={()=>setMainSection('social')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><ExternalLink className="h-4 w-4"/>منصات التواصل</button>
+              <button onClick={()=>setMainSection('phone')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50"><Share2 className="h-4 w-4"/>الهاتف وQR</button>
+              {canManagePage&&<button onClick={()=>setMainSection('settings')} className="flex w-full items-center gap-2 px-4 py-3 text-sm font-bold hover:bg-slate-50"><SettingsIcon className="h-4 w-4"/>الإعدادات</button>}
             </div>
           </div>
         </aside>
@@ -220,20 +223,35 @@ export default function DoctorProfilePage({ id }: { id: string }) {
 
         <div className="mb-5 overflow-x-auto rounded-xl border bg-white shadow-sm">
           <div className="flex min-w-max items-center" dir={lang==='ar'?'rtl':'ltr'}>
-            {tabs.map((tab,i)=>{const Icon=tab.icon;return <button key={tab.label+'-'+i} onClick={()=>{setActiveTab(tab.key);if(tab.scroll)setTimeout(()=>document.getElementById(tab.scroll!)?.scrollIntoView({behavior:'smooth',block:'start'}),0)}} className={`flex items-center gap-2 border-e px-4 py-3 text-sm font-bold transition ${activeTab===tab.key?'bg-teal-50 text-teal-700':'text-slate-600 hover:bg-slate-50 hover:text-teal-700'}`}><Icon className="h-4 w-4"/>{tab.label}</button>})}
+            {tabs.map((tab,i)=>{const Icon=tab.icon;return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key)}} className={`flex items-center gap-2 border-e px-4 py-3 text-sm font-bold transition ${activeTab===tab.key?'bg-teal-50 text-teal-700':'text-slate-600 hover:bg-slate-50 hover:text-teal-700'}`}><Icon className="h-4 w-4"/>{tab.label}</button>})}
             <button onClick={()=>navigate('/notifications/private')} className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-teal-700"><Bell className="h-4 w-4"/>إشعارات</button>
           </div>
         </div>
-        {activeTab === 'home' && (
-          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} hideStories />
-        )}
-
-        {canSeePrivate && activeTab === 'portfolio' && (
+        {mainSection === 'wallet' && canSeePrivate && (
           <div className="mb-5 grid gap-4 md:grid-cols-3">
             <div className="card p-5"><Wallet className="text-teal-600"/><b className="block mt-3">الرصيد</b><strong>{wallet.balance} USD</strong></div>
             <div className="card p-5"><Coins className="text-indigo-600"/><b className="block mt-3">النقاط</b><strong>{wallet.points}</strong></div>
             <div className="card p-5"><BadgeCheck className="text-amber-500"/><b className="block mt-3">المستحقات</b><strong>{wallet.due} USD</strong></div>
           </div>
+        )}
+        {mainSection === 'favorites' && <FavoritesPage />}
+        {mainSection === 'home' && activeTab === 'home' && (
+          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} hideStories focusSection="home" />
+        )}
+        {mainSection === 'albums' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} focusSection="albums" />}
+        {mainSection === 'social' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} focusSection="social" />}
+        {mainSection === 'phone' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} focusSection="phone" />}
+        {mainSection === 'settings' && canManagePage && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} focusSection="settings" />}
+        {mainSection === 'clone' && canManagePage && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} focusSection="clone" />}
+
+        {mainSection === 'home' && activeTab === 'sessions' && (
+          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} focusSection="medical" />
+        )}
+        {mainSection === 'home' && activeTab === 'recordings' && (
+          <div className="card p-5"><h2 className="text-xl font-extrabold mb-4">تسجيلاتي</h2>{audios.length ? <div className="space-y-3">{audios.map(a=><div key={a.id} className="rounded-xl border p-4"><b>{a.title}</b></div>)}</div> : <p className="text-slate-500">لا توجد تسجيلات منشورة بعد.</p>}</div>
+        )}
+        {mainSection === 'home' && activeTab === 'certificates' && (
+          <div className="card p-5"><h2 className="text-xl font-extrabold mb-4">شهاداتي</h2><div className="grid gap-3 md:grid-cols-2"><div className="rounded-xl border p-4"><Award className="text-teal-700"/><b className="mt-2 block">شهادات الاعتماد والإنجاز</b><p className="mt-1 text-sm text-slate-500">تظهر هنا الشهادات المرتبطة بصفحة الأخصائي.</p></div></div></div>
         )}
 
         {activeTab === 'articles' && (
