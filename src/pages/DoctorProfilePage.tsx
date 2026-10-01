@@ -338,7 +338,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
             </div>
           </div>
         </aside>
-        <div className="min-w-0 overflow-hidden xl:ps-[17rem]">
+        <div className="min-w-0 xl:ps-[17rem]">
         {/* Profile Header — keep the existing profile design; green cover removed as requested */}
         <div className="card mb-2 border-teal-900 bg-teal-700 text-white">
           <div className="px-6 py-5">
