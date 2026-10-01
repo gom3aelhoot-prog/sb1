@@ -115,6 +115,7 @@ export default function PageProfileTools({
   const [comments,setComments]=useState<Record<string,string>>({});
   const [likedIds,setLikedIds]=useState<string[]>(()=>read('sb1_fb_liked_'+pageId,[]));
   const hoverTimers=useRef<Record<string,number>>({});
+  const viewedOnce=useRef<Set<string>>(new Set());
   const [openComments,setOpenComments]=useState<string|null>(null);
   const [notice,setNotice]=useState('');
   const [active,setActive]=useState('home');
@@ -212,7 +213,9 @@ export default function PageProfileTools({
   const startHoverView=(itemId:string,video?:HTMLVideoElement|null)=>{
     if(video) video.play().catch(()=>{});
     if(hoverTimers.current[itemId]) return;
+    if(!canManage && viewedOnce.current.has(itemId)) return;
     hoverTimers.current[itemId]=window.setTimeout(()=>{
+      if(!canManage) viewedOnce.current.add(itemId);
       setFeed(v=>v.map(p=>p.id===itemId?{...p,views:(p.views||0)+1}:p));
       delete hoverTimers.current[itemId];
     },1000);
@@ -273,6 +276,27 @@ export default function PageProfileTools({
     setClones(v=>[...next,...v]);setNotice('تم إنشاء الصفحات المستنسخة بالصلاحيات المحددة.');
   };
 
+  const scrollerRefs=useRef<Record<string,HTMLDivElement|null>>({});
+  const scrollStrip=(key:string,direction:number)=>{scrollerRefs.current[key]?.scrollBy({left:direction*420,behavior:'smooth'});};
+  const ReelStrip=({stripId='reels-inline'}:{stripId?:string})=><div id={stripId} className="bg-transparent p-0">
+    <div className="mb-2 flex items-center justify-between">
+      <span className="text-xs font-bold text-teal-700">Reels</span>
+      <div className="flex gap-1" dir="ltr">
+        <button onClick={()=>scrollStrip(stripId,-1)} className="grid h-8 w-8 place-items-center rounded-full border bg-white text-teal-700 shadow-sm active:bg-teal-50">‹</button>
+        <button onClick={()=>scrollStrip(stripId,1)} className="grid h-8 w-8 place-items-center rounded-full border bg-white text-teal-700 shadow-sm active:bg-teal-50">›</button>
+      </div>
+    </div>
+    <div ref={el=>{scrollerRefs.current[stripId]=el}} className="flex gap-3 overflow-x-auto pb-1 scroll-smooth">
+      {reels.map(r=><button key={r.id+'-'+stripId} onClick={()=>setReelViewer(r)} className="min-w-[118px] overflow-hidden rounded-xl bg-slate-900 text-white text-right">
+        <div className="relative aspect-[3/4] max-h-40 overflow-hidden bg-slate-950">
+          <video src={r.mediaUrl||demoReelUrl} muted playsInline loop preload="metadata" className="absolute inset-0 h-full w-full object-cover" onMouseEnter={e=>startHoverView(r.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(r.id,e.currentTarget)}/>
+          <div className="absolute inset-0 bg-black/20"/>
+          <span className="absolute bottom-2 right-2 max-w-[90%] rounded bg-black/60 px-2 py-1 text-[10px] font-bold">{r.text.slice(0,38)}</span>
+          <span className="absolute bottom-2 left-2 rounded-full bg-black/70 px-2 py-1 text-[10px]"><Eye className="inline h-3 w-3 ml-1"/>{r.views||0}</span>
+        </div>
+      </button>)}
+    </div>
+  </div>;
   const sectionButton=(key:string,label:string,Icon:any)=>
     <button key={key} onClick={()=>jump(key)} className={'shrink-0 rounded-lg px-3 py-2 text-sm font-bold transition active:bg-slate-200 '+(active===key?'bg-teal-700 text-white':'text-slate-700 hover:bg-teal-50')}>{Icon&&<Icon className="inline h-4 w-4 ml-1"/>}{label}</button>;
 
@@ -316,45 +340,51 @@ export default function PageProfileTools({
           </div>
         </div>}
 
-        {/* Home order requested: posts heading -> horizontal Reels -> posts feed */}
-        {/* Reels strip appears directly after the composer */}
+        {/* ترتيب الرئيسية: شريط Reels -> منشئ المنشورات -> 3 منشورات -> Reels دوري */}
+        <ReelStrip stripId="fb-reels"/>
 
-        <div id="fb-reels" className="bg-transparent p-0"><div className="mb-3 flex justify-end"><button onClick={()=>jump("reels")} className="text-xs font-bold text-teal-700">عرض الكل</button></div>
-          <div className="flex gap-3 overflow-x-auto">
-            {reels.slice(0,10).map(r=><button key={r.id} onClick={()=>setReelViewer(r)} className="min-w-[118px] overflow-hidden rounded-xl bg-slate-900 text-white text-right">
-              <div className="relative grid aspect-[3/4] max-h-40 place-items-center overflow-hidden bg-slate-950 p-2">
-  <video src={r.mediaUrl||demoReelUrl} muted playsInline loop preload="metadata" className="absolute inset-0 h-full w-full object-cover" onMouseEnter={e=>startHoverView(r.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(r.id,e.currentTarget)}/>
-  <div className="absolute inset-0 bg-black/30"/>
-  <span className="relative z-10 px-2 text-xs font-bold">{r.text.slice(0,55)}</span><span className="absolute bottom-2 left-2 z-10 rounded-full bg-black/60 px-2 py-1 text-[10px]"><Eye className="inline h-3 w-3 ml-1"/>{r.views||0}</span>
-</div>
-            </button>)}
+        {canManage&&<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <button onClick={()=>setComposer(true)} className="flex w-full items-center gap-3 text-right">
+            {pageAvatar?<img src={pageAvatar} alt={pageName} className="h-11 w-11 shrink-0 rounded-full object-cover"/>:<div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-teal-100 font-extrabold text-teal-700">{pageName.charAt(0)}</div>}
+            <div className="flex-1 rounded-full bg-slate-100 px-4 py-3 text-sm text-slate-500">بم تفكر؟ اكتب منشوراً أو أضف صورة أو فيديو أو Reel...</div>
+          </button>
+          <div className="mt-3 grid grid-cols-3 border-t pt-3 text-sm font-bold text-slate-600">
+            <button onClick={()=>{setPostKind('image');setComposer(true)}} className="rounded-lg py-2 hover:bg-slate-50"><ImageIcon className="inline text-teal-600"/> صورة</button>
+            <button onClick={()=>{setPostKind('video');setComposer(true)}} className="rounded-lg py-2 hover:bg-slate-50"><Video className="inline text-teal-600"/> فيديو</button>
+            <button onClick={()=>{setPostKind('reel');setComposer(true)}} className="rounded-lg py-2 hover:bg-slate-50"><Video className="inline text-teal-600"/> Reel</button>
           </div>
-        </div>
+        </div>}
 
-        {/* Feed */}
         <div id="fb-posts" className="space-y-4">
-          {publicFeed.map((p,i)=><div key={p.id}>
-            <article onMouseEnter={()=>startHoverView(p.id)} onMouseLeave={()=>stopHoverView(p.id)} className="mx-auto max-w-3xl overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm">
-              <div className="p-3">
-              <div className="flex items-center gap-3">
-                {p.authorPhoto?<img src={p.authorPhoto} alt={p.author} className="h-10 w-10 rounded-full object-cover"/>:<div className="grid h-10 w-10 place-items-center rounded-full bg-teal-100 font-extrabold text-teal-700">{p.author.charAt(0)}</div>}
-                <div className="flex-1"><b className="text-sm">{p.author}</b><div className="text-xs text-slate-400">{new Date(p.createdAt).toLocaleString()}</div></div>
-              </div>
-              <div className="mt-3 rounded-xl px-3 py-4 whitespace-pre-wrap leading-7 text-sm" style={p.style||{}}>{p.text}</div>
-              {p.mediaUrl&&p.kind==='image'&&<img src={p.mediaUrl} alt="" className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl object-contain"/>}
-              {p.mediaUrl&&(p.kind==='video'||p.kind==='reel')&&<video src={p.mediaUrl} controls muted playsInline loop={p.kind==='reel'} preload="metadata" className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl bg-black object-contain"/>} 
-              {p.mediaUrl&&p.kind==='audio'&&<audio src={p.mediaUrl} controls className="mt-3 w-full"/>}
-              </div>
-              <div className="flex items-center border-t border-slate-700 bg-black px-2 py-2 text-sm text-white">
-                <button onClick={()=>like(p.id)} disabled={likedIds.includes(p.id)} className={'flex-1 rounded-lg py-2 transition '+(likedIds.includes(p.id)?'text-red-400':'text-white hover:bg-slate-800 hover:text-teal-300')}><Heart className="inline h-4 w-4 ml-1" fill={likedIds.includes(p.id)?'currentColor':'none'}/> {p.likes}</button>
-                <button onClick={()=>setOpenComments(p.id)} className="flex-1 rounded-lg py-2 hover:bg-slate-800" aria-label="التعليقات">{p.authorPhoto?<img src={p.authorPhoto} alt="" className="inline-block h-5 w-5 rounded-full object-cover align-middle ml-1"/>:<MessageCircle className="inline h-4 w-4 ml-1"/>}<MessageCircle className="inline h-4 w-4 ml-1"/> {p.comments.length}</button>
-                <span className="flex items-center gap-1 px-2 text-xs font-bold text-white"><Eye className="h-4 w-4"/>{p.views||0}</span>
-                <button onClick={()=>openShare(p.text)} className="flex-1 rounded-lg py-2 hover:bg-slate-800 active:bg-slate-700"><Share2 className="inline h-4 w-4 ml-1"/> مشاركة</button>
-                <button onClick={()=>saveToFavorites(p)} className="rounded-lg px-3 py-2 text-white hover:bg-slate-800 active:bg-slate-700" aria-label="حفظ"><Bookmark className="inline h-4 w-4"/></button>
-                <button onClick={()=>setAlbumPicker(p)} className="rounded-lg px-3 py-2 hover:bg-white active:bg-slate-100" aria-label="إضافة إلى ألبوم"><Album className="inline h-4 w-4"/></button>
-              </div>
-            </article>
-          </div>)}
+          {publicFeed.map((post,i)=>{
+            const n=i+1;
+            const showReel=[3,20,30,40].includes(n) || (n>50 && (n-50)%50===0);
+            const showStories=n===50 || (n>50 && (n-50)%200===0);
+            return <div key={post.id}>
+              <article onMouseEnter={()=>startHoverView(post.id)} onMouseLeave={()=>stopHoverView(post.id)} className="mx-auto max-w-3xl overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm">
+                <div className="p-3">
+                  <div className="flex items-center gap-3">
+                    {post.authorPhoto?<img src={post.authorPhoto} alt={post.author} className="h-10 w-10 rounded-full object-cover"/>:<div className="grid h-10 w-10 place-items-center rounded-full bg-teal-100 font-extrabold text-teal-700">{post.author.charAt(0)}</div>}
+                    <div className="flex-1"><b className="text-sm">{post.author}</b><div className="text-xs text-slate-400">{new Date(post.createdAt).toLocaleString()}</div></div>
+                  </div>
+                  <div className="mt-3 rounded-xl px-3 py-4 whitespace-pre-wrap leading-7 text-sm" style={post.style||{}}>{post.text}</div>
+                  {post.mediaUrl&&post.kind==='image'&&<img src={post.mediaUrl} alt="" className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl object-contain" onMouseEnter={()=>startHoverView(post.id)} onMouseLeave={()=>stopHoverView(post.id)}/>}
+                  {post.mediaUrl&&(post.kind==='video'||post.kind==='reel')&&<video src={post.mediaUrl} controls muted playsInline loop={post.kind==='reel'} preload="metadata" className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl bg-black object-contain"/>}
+                  {post.mediaUrl&&post.kind==='audio'&&<audio src={post.mediaUrl} controls className="mt-3 w-full"/>}
+                </div>
+                <div className="flex items-center border-t border-teal-900 bg-teal-800 px-2 py-2 text-sm text-white">
+                  <button onClick={()=>like(post.id)} disabled={likedIds.includes(post.id)} className={'flex-1 rounded-lg py-2 transition '+(likedIds.includes(post.id)?'text-red-300':'text-white hover:bg-teal-700')}><Heart className="inline h-4 w-4 ml-1" fill={likedIds.includes(post.id)?'currentColor':'none'}/> {post.likes}</button>
+                  <button onClick={()=>setOpenComments(post.id)} className="flex-1 rounded-lg py-2 hover:bg-teal-700" aria-label="التعليقات">{post.authorPhoto?<img src={post.authorPhoto} alt="" className="inline-block h-5 w-5 rounded-full object-cover align-middle ml-1"/>:<MessageCircle className="inline h-4 w-4 ml-1"/>}<MessageCircle className="inline h-4 w-4 ml-1"/> {post.comments.length}</button>
+                  <span className="flex items-center gap-1 px-2 text-xs font-bold text-white"><Eye className="h-4 w-4"/>{post.views||0}</span>
+                  <button onClick={()=>openShare(post.text)} className="flex-1 rounded-lg py-2 hover:bg-teal-700 active:bg-teal-900"><Share2 className="inline h-4 w-4 ml-1"/> مشاركة</button>
+                  <button onClick={()=>saveToFavorites(post)} className="rounded-lg px-3 py-2 text-white hover:bg-teal-700 active:bg-teal-900" aria-label="حفظ"><Bookmark className="inline h-4 w-4"/></button>
+                  <button onClick={()=>setAlbumPicker(post)} className="rounded-lg px-3 py-2 text-white hover:bg-teal-700 active:bg-teal-900" aria-label="إضافة إلى ألبوم"><Album className="inline h-4 w-4"/></button>
+                </div>
+              </article>
+              {showReel&&<ReelStrip stripId={'reels-'+n}/>}
+              {showStories&&<div className="my-2 border-y-2 border-black py-2"><div className="text-xs font-bold text-teal-700 mb-2">القصص</div><div className="flex gap-3 overflow-x-auto pb-1">{activeStories.map(s=><button key={s.id+'-mid'} onClick={()=>setStoryViewer(s)} className="min-w-[104px] overflow-hidden rounded-xl bg-white"><div className="h-28 overflow-hidden bg-slate-900">{s.mediaUrl?(s.mediaKind==='video'?<video src={s.mediaUrl} muted playsInline className="h-full w-full object-cover" onMouseEnter={e=>startHoverView(s.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(s.id,e.currentTarget)}/>:<img src={s.mediaUrl} alt="" className="h-full w-full object-cover" onMouseEnter={()=>startHoverView(s.id)} onMouseLeave={()=>stopHoverView(s.id)}/>):<span className="p-3 text-xs font-bold">{s.text}</span>}</div></button>)}</div></div>}
+            </div>
+          })}
         </div>
       </div>
 
