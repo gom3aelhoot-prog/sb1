@@ -58,8 +58,6 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [mainSection, setMainSection] = useState<MainSection>('home');
-  const [sidebarPinned, setSidebarPinned] = useState(false);
-  const sidebarPinY = useRef<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgError, setImgError] = useState(false);
   const [coverUrl,setCoverUrl]=useState(()=>localStorage.getItem('sb1_cover_'+id)||'');
@@ -84,22 +82,6 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const profileAvatar = doctor?.photo_url || ('https://api.dicebear.com/9.x/personas/svg?seed=' + encodeURIComponent(id));
   const savedCoverImages=getSaved().filter(x=>x.kind==='image'&&x.url).map(x=>x.url as string);
   const selectMain=(section:MainSection)=>{setMainSection(section);setTimeout(()=>document.getElementById('profile-tabs')?.scrollIntoView({behavior:'smooth',block:'start'}),0)};
-  useEffect(()=>{
-    const measure=()=>{
-      const tabs=document.getElementById('profile-tabs');
-      if(!tabs) return;
-      sidebarPinY.current=tabs.getBoundingClientRect().top+window.scrollY;
-      setSidebarPinned(window.scrollY>=sidebarPinY.current);
-    };
-    const onScroll=()=>{
-      if(sidebarPinY.current===null) measure();
-      setSidebarPinned(window.scrollY>=(sidebarPinY.current||0));
-    };
-    const timer=window.setTimeout(measure,50);
-    window.addEventListener('scroll',onScroll,{passive:true});
-    window.addEventListener('resize',measure);
-    return()=>{window.clearTimeout(timer);window.removeEventListener('scroll',onScroll);window.removeEventListener('resize',measure)};
-  },[]);
   useEffect(()=>{
     const onNotification=()=>{setNotifications(v=>[{id:'n-'+Date.now(),title:'إشعار جديد',body:'لديك إشعار جديد في صفحة الأخصائي.',time:'الآن',read:false},...v]);setUnreadNotifications(v=>{const next=v+1;localStorage.setItem('sb1_unread_notifications',String(next));return next});setBellAnimating(true);window.setTimeout(()=>setBellAnimating(false),15000)};
     const onStorage=(e:StorageEvent)=>{if(e.key==='sb1_unread_notifications'){const next=Number(e.newValue||'0');if(next>unreadNotifications){setBellAnimating(true);window.setTimeout(()=>setBellAnimating(false),15000)}setUnreadNotifications(next)}};
@@ -309,7 +291,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         </button>
 
         <div className="relative" dir="rtl">
-        <aside className={`${sidebarPinned ? "sticky top-0" : "absolute top-0"} start-4 z-40 hidden max-h-[calc(100vh-1rem)] w-[15rem] self-start overflow-y-auto border-s border-slate-900 bg-white ps-4 pe-1 shadow-sm xl:block`} aria-label="قائمة SB1 الرئيسية">
+        <aside className="sticky top-[4.5rem] start-4 z-40 hidden max-h-[calc(100vh-5.5rem)] w-[15rem] self-start overflow-y-auto border-s-slate-900 bg-white ps-4 pe-1 shadow-sm xl:block" aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
             {canSeePrivate&&<button onClick={()=>selectMain('wallet')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm active:bg-slate-900"><Wallet className="h-4 w-4 text-amber-300"/>الحساب والمحفظة</button>}
             {canManagePage&&<button onClick={()=>selectMain('clone')} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm active:bg-emerald-200"><Copy className="h-4 w-4 text-emerald-700"/>الاستنساخ</button>}
