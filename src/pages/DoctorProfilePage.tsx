@@ -103,8 +103,12 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     window.addEventListener('sb1:booking-created',onBooking as EventListener);return()=>window.removeEventListener('sb1:booking-created',onBooking as EventListener)
   },[id]);
   const saveCover=(url:string)=>{setCoverUrl(url);localStorage.setItem('sb1_cover_'+id,url);setCoverChooser(false)};
-  const [wallet,setWallet] = useState(()=>{try{return JSON.parse(localStorage.getItem('sb1_specialist_wallet')||'{"balance":1250,"points":340,"due":180}')}catch{return {balance:1250,points:340,due:180}}});
+  const [wallet,setWallet] = useState<any>({balance:0,points:0,due:0});
+  const [walletLedger,setWalletLedger]=useState<any[]|null>(null);
+  const [walletLedgerTitle,setWalletLedgerTitle]=useState('حركة المحفظة');
+  useEffect(()=>{supabase.from('sb1_wallets').select('*').eq('account_key',localStorage.getItem('sb1_account_user_id')||'guest').maybeSingle().then(({data})=>{if(data)setWallet({balance:Number(data.balance||0),points:Number(data.rewards_points||0),due:0})})},[]);
   const [workNow,setWorkNow]=useState(Date.now());
+  const openWalletLedger=async(kind:'points'|'due'|'balance')=>{const key=localStorage.getItem('sb1_account_user_id')||'guest';const [{data:walletTx},{data:creditTx},{data:penalties}]=await Promise.all([supabase.from('sb1_wallet_transactions').select('*').eq('account_key',key).order('created_at',{ascending:false}).limit(100),supabase.from('sb1_credit_transactions').select('*').eq('account_key',key).order('created_at',{ascending:false}).limit(100),supabase.from('provider_penalties').select('*').eq('provider_id',id).order('created_at',{ascending:false}).limit(100)]);let rows:any[]=[...(walletTx||[]).map(x=>({...x,source:'المحفظة',reason:x.description||x.transaction_type,value:x.amount,currency:x.currency_code||'USD'})),...(creditTx||[]).map(x=>({...x,source:'النقاط',reason:x.transaction_type,value:x.units, currency:'points'})),...(penalties||[]).map(x=>({...x,source:'العقوبات',reason:x.reason,value:-Math.abs(x.points||0),currency:'points'}))];if(kind==='points')rows=rows.filter(x=>x.currency==='points'||x.source==='النقاط'||x.source==='العقوبات');if(kind==='due')rows=rows.filter(x=>Number(x.value)<0||x.source==='العقوبات');setWalletLedgerTitle(kind==='points'?'عمليات النقاط والعقوبات':kind==='due'?'المستحقات والخصومات':'حركة الأموال');setWalletLedger(rows);};
   const [demoWorkStart]=useState(()=>{const k='sb1_demo_work_start_'+id;const old=Number(localStorage.getItem(k)||0);if(old>0)return old;const next=Date.now()+2*3600000;localStorage.setItem(k,String(next));return next});
   const [workSessions,setWorkSessions]=useState(()=>readWorkSchedule(id));
   const [openWorkQuestions,setOpenWorkQuestions]=useState(()=>[
@@ -452,11 +456,12 @@ export default function DoctorProfilePage({ id }: { id: string }) {
 
         {mainSection === 'wallet' && canSeePrivate && (
           <div className="mb-5 grid gap-4 md:grid-cols-3">
-            <div className="card p-5"><Wallet className="text-teal-600"/><b className="block mt-3">الرصيد</b><strong>{wallet.balance} USD</strong></div>
-            <div className="card p-5"><Coins className="text-indigo-600"/><b className="block mt-3">النقاط</b><strong>{wallet.points}</strong></div>
-            <div className="card p-5"><BadgeCheck className="text-amber-500"/><b className="block mt-3">المستحقات</b><strong>{wallet.due} USD</strong></div>
+            <button onClick={()=>openWalletLedger('balance')} className="card p-5 text-right active:bg-slate-100"><Wallet className="text-teal-600"/><b className="block mt-3">الرصيد</b><strong>{wallet.balance} USD</strong><span className="block mt-2 text-xs text-teal-700">عرض العمليات الحقيقية</span></button>
+            <button onClick={()=>openWalletLedger('points')} className="card p-5 text-right active:bg-slate-100"><Coins className="text-indigo-600"/><b className="block mt-3">النقاط</b><strong>{wallet.points}</strong><span className="block mt-2 text-xs text-teal-700">عرض السبب والعملية والعقوبة</span></button>
+            <button onClick={()=>openWalletLedger('due')} className="card p-5 text-right active:bg-slate-100"><BadgeCheck className="text-amber-500"/><b className="block mt-3">المستحقات</b><strong>{wallet.due} USD</strong><span className="block mt-2 text-xs text-teal-700">عرض العمليات والاستحقاق</span></button>
           </div>
         )}
+        {walletLedger&&<div className="fixed inset-0 z-[220] grid place-items-center bg-black/60 p-4" onClick={()=>setWalletLedger(null)}><div className="w-full max-w-2xl max-h-[80vh] overflow-hidden rounded-2xl bg-white" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between border-b p-4"><b>{walletLedgerTitle}</b><button onClick={()=>setWalletLedger(null)}><X/></button></div><div className="max-h-[68vh] overflow-y-auto p-4 space-y-2">{walletLedger.length?walletLedger.map((x:any,i)=><div key={x.id||i} className="rounded-xl border bg-slate-50 p-3"><div className="flex items-center justify-between gap-3"><b>{x.reason}</b><strong>{x.value} {x.currency}</strong></div><div className="mt-1 text-xs text-slate-500">{x.source} · {x.created_at?new Date(x.created_at).toLocaleString():''}</div>{x.severity&&<div className="mt-1 text-xs text-red-600">العقوبة: {x.severity} · النقاط: {Math.abs(x.points||0)}</div>}</div>):<p className="py-10 text-center text-slate-500">لا توجد عمليات مسجلة لهذا النوع في النظام.</p>}</div></div></div>}
         {mainSection === 'favorites' && <FavoritesPage />}
         {mainSection === 'home' && activeTab === 'home' && (
           <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} hideStories focusSection="home" />
