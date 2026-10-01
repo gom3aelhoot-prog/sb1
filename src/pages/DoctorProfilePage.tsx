@@ -423,7 +423,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
                 <div className="mt-3 space-y-2">
                   {(workSessions.length?workSessions:[{id:'demo-work-session',title:'جلسة متابعة مع متابع',client:'محمد',startsAt:demoWorkStart,endsAt:demoWorkStart+3600000,status:'محجوزة'}]).map((s:any)=>{
                     const remaining=Math.max(0,s.startsAt-workNow); const mins=Math.floor(remaining/60000); const hh=Math.floor(mins/60); const mm=mins%60; const urgent=remaining<=50*60000; const red=remaining<=60*60000;
-                    return <div key={s.id} className="rounded-xl border bg-white p-3">
+                    return <button key={s.id} onClick={()=>navigate('/appointments')} className="w-full rounded-xl border bg-white p-3 text-right hover:bg-slate-50 active:bg-slate-100">
                       <div className="flex items-start justify-between gap-2"><div><b className="text-sm">{s.title}</b><p className="mt-1 text-xs text-slate-500">{s.client} · {new Date(s.startsAt).toLocaleString('ar')}</p></div><span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">{s.status}</span></div>
                       <div className="mt-3 flex items-center justify-between gap-2"><span className="text-xs text-slate-500">الوقت المتبقي</span><span className={`font-mono text-sm font-black ${urgent?'animate-[sb1pulse_.55s_ease-in-out_infinite] text-red-600':red?'text-red-600':'text-black'}`}>{hh}:{String(mm).padStart(2,'0')}</span></div>
                       {urgent&&<div className="mt-1 text-[10px] font-bold text-red-600">اقترب موعد الجلسة — المنبه مفعل</div>}
@@ -433,7 +433,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               </div>
               <div className="rounded-xl border bg-slate-50 p-4">
                 <b>أسئلتي المفتوحة</b>
-                <div className="mt-3 space-y-2">{openWorkQuestions.map(q=>{const r=Math.max(0,q.closesAt-workNow);return <div key={q.id} className="rounded-xl border bg-white p-3"><b className="text-sm">{q.title}</b><p className="mt-1 text-[10px] text-slate-500">يغلق: {new Date(q.closesAt).toLocaleString('ar')} · متبقٍ {Math.floor(r/3600000)}س {Math.floor((r%3600000)/60000)}د</p></div>})}</div>
+                <div className="mt-3 space-y-2">{openWorkQuestions.map(q=>{const r=Math.max(0,q.closesAt-workNow);return <button key={q.id} onClick={()=>navigate('/questions/'+q.id)} className="w-full rounded-xl border bg-white p-3 text-right hover:bg-slate-50 active:bg-slate-100"><b className="text-sm">{q.title}</b><p className="mt-1 text-[10px] text-slate-500">يغلق: {new Date(q.closesAt).toLocaleString('ar')} · متبقٍ {Math.floor(r/3600000)}س {Math.floor((r%3600000)/60000)}د</p></div>})}</div>
               </div>
               <div className="rounded-xl border bg-slate-50 p-4">
                 <div className="flex items-center justify-between"><b>المواعيد المتاحة</b><button onClick={()=>navigate('/specialist-appointments')} title="فتح مفكرة المواعيد والأسعار" className="rounded-lg bg-indigo-50 px-2 py-1 text-xs font-bold text-indigo-700 active:bg-indigo-100">فتح المفكرة</button></div>
