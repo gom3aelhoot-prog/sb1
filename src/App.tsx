@@ -117,6 +117,7 @@ import SpecialistPackagesPage from '@/pages/SpecialistPackagesPage';
 import SpecialistStudioPage from '@/pages/SpecialistStudioPage';
 import ClientDashboardPage from '@/pages/ClientDashboardPage';
 import RoleWorkspacePage from '@/pages/RoleWorkspacePage';
+import ClonePage from '@/pages/ClonePage';
 import { getSanction } from '@/lib/safetyModeration';
 import RoleGate from '@/components/RoleGate';
 import { getRole, routeAllowed, roleLabel } from '@/lib/access';
@@ -170,6 +171,7 @@ function PlatformRoute() {
   if (route === '/specialist/content') return <SpecialistContentUploadPage />;
   if (route === '/specialist/packages') return <SpecialistPackagesPage />;
   if (route === '/specialist/studio') return <SpecialistStudioPage />;
+  if (route.startsWith('/clone/')) return <ClonePage />;
   if (route === '/dashboard') return <RoleWorkspacePage />;
   if (route === '/client/dashboard') return <ClientDashboardPage />;
   if (route === '/institution/dashboard') return <RoleWorkspacePage />;
