@@ -261,6 +261,8 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const workCountdown=Math.max(0,nextWorkStart-workNow);
   const dateKey=(value:string|number)=>{const x=new Date(value);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
   const filteredDiary=diary.filter(s=>dateKey(s.created_at)===sessionDate);
+  const demoDiary=Array.from({length:4},(_,i)=>({id:'demo-session-'+i,title:'جلسة مجانية '+(i+1),body:'جلسة تعريفية مجانية مع المتابعين',created_at:new Date(Date.now()-i*86400000).toISOString()}));
+  const visibleDiary=diary.length?filteredDiary:demoDiary.filter(s=>dateKey(s.created_at)===sessionDate);
   const selectedWorkSessions=workSessions.filter((s:any)=>dateKey(s.startsAt)===sessionDate);
   const workMinutes=Math.floor(workCountdown/60000);
   const workHours=Math.floor(workMinutes/60);
@@ -434,8 +436,8 @@ export default function DoctorProfilePage({ id }: { id: string }) {
             </div>
             {selectedWorkSessions.length>0&&<div className="mb-4 rounded-xl border border-indigo-100 bg-indigo-50 p-3"><b className="text-sm">مواعيد هذا التاريخ</b><div className="mt-2 space-y-2">{selectedWorkSessions.map((s:any)=><div key={s.id} className="flex items-center justify-between rounded-lg bg-white p-3"><div><b>{s.title}</b><p className="text-xs text-slate-500">{s.client} · {new Date(s.startsAt).toLocaleString('ar')}</p></div><span className="text-xs font-bold text-indigo-700">{s.status}</span></div>)}</div></div>}
             <div className="space-y-3">
-              {filteredDiary.map((s:any)=><article key={s.id} className="rounded-xl border bg-white p-4"><div className="flex items-center justify-between gap-3"><div><b>{s.title||'جلسة مجانية'}</b><p className="mt-1 text-xs text-slate-500">{s.body}</p></div><div className="flex items-center gap-2"><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">مجانية</span><button onClick={()=>toggleSaved({id:s.id,kind:'session',title:s.title||'جلسة',body:s.body,author:doctor.name,created_at:s.created_at})} className="rounded-lg bg-slate-50 p-2 text-teal-700" aria-label="إضافة إلى مفضلتي"><Bookmark className="h-4 w-4"/></button></div></div><div className="mt-2 text-xs text-slate-400">{new Date(s.created_at).toLocaleDateString()}</div></article>)}
-              {!selectedWorkSessions.length&&!filteredDiary.length&&<div className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-400">لا توجد جلسات في هذا التاريخ.</div>}
+              {visibleDiary.map((s:any)=><article key={s.id} className="rounded-xl border bg-white p-4"><div className="flex items-center justify-between gap-3"><div><b>{s.title||'جلسة مجانية'}</b><p className="mt-1 text-xs text-slate-500">{s.body}</p></div><div className="flex items-center gap-2"><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">مجانية</span><button onClick={()=>toggleSaved({id:s.id,kind:'session',title:s.title||'جلسة',body:s.body,author:doctor.name,created_at:s.created_at})} className="rounded-lg bg-slate-50 p-2 text-teal-700" aria-label="إضافة إلى مفضلتي"><Bookmark className="h-4 w-4"/></button></div></div><div className="mt-2 text-xs text-slate-400">{new Date(s.created_at).toLocaleDateString()}</div></article>)}
+              {!selectedWorkSessions.length&&!visibleDiary.length&&<div className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-400">لا توجد جلسات في هذا التاريخ.</div>}
             </div>
           </div>
         )}
