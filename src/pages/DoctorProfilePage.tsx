@@ -25,7 +25,7 @@ function StoryBar({pageId,canManage,pageAvatar,ownOnly=false}:{pageId:string;can
   const demo=['د. ليان','د. أحمد','مركز الحياة','سارة','محمد'];
   const demoImages=['https://randomuser.me/api/portraits/women/44.jpg','https://randomuser.me/api/portraits/men/32.jpg','https://randomuser.me/api/portraits/women/68.jpg','https://randomuser.me/api/portraits/men/75.jpg','https://randomuser.me/api/portraits/women/65.jpg'];
   const demoVideo='https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
-  const visible=[...(ownOnly?stories.filter(s=>s.own):stories.filter(s=>new Date(s.expiresAt)>new Date())),...(ownOnly?[]:demo.map((name,i)=>({id:'story-demo-'+i,name,text:['معلومة جديدة','جلسة تعليمية','سؤال وجواب','فيديو جديد','تسجيل جديد'][i],mediaUrl:i===1||i===4?demoVideo:demoImages[i],mediaKind:i===1||i===4?'video':'image',expiresAt:new Date(Date.now()+86400000).toISOString()} as S))];
+  const visible=[...(ownOnly?stories.filter(s=>s.own):stories.filter(s=>new Date(s.expiresAt)>new Date())),...(ownOnly?[]:demo.map((name,i)=>({id:'story-demo-'+i,name,text:['معلومة جديدة','جلسة تعليمية','سؤال وجواب','فيديو جديد','تسجيل جديد'][i],mediaUrl:i===1||i===4?demoVideo:demoImages[i],mediaKind:i===1||i===4?'video':'image',expiresAt:new Date(Date.now()+86400000).toISOString()} as S)))];
   const [storyViews,setStoryViews]=useState<Record<string,number>>({});
   const storyHoverTimers=useRef<Record<string,number>>({});
   const storyHover=(storyId:string,videoEl?:HTMLVideoElement)=>{if(videoEl)videoEl.play().catch(()=>{});if(storyHoverTimers.current[storyId])return;storyHoverTimers.current[storyId]=window.setTimeout(()=>{setStoryViews(v=>({...v,[storyId]:(v[storyId]||0)+1}));delete storyHoverTimers.current[storyId]},1000)};
