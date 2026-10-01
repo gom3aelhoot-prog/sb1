@@ -8,3 +8,8 @@ export function saveDoctorSessionConfig(config:DoctorSessionConfig){const all=JS
 export function getSessionOptions(doctorId:string){return getDoctorSessionConfig(doctorId).options.filter(x=>x.enabled).sort((a,b)=>a.durationMinutes-b.durationMinutes);}
 export function sessionPrice(doctorId:string,duration:number){return getSessionOptions(doctorId).find(x=>x.durationMinutes===duration)?.price??0;}
 export function formatDuration(minutes:number,lang='ar'){if(lang==='ar')return minutes%60===0?minutes/60+' ساعة':minutes+' دقيقة';return minutes%60===0?minutes/60+' hour'+(minutes>60?'s':''):minutes+' minutes';}
+
+export type AvailabilitySlot={id:string;doctorId:string;start:string;end:string;price:number;enabled:boolean};
+const AVAILABILITY_KEY='sb1_doctor_availability';
+export function getDoctorAvailability(doctorId:string):AvailabilitySlot[]{try{const all=JSON.parse(localStorage.getItem(AVAILABILITY_KEY)||'{}');return (all[doctorId]||[]).filter((x:any)=>x.enabled!==false)}catch{return[]}}
+export function saveDoctorAvailability(doctorId:string,slots:AvailabilitySlot[]){const all=JSON.parse(localStorage.getItem(AVAILABILITY_KEY)||'{}');all[doctorId]=slots;localStorage.setItem(AVAILABILITY_KEY,JSON.stringify(all));window.dispatchEvent(new Event('sb1-availability-change'));return slots}
