@@ -94,6 +94,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const saveCover=(url:string)=>{setCoverUrl(url);localStorage.setItem('sb1_cover_'+id,url);setCoverChooser(false)};
   const [wallet,setWallet] = useState(()=>{try{return JSON.parse(localStorage.getItem('sb1_specialist_wallet')||'{"balance":1250,"points":340,"due":180}')}catch{return {balance:1250,points:340,due:180}}});
   const [workNow,setWorkNow]=useState(Date.now());
+  const [demoWorkStart]=useState(()=>{const k='sb1_demo_work_start_'+id;const old=Number(localStorage.getItem(k)||0);if(old>0)return old;const next=Date.now()+2*3600000;localStorage.setItem(k,String(next));return next});
   const [workSessions,setWorkSessions]=useState(()=>readWorkSchedule(id));
   const [openWorkQuestions,setOpenWorkQuestions]=useState(()=>[
     {id:'wq1',title:'كيف أتعامل مع القلق المستمر؟',closesAt:Date.now()+4*3600000},
@@ -194,7 +195,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     );
   }
 
-  const nextWorkStart=workSessions[0]?.startsAt || Date.now()+2*3600000;
+  const nextWorkStart=workSessions[0]?.startsAt || demoWorkStart;
   const workCountdown=Math.max(0,nextWorkStart-workNow);
   const workMinutes=Math.floor(workCountdown/60000);
   const workHours=Math.floor(workMinutes/60);
@@ -317,7 +318,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               <div className="rounded-xl border bg-slate-50 p-4">
                 <b>الجلسات الحالية والقادمة</b>
                 <div className="mt-3 space-y-2">
-                  {(workSessions.length?workSessions:[{id:'demo-work-session',title:'جلسة متابعة مع متابع',client:'محمد',startsAt:Date.now()+2*3600000,endsAt:Date.now()+3*3600000,status:'محجوزة'}]).map((s:any)=>{
+                  {(workSessions.length?workSessions:[{id:'demo-work-session',title:'جلسة متابعة مع متابع',client:'محمد',startsAt:demoWorkStart,endsAt:demoWorkStart+3600000,status:'محجوزة'}]).map((s:any)=>{
                     const remaining=Math.max(0,s.startsAt-workNow); const mins=Math.floor(remaining/60000); const hh=Math.floor(mins/60); const mm=mins%60; const urgent=remaining<=50*60000; const red=remaining<=60*60000;
                     return <div key={s.id} className="rounded-xl border bg-white p-3">
                       <div className="flex items-start justify-between gap-2"><div><b className="text-sm">{s.title}</b><p className="mt-1 text-xs text-slate-500">{s.client} · {new Date(s.startsAt).toLocaleString('ar')}</p></div><span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">{s.status}</span></div>
