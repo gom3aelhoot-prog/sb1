@@ -7,7 +7,7 @@ import FavoritesPage from '@/pages/FavoritesPage';
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Question, type SpecialistPost, type PostComment, type Article, type DoctorAudio } from '@/lib/supabase';
 import QuestionCard from '@/components/QuestionCard';
-import { getAppointments, type Appointment } from '@/lib/appointments';
+import { getAppointments } from '@/lib/appointments';
 import { getDoctorAvailability } from '@/lib/appointmentConfig';
 import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty, virtualArticlesForSpecialty, virtualAudioForSpecialty, virtualVideosForSpecialty, virtualCoursesForSpecialty } from '@/lib/catalog';
 import { toggleSaved, isSaved, toggleLiked, isLiked, archiveItem, addComment, toggleFollowing, isFollowing as isFollowingVault, getSaved } from '@/lib/socialVault';
