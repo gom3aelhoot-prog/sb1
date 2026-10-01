@@ -399,7 +399,8 @@ export default function DoctorProfilePage({ id }: { id: string }) {
       </button>)}
     </div>
   </div>}
-</div></div>}
+</div>}
+                </div>
               </div>
             </div>
             {doctor.bio && <p className="text-sm text-slate-200 mt-4 leading-relaxed">{doctor.bio}</p>}
