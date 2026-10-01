@@ -288,7 +288,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         </button>
 
         <div className="relative" dir="rtl">
-        <aside className="fixed start-4 top-24 bottom-4 z-40 hidden max-h-[calc(100vh-7rem)] w-[15rem] overflow-y-auto border-s border-slate-900 bg-white ps-4 pe-1 shadow-sm xl:block" aria-label="قائمة SB1 الرئيسية">
+        <aside className="fixed start-4 top-[145px] bottom-4 z-40 hidden max-h-[calc(100vh-7rem)] w-[15rem] overflow-y-auto border-s border-slate-900 bg-white ps-4 pe-1 shadow-sm xl:block" aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
             {canSeePrivate&&<button onClick={()=>selectMain('wallet')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm active:bg-slate-900"><Wallet className="h-4 w-4 text-amber-300"/>الحساب والمحفظة</button>}
             {canManagePage&&<button onClick={()=>selectMain('clone')} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm active:bg-emerald-200"><Copy className="h-4 w-4 text-emerald-700"/>الاستنساخ</button>}
@@ -319,7 +319,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         </aside>
         <div className="min-w-0 overflow-hidden xl:ps-[17rem]">
         {/* Profile Header — keep the existing profile design; green cover removed as requested */}
-        <div className="card mb-2 border-black bg-black text-white">
+        <div className="card mb-2 border-teal-900 bg-teal-700 text-white">
           <div className="px-6 py-5">
             <div className="flex flex-col md:flex-row gap-4 mt-0 pt-4">
               <div className="w-28 h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center shrink-0 ring-4 ring-white mx-auto md:mx-0">
@@ -366,7 +366,6 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           </div>
         </div>
         <div className="my-3 border-b-2 border-black" aria-hidden="true" />
-        <div className="mb-2"><StoryBar pageId={id} canManage={canManagePage} /></div>
 
         <div id="profile-tabs" className="mb-5 w-full overflow-hidden rounded-xl border bg-white shadow-sm">
           <div className="grid w-full grid-cols-7" dir={lang==='ar'?'rtl':'ltr'}>
@@ -375,6 +374,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
             </button>})}
           </div>
         </div>
+        <div className="mb-3"><StoryBar pageId={id} canManage={canManagePage} /></div>
         {mainSection === 'work' && canSeePrivate && (
           <section className="mb-5 rounded-xl border bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3">
