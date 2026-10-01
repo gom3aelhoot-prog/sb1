@@ -12,7 +12,9 @@ type FeedItem = {
   id:string; kind:MediaKind; text:string; mediaUrl?:string; mediaName?:string;
   createdAt:string; likes:number; views?:number; comments:{id:string;name:string;photo?:string;body:string}[];
   public:boolean; demo?:boolean; author:string;
-  style?:{background:string;color:string;fontSize:string;fontWeight:string};
+  style?:{background:string;color:string;fontSize:string;fontWeight:string;filter?:string};
+  authorPhoto?:string;
+  likedBy?:{name:string;photo?:string}[];
 };
 
 const read = <T,>(key:string, fallback:T):T => {
@@ -53,7 +55,7 @@ const demoReelUrl='https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_
 
 export default function PageProfileTools({
   canManage=false, pageId='current', pageName='SB1', pageAvatar,
-  seedPosts=[], hideStories=false, focusSection='home'
+  seedPosts=[], hideStories=false, focusSection='home', onlyOwn=false
 }:{
   canManage?:boolean;
   pageId?:string;
@@ -62,6 +64,7 @@ export default function PageProfileTools({
   seedPosts?:Array<{id:string;body:string;image_url?:string|null;video_url?:string|null;post_type?:string;created_at:string;likes_count?:number}>;
   hideStories?:boolean;
   focusSection?:'home'|'reels'|'albums'|'medical'|'social'|'phone'|'clone'|'settings';
+  onlyOwn?:boolean;
 }) {
   const show=(section:string)=>focusSection===section;
   const initial = useMemo<FeedItem[]>(() => {
@@ -120,6 +123,10 @@ export default function PageProfileTools({
   const [notice,setNotice]=useState('');
   const [active,setActive]=useState('home');
   const [share,setShare]=useState<{title:string;url:string}|null>(null);
+  const [likesViewer,setLikesViewer]=useState<FeedItem|null>(null);
+  const [albumType,setAlbumType]=useState<'all'|'images'|'videos'|'files'|'audio'>('all');
+  const [albumViewer,setAlbumViewer]=useState<any|null>(null);
+  const [albumUpload,setAlbumUpload]=useState<File|null>(null);
 
   const [phone,setPhone]=useState(()=>localStorage.getItem('sb1_private_phone')||'');
   const [phoneLinked,setPhoneLinked]=useState(()=>localStorage.getItem('sb1_phone_linked')==='true');
@@ -138,6 +145,10 @@ export default function PageProfileTools({
   const [postFontColor,setPostFontColor]=useState('#334155');
   const [postFontSize,setPostFontSize]=useState('18px');
   const [postFontWeight,setPostFontWeight]=useState('700');
+  const [postFilter,setPostFilter]=useState('none');
+  const [postMuted,setPostMuted]=useState(true);
+  const filters=[['none','بدون فلتر'],['grayscale(1)','أبيض وأسود'],['sepia(.65)','دافئ'],['contrast(1.15) saturate(1.25)','حيوي'],['brightness(1.12)','فاتح']];
+  const emojis=['❤️','👍','😂','😍','👏','🔥','😊','🎉','🧠','🩺','⭐','✨'];
   const [clonePermissions,setClonePermissions]=useState<string[]>([]);
   const [cloneType,setCloneType]=useState('specialist');
   const [cloneCount,setCloneCount]=useState(1);
@@ -162,7 +173,7 @@ export default function PageProfileTools({
   useEffect(()=>{if(storyFile){const u=URL.createObjectURL(storyFile);setStoryUrl(u)}else setStoryUrl('')},[storyFile]);
   useEffect(()=>()=>stream.current?.getTracks().forEach(t=>t.stop()),[]);
 
-  const publicFeed=feed.filter(p=>p.public);
+  const publicFeed=feed.filter(p=>p.public&&(!onlyOwn||p.author===pageName));
   const reels=publicFeed.filter(p=>p.kind==='reel');
   const activeStories=useMemo(()=>[
     ...stories.filter(s=>new Date(s.expiresAt)>new Date()),
@@ -189,7 +200,7 @@ export default function PageProfileTools({
 
   const publish=()=>{
     if(!postText.trim()&&!postUrl&&!recordUrl){setNotice('اكتب نصاً أو اختر صورة/فيديو أو سجّل صوتاً.');return}
-    const item:FeedItem={id:id(),kind:recordUrl?'audio':postKind,text:postText.trim()||'منشور جديد',mediaUrl:recordUrl||postUrl,mediaName:postFile?.name,createdAt:new Date().toISOString(),likes:0,comments:[],public:true,author:pageName,authorPhoto:pageAvatar};
+    const item:FeedItem={id:id(),kind:recordUrl?'audio':postKind,text:postText.trim()||'منشور جديد',mediaUrl:recordUrl||postUrl,mediaName:postFile?.name,createdAt:new Date().toISOString(),likes:0,likedBy:[],comments:[],public:true,author:pageName,authorPhoto:pageAvatar,style:{background:postBackground,color:postFontColor,fontSize:postFontSize,fontWeight:postFontWeight,filter:postFilter}};
     setFeed(v=>[item,...v]);setPostText('');setPostFile(null);setRecordUrl('');setComposer(false);setNotice('تم نشر المحتوى في الرئيسية.');
   };
 
@@ -207,8 +218,10 @@ export default function PageProfileTools({
 
   const like=(postId:string)=>{
     if(likedIds.includes(postId)) return;
+    const name=localStorage.getItem('chat_name')||'مستخدم SB1';
+    const photo=localStorage.getItem('chat_photo')||pageAvatar;
     setLikedIds(v=>[...v,postId]);
-    setFeed(v=>v.map(p=>p.id===postId?{...p,likes:p.likes+1}:p));
+    setFeed(v=>v.map(p=>p.id===postId?{...p,likes:p.likes+1,likedBy:[...(p.likedBy||[]),{name,photo}]}:p));
   };
   const startHoverView=(itemId:string,video?:HTMLVideoElement|null)=>{
     if(video) video.play().catch(()=>{});
