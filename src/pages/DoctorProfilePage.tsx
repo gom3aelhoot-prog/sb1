@@ -106,51 +106,112 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   }
 
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setDoctor(null);
+    setImgError(false);
+    setQuestions([]);
+    setPosts([]);
+    setDiary([]);
+    setArticles([]);
+    setAudios([]);
+    setComments({});
+
     (async () => {
-      const { data: doc } = await supabase.from('doctors').select('*, specialty(*)').eq('id', id).maybeSingle();
-      let resolved = doc as Doctor | null;
-      if (!resolved && id.startsWith('catalog-doctor-')) {
-        const parts=id.split('-');
-        const langCode=parts[2] || lang;
-        const slug=parts.slice(3,-1).join('-');
-        resolved = virtualDoctorsForSpecialty(slug, langCode, 10).find(d=>d.id===id) || null;
+      try {
+        const { data: doc } = await supabase.from('doctors').select('*, specialty(*)').eq('id', id).maybeSingle();
+        let resolved = doc as Doctor | null;
+        if (!resolved && id.startsWith('catalog-doctor-')) {
+          const parts=id.split('-');
+          const langCode=parts[2] || lang;
+          const slug=parts.slice(3,-1).join('-');
+          resolved = virtualDoctorsForSpecialty(slug, langCode, 10).find(d=>d.id===id) || null;
+        }
+
+        if (cancelled) return;
+
+        if (resolved) {
+          setDoctor(resolved);
+          const currentDoctor = resolved;
+          if (currentDoctor.is_virtual) {
+            const slug=currentDoctor.specialty?.slug||'';
+            setQuestions(virtualQuestionsForSpecialty(slug,lang,8));
+            setArticles(virtualArticlesForSpecialty(slug,lang,5));
+            setAudios(virtualAudioForSpecialty(slug,lang,4));
+            setPosts(Array.from({length:5},(_,i)=>({
+              id:`virtual-post-${id}-${i+1}`,
+              doctor_id:id,
+              body:lang==='ar'?`منشور تعليمي من ${currentDoctor.name} حول ${currentDoctor.specialty?.name||'التخصص'}.`:`Educational post from ${currentDoctor.name} about ${currentDoctor.specialty?.name||'the specialty'}.`,
+              image_url:null,
+              video_url:i===1?'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4':null,
+              post_type:i===1?'reel':'post',
+              views:200+i*70,
+              likes_count:30+i*11,
+              comments_count:3+i,
+              created_at:new Date(Date.now()-i*86400000).toISOString(),
+              doctor:currentDoctor
+            })) as SpecialistPost[]);
+            setDiary([]);
+            setComments({});
+            if (!cancelled) setLoading(false);
+            return;
+          }
+
+          const { data: ans } = await supabase.from('answers').select('question_id').eq('doctor_id', id);
+          if (cancelled) return;
+          if (ans && ans.length > 0) {
+            const qIds = ans.map((a) => a.question_id);
+            const { data: qs } = await supabase.from('questions').select('*, specialty(*), answers(*)').in('id', qIds).order('created_at', { ascending: false });
+            if (cancelled) return;
+            setQuestions(qs || []);
+          }
+
+          const { data: p } = await supabase.from('specialist_posts').select('*').eq('doctor_id', id).order('created_at', { ascending: false }).limit(20);
+          if (cancelled) return;
+          const demoPosts = currentDoctor.is_virtual ? Array.from({length:4},(_,i)=>({
+            id:`virtual-post-${id}-${i+1}`,
+            doctor_id:id,
+            body:lang==='ar'?`منشور تجريبي من ${currentDoctor.name}: معلومة تثقيفية عامة مرتبطة بتخصصي.`:`Educational demo post from ${currentDoctor.name} about the specialty.`,
+            image_url:null,
+            video_url:i===1?'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4':null,
+            post_type:i===1?'reel':'post',
+            views:200+i*70,
+            likes_count:30+i*11,
+            comments_count:3+i,
+            created_at:new Date(Date.now()-i*86400000).toISOString(),
+            doctor:currentDoctor
+          })) as SpecialistPost[] : [];
+          setPosts(p && p.length ? p : demoPosts);
+
+          const { data: d } = await supabase.from('specialist_diary').select('id, title, body, created_at').eq('doctor_id', id).eq('is_public', true).order('created_at', { ascending: false }).limit(10);
+          if (cancelled) return;
+          setDiary(d || []);
+
+          const { data: arts } = await supabase.from('articles').select('*, specialty(*)').eq('doctor_id', id).order('created_at', { ascending: false }).limit(10);
+          if (cancelled) return;
+          setArticles(arts || []);
+
+          const { data: aud } = await supabase.from('doctor_audio').select('*, specialty(*)').eq('doctor_id', id).order('created_at', { ascending: false }).limit(10);
+          if (cancelled) return;
+          setAudios(aud || []);
+
+          if (p && p.length > 0) {
+            const pIds = p.map((x) => x.id);
+            const { data: cs } = await supabase.from('post_comments').select('*').in('post_id', pIds).order('created_at');
+            if (cancelled) return;
+            const cMap: Record<string, PostComment[]> = {};
+            (cs || []).forEach((comment) => { (cMap[comment.post_id] = cMap[comment.post_id] || []).push(comment); });
+            setComments(cMap);
+          }
+        }
+      } catch (error) {
+        console.error('SB1 specialist profile load failed', error);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      if (resolved) {
-        setDoctor(resolved);
-        const doc = resolved;
-        if (doc.is_virtual) {
-          const slug=doc.specialty?.slug||'';
-          setQuestions(virtualQuestionsForSpecialty(slug,lang,8));
-          setArticles(virtualArticlesForSpecialty(slug,lang,5));
-          setAudios(virtualAudioForSpecialty(slug,lang,4));
-          setPosts(Array.from({length:5},(_,i)=>({id:`virtual-post-${id}-${i+1}`,doctor_id:id,body:lang==='ar'?`منشور تعليمي من ${doc.name} حول ${doc.specialty?.name||'التخصص'}.`:`Educational post from ${doc.name} about ${doc.specialty?.name||'the specialty'}.`,image_url:null,video_url:i===1?'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4':null,post_type:i===1?'reel':'post',views:200+i*70,likes_count:30+i*11,comments_count:3+i,created_at:new Date(Date.now()-i*86400000).toISOString(),doctor:doc})) as SpecialistPost[]);
-          setDiary([]); setComments({}); setLoading(false); return;
-        }
-        const { data: ans } = await supabase.from('answers').select('question_id').eq('doctor_id', id);
-        if (ans && ans.length > 0) {
-          const qIds = ans.map((a) => a.question_id);
-          const { data: qs } = await supabase.from('questions').select('*, specialty(*), answers(*)').in('id', qIds).order('created_at', { ascending: false });
-          setQuestions(qs || []);
-        }
-        const { data: p } = await supabase.from('specialist_posts').select('*').eq('doctor_id', id).order('created_at', { ascending: false }).limit(20);
-        const demoPosts = doc.is_virtual ? Array.from({length:4},(_,i)=>({id:`virtual-post-${id}-${i+1}`,doctor_id:id,body:lang==='ar'?`منشور تجريبي من ${doc.name}: معلومة تثقيفية عامة مرتبطة بتخصصي.`:`Educational demo post from ${doc.name} about the specialty.`,image_url:null,video_url:i===1?'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4':null,post_type:i===1?'reel':'post',views:200+i*70,likes_count:30+i*11,comments_count:3+i,created_at:new Date(Date.now()-i*86400000).toISOString(),doctor:doc})) as SpecialistPost[] : [];
-        setPosts(p && p.length ? p : demoPosts);
-        const { data: d } = await supabase.from('specialist_diary').select('id, title, body, created_at').eq('doctor_id', id).eq('is_public', true).order('created_at', { ascending: false }).limit(10);
-        setDiary(d || []);
-        const { data: arts } = await supabase.from('articles').select('*, specialty(*)').eq('doctor_id', id).order('created_at', { ascending: false }).limit(10);
-        setArticles(arts || []);
-        const { data: aud } = await supabase.from('doctor_audio').select('*, specialty(*)').eq('doctor_id', id).order('created_at', { ascending: false }).limit(10);
-        setAudios(aud || []);
-        if (p && p.length > 0) {
-          const pIds = p.map((x) => x.id);
-          const { data: cs } = await supabase.from('post_comments').select('*').in('post_id', pIds).order('created_at');
-          const cMap: Record<string, PostComment[]> = {};
-          (cs || []).forEach((c) => { (cMap[c.post_id] = cMap[c.post_id] || []).push(c); });
-          setComments(cMap);
-        }
-      }
-      setLoading(false);
     })();
+
+    return () => { cancelled = true; };
   }, [id, lang]);
 
   const handleLike = (postId: string) => {
