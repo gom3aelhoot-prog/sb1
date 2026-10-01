@@ -391,11 +391,10 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         <div className="my-3 border-b-2 border-black" aria-hidden="true" />
 
         <div className="mb-5 min-h-[58px] w-full"><div ref={profileTabsRef} id="profile-tabs" className={`${profileNavPinned ? "fixed inset-x-0 top-0 z-50" : "relative z-50"} w-full overflow-hidden border bg-white shadow-sm`}><div className="mx-auto max-w-6xl px-3 sm:px-5 lg:px-8"><div className="xl:ps-[17rem]"><div className="grid w-full grid-cols-7" dir={lang==='ar'?'rtl':'ltr'}>
-          <div className="grid w-full grid-cols-7" dir={lang==='ar'?'rtl':'ltr'}>
-            {tabs.map((tab,i)=>{const Icon=tab.icon;const colors=['text-teal-600','text-rose-500','text-indigo-500','text-amber-500','text-sky-500','text-violet-500','text-emerald-500'];return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key)}} className={`min-w-0 border-e px-1 py-2 text-[11px] font-bold leading-4 transition active:bg-slate-200 ${activeTab===tab.key?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`}>
+          {tabs.map((tab,i)=>{const Icon=tab.icon;const colors=['text-teal-600','text-rose-500','text-indigo-500','text-amber-500','text-sky-500','text-violet-500','text-emerald-500'];return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key)}} className={`min-w-0 border-e px-1 py-2 text-[11px] font-bold leading-4 transition active:bg-slate-200 ${activeTab===tab.key?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`}>
               <span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Icon className={`h-4 w-4 ${colors[i]}`}/><span className="break-words">{tab.label}</span></span>
             </button>})}
-          </div></div></div></div>
+          </div></div></div></div></div>
         <div className="mb-3"><StoryBar pageId={id} canManage={canManagePage} /></div>
         {mainSection === 'work' && canSeePrivate && (
           <section className="mb-5 rounded-xl border bg-white p-5 shadow-sm">
