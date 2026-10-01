@@ -16,8 +16,8 @@ type Tab = 'home' | 'sessions' | 'articles' | 'questions' | 'recordings' | 'cour
 type MainSection = 'home' | 'favorites' | 'albums' | 'social' | 'phone' | 'settings' | 'clone' | 'wallet' | 'work';
 
 
-function StoryBar({pageId,canManage}:{pageId:string;canManage:boolean}) {
-  type S={id:string;name:string;text:string;mediaUrl?:string;mediaKind?:'image'|'video';own?:boolean;expiresAt:string};
+function StoryBar({pageId,canManage,pageAvatar,ownOnly=false}:{pageId:string;canManage:boolean;pageAvatar?:string;ownOnly?:boolean}) {
+  type S={id:string;name:string;text:string;mediaUrl?:string;mediaKind?:'image'|'video';own?:boolean;authorPhoto?:string;expiresAt:string};
   const [stories,setStories]=useState<S[]>(()=>{try{return JSON.parse(localStorage.getItem('sb1_fb_stories_'+pageId)||'[]')}catch{return[]}});
   const [viewer,setViewer]=useState<S|null>(null),[compose,setCompose]=useState(false),[text,setText]=useState(''),[file,setFile]=useState<File|null>(null),[url,setUrl]=useState(''),[video,setVideo]=useState(false);
   useEffect(()=>{if(file){const u=URL.createObjectURL(file);setUrl(u)}else setUrl('')},[file]);
@@ -25,12 +25,12 @@ function StoryBar({pageId,canManage}:{pageId:string;canManage:boolean}) {
   const demo=['د. ليان','د. أحمد','مركز الحياة','سارة','محمد'];
   const demoImages=['https://randomuser.me/api/portraits/women/44.jpg','https://randomuser.me/api/portraits/men/32.jpg','https://randomuser.me/api/portraits/women/68.jpg','https://randomuser.me/api/portraits/men/75.jpg','https://randomuser.me/api/portraits/women/65.jpg'];
   const demoVideo='https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
-  const visible=[...stories.filter(s=>new Date(s.expiresAt)>new Date()),...demo.map((name,i)=>({id:'story-demo-'+i,name,text:['معلومة جديدة','جلسة تعليمية','سؤال وجواب','فيديو جديد','تسجيل جديد'][i],mediaUrl:i===1||i===4?demoVideo:demoImages[i],mediaKind:i===1||i===4?'video':'image',expiresAt:new Date(Date.now()+86400000).toISOString()} as S))];
+  const visible=[...(ownOnly?stories.filter(s=>s.own):stories.filter(s=>new Date(s.expiresAt)>new Date())),...(ownOnly?[]:demo.map((name,i)=>({id:'story-demo-'+i,name,text:['معلومة جديدة','جلسة تعليمية','سؤال وجواب','فيديو جديد','تسجيل جديد'][i],mediaUrl:i===1||i===4?demoVideo:demoImages[i],mediaKind:i===1||i===4?'video':'image',expiresAt:new Date(Date.now()+86400000).toISOString()} as S))];
   const [storyViews,setStoryViews]=useState<Record<string,number>>({});
   const storyHoverTimers=useRef<Record<string,number>>({});
   const storyHover=(storyId:string,videoEl?:HTMLVideoElement)=>{if(videoEl)videoEl.play().catch(()=>{});if(storyHoverTimers.current[storyId])return;storyHoverTimers.current[storyId]=window.setTimeout(()=>{setStoryViews(v=>({...v,[storyId]:(v[storyId]||0)+1}));delete storyHoverTimers.current[storyId]},1000)};
   const storyHoverStop=(storyId:string,videoEl?:HTMLVideoElement)=>{if(storyHoverTimers.current[storyId]){window.clearTimeout(storyHoverTimers.current[storyId]);delete storyHoverTimers.current[storyId]}if(videoEl){videoEl.pause();videoEl.currentTime=0}};
-  const create=()=>{if(!text.trim()&&!url)return;const s:S={id:'story-'+Date.now(),name:'قصتي',text:text.trim(),mediaUrl:url||undefined,mediaKind:video?'video':'image',own:true,expiresAt:new Date(Date.now()+86400000).toISOString()};setStories(v=>[s,...v]);setText('');setFile(null);setCompose(false);setViewer(s)};
+  const create=()=>{if(!text.trim()&&!url)return;const s:S={id:'story-'+Date.now(),name:'قصتي',text:text.trim(),mediaUrl:url||undefined,mediaKind:video?'video':'image',own:true,authorPhoto:pageAvatar,expiresAt:new Date(Date.now()+86400000).toISOString()};setStories(v=>[s,...v]);setText('');setFile(null);setCompose(false);setViewer(s)};
   return <>
     <div className="mb-1 bg-transparent p-0"><div className="flex gap-3 overflow-x-auto pb-1" dir="rtl">
       {canManage&&<button onClick={()=>setCompose(true)} className="min-w-[104px] overflow-hidden rounded-xl bg-slate-50"><div className="grid h-28 place-items-center bg-gradient-to-br from-teal-600 to-teal-800 text-white"><Plus className="h-8 w-8"/></div><div className="p-2 text-center text-xs font-bold">قصتك</div></button>}
@@ -404,7 +404,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               <span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Icon className={`h-4 w-4 ${colors[i]}`}/><span className="break-words">{tab.label}</span></span>
             </button>})}
           </div></div></div></div></div>
-        <div className="mb-3">{mainSection === 'home' && activeTab === 'home' && <StoryBar pageId={id} canManage={canManagePage} />}</div>
+        <div className="mb-3">{mainSection === 'home' && activeTab === 'home' && <StoryBar pageId={id} canManage={canManagePage} pageAvatar={profileAvatar} />} {mainSection === 'home' && activeTab === 'portfolio' && <StoryBar pageId={id} canManage={canManagePage} pageAvatar={profileAvatar} ownOnly />}</div>
         {mainSection === 'home' && showFollowers && (
           <section id="followers-list" className="mb-5 rounded-xl border bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">المتابعون</h2><p className="mt-1 text-xs text-slate-500">مرتبة أبجدياً، مع تمييز المتاحين الآن.</p></div><button onClick={()=>setShowFollowers(false)} className="rounded-lg border px-3 py-1 text-xs font-bold">إغلاق</button></div>
@@ -487,7 +487,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           <div className="card p-5"><h2 className="text-xl font-extrabold mb-4">تسجيلاتي</h2>{audios.length ? <div className="space-y-3">{audios.map(a=><div key={a.id} className="rounded-xl border p-4"><div className="flex items-center justify-between gap-3"><div><b>{a.title}</b><p className="mt-1 text-xs text-slate-500">{a.description}</p></div><Bookmark className="h-4 w-4 text-teal-700"/></div><audio src={a.audio_url} controls className="mt-3 w-full"/><button onClick={()=>toggleSaved({id:a.id,kind:'recording',title:a.title,body:a.description,author:doctor.name,url:a.audio_url,created_at:a.created_at})} className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs font-bold active:bg-slate-200">حفظ في مفضلتي</button></div>)}</div> : <p className="text-slate-500">لا توجد تسجيلات منشورة بعد.</p>}</div>
         )}
         {mainSection === 'home' && activeTab === 'portfolio' && (
-          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="home" onlyOwn />
+          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="home" onlyOwn hideStories />
         )}
         {mainSection === 'home' && activeTab === 'certificates' && (
           <div className="card p-5"><h2 className="text-xl font-extrabold mb-4">شهاداتي</h2><div className="grid gap-3 md:grid-cols-2"><div className="rounded-xl border p-4"><Award className="text-teal-700"/><b className="mt-2 block">شهادات الاعتماد والإنجاز</b><p className="mt-1 text-sm text-slate-500">تظهر هنا الشهادات المرتبطة بصفحة الأخصائي.</p></div></div></div>
