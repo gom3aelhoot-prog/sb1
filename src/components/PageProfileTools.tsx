@@ -252,7 +252,7 @@ export default function PageProfileTools({
   };
   const addComment=(postId:string)=>{
     const body=(comments[postId]||'').trim();if(!body)return;
-    setFeed(v=>v.map(p=>p.id===postId?{...p,comments:[...p.comments,{id:id(),name:'مستخدم SB1',photo:pageAvatar,body}]}:p));
+    const commenterName=localStorage.getItem('chat_name')||localStorage.getItem('sb1_account_name')||'مستخدم SB1'; const commenterPhoto=localStorage.getItem('chat_photo')||localStorage.getItem('sb1_account_avatar')||undefined; setFeed(v=>v.map(p=>p.id===postId?{...p,comments:[...p.comments,{id:id(),name:commenterName,photo:commenterPhoto,body}]}:p));
     setComments(v=>({...v,[postId]:''}));
   };
   const saveStoryToFavorites=(s:StoryItem)=>{toggleSaved({id:s.id,kind:s.mediaKind==='video'?'video':'image',title:s.text||s.name,body:s.text,author:s.name,url:s.mediaUrl,image_url:s.mediaKind==='image'?s.mediaUrl:undefined,created_at:s.createdAt});setNotice('تم حفظ القصة في مفضلتي.');};
@@ -318,8 +318,8 @@ export default function PageProfileTools({
     <div className="mb-2 flex items-center justify-between">
       <span className="text-xs font-bold text-teal-700">Reels</span>
       <div className="flex gap-1" dir="ltr">
-        <button onClick={()=>scrollStrip(stripId,-1)} className="grid h-8 w-8 place-items-center rounded-full border bg-white text-teal-700 shadow-sm active:bg-teal-50">‹</button>
-        <button onClick={()=>scrollStrip(stripId,1)} className="grid h-8 w-8 place-items-center rounded-full border bg-white text-teal-700 shadow-sm active:bg-teal-50">›</button>
+        <button title="تحريك الريلز لليسار" onClick={()=>scrollStrip(stripId,-1)} className="grid h-8 w-8 place-items-center rounded-full border bg-white text-teal-700 shadow-sm active:bg-teal-50">‹</button>
+        <button title="تحريك الريلز لليمين" onClick={()=>scrollStrip(stripId,1)} className="grid h-8 w-8 place-items-center rounded-full border bg-white text-teal-700 shadow-sm active:bg-teal-50">›</button>
       </div>
     </div>
     <div ref={el=>{scrollerRefs.current[stripId]=el}} className="flex gap-3 overflow-x-auto pb-1 scroll-smooth">
@@ -344,7 +344,7 @@ export default function PageProfileTools({
           <div className="bg-transparent p-0">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="sr-only">القصص</h2>
-              <button onClick={()=>setStoryComposer(true)} className="rounded-full bg-teal-50 p-2 text-teal-700" aria-label="إنشاء قصة"><Plus className="h-4 w-4"/></button>
+              <button title="إنشاء قصة جديدة" onClick={()=>setStoryComposer(true)} className="rounded-full bg-teal-50 p-2 text-teal-700" aria-label="إنشاء قصة"><Plus className="h-4 w-4"/></button>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-1">
               <button onClick={()=>setStoryComposer(true)} className="min-w-[104px] overflow-hidden rounded-xl bg-slate-50">
@@ -406,7 +406,7 @@ export default function PageProfileTools({
                   </div>
                   <div className="mt-3 rounded-xl px-3 py-4 whitespace-pre-wrap leading-7 text-sm" style={post.style||{}}>{post.text}</div>
                   {post.mediaUrl&&post.kind==='image'&&<img src={post.mediaUrl} alt="" className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl object-contain" onMouseEnter={()=>startHoverView(post.id)} onMouseLeave={()=>stopHoverView(post.id)}/>}
-                  {post.mediaUrl&&(post.kind==='video'||post.kind==='reel')&&<video src={post.mediaUrl} controls muted={postMuted} playsInline loop={post.kind==='reel'} preload="metadata" className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl bg-black object-contain" style={post.style?.filter?{filter:post.style.filter}:undefined}/>}
+                  {post.mediaUrl&&(post.kind==='video'||post.kind==='reel')&&<video src={post.mediaUrl} controls muted={postMuted} playsInline loop={post.kind==='reel'} preload="metadata" className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl bg-black object-contain" style={post.style?.filter?{filter:post.style.filter}:undefined} onMouseEnter={e=>startHoverView(post.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(post.id,e.currentTarget)}/>}
                   {post.mediaUrl&&post.kind==='audio'&&<audio src={post.mediaUrl} controls className="mt-3 w-full"/>}
                 </div>
                 <div className="flex items-center border-t border-teal-900 bg-teal-800 px-2 py-2 text-sm text-white">
