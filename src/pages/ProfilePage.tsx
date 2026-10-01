@@ -4,16 +4,17 @@ import { useI18n } from '@/lib/i18n';
 import { useRouter } from '@/lib/router';
 import { lt } from '@/lib/featureText';
 import { getSaved } from '@/lib/socialVault';
+import { getRole, roleLabel } from '@/lib/access';
 
 export default function ProfilePage() {
   const { lang } = useI18n();
   const { navigate } = useRouter();
-  const role = 'student';
+  const role = getRole()==='guest' ? 'client' : getRole();
   const [photo,setPhoto]=useState(()=>localStorage.getItem('sb1_generic_profile_photo')||'');
   const [cover,setCover]=useState(()=>localStorage.getItem('sb1_generic_profile_cover')||'');
   const savedImages=getSaved().filter(x=>x.kind==='image'&&x.url).map(x=>x.url as string);
   const pick=(kind:'photo'|'cover',file?:File)=>{if(!file)return;const u=URL.createObjectURL(file);if(kind==='photo'){setPhoto(u);localStorage.setItem('sb1_generic_profile_photo',u)}else{setCover(u);localStorage.setItem('sb1_generic_profile_cover',u)}};
-  const title = lt(lang,{ar:'الملف الشخصي',ru:'Профиль',en:'Profile',de:'Profil'});
+  const title = lt(lang,{ar:'صفحتي',ru:'Моя страница',en:'My Page',de:'Meine Seite'});
   return (
     <div className="min-h-screen pt-24 pb-16 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -23,8 +24,8 @@ export default function ProfilePage() {
             <div className="-mt-12 flex flex-col gap-4 md:flex-row md:items-end">
               <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl border-4 border-white bg-teal-100 text-2xl font-extrabold text-teal-700 shadow-lg">{photo?<img src={photo} alt="" className="h-full w-full object-cover"/>:'GA'}<label className="absolute inset-x-1 bottom-1 cursor-pointer rounded-lg bg-black/55 px-1 py-1 text-center text-[9px] font-bold text-white">تغيير<input type="file" accept="image/*" className="hidden" onChange={e=>pick('photo',e.target.files?.[0])}/></label></div>
               <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-2"><h1 className="text-2xl font-bold text-gray-800">{role === 'student' ? lt(lang,{ar:'طالب SB1',ru:'Студент SB1',en:'SB1 Student',de:'SB1 Student'}) : 'Specialist'}</h1><span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">{role === 'student' ? lt(lang,{ar:'طالب',ru:'Студент',en:'Student',de:'Student'}) : lt(lang,{ar:'أخصائي',ru:'Специалист',en:'Specialist',de:'Spezialist'})}</span></div>
-                <p className="mt-1 text-sm text-gray-500">{lt(lang,{ar:'مهتم بالعلاج النفسي والعلوم السلوكية',ru:'Интересуется психотерапией и поведенческими науками',en:'Interested in psychotherapy and behavioral sciences',de:'Interesse an Psychotherapie und Verhaltenswissenschaften'})}</p>
+                <div className="flex flex-wrap items-center gap-2"><h1 className="text-2xl font-bold text-gray-800">{role === 'client' ? lt(lang,{ar:'عميل SB1',ru:'Клиент SB1',en:'SB1 Client',de:'SB1 Client'}) : roleLabel(role,lang)}</h1><span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">{roleLabel(role,lang)}</span></div>
+                <p className="mt-1 text-sm text-gray-500">{lt(lang,{ar:'ملفي الشخصي ومتابعاتي ومحتواي المحفوظ',ru:'Профиль, подписки и сохранённый контент',en:'My profile, follows and saved content',de:'Profil, Abonnements und gespeicherte Inhalte'})}</p>
               </div>
               <div className="flex gap-2"><button className="btn-secondary"><Camera className="w-4 h-4" /></button><button onClick={() => navigate('/community')} className="btn-primary"><Users className="w-4 h-4" />{lt(lang,{ar:'المجتمع',ru:'Сообщество',en:'Community',de:'Community'})}</button></div>
             </div>
@@ -34,7 +35,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="mt-8 grid gap-5 md:grid-cols-3">
-              <div className="rounded-2xl border p-5"><GraduationCap className="w-6 h-6 text-teal-600" /><h3 className="mt-3 font-bold">{lt(lang,{ar:'التعلّم',ru:'Обучение',en:'Learning',de:'Lernen'})}</h3><p className="mt-1 text-sm text-gray-500">{lt(lang,{ar:'خطتي الدراسية والدورات الحالية',ru:'Учебный план и текущие курсы',en:'Study plan and current courses',de:'Studienplan und aktuelle Kurse'})}</p><button onClick={() => navigate('/academy')} className="mt-4 text-sm font-semibold text-teal-700">{lt(lang,{ar:'فتح الأكاديمية',ru:'Открыть академию',en:'Open academy',de:'Akademie öffnen'})} →</button></div>
+              <div className="rounded-2xl border p-5"><GraduationCap className="w-6 h-6 text-teal-600" /><h3 className="mt-3 font-bold">{lt(lang,{ar:'لوحتي',ru:'Моя страница',en:'My Dashboard',de:'Meine Seite'})}</h3><p className="mt-1 text-sm text-gray-500">{lt(lang,{ar:'المحفوظات والإعجابات والمتابعات',ru:'Сохранённое, лайки и подписки',en:'Saved items, likes and follows',de:'Gespeicherte Inhalte, Likes und Abonnements'})}</p><button onClick={() => navigate('/client/dashboard')} className="mt-4 text-sm font-semibold text-teal-700">{lt(lang,{ar:'فتح لوحة العميل',ru:'Открыть панель клиента',en:'Open client dashboard',de:'Kundenbereich öffnen'})} →</button></div>
               <div className="rounded-2xl border p-5"><BookOpen className="w-6 h-6 text-teal-600" /><h3 className="mt-3 font-bold">{lt(lang,{ar:'مكتبتي',ru:'Моя библиотека',en:'My library',de:'Meine Bibliothek'})}</h3><p className="mt-1 text-sm text-gray-500">{lt(lang,{ar:'الكتب والملفات المحفوظة',ru:'Сохранённые книги и файлы',en:'Saved books and files',de:'Gespeicherte Bücher und Dateien'})}</p><button onClick={() => navigate('/library')} className="mt-4 text-sm font-semibold text-teal-700">{lt(lang,{ar:'فتح المكتبة',ru:'Открыть библиотеку',en:'Open library',de:'Bibliothek öffnen'})} →</button></div>
               <div className="rounded-2xl border p-5"><MessageCircle className="w-6 h-6 text-teal-600" /><h3 className="mt-3 font-bold">{lt(lang,{ar:'مجتمعي',ru:'Моё сообщество',en:'My community',de:'Meine Community'})}</h3><p className="mt-1 text-sm text-gray-500">{lt(lang,{ar:'المجموعات والمحادثات والمشاركات',ru:'Группы, чаты и публикации',en:'Groups, chats and posts',de:'Gruppen, Chats und Beiträge'})}</p><button onClick={() => navigate('/community')} className="mt-4 text-sm font-semibold text-teal-700">{lt(lang,{ar:'فتح المجتمع',ru:'Открыть сообщество',en:'Open community',de:'Community öffnen'})} →</button></div>
             </div>
