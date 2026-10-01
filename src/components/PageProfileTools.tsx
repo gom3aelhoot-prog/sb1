@@ -51,7 +51,7 @@ const demoPostImages = [
 const demoVideoUrl='https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
 
 export default function PageProfileTools({
-  canManage=false, pageId='current', pageName='SB1',
+  canManage=false, pageId='current', pageName='SB1', pageAvatar,
   seedPosts=[], hideStories=false, focusSection='home'
 }:{
   canManage?:boolean;
