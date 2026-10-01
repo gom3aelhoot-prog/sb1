@@ -66,11 +66,19 @@ export default function PageProfileTools({
   const show=(section:string)=>focusSection===section;
   const initial = useMemo<FeedItem[]>(() => {
     const saved = read<FeedItem[]>('sb1_fb_posts_'+pageId, []);
-    if (saved.length) return saved.map((p,i)=>p.demo && !p.mediaUrl ? {
-      ...p,
-      mediaUrl:p.kind==='image'?demoPostImages[i%demoPostImages.length]:(p.kind==='video'||p.kind==='reel'?demoVideoUrl:undefined),
-      views:p.views||120+i*31
-    } : p);
+    if (saved.length) {
+      const normalized=saved.map((p,i)=>p.demo && !p.mediaUrl ? {
+        ...p,
+        mediaUrl:p.kind==='image'?demoPostImages[i%demoPostImages.length]:(p.kind==='reel'?demoReelUrl:p.kind==='video'?demoVideoUrl:undefined),
+        views:p.views||120+i*31
+      } : {...p,views:typeof p.views==='number'?p.views:0});
+      if(!normalized.some(p=>p.kind==='reel')) normalized.unshift({
+        id:'demo-real-reel',kind:'reel',text:'Reel تجريبي حقيقي لتجربة التشغيل عند الوقوف بالفأرة لمدة ثانية.',
+        mediaUrl:demoReelUrl,createdAt:new Date().toISOString(),likes:42,views:0,comments:[],
+        public:true,demo:true,author:pageName,authorPhoto:pageAvatar
+      });
+      return normalized;
+    }
     const seeded = seedPosts.map(p=>({
       id:p.id, kind:(p.video_url ? (p.post_type==='reel'?'reel':'video') : p.image_url ? 'image':'post') as MediaKind,
       text:p.body, mediaUrl:p.video_url||p.image_url||undefined, createdAt:p.created_at,
