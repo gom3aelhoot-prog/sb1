@@ -194,6 +194,13 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     );
   }
 
+  const nextWorkStart=workSessions[0]?.startsAt || Date.now()+2*3600000;
+  const workCountdown=Math.max(0,nextWorkStart-workNow);
+  const workMinutes=Math.floor(workCountdown/60000);
+  const workHours=Math.floor(workMinutes/60);
+  const workMins=workMinutes%60;
+  const workUrgent=workCountdown<=50*60000;
+  const workRed=workCountdown<=60*60000;
   const tabs: { key: Tab; label: string; icon: typeof FileText }[] = [
     { key:'home', label:lang==='ar'?'الرئيسية':'Home', icon:Home },
     { key:'sessions', label:lang==='ar'?'جلساتي':'My Sessions', icon:Video },
@@ -217,7 +224,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           <div className="space-y-2">
             {canSeePrivate&&<button onClick={()=>selectMain('wallet')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm active:bg-slate-900"><Wallet className="h-4 w-4 text-amber-300"/>الحساب والمحفظة</button>}
             {canManagePage&&<button onClick={()=>selectMain('clone')} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm active:bg-emerald-200"><Copy className="h-4 w-4 text-emerald-700"/>الاستنساخ</button>}
-            {canSeePrivate&&<button onClick={()=>selectMain('work')} className="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-800 shadow-sm hover:bg-slate-50 active:bg-slate-200"><CalendarClock className="h-4 w-4 text-indigo-600"/>جدول أعمالي</button>}
+            {canSeePrivate&&<button onClick={()=>selectMain('work')} className="flex w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-800 shadow-sm hover:bg-slate-50 active:bg-slate-200"><span className="flex items-center gap-2"><CalendarClock className="h-4 w-4 text-indigo-600"/>جدول أعمالي</span><span className={`rounded-full px-2 py-1 font-mono text-[11px] font-black ${workUrgent?'animate-[sb1pulse_.55s_ease-in-out_infinite] text-red-600':workRed?'text-red-600':'text-black'}`}>{workHours}:{String(workMins).padStart(2,'0')}</span></button>}
             {canSeePrivate&&<div className="overflow-hidden rounded-xl border bg-white shadow-sm">
               <button onClick={()=>selectMain('home')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><Home className="h-4 w-4 text-teal-600"/>الرئيسية</button>
               <button onClick={()=>selectMain('favorites')} className="flex w-full items-center gap-2 border-b px-4 py-3 text-sm font-bold hover:bg-slate-50 active:bg-slate-200"><Heart className="h-4 w-4 text-rose-500"/>مفضلتي</button>
