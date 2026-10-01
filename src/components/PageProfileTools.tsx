@@ -181,6 +181,7 @@ export default function PageProfileTools({
   useEffect(()=>write('sb1_fb_social_favorites',favorites),[favorites]);
   useEffect(()=>write('sb1_fb_albums_'+pageId,albums),[albums,pageId]);
   useEffect(()=>write('sb1_fb_clones',clones),[clones]);
+  useEffect(()=>{if(socialEmbedded!=='Pinterest')return;const id='sb1-pinterest-widget';if(document.getElementById(id))return;const s=document.createElement('script');s.id=id;s.async=true;s.defer=true;s.src='https://assets.pinterest.com/js/pinit.js';document.body.appendChild(s);return()=>{}},[socialEmbedded]);
   useEffect(()=>{if(postFile){const u=URL.createObjectURL(postFile);setPostUrl(u)}else setPostUrl('')},[postFile]);
   useEffect(()=>{if(storyFile){const u=URL.createObjectURL(storyFile);setStoryUrl(u)}else setStoryUrl('')},[storyFile]);
   useEffect(()=>()=>stream.current?.getTracks().forEach(t=>t.stop()),[]);
