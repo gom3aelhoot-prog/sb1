@@ -8,6 +8,7 @@ import { useI18n } from '@/lib/i18n';
 import { supabase, type Doctor, type Question, type SpecialistPost, type PostComment, type Article, type DoctorAudio } from '@/lib/supabase';
 import QuestionCard from '@/components/QuestionCard';
 import { getAppointments, type Appointment } from '@/lib/appointments';
+import { getDoctorAvailability } from '@/lib/appointmentConfig';
 import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty, virtualArticlesForSpecialty, virtualAudioForSpecialty, virtualVideosForSpecialty, virtualCoursesForSpecialty } from '@/lib/catalog';
 import { toggleSaved, isSaved, toggleLiked, isLiked, archiveItem, addComment, toggleFollowing, isFollowing as isFollowingVault, getSaved } from '@/lib/socialVault';
 
@@ -293,6 +294,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const workHours=Math.floor(workMinutes/60);
   const workMins=workMinutes%60;
   const workUrgent=workCountdown<=50*60000;
+  const configuredAvailability=getDoctorAvailability(id);
   const workRed=workCountdown<=60*60000;
   const tabs: { key: Tab; label: string; icon: typeof FileText }[] = [
     { key:'home', label:lang==='ar'?'الرئيسية':'Home', icon:Home },
@@ -437,7 +439,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               </div>
               <div className="rounded-xl border bg-slate-50 p-4">
                 <div className="flex items-center justify-between"><b>المواعيد المتاحة</b><button onClick={()=>navigate('/specialist-appointments')} title="فتح مفكرة المواعيد والأسعار" className="rounded-lg bg-indigo-50 px-2 py-1 text-xs font-bold text-indigo-700 active:bg-indigo-100">فتح المفكرة</button></div>
-                <div className="mt-3 space-y-2">{availableSlots.map((slot,i)=><div key={slot+i} className="flex items-center justify-between rounded-lg bg-white p-2 text-sm"><span>{slot}</span><span className="h-2 w-2 rounded-full bg-emerald-500"/></div>)}</div>
+                <div className="mt-3 space-y-2">{configuredAvailability.map((slot:any)=><div key={slot.id} className="flex items-center justify-between rounded-lg bg-white p-2 text-sm"><span>{new Date(slot.start).toLocaleString('ar')} — {new Date(slot.end).toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})}</span><span className="font-bold text-teal-700">{slot.price} USD</span></div>)}{configuredAvailability.length===0&&<div className="rounded-lg bg-white p-3 text-xs text-slate-500">لا توجد مواعيد متاحة مسجلة حالياً. افتح المفكرة لإضافة التاريخ والوقت والسعر.</div>}</div>
               </div>
             </div>
             
