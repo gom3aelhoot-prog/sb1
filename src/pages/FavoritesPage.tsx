@@ -43,6 +43,7 @@ export default function FavoritesPage() {
     ...Object.entries(labels).map(([key,label])=>({key,label})),
   ];
   const filtered=activeTab==='all'?favorites:favorites.filter(f=>f.item_type===activeTab);
+  const openFavorite=(fav:any)=>{const map:any={doctor:'/doctors/',article:'/articles/',course:'/courses/',facility:'/facilities/',question:'/questions/',session:'/specialist-sessions',reel:'/media',video:'/videos',recording:'/audio'};const target=fav.url||((map[fav.item_type]||'')+(fav.item_id||''));if(!target)return;if(/^https?:\\/\\//i.test(target))window.location.href=target;else navigate(target)};
 
   return (
     <div dir="rtl" className="rounded-2xl border bg-slate-50 p-4">
@@ -58,7 +59,7 @@ export default function FavoritesPage() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((fav:any)=>{
           const Icon=itemIcons[fav.item_type]||Heart;
-          return <article key={fav.id} className="overflow-hidden rounded-xl border bg-white shadow-sm">
+          return <article key={fav.id} onClick={()=>openFavorite(fav)} className="cursor-pointer overflow-hidden rounded-xl border bg-white shadow-sm">
             {fav.image_url&&<img src={fav.image_url} alt="" className="h-36 w-full object-cover"/>}
             <div className="p-4">
               <div className="flex items-center gap-3">
