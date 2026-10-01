@@ -45,8 +45,12 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const { navigate } = useRouter();
   const role = getRole();
   const actualRole = typeof window !== 'undefined' ? localStorage.getItem('sb1_account_role') : null;
-  const isPrimaryOwnerPage = id === 'catalog-doctor-ar-clinical-psychology-1';
-  const canManagePage = isPrimaryOwnerPage || role === 'owner' || role === 'moderator' || actualRole === 'owner' || localStorage.getItem('sb1_page_owner_id') === id || localStorage.getItem('sb1_is_page_owner') === 'true';
+  const previewRole = typeof window !== 'undefined' ? localStorage.getItem('sb1_preview_role') : null;
+  const accountUserId = typeof window !== 'undefined' ? localStorage.getItem('sb1_account_user_id') : null;
+  const pageOwnerId = typeof window !== 'undefined' ? localStorage.getItem('sb1_page_owner_id') : null;
+  const isAccountOwner = !previewRole && !!pageOwnerId && !!accountUserId && pageOwnerId === id && pageOwnerId === accountUserId;
+  const isModerator = !previewRole && actualRole === 'moderator';
+  const canManagePage = isAccountOwner || isModerator;
   const canSeePrivate = canManagePage;
   const { t, specialtyName, lang } = useI18n();
   const [doctor, setDoctor] = useState<Doctor | null>(null);
@@ -86,7 +90,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const [isFollowing, setIsFollowing] = useState(()=>isFollowingVault(id));
   const profileAvatar = doctor?.photo_url || ('https://api.dicebear.com/9.x/personas/svg?seed=' + encodeURIComponent(id));
   const savedCoverImages=getSaved().filter(x=>x.kind==='image'&&x.url).map(x=>x.url as string);
-  const selectMain=(section:MainSection)=>{setMainSection(section);setTimeout(()=>document.getElementById('profile-tabs')?.scrollIntoView({behavior:'smooth',block:'start'}),0)};
+  const selectMain=(section:MainSection)=>{setMainSection(section);setActiveTab('home');setTimeout(()=>document.getElementById('profile-tabs')?.scrollIntoView({behavior:'smooth',block:'start'}),0)};
   useEffect(()=>{
     const onNotification=()=>{setNotifications(v=>[{id:'n-'+Date.now(),title:'إشعار جديد',body:'لديك إشعار جديد في صفحة الأخصائي.',time:'الآن',read:false},...v]);setUnreadNotifications(v=>{const next=v+1;localStorage.setItem('sb1_unread_notifications',String(next));return next});setBellAnimating(true);window.setTimeout(()=>setBellAnimating(false),15000)};
     const onStorage=(e:StorageEvent)=>{if(e.key==='sb1_unread_notifications'){const next=Number(e.newValue||'0');if(next>unreadNotifications){setBellAnimating(true);window.setTimeout(()=>setBellAnimating(false),15000)}setUnreadNotifications(next)}};
@@ -400,7 +404,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               <span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Icon className={`h-4 w-4 ${colors[i]}`}/><span className="break-words">{tab.label}</span></span>
             </button>})}
           </div></div></div></div></div>
-        <div className="mb-3"><StoryBar pageId={id} canManage={canManagePage} /></div>
+        <div className="mb-3">{mainSection === 'home' && activeTab === 'home' && <StoryBar pageId={id} canManage={canManagePage} />}</div>
         {mainSection === 'home' && showFollowers && (
           <section id="followers-list" className="mb-5 rounded-xl border bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">المتابعون</h2><p className="mt-1 text-xs text-slate-500">مرتبة أبجدياً، مع تمييز المتاحين الآن.</p></div><button onClick={()=>setShowFollowers(false)} className="rounded-lg border px-3 py-1 text-xs font-bold">إغلاق</button></div>
