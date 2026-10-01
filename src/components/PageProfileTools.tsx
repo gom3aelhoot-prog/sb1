@@ -279,11 +279,11 @@ export default function PageProfileTools({
   };
   const searchSocial=()=>{
     const q=socialSearch.trim();
-    if(!q)return;
-    const providers=[['YouTube','https://www.youtube.com/embed/'+encodeURIComponent(q)],['Rutube','https://rutube.ru/play/embed/'+encodeURIComponent(q)]];
-    const found=providers.find(([n])=>q.toLowerCase().includes(String(n).toLowerCase()));
-    if(found) openSocial(found[1]);
-    else setNotice('اختر منصة قابلة للعرض داخل SB1 ثم أدخل رابط/معرّف المحتوى.');
+    const provider=(document.getElementById('sb1-social-provider') as HTMLSelectElement|null)?.value||'YouTube';
+    if(provider==='Google Search'||provider==='Yandex Search'){setSocialEmbedded(provider);return;}
+    if(provider==='Pinterest'||provider==='OK'){setSocialEmbedded(provider);return;}
+    if(!q){setNotice('اكتب كلمة البحث أو رابط المحتوى.');return;}
+    setSocialEmbedded(provider);
   };
 
   const permissionGroups=[
