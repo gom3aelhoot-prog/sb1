@@ -43,7 +43,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const { navigate } = useRouter();
   const role = getRole();
   const actualRole = typeof window !== 'undefined' ? localStorage.getItem('sb1_account_role') : null;
-  const canManagePage = role === 'owner' || role === 'moderator' || actualRole === 'owner' || (role === 'specialist' && id.startsWith('catalog-doctor-')) || localStorage.getItem('sb1_page_owner_id') === id || localStorage.getItem('sb1_is_page_owner') === 'true';
+  const canManagePage = role === 'owner' || role === 'moderator' || actualRole === 'owner' || localStorage.getItem('sb1_page_owner_id') === id || localStorage.getItem('sb1_is_page_owner') === 'true';
   const canSeePrivate = canManagePage;
   const { t, specialtyName, lang } = useI18n();
   const [doctor, setDoctor] = useState<Doctor | null>(null);
@@ -101,6 +101,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     {id:'wq2',title:'هل اضطراب النوم يحتاج تقييماً؟',closesAt:Date.now()+7*3600000}
   ]);
   const [availableSlots,setAvailableSlots]=useState(['اليوم 18:00','غداً 11:00','غداً 16:30']);
+  const [sessionDate,setSessionDate]=useState(()=>{const x=new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')});
   function readWorkSchedule(page:string){
     try{return JSON.parse(localStorage.getItem('sb1_work_schedule_'+page)||'[]')}catch{return []}
   }
@@ -258,6 +259,9 @@ export default function DoctorProfilePage({ id }: { id: string }) {
 
   const nextWorkStart=workSessions[0]?.startsAt || demoWorkStart;
   const workCountdown=Math.max(0,nextWorkStart-workNow);
+  const dateKey=(value:string|number)=>{const x=new Date(value);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+  const filteredDiary=diary.filter(s=>dateKey(s.created_at)===sessionDate);
+  const selectedWorkSessions=workSessions.filter((s:any)=>dateKey(s.startsAt)===sessionDate);
   const workMinutes=Math.floor(workCountdown/60000);
   const workHours=Math.floor(workMinutes/60);
   const workMins=workMinutes%60;
@@ -281,7 +285,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
           {t('common.back')}
         </button>
 
-        <div className="xl:grid xl:grid-cols-[15rem_minmax(0,1fr)] xl:gap-6 xl:items-start" dir="rtl">
+        <div className="relative" dir="rtl">
         <aside className="sticky top-24 z-30 hidden max-h-[calc(100vh-7rem)] w-full overflow-y-auto border-s border-slate-200 bg-white ps-4 pe-1 xl:block" aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
             {canSeePrivate&&<button onClick={()=>selectMain('wallet')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm active:bg-slate-900"><Wallet className="h-4 w-4 text-amber-300"/>الحساب والمحفظة</button>}
@@ -311,9 +315,9 @@ export default function DoctorProfilePage({ id }: { id: string }) {
             </div>
           </div>
         </aside>
-        <div className="min-w-0 overflow-hidden">
+        <div className="min-w-0 overflow-hidden xl:ps-[17rem]">
         {/* Profile Header — keep the existing profile design; green cover removed as requested */}
-        <div className="card mb-2">
+        <div className="card mb-2 border-black bg-black text-white">
           <div className="px-6 py-5">
             <div className="flex flex-col md:flex-row gap-4 mt-0 pt-4">
               <div className="w-28 h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center shrink-0 ring-4 ring-white mx-auto md:mx-0">
@@ -325,11 +329,11 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               </div>
               <div className="flex-1 text-center md:text-right pt-2"><div className="mb-1 text-[10px] font-bold text-slate-400">الصورة الرسمية للأخصائي</div>
                 <div className="flex items-center justify-center md:justify-start gap-2">
-                  <h1 className="text-xl font-bold text-gray-800">{doctor.name}</h1>
+                  <h1 className="text-xl font-bold text-white">{doctor.name}</h1>
                   {doctor.is_verified && <BadgeCheck className="w-5 h-5 text-teal-500" />}
                 </div>
-                {doctor.specialty && <p className="text-teal-600 font-medium text-sm">{specialtyName(doctor.specialty)}</p>}
-                <div className="flex flex-wrap justify-center md:justify-start gap-3 text-xs text-gray-500 mt-2">
+                {doctor.specialty && <p className="text-emerald-300 font-medium text-sm">{specialtyName(doctor.specialty)}</p>}
+                <div className="flex flex-wrap justify-center md:justify-start gap-3 text-xs text-slate-300 mt-2">
                   <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />{Number(doctor.rating).toFixed(1)}</span>
                   <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-teal-500" />{doctor.city}</span>
                   <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-teal-500" />{doctor.experience_years} {lang === 'ar' ? 'سنوات' : ''}</span>
@@ -356,10 +360,10 @@ export default function DoctorProfilePage({ id }: { id: string }) {
 </div></div>
               </div>
             </div>
-            {doctor.bio && <p className="text-sm text-gray-600 mt-4 leading-relaxed">{doctor.bio}</p>}
+            {doctor.bio && <p className="text-sm text-slate-200 mt-4 leading-relaxed">{doctor.bio}</p>}
           </div>
         </div>
-        <div className="my-2 border-b border-slate-200" aria-hidden="true" />
+        <div className="my-3 border-b-2 border-black" aria-hidden="true" />
         <div className="mb-2"><StoryBar pageId={id} canManage={canManagePage} /></div>
 
         <div id="profile-tabs" className="mb-5 w-full overflow-hidden rounded-xl border bg-white shadow-sm">
@@ -420,7 +424,20 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         {mainSection === 'clone' && canManagePage && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="clone" />}
 
         {mainSection === 'home' && activeTab === 'sessions' && (
-          <div className="card p-5"><div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">جلساتي</h2><p className="text-xs text-slate-500">الجلسات المجانية التي تمت مع المتابعين، وليست فيديوهات.</p></div><button onClick={()=>setMainSection('work')} className="rounded-xl bg-teal-50 p-2 text-teal-700 active:bg-teal-100" aria-label="فتح جدول أعمالي"><CalendarDaysIcon/></button></div><div className="space-y-3">{(diary.length?diary:Array.from({length:4},(_,i)=>({id:'demo-session-'+i,title:'جلسة مجانية '+(i+1),body:'جلسة تعريفية مجانية مع المتابعين',created_at:new Date(Date.now()-i*86400000).toISOString()}))).map((s:any)=><article key={s.id} className="rounded-xl border bg-white p-4"><div className="flex items-center justify-between gap-3"><div><b>{s.title||'جلسة مجانية'}</b><p className="mt-1 text-xs text-slate-500">{s.body}</p></div><div className="flex items-center gap-2"><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">مجانية</span><button onClick={()=>toggleSaved({id:s.id,kind:'session',title:s.title||'جلسة',body:s.body,author:doctor.name,created_at:s.created_at})} className="rounded-lg bg-slate-50 p-2 text-teal-700" aria-label="إضافة إلى مفضلتي"><Bookmark className="h-4 w-4"/></button></div></div><div className="mt-2 text-xs text-slate-400">{new Date(s.created_at).toLocaleDateString()}</div></article>)}</div></div>
+          <div className="card p-5">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div><h2 className="text-xl font-extrabold">جلساتي</h2><p className="text-xs text-slate-500">اختر تاريخ الجلسة من التقويم لتظهر جلسات ذلك اليوم.</p></div>
+              <div className="flex items-center gap-2 rounded-xl border bg-white px-3 py-2">
+                <CalendarDaysIcon className="h-5 w-5 text-teal-700"/>
+                <input type="date" value={sessionDate} onChange={e=>setSessionDate(e.target.value)} className="bg-transparent text-sm font-bold outline-none"/>
+              </div>
+            </div>
+            {selectedWorkSessions.length>0&&<div className="mb-4 rounded-xl border border-indigo-100 bg-indigo-50 p-3"><b className="text-sm">مواعيد هذا التاريخ</b><div className="mt-2 space-y-2">{selectedWorkSessions.map((s:any)=><div key={s.id} className="flex items-center justify-between rounded-lg bg-white p-3"><div><b>{s.title}</b><p className="text-xs text-slate-500">{s.client} · {new Date(s.startsAt).toLocaleString('ar')}</p></div><span className="text-xs font-bold text-indigo-700">{s.status}</span></div>)}</div></div>}
+            <div className="space-y-3">
+              {filteredDiary.map((s:any)=><article key={s.id} className="rounded-xl border bg-white p-4"><div className="flex items-center justify-between gap-3"><div><b>{s.title||'جلسة مجانية'}</b><p className="mt-1 text-xs text-slate-500">{s.body}</p></div><div className="flex items-center gap-2"><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">مجانية</span><button onClick={()=>toggleSaved({id:s.id,kind:'session',title:s.title||'جلسة',body:s.body,author:doctor.name,created_at:s.created_at})} className="rounded-lg bg-slate-50 p-2 text-teal-700" aria-label="إضافة إلى مفضلتي"><Bookmark className="h-4 w-4"/></button></div></div><div className="mt-2 text-xs text-slate-400">{new Date(s.created_at).toLocaleDateString()}</div></article>)}
+              {!selectedWorkSessions.length&&!filteredDiary.length&&<div className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-400">لا توجد جلسات في هذا التاريخ.</div>}
+            </div>
+          </div>
         )}
         {mainSection === 'home' && activeTab === 'recordings' && (
           <div className="card p-5"><h2 className="text-xl font-extrabold mb-4">تسجيلاتي</h2>{audios.length ? <div className="space-y-3">{audios.map(a=><div key={a.id} className="rounded-xl border p-4"><div className="flex items-center justify-between gap-3"><div><b>{a.title}</b><p className="mt-1 text-xs text-slate-500">{a.description}</p></div><Bookmark className="h-4 w-4 text-teal-700"/></div><audio src={a.audio_url} controls className="mt-3 w-full"/><button onClick={()=>toggleSaved({id:a.id,kind:'recording',title:a.title,body:a.description,author:doctor.name,url:a.audio_url,created_at:a.created_at})} className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs font-bold active:bg-slate-200">حفظ في مفضلتي</button></div>)}</div> : <p className="text-slate-500">لا توجد تسجيلات منشورة بعد.</p>}</div>
