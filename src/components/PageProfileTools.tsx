@@ -354,9 +354,9 @@ export default function PageProfileTools({
       
     </section>) }
 
-    {show('reels') && (<section id="fb-reels-all" className="rounded-xl border bg-white p-5 shadow-sm">
+    {show('reels') && (<section id="fb-reels-all" className="bg-transparent p-0">
       <div className="mb-3 flex items-center justify-between"><h2 className="sr-only">Reels</h2><span className="text-xs text-slate-400">{reels.length} Reel</span></div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">{reels.slice(0,18).map(r=><button key={r.id} onClick={()=>setReelViewer(r)} className="overflow-hidden rounded-xl bg-slate-900 text-white text-right"><div className="grid aspect-[3/5] place-items-center bg-gradient-to-br from-teal-900 to-slate-950 p-3"><Video/><span className="text-xs font-bold">{r.text.slice(0,60)}</span></div></button>)}</div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">{reels.slice(0,18).map(r=><button key={r.id} onClick={()=>setReelViewer(r)} className="relative overflow-hidden rounded-xl bg-slate-900 text-white text-right"><video src={r.mediaUrl||demoVideoUrl} muted playsInline className="h-full w-full object-cover" onMouseEnter={e=>startHoverView(r.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(r.id,e.currentTarget)}/><div className="absolute inset-0 bg-black/25"/><span className="absolute bottom-2 right-2 left-2 z-10 text-xs font-bold">{r.text.slice(0,60)}</span><span className="absolute bottom-2 left-2 z-10 rounded-full bg-black/65 px-2 py-1 text-[10px]"><Eye className="inline h-3 w-3 ml-1"/>{r.views||0}</span></button>)}</div>
     </section>) }
 
     {show('albums') && (<section id="fb-albums" className="rounded-xl border bg-white p-5 shadow-sm">
