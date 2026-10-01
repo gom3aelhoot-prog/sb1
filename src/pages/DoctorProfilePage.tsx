@@ -342,13 +342,13 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         )}
         {mainSection === 'favorites' && <FavoritesPage />}
         {mainSection === 'home' && activeTab === 'home' && (
-          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} hideStories focusSection="home" />
+          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} hideStories focusSection="home" />
         )}
-        {mainSection === 'albums' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} focusSection="albums" />}
-        {mainSection === 'social' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} focusSection="social" />}
-        {mainSection === 'phone' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} focusSection="phone" />}
-        {mainSection === 'settings' && canManagePage && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} focusSection="settings" />}
-        {mainSection === 'clone' && canManagePage && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} seedPosts={posts} focusSection="clone" />}
+        {mainSection === 'albums' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="albums" />}
+        {mainSection === 'social' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="social" />}
+        {mainSection === 'phone' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="phone" />}
+        {mainSection === 'settings' && canManagePage && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="settings" />}
+        {mainSection === 'clone' && canManagePage && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="clone" />}
 
         {mainSection === 'home' && activeTab === 'sessions' && (
           <div className="card p-5"><div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">جلساتي</h2><p className="text-xs text-slate-500">الجلسات المجانية التي تمت مع المتابعين، وليست فيديوهات.</p></div><CalendarDaysIcon className="text-teal-700"/></div><div className="space-y-3">{(diary.length?diary:Array.from({length:4},(_,i)=>({id:'demo-session-'+i,title:'جلسة مجانية '+(i+1),body:'جلسة تعريفية مجانية مع المتابعين',created_at:new Date(Date.now()-i*86400000).toISOString()}))).map((s:any)=><article key={s.id} className="rounded-xl border bg-white p-4"><div className="flex items-center justify-between gap-3"><div><b>{s.title||'جلسة مجانية'}</b><p className="mt-1 text-xs text-slate-500">{s.body}</p></div><div className="flex items-center gap-2"><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">مجانية</span><button onClick={()=>toggleSaved({id:s.id,kind:'session',title:s.title||'جلسة',body:s.body,author:doctor.name,created_at:s.created_at})} className="rounded-lg bg-slate-50 p-2 text-teal-700" aria-label="إضافة إلى مفضلتي"><Bookmark className="h-4 w-4"/></button></div></div><div className="mt-2 text-xs text-slate-400">{new Date(s.created_at).toLocaleDateString()}</div></article>)}</div></div>
