@@ -51,6 +51,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const isAccountOwner = !previewRole && !!accountUserId && accountUserId === id;
   const isModerator = !previewRole && actualRole === 'moderator';
   const canManagePage = isAccountOwner || isModerator;
+  const canClonePage = canManagePage && (actualRole === 'owner' || (actualRole === 'specialist' && !!doctor?.name?.includes('جمال')));
   const canSeePrivate = canManagePage;
   const { t, specialtyName, lang } = useI18n();
   const [doctor, setDoctor] = useState<Doctor | null>(null);
@@ -472,7 +473,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         {mainSection === 'social' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="social" />}
         {mainSection === 'phone' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="phone" />}
         {mainSection === 'settings' && canManagePage && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="settings" />}
-        {mainSection === 'clone' && canManagePage && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="clone" />}
+        {mainSection === 'clone' && canClonePage && <PageProfileTools canManage={canClonePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="clone" />}
 
         {mainSection === 'home' && activeTab === 'sessions' && (
           <div className="card p-5">
