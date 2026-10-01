@@ -3,7 +3,7 @@ import { Heart, Stethoscope, FileText, Video, Pill, Calculator, BookOpen, Image 
 import { useI18n } from '@/lib/i18n';
 import { supabase, type Favorite } from '@/lib/supabase';
 import { getWishlist } from '@/lib/commerce';
-import { getSaved, type VaultItem } from '@/lib/socialVault';
+import { getSaved, toggleSaved, type VaultItem } from '@/lib/socialVault';
 import { useRouter } from '@/lib/router';
 
 const itemIcons: Record<string, typeof Heart> = {
