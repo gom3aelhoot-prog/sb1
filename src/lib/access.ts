@@ -7,7 +7,7 @@ export function getRole():SB1Role{
  return actual;
 }
 export function setPreviewRole(role:SB1Role|null){if(role)localStorage.setItem('sb1_preview_role',role);else localStorage.removeItem('sb1_preview_role');window.dispatchEvent(new Event('sb1-role-change'))}
-export function can(role:SB1Role, allowed:SB1Role[]){return role==='owner'||allowed.includes(role)}
+export function can(role:SB1Role, allowed:SB1Role[]){return allowed.includes(role)}
 export function roleLabel(role:SB1Role,lang='ar'){
  const m:any={guest:{ar:'زائر',en:'Guest'},client:{ar:'عميل',en:'Client'},specialist:{ar:'أخصائي',en:'Specialist'},institution:{ar:'مؤسسة',en:'Institution'},delivery_worker:{ar:'عامل توصيل',en:'Delivery worker'},property_owner:{ar:'صاحب منشأة',en:'Property owner'},moderator:{ar:'مشرف',en:'Moderator'},owner:{ar:'مالك',en:'Owner'}};
  return m[role]?.[lang]||m[role]?.en||role;
