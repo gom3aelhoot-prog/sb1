@@ -84,7 +84,7 @@ export default function PageProfileTools({
       text:p.body, mediaUrl:p.video_url||p.image_url||undefined, createdAt:p.created_at,
       likes:p.likes_count||0, views:120, comments:[], public:true, demo:false, author:pageName, authorPhoto:pageAvatar
     }));
-    const demo = Array.from({length:24},(_,i)=>{
+    const demo = Array.from({length:120},(_,i)=>{
       const kind=(i%4===0?'reel':i%5===0?'video':i%3===0?'image':'post') as MediaKind;
       return {
         id:'demo-'+i, kind,
