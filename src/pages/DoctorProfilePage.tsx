@@ -110,6 +110,23 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     try{return JSON.parse(localStorage.getItem('sb1_work_schedule_'+page)||'[]')}catch{return []}
   }
 
+  useEffect(()=>{
+    const measure=()=>{
+      const el=profileTabsRef.current;
+      if(!el) return;
+      profileNavPinY.current=el.getBoundingClientRect().top+window.scrollY;
+      setProfileNavPinned(window.scrollY>=profileNavPinY.current);
+    };
+    const onScroll=()=>{
+      if(profileNavPinY.current===null) measure();
+      else setProfileNavPinned(window.scrollY>=profileNavPinY.current);
+    };
+    const timer=window.setTimeout(measure,50);
+    window.addEventListener('scroll',onScroll,{passive:true});
+    window.addEventListener('resize',measure);
+    return()=>{window.clearTimeout(timer);window.removeEventListener('scroll',onScroll);window.removeEventListener('resize',measure)};
+  },[]);
+
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -275,23 +292,6 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const workMins=workMinutes%60;
   const workUrgent=workCountdown<=50*60000;
   const workRed=workCountdown<=60*60000;
-  useEffect(()=>{
-    const measure=()=>{
-      const el=profileTabsRef.current;
-      if(!el) return;
-      profileNavPinY.current=el.getBoundingClientRect().top+window.scrollY;
-      setProfileNavPinned(window.scrollY>=profileNavPinY.current);
-    };
-    const onScroll=()=>{
-      if(profileNavPinY.current===null) measure();
-      else setProfileNavPinned(window.scrollY>=profileNavPinY.current);
-    };
-    const timer=window.setTimeout(measure,50);
-    window.addEventListener('scroll',onScroll,{passive:true});
-    window.addEventListener('resize',measure);
-    return()=>{window.clearTimeout(timer);window.removeEventListener('scroll',onScroll);window.removeEventListener('resize',measure)};
-  },[]);
-
   const tabs: { key: Tab; label: string; icon: typeof FileText }[] = [
     { key:'home', label:lang==='ar'?'الرئيسية':'Home', icon:Home },
     { key:'sessions', label:lang==='ar'?'جلساتي':'My Sessions', icon:Video },
