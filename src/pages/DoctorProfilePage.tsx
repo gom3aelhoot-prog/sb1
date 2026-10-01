@@ -43,7 +43,8 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const { navigate } = useRouter();
   const role = getRole();
   const actualRole = typeof window !== 'undefined' ? localStorage.getItem('sb1_account_role') : null;
-  const canManagePage = role === 'owner' || role === 'moderator' || actualRole === 'owner' || localStorage.getItem('sb1_page_owner_id') === id || localStorage.getItem('sb1_is_page_owner') === 'true';
+  const isPrimaryOwnerPage = id === 'catalog-doctor-ar-clinical-psychology-1';
+  const canManagePage = isPrimaryOwnerPage || role === 'owner' || role === 'moderator' || actualRole === 'owner' || localStorage.getItem('sb1_page_owner_id') === id || localStorage.getItem('sb1_is_page_owner') === 'true';
   const canSeePrivate = canManagePage;
   const { t, specialtyName, lang } = useI18n();
   const [doctor, setDoctor] = useState<Doctor | null>(null);
@@ -282,9 +283,9 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   ];
 
   return (
-    <div className="min-h-screen pt-20 pb-16"><style>{`@keyframes sb1bell{0%,100%{transform:rotate(0)}25%{transform:rotate(10deg)}75%{transform:rotate(-10deg)}}@keyframes sb1pulse{0%,100%{transform:scale(1);filter:hue-rotate(0deg)}50%{transform:scale(1.18);filter:hue-rotate(260deg)}}`}</style>
+    <div className="min-h-screen pt-2 pb-16"><style>{`@keyframes sb1bell{0%,100%{transform:rotate(0)}25%{transform:rotate(10deg)}75%{transform:rotate(-10deg)}}@keyframes sb1pulse{0%,100%{transform:scale(1);filter:hue-rotate(0deg)}50%{transform:scale(1.18);filter:hue-rotate(260deg)}}`}</style>
       <div className="max-w-6xl mx-auto px-3 sm:px-5 lg:px-8">
-        <button onClick={() => navigate('/doctors')} className="flex items-center gap-2 text-gray-500 hover:text-teal-600 transition-colors mb-4 mt-4">
+        <button onClick={() => navigate('/doctors')} className="hidden items-center gap-2 text-gray-500 hover:text-teal-600 transition-colors mb-2 mt-1 xl:flex">
           <ArrowRight className="w-4 h-4" />
           {t('common.back')}
         </button>
