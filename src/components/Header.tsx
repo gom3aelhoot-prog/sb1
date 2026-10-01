@@ -92,6 +92,7 @@ export function Header() {
   ];
   const navItems = [
     { label: t.nav.home, href: '/#home', icon: Home },
+    { label: 'صفحتي', href: '/profile', icon: User },
     { label: t.nav.howItWorks, href: '/#how-it-works', icon: HelpCircle },
     { label: t.nav.about, href: '/#about', icon: Info },
     { label: t.nav.contact, href: '/#contact', icon: Phone },
@@ -122,7 +123,8 @@ export function Header() {
 
             {/* Desktop Nav: compact core links only; platform sections are in the full-width row below */}
             <nav className="hidden lg:flex min-w-0 items-center gap-0.5">
-              <a href="/#home" className="rounded-lg px-2 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">{t.nav.home}</a>
+              <a href="/#home" title="الرئيسية" className="rounded-lg px-2 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">{t.nav.home}</a>
+              <a href="/profile" title="صفحتك الشخصية" className="rounded-lg bg-blue-600 px-2 py-2 text-xs font-bold text-white hover:bg-blue-700">صفحتي</a>
               <a href="/#how-it-works" className="rounded-lg px-2 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">{t.nav.howItWorks}</a>
               <a href="/#about" className="rounded-lg px-2 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">{t.nav.about}</a>
               <a href="/#contact" className="rounded-lg px-2 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">{t.nav.contact}</a>
