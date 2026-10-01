@@ -83,7 +83,7 @@ export default function PageProfileTools({
         mediaUrl:kind==='image'?demoPostImages[i%demoPostImages.length]:(kind==='video'||kind==='reel'?demoVideoUrl:undefined),
         likes:12+(i*7)%120, views:180+i*27,
         comments:[{id:'c'+i+'a',name:'مستخدم SB1',photo:demoPeopleImages[i%demoPeopleImages.length],body:'معلومة مفيدة، شكراً.'}],
-        public:true,demo:true,author:pageName
+        public:true,demo:true,author:demoNames[i%demoNames.length],authorPhoto:demoPeopleImages[i%demoPeopleImages.length]
       };
     });
     return [...seeded,...demo];
