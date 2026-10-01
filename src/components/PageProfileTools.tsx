@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { toggleSaved } from '@/lib/socialVault';
 import {
   Album, AudioLines, BookOpen, CheckCircle2, ExternalLink, FileVideo, Gift, Heart,
-  Image as ImageIcon, Library, MessageCircle, Mic, Plus, QrCode, Search, Send,
+  Image as ImageIcon, Library, MessageCircle, Mic, Plus, QrCode, Search, Send, Eye,
   Settings, Share2, Trash2, Upload, Video, X, Wand2, Bookmark
 } from 'lucide-react';
 
@@ -10,7 +10,7 @@ type MediaKind = 'post' | 'image' | 'video' | 'reel' | 'audio' | 'article';
 type StoryItem = { id:string; name:string; text:string; mediaUrl?:string; mediaKind?:'image'|'video'; createdAt:string; expiresAt:string; own?:boolean };
 type FeedItem = {
   id:string; kind:MediaKind; text:string; mediaUrl?:string; mediaName?:string;
-  createdAt:string; likes:number; views?:number; comments:{id:string;name:string;body:string}[];
+  createdAt:string; likes:number; views?:number; comments:{id:string;name:string;photo?:string;body:string}[];
   public:boolean; demo?:boolean; author:string;
   style?:{background:string;color:string;fontSize:string;fontWeight:string};
 };
@@ -57,6 +57,7 @@ export default function PageProfileTools({
   canManage?:boolean;
   pageId?:string;
   pageName?:string;
+  pageAvatar?:string;
   seedPosts?:Array<{id:string;body:string;image_url?:string|null;video_url?:string|null;post_type?:string;created_at:string;likes_count?:number}>;
   hideStories?:boolean;
   focusSection?:'home'|'reels'|'albums'|'medical'|'social'|'phone'|'clone'|'settings';
@@ -72,7 +73,7 @@ export default function PageProfileTools({
     const seeded = seedPosts.map(p=>({
       id:p.id, kind:(p.video_url ? (p.post_type==='reel'?'reel':'video') : p.image_url ? 'image':'post') as MediaKind,
       text:p.body, mediaUrl:p.video_url||p.image_url||undefined, createdAt:p.created_at,
-      likes:p.likes_count||0, views:120, comments:[], public:true, demo:false, author:pageName
+      likes:p.likes_count||0, views:120, comments:[], public:true, demo:false, author:pageName, authorPhoto:pageAvatar
     }));
     const demo = Array.from({length:24},(_,i)=>{
       const kind=(i%4===0?'reel':i%5===0?'video':i%3===0?'image':'post') as MediaKind;
@@ -179,7 +180,7 @@ export default function PageProfileTools({
 
   const publish=()=>{
     if(!postText.trim()&&!postUrl&&!recordUrl){setNotice('اكتب نصاً أو اختر صورة/فيديو أو سجّل صوتاً.');return}
-    const item:FeedItem={id:id(),kind:recordUrl?'audio':postKind,text:postText.trim()||'منشور جديد',mediaUrl:recordUrl||postUrl,mediaName:postFile?.name,createdAt:new Date().toISOString(),likes:0,comments:[],public:true,author:pageName};
+    const item:FeedItem={id:id(),kind:recordUrl?'audio':postKind,text:postText.trim()||'منشور جديد',mediaUrl:recordUrl||postUrl,mediaName:postFile?.name,createdAt:new Date().toISOString(),likes:0,comments:[],public:true,author:pageName,authorPhoto:pageAvatar};
     setFeed(v=>[item,...v]);setPostText('');setPostFile(null);setRecordUrl('');setComposer(false);setNotice('تم نشر المحتوى في الرئيسية.');
   };
 
@@ -296,9 +297,9 @@ export default function PageProfileTools({
         )}
 
         {/* Facebook-style composer */}
-        {canManage&&<div className="rounded-xl border bg-white p-4 shadow-sm">
+        {canManage&&<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <button onClick={()=>setComposer(true)} className="flex w-full items-center gap-3 text-right">
-            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-teal-100 font-extrabold text-teal-700">{pageName.charAt(0)}</div>
+            {pageAvatar?<img src={pageAvatar} alt={pageName} className="h-11 w-11 shrink-0 rounded-full object-cover"/>:<div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-teal-100 font-extrabold text-teal-700">{pageName.charAt(0)}</div>}
             <div className="flex-1 rounded-full bg-slate-100 px-4 py-3 text-sm text-slate-500">بم تفكر؟ اكتب منشوراً أو أضف صورة أو فيديو أو Reel...</div>
           </button>
           <div className="mt-3 grid grid-cols-3 border-t pt-3 text-sm font-bold text-slate-600">
@@ -311,13 +312,13 @@ export default function PageProfileTools({
         {/* Home order requested: posts heading -> horizontal Reels -> posts feed */}
         {/* Reels strip appears directly after the composer */}
 
-        <div id="fb-reels" className="rounded-xl border bg-white p-4 shadow-sm"><div className="mb-3 flex justify-end"><button onClick={()=>jump("reels")} className="text-xs font-bold text-teal-700">عرض الكل</button></div>
+        <div id="fb-reels" className="bg-transparent p-0"><div className="mb-3 flex justify-end"><button onClick={()=>jump("reels")} className="text-xs font-bold text-teal-700">عرض الكل</button></div>
           <div className="flex gap-3 overflow-x-auto">
             {reels.slice(0,10).map(r=><button key={r.id} onClick={()=>setReelViewer(r)} className="min-w-[118px] overflow-hidden rounded-xl bg-slate-900 text-white text-right">
               <div className="relative grid aspect-[3/4] max-h-40 place-items-center overflow-hidden bg-slate-950 p-2">
   <video src={r.mediaUrl||demoVideoUrl} muted playsInline className="absolute inset-0 h-full w-full object-cover" onMouseEnter={e=>startHoverView(r.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(r.id,e.currentTarget)}/>
   <div className="absolute inset-0 bg-black/30"/>
-  <span className="relative z-10 px-2 text-xs font-bold">{r.text.slice(0,55)}</span>
+  <span className="relative z-10 px-2 text-xs font-bold">{r.text.slice(0,55)}</span><span className="absolute bottom-2 left-2 z-10 rounded-full bg-black/60 px-2 py-1 text-[10px]"><Eye className="inline h-3 w-3 ml-1"/>{r.views||0}</span>
 </div>
             </button>)}
           </div>
@@ -326,22 +327,24 @@ export default function PageProfileTools({
         {/* Feed */}
         <div id="fb-posts" className="space-y-4">
           {publicFeed.map((p,i)=><div key={p.id}>
-            <article className="mx-auto max-w-3xl rounded-xl border bg-white p-3 shadow-sm">
+            <article className="mx-auto max-w-3xl overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm">
+              <div className="p-3">
               <div className="flex items-center gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-full bg-teal-100 font-extrabold text-teal-700">{p.author.charAt(0)}</div>
-                <div className="flex-1"><b className="text-sm">{p.author}</b><div className="text-xs text-slate-400">{new Date(p.createdAt).toLocaleString()} · {p.views||0} مشاهدة</div></div>
-
+                {p.authorPhoto?<img src={p.authorPhoto} alt={p.author} className="h-10 w-10 rounded-full object-cover"/>:<div className="grid h-10 w-10 place-items-center rounded-full bg-teal-100 font-extrabold text-teal-700">{p.author.charAt(0)}</div>}
+                <div className="flex-1"><b className="text-sm">{p.author}</b><div className="text-xs text-slate-400">{new Date(p.createdAt).toLocaleString()}</div></div>
               </div>
               <div className="mt-3 rounded-xl px-3 py-4 whitespace-pre-wrap leading-7 text-sm" style={p.style||{}}>{p.text}</div>
               {p.mediaUrl&&p.kind==='image'&&<img src={p.mediaUrl} alt="" className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl object-contain"/>}
               {p.mediaUrl&&(p.kind==='video'||p.kind==='reel')&&<video src={p.mediaUrl} controls muted playsInline className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl bg-black object-contain" onMouseEnter={e=>startHoverView(p.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(p.id,e.currentTarget)}/>} 
               {p.mediaUrl&&p.kind==='audio'&&<audio src={p.mediaUrl} controls className="mt-3 w-full"/>}
-              <div className="mt-3 flex items-center border-t pt-2 text-sm text-slate-500">
-                <button onClick={()=>like(p.id)} disabled={likedIds.includes(p.id)} className={'flex-1 rounded-lg py-2 transition '+(likedIds.includes(p.id)?'text-red-600':'text-slate-500 hover:bg-slate-50 hover:text-teal-700')}><Heart className="inline h-4 w-4 ml-1" fill={likedIds.includes(p.id)?'currentColor':'none'}/> {p.likes}</button>
-                <button onClick={()=>setOpenComments(p.id)} className="flex-1 rounded-lg py-2 hover:bg-slate-50" aria-label="التعليقات"><MessageCircle className="inline h-4 w-4 ml-1"/> {p.comments.length}</button>
-                <button onClick={()=>openShare(p.text)} className="flex-1 rounded-lg py-2 hover:bg-slate-50 active:bg-slate-100"><Share2 className="inline h-4 w-4 ml-1"/> مشاركة</button>
-                <button onClick={()=>saveToFavorites(p)} className="rounded-lg px-3 py-2 hover:bg-slate-50 active:bg-slate-100" aria-label="حفظ"><Bookmark className="inline h-4 w-4"/></button>
-                <button onClick={()=>setAlbumPicker(p)} className="rounded-lg px-3 py-2 hover:bg-slate-50 active:bg-slate-100" aria-label="إضافة إلى ألبوم"><Album className="inline h-4 w-4"/></button>
+              </div>
+              <div className="flex items-center border-t border-slate-300 bg-slate-50 px-2 py-2 text-sm text-slate-600">
+                <button onClick={()=>like(p.id)} disabled={likedIds.includes(p.id)} className={'flex-1 rounded-lg py-2 transition '+(likedIds.includes(p.id)?'text-red-600':'text-slate-600 hover:bg-white hover:text-teal-700')}><Heart className="inline h-4 w-4 ml-1" fill={likedIds.includes(p.id)?'currentColor':'none'}/> {p.likes}</button>
+                <button onClick={()=>setOpenComments(p.id)} className="flex-1 rounded-lg py-2 hover:bg-white" aria-label="التعليقات">{p.authorPhoto?<img src={p.authorPhoto} alt="" className="inline-block h-5 w-5 rounded-full object-cover align-middle ml-1"/>:<MessageCircle className="inline h-4 w-4 ml-1"/>}<MessageCircle className="inline h-4 w-4 ml-1"/> {p.comments.length}</button>
+                <span className="flex items-center gap-1 px-2 text-xs font-bold text-slate-500"><Eye className="h-4 w-4"/>{p.views||0}</span>
+                <button onClick={()=>openShare(p.text)} className="flex-1 rounded-lg py-2 hover:bg-white active:bg-slate-100"><Share2 className="inline h-4 w-4 ml-1"/> مشاركة</button>
+                <button onClick={()=>saveToFavorites(p)} className="rounded-lg px-3 py-2 hover:bg-white active:bg-slate-100" aria-label="حفظ"><Bookmark className="inline h-4 w-4"/></button>
+                <button onClick={()=>setAlbumPicker(p)} className="rounded-lg px-3 py-2 hover:bg-white active:bg-slate-100" aria-label="إضافة إلى ألبوم"><Album className="inline h-4 w-4"/></button>
               </div>
             </article>
           </div>)}
@@ -408,11 +411,11 @@ export default function PageProfileTools({
       {settingsOpen&&<div className="mt-3 grid gap-3 md:grid-cols-2"><label className="rounded-xl bg-slate-50 p-4 text-sm"><b>المحتوى الطبي العام</b><p className="mt-1 text-xs text-slate-500">يمكن للزوار مشاهدة المحتوى الطبي المجاني.</p><input type="checkbox" defaultChecked className="mt-3 h-5 w-5"/></label><label className="rounded-xl bg-slate-50 p-4 text-sm"><b>السماح بالقصص</b><p className="mt-1 text-xs text-slate-500">إظهار القصص في أعلى الصفحة.</p><input type="checkbox" defaultChecked className="mt-3 h-5 w-5"/></label></div>}
     </section>) }
 
-    {storyComposer&&<div className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4" onClick={()=>setStoryComposer(false)}><div className="w-full max-w-lg rounded-2xl bg-white p-5" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between"><h3 className="text-xl font-extrabold">إنشاء قصة</h3><button onClick={()=>setStoryComposer(false)}><X/></button></div><textarea value={storyText} onChange={e=>setStoryText(e.target.value)} className="mt-4 min-h-28 w-full rounded-xl border p-3" placeholder="اكتب ما تريد في قصتك..."/><div className="mt-3 flex flex-wrap gap-2"><label className="cursor-pointer rounded-lg bg-slate-100 px-3 py-2 text-sm font-bold"><Upload className="inline h-4 w-4 ml-1"/> صورة / فيديو<input type="file" accept="image/*,video/*" className="hidden" onChange={e=>{const f=e.target.files?.[0]||null;setStoryFile(f);setStoryVideo(f?.type.startsWith('video/')||false)}}/></label><button onClick={createStory} className="rounded-lg bg-teal-700 px-4 py-2 font-bold text-white">نشر القصة</button></div>{storyFile&&<div className="mt-2 text-xs text-slate-500">{storyFile.name}</div>}</div></div>}
+    {storyComposer&&<div className="fixed inset-0 z-[200] grid place-items-center bg-black/60 p-4" onClick={()=>setStoryComposer(false)}><div className="w-full max-w-lg rounded-2xl bg-white p-5" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between"><h3 className="text-xl font-extrabold">إنشاء قصة</h3><button onClick={()=>setStoryComposer(false)}><X/></button></div><textarea value={storyText} onChange={e=>setStoryText(e.target.value)} className="mt-4 min-h-28 w-full rounded-xl border p-3" placeholder="اكتب ما تريد في قصتك..."/><div className="mt-3 flex flex-wrap gap-2"><label className="cursor-pointer rounded-lg bg-slate-100 px-3 py-2 text-sm font-bold"><Upload className="inline h-4 w-4 ml-1"/> صورة / فيديو<input type="file" accept="image/*,video/*" className="hidden" onChange={e=>{const f=e.target.files?.[0]||null;setStoryFile(f);setStoryVideo(f?.type.startsWith('video/')||false)}}/></label><button onClick={createStory} className="rounded-lg bg-teal-700 px-4 py-2 font-bold text-white">نشر القصة</button></div>{storyFile&&<div className="mt-2 text-xs text-slate-500">{storyFile.name}</div>}</div></div>}
 
     {composer&&<div className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4" onClick={()=>setComposer(false)}><div className="w-full max-w-xl rounded-2xl bg-white p-5" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between"><h3 className="text-xl font-extrabold">إنشاء منشور</h3><button onClick={()=>setComposer(false)}><X/></button></div><textarea value={postText} onChange={e=>setPostText(e.target.value)} className="mt-4 min-h-32 w-full rounded-xl border p-3" placeholder="اكتب منشوراً..."/><div className="mt-3 flex flex-wrap gap-2">{(['post','image','video','reel','article'] as MediaKind[]).map(k=><button key={k} onClick={()=>setPostKind(k)} className={'rounded-lg px-3 py-2 text-sm font-bold active:bg-slate-200 '+(postKind===k?'bg-teal-700 text-white':'bg-slate-100')}>{k==='post'?'نص':k==='image'?'صورة':k==='video'?'فيديو':k==='reel'?'Reel':'مقالة'}</button>)}<label className="cursor-pointer rounded-lg bg-slate-100 px-3 py-2 text-sm font-bold"><Upload className="inline h-4 w-4 ml-1"/> رفع ملف<input type="file" accept={postKind==='image'?'image/*':postKind==='video'||postKind==='reel'?'video/*':'*/*'} className="hidden" onChange={e=>setPostFile(e.target.files?.[0]||null)}/></label><div className="mt-3 rounded-xl border bg-slate-50 p-3"><div className="mb-2 text-xs font-extrabold">تنسيق المنشور الكتابي</div><div className="flex flex-wrap gap-2"><label className="flex items-center gap-2 rounded-lg bg-white px-2 py-2 text-xs font-bold">الخلفية <input type="color" value={postBackground} onChange={e=>setPostBackground(e.target.value)} className="h-7 w-7 cursor-pointer rounded"/></label><label className="flex items-center gap-2 rounded-lg bg-white px-2 py-2 text-xs font-bold">الخط <input type="color" value={postFontColor} onChange={e=>setPostFontColor(e.target.value)} className="h-7 w-7 cursor-pointer rounded"/></label><select value={postFontSize} onChange={e=>setPostFontSize(e.target.value)} className="rounded-lg border bg-white px-2 py-2 text-xs font-bold"><option value="14px">صغير</option><option value="18px">متوسط</option><option value="24px">كبير</option><option value="32px">كبير جداً</option></select><button onClick={()=>setPostFontWeight(v=>v==='700'?'900':'700')} className="rounded-lg border bg-white px-3 py-2 text-xs font-black active:bg-slate-200">{postFontWeight==='900'?'عريض جداً':'عريض'}</button></div><div className="mt-3 rounded-xl px-4 py-4" style={{background:postBackground,color:postFontColor,fontSize:postFontSize,fontWeight:postFontWeight}}>{postText||'معاينة المنشور'}</div></div><button onClick={recording?stopRecord:startRecord} className={'rounded-lg px-3 py-2 text-sm font-bold '+(recording?'bg-red-600 text-white':'bg-slate-100')}><Mic className="inline h-4 w-4 ml-1"/>{recording?'إيقاف':'تسجيل صوت'}</button></div>{(postUrl||recordUrl)&&<div className="mt-3 rounded-xl bg-slate-50 p-3 text-sm">{postFile?.name||'تسجيل صوتي جاهز'}</div>}<button onClick={publish} className="mt-4 w-full rounded-xl bg-teal-700 py-3 font-bold text-white">نشر الآن</button></div></div>}
 
-    {storyViewer&&<div className="fixed inset-0 z-[110] grid place-items-center bg-black/80 p-4" onClick={()=>setStoryViewer(null)}><div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-slate-950 text-white" onClick={e=>e.stopPropagation()}><button onClick={()=>setStoryViewer(null)} className="absolute left-3 top-3 z-10 rounded-full bg-black/50 p-2"><X/></button>{storyViewer.mediaUrl ? (storyViewer.mediaKind==='video' ? <video src={storyViewer.mediaUrl} controls autoPlay className="max-h-[72vh] w-full bg-black object-contain"/> : <img src={storyViewer.mediaUrl} alt="" className="max-h-[72vh] w-full object-contain"/>) : <div className="grid min-h-[60vh] place-items-center p-8 text-center text-2xl font-extrabold">{storyViewer.text}</div>}<div className="flex items-center justify-between p-4"><div><b>{storyViewer.name}</b><p className="text-xs opacity-70">{storyViewer.text}</p></div><div className="flex gap-2">{<button onClick={()=>saveStoryToFavorites(storyViewer)} className="rounded-lg bg-white/10 px-3 py-2 text-xs font-bold active:bg-white/20"><Bookmark className="inline h-4 w-4 ml-1"/>حفظ</button>}{storyViewer.own&&<button onClick={()=>deleteStory(storyViewer)} className="rounded-lg bg-red-600 px-3 py-2 text-xs font-bold"><Trash2 className="inline h-4 w-4 ml-1"/>حذف</button>}</div></div></div></div>}
+    {storyViewer&&<div className="fixed inset-0 z-[210] grid place-items-center bg-black/80 p-4" onClick={()=>setStoryViewer(null)}><div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-slate-950 text-white" onClick={e=>e.stopPropagation()}><button onClick={()=>setStoryViewer(null)} className="absolute left-3 top-3 z-10 rounded-full bg-black/50 p-2"><X/></button>{storyViewer.mediaUrl ? (storyViewer.mediaKind==='video' ? <video src={storyViewer.mediaUrl} controls autoPlay className="max-h-[72vh] w-full bg-black object-contain"/> : <img src={storyViewer.mediaUrl} alt="" className="max-h-[72vh] w-full object-contain"/>) : <div className="grid min-h-[60vh] place-items-center p-8 text-center text-2xl font-extrabold">{storyViewer.text}</div>}<div className="flex items-center justify-between p-4"><div><b>{storyViewer.name}</b><p className="text-xs opacity-70">{storyViewer.text}</p></div><div className="flex gap-2">{<button onClick={()=>saveStoryToFavorites(storyViewer)} className="rounded-lg bg-white/10 px-3 py-2 text-xs font-bold active:bg-white/20"><Bookmark className="inline h-4 w-4 ml-1"/>حفظ</button>}{storyViewer.own&&<button onClick={()=>deleteStory(storyViewer)} className="rounded-lg bg-red-600 px-3 py-2 text-xs font-bold"><Trash2 className="inline h-4 w-4 ml-1"/>حذف</button>}</div></div></div></div>}
 
     {openComments&&(()=>{const post=feed.find(x=>x.id===openComments); if(!post)return null; return <div className="fixed inset-0 z-[120] grid place-items-center bg-black/60 p-4" onClick={()=>setOpenComments(null)}>
       <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl" onClick={e=>e.stopPropagation()}>
@@ -422,7 +425,7 @@ export default function PageProfileTools({
         </div>
         <div className="max-h-[55vh] space-y-2 overflow-y-auto py-4">
           {post.comments.length===0&&<div className="py-8 text-center text-sm text-slate-500">لا توجد تعليقات بعد.</div>}
-          {post.comments.map(c=><div key={c.id} className="rounded-xl bg-slate-50 p-3 text-sm"><b>{c.name}</b><div className="mt-1">{c.body}</div></div>)}
+          {post.comments.map(c=><div key={c.id} className="flex gap-2 rounded-xl bg-slate-50 p-3 text-sm">{c.photo?<img src={c.photo} alt={c.name} className="h-8 w-8 shrink-0 rounded-full object-cover"/>:<div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-teal-100 text-xs font-bold text-teal-700">{c.name.charAt(0)}</div>}<div><b>{c.name}</b><div className="mt-1">{c.body}</div></div></div>)}
         </div>
         <div className="flex gap-2 border-t pt-3">
           <input autoFocus value={comments[post.id]||''} onChange={e=>setComments(v=>({...v,[post.id]:e.target.value}))} onKeyDown={e=>e.key==='Enter'&&addComment(post.id)} className="flex-1 rounded-full border bg-slate-50 px-4 py-2 text-sm" placeholder="اكتب تعليقاً..."/>
