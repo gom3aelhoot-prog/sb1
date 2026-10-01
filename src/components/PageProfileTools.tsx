@@ -142,6 +142,7 @@ export default function PageProfileTools({
   const [socialUrl,setSocialUrl]=useState('');
   const [socialOpen,setSocialOpen]=useState<string[]>([]);
   const [socialEmbedded,setSocialEmbedded]=useState<string|null>(null);
+  const [youtubeResults,setYoutubeResults]=useState<any[]>([]);
   const [favorites,setFavorites]=useState<string[]>(()=>read('sb1_fb_social_favorites',[]));
   const [albums,setAlbums]=useState<any[]>(()=>read('sb1_fb_albums_'+pageId,[]));
   const [albumName,setAlbumName]=useState('');
@@ -277,12 +278,19 @@ export default function PageProfileTools({
     setSocialEmbedded(url);
     if(!favorites.includes(url))setFavorites(v=>[url,...v]);
   };
-  const searchSocial=()=>{
+  const searchSocial=async()=>{
     const q=socialSearch.trim();
     const provider=(document.getElementById('sb1-social-provider') as HTMLSelectElement|null)?.value||'YouTube';
+    if(!q){setNotice(provider==='Pinterest'?'ألصق رابط Pin هنا.':'اكتب كلمة البحث أو رابط المحتوى.');return;}
+    if(provider==='YouTube'){
+      if(/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//i.test(q)){
+        const m=q.match(/(?:v=|youtu\.be\/|embed\/)([\\w-]{6,})/);if(m){setYoutubeResults([{id:m[1],title:'YouTube video',thumbnail:'',channelTitle:''}]);setSocialEmbedded('YouTube');return;}
+      }
+      try{const r=await fetch('/api/youtube-search?q='+encodeURIComponent(q)+'&type=video');const x=await r.json();if(!r.ok)throw new Error(x.error||'YouTube API error');setYoutubeResults(x.items||[]);setSocialEmbedded('YouTube');}catch(e){setNotice(e instanceof Error?e.message:'تعذر البحث في YouTube');}
+      return;
+    }
+    if(provider==='Pinterest'){setSocialEmbedded('Pinterest');return;}
     if(provider==='Google Search'||provider==='Yandex Search'){setSocialEmbedded(provider);return;}
-    if(provider==='Pinterest'||provider==='OK'){setSocialEmbedded(provider);return;}
-    if(!q){setNotice('اكتب كلمة البحث أو رابط المحتوى.');return;}
     setSocialEmbedded(provider);
   };
 
