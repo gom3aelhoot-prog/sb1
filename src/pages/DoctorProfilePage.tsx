@@ -261,9 +261,11 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const workCountdown=Math.max(0,nextWorkStart-workNow);
   const dateKey=(value:string|number)=>{const x=new Date(value);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
   const filteredDiary=diary.filter(s=>dateKey(s.created_at)===sessionDate);
-  const demoDiary=Array.from({length:4},(_,i)=>({id:'demo-session-'+i,title:'جلسة مجانية '+(i+1),body:'جلسة تعريفية مجانية مع المتابعين',created_at:new Date(Date.now()-i*86400000).toISOString()}));
+  const demoDiary=Array.from({length:7},(_,i)=>({id:'demo-session-'+i,title:'جلسة مجانية '+(i+1),body:'جلسة تعريفية مجانية مع المتابعين',created_at:new Date(Date.now()+i*86400000).toISOString()}));
+  const demoScheduledSessions=Array.from({length:14},(_,i)=>{const starts=new Date(Date.now()+(i+1)*86400000);starts.setHours(10+(i%6),i%2?30:0,0,0);return {id:'demo-booking-'+i,title:'جلسة محجوزة '+(i+1),client:['محمد','سارة','أحمد','ليان'][i%4],startsAt:starts.getTime(),endsAt:starts.getTime()+3600000,status:'محجوزة'}});
   const visibleDiary=diary.length?filteredDiary:demoDiary.filter(s=>dateKey(s.created_at)===sessionDate);
-  const selectedWorkSessions=workSessions.filter((s:any)=>dateKey(s.startsAt)===sessionDate);
+  const scheduledSource=workSessions.length?workSessions:demoScheduledSessions;
+  const selectedWorkSessions=scheduledSource.filter((s:any)=>dateKey(s.startsAt)===sessionDate);
   const workMinutes=Math.floor(workCountdown/60000);
   const workHours=Math.floor(workMinutes/60);
   const workMins=workMinutes%60;
