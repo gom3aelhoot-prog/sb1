@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 type MediaKind = 'post' | 'image' | 'video' | 'reel' | 'audio' | 'article';
-type StoryItem = { id:string; name:string; text:string; mediaUrl?:string; mediaKind?:'image'|'video'; audioUrl?:string; audioStart?:number; filter?:string; textStyle?:{color:string;fontSize:string;fontWeight:string}; createdAt:string; expiresAt:string; own?:boolean };
+type StoryItem = { id:string; name:string; text:string; mediaUrl?:string; mediaKind?:'image'|'video'; audioUrl?:string; audioStart?:number; filter?:string; authorPhoto?:string; textStyle?:{color:string;fontSize:string;fontWeight:string}; createdAt:string; expiresAt:string; own?:boolean };
 type FeedItem = {
   id:string; kind:MediaKind; text:string; mediaUrl?:string; mediaName?:string;
   createdAt:string; likes:number; views?:number; comments:{id:string;name:string;photo?:string;body:string}[];
@@ -189,7 +189,7 @@ export default function PageProfileTools({
   const activeStories=useMemo(()=>[
     ...stories.filter(s=>new Date(s.expiresAt)>new Date()),
     ...demoNames.map((name,i)=>({
-      id:'demo-story-'+i,name,text:demoStoryTexts[i],
+      id:'demo-story-'+i,name,text:demoStoryTexts[i],authorPhoto:demoPeopleImages[i%demoPeopleImages.length],
       mediaUrl:i%3===0?demoVideoUrl:demoPeopleImages[i%demoPeopleImages.length],
       mediaKind:i%3===0?'video':'image',
       createdAt:new Date(Date.now()-i*3600000).toISOString(),
@@ -201,7 +201,7 @@ export default function PageProfileTools({
 
   const createStory=()=>{
     if(!storyText.trim()&&!storyUrl){setNotice('أضف نصاً أو صورة أو فيديو للقصة.');return}
-    const item:StoryItem={id:id(),name:'قصتي',text:storyText.trim(),mediaUrl:storyUrl||undefined,mediaKind:storyVideo?'video':'image',audioUrl:storyAudioUrl||undefined,audioStart:storyAudioStart,filter:storyFilter,textStyle:{color:storyTextColor,fontSize:storyTextSize,fontWeight:'800'},createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+86400000),own:true};
+    const item:StoryItem={id:id(),name:'قصتي',text:storyText.trim(),mediaUrl:storyUrl||undefined,mediaKind:storyVideo?'video':'image',audioUrl:storyAudioUrl||undefined,audioStart:storyAudioStart,authorPhoto:pageAvatar,filter:storyFilter,textStyle:{color:storyTextColor,fontSize:storyTextSize,fontWeight:'800'},createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+86400000),own:true};
     setStories(v=>[item,...v]);setStoryText('');setStoryFile(null);setStoryAudioUrl('');setStoryAudioStart(0);setStoryFilter('none');setStoryComposer(false);setNotice('تم نشر قصتك.');setStoryViewer(item);
   };
   const deleteStory=(story:StoryItem)=>{
@@ -319,9 +319,10 @@ export default function PageProfileTools({
           <video src={r.mediaUrl||demoReelUrl} muted playsInline loop preload="metadata" className="absolute inset-0 h-full w-full object-cover" onMouseEnter={e=>startHoverView(r.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(r.id,e.currentTarget)}/>
           <div className="absolute inset-0 bg-black/20"/>
           <span className="absolute bottom-2 right-2 max-w-[90%] rounded bg-black/60 px-2 py-1 text-[10px] font-bold">{r.text.slice(0,38)}</span>
-          <span className="absolute bottom-2 left-2 rounded-full bg-black/70 px-2 py-1 text-[10px]"><Eye className="inline h-3 w-3 ml-1"/>{r.views||0}</span>
+          <span className="absolute top-2 right-2 h-7 w-7 overflow-hidden rounded-full border-2 border-white shadow"><img src={r.authorPhoto||pageAvatar} alt="" className="h-full w-full object-cover"/></span><span className="absolute bottom-2 left-2 rounded-full bg-black/70 px-2 py-1 text-[10px]"><Eye className="inline h-3 w-3 ml-1"/>{r.views||0}</span>
         </div>
       </button>)}
+      {albums.filter(a=>a.public).map(a=><button key={a.id+'-'+stripId} onClick={()=>setAlbumViewer(a)} className="min-w-[118px] overflow-hidden rounded-xl border-2 border-indigo-400 bg-indigo-950 text-white text-right"><div className="relative aspect-[3/4] max-h-40 overflow-hidden">{a.items?.[0]?.mediaUrl&&a.items?.[0]?.kind==='image'?<img src={a.items[0].mediaUrl} alt="" className="absolute inset-0 h-full w-full object-cover"/>:<div className="absolute inset-0 grid place-items-center text-3xl">📁</div>}<span className="absolute top-2 right-2 h-7 w-7 overflow-hidden rounded-full border-2 border-white"><img src={pageAvatar} alt="" className="h-full w-full object-cover"/></span><span className="absolute bottom-2 right-2 rounded bg-black/70 px-2 py-1 text-[10px] font-bold">ألبوم · {a.name}</span></div></button>)}
     </div>
   </div>;
   const sectionButton=(key:string,label:string,Icon:any)=>
@@ -347,7 +348,7 @@ export default function PageProfileTools({
                     ? <video src={s.mediaUrl} muted playsInline className="h-full w-full object-cover" onMouseEnter={e=>startHoverView(s.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(s.id,e.currentTarget)}/>
                     : <img src={s.mediaUrl} className="h-full w-full object-cover" alt="" onMouseEnter={()=>startHoverView(s.id)} onMouseLeave={()=>stopHoverView(s.id)}/>)
                     : <span className="p-3 text-xs font-bold">{s.text}</span>}
-                  <span className="absolute bottom-2 right-2 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-slate-800">{s.name}</span>
+                  <span className="absolute top-2 right-2 h-7 w-7 overflow-hidden rounded-full border-2 border-white shadow"><img src={s.authorPhoto||pageAvatar} alt="" className="h-full w-full object-cover"/></span><span className="absolute bottom-2 right-2 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-slate-800">{s.name}</span>
                 </div>
               </button>)}
             </div>
@@ -425,7 +426,7 @@ export default function PageProfileTools({
 
     {show('albums') && (<section id="fb-albums" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between"><div><h2 className="text-lg font-extrabold">الألبومات</h2><p className="text-xs text-slate-500">صور، فيديو، صوت، MP3/WAV، ملفات Word/PDF وأي ملف من الجهاز.</p></div><button onClick={()=>setAlbumModal(true)} title="إنشاء ألبوم" className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-bold text-white active:bg-teal-800"><Plus className="inline h-4 w-4 ml-1"/>ألبوم جديد</button></div>
-      {albums.length===0?<div className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-400">لا توجد ألبومات بعد.</div>:<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{albums.map(a=><article key={a.id} className="rounded-xl border bg-slate-50 p-4"><button onClick={()=>setAlbumViewer(a)} className="w-full text-right"><div className="flex items-center justify-between"><b>{a.name}</b><span className="text-xs text-slate-400">{a.items?.length||0} عنصر</span></div><div className="mt-3 grid grid-cols-3 gap-2">{(a.items||[]).slice(0,6).map((x:any)=><div key={x.id} className="aspect-square overflow-hidden rounded-lg bg-white">{x.mediaUrl&&x.kind==='image'?<img src={x.mediaUrl} alt="" className="h-full w-full object-cover"/>:x.mediaUrl&&x.kind==='video'?<video src={x.mediaUrl} muted className="h-full w-full object-cover"/>:<div className="grid h-full place-items-center p-1 text-[10px] font-bold text-slate-500">{x.mediaName||x.text||x.kind}</div>}</div>)}</div><div className="mt-3 text-xs font-bold text-teal-700">{a.type==='all'?'الكل':a.type==='images'?'صور':a.type==='videos'?'فيديو':a.type==='audio'?'صوت':'ملفات'} {a.public?'· عام':'· خاص'}</div></button></article>)}</div>}
+      {albums.length===0?<div className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-400">لا توجد ألبومات بعد.</div>:<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{albums.map(a=><article key={a.id} className="rounded-xl border bg-slate-50 p-4"><button onClick={()=>setAlbumViewer(a)} className="w-full text-right"><div className="flex items-center justify-between"><b>{a.name}</b><span className="text-xs text-slate-400">{a.items?.length||0} عنصر</span></div><div className="mt-3 grid grid-cols-3 gap-2">{(a.items||[]).slice(0,6).map((x:any)=><div key={x.id} className="aspect-square overflow-hidden rounded-lg bg-white">{x.mediaUrl&&x.kind==='image'?<img src={x.mediaUrl} alt="" className="h-full w-full object-cover"/>:x.mediaUrl&&x.kind==='video'?<video src={x.mediaUrl} muted className="h-full w-full object-cover"/>:<div className="grid h-full place-items-center p-1 text-[10px] font-bold text-slate-500">{x.mediaName||x.text||x.kind}</div>}</div>)}</div><div className="mt-3 text-xs font-bold text-teal-700">{a.type==='all'?'الكل':a.type==='images'?'صور':a.type==='videos'?'فيديو':a.type==='audio'?'صوت':'ملفات'} {a.public?'· عام':'· خاص'}</div><div className="mt-2 flex items-center gap-2"><button onClick={e=>{e.stopPropagation();setAlbums(v=>v.map(x=>x.id===a.id?{...x,public:!x.public}:x))}} className="rounded-lg bg-white px-2 py-1 text-[10px] font-bold">{a.public?'إخفاء عن العامة':'مشاركة للعامة'}}</button><span className="h-7 w-7 overflow-hidden rounded-full border"><img src={pageAvatar} alt="" className="h-full w-full object-cover"/></span></div></button></article>)}</div>}
     </section>)}
 
     {show('medical') && (<section id="fb-medical-content" className="rounded-xl border bg-white p-5 shadow-sm">
