@@ -221,7 +221,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         </button>
 
         <div className="xl:grid xl:grid-cols-[15rem_minmax(0,1fr)] xl:gap-6 xl:items-start" dir="rtl">
-        <aside className="sticky top-24 z-30 hidden max-h-[calc(100vh-7rem)] w-full overflow-y-auto border-s border-slate-300 bg-white ps-4 pe-1 xl:block" aria-label="قائمة SB1 الرئيسية">
+        <aside className="sticky top-24 z-30 hidden max-h-[calc(100vh-7rem)] w-full overflow-y-auto border-s border-slate-200 bg-white ps-4 pe-1 xl:block" aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
             {canSeePrivate&&<button onClick={()=>selectMain('wallet')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm active:bg-slate-900"><Wallet className="h-4 w-4 text-amber-300"/>الحساب والمحفظة</button>}
             {canManagePage&&<button onClick={()=>selectMain('clone')} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm active:bg-emerald-200"><Copy className="h-4 w-4 text-emerald-700"/>الاستنساخ</button>}
