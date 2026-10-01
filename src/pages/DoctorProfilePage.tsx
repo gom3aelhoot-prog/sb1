@@ -90,7 +90,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const [isFollowing, setIsFollowing] = useState(()=>isFollowingVault(id));
   const profileAvatar = doctor?.photo_url || ('https://api.dicebear.com/9.x/personas/svg?seed=' + encodeURIComponent(id));
   const savedCoverImages=getSaved().filter(x=>x.kind==='image'&&x.url).map(x=>x.url as string);
-  const selectMain=(section:MainSection)=>{setMainSection(section);setActiveTab('home');setTimeout(()=>document.getElementById('profile-tabs')?.scrollIntoView({behavior:'smooth',block:'start'}),0)};
+  const selectMain=(section:MainSection)=>{setMainSection(section);setActiveTab('home');setNotificationOpen(false);setTimeout(()=>document.getElementById('profile-tabs')?.scrollIntoView({behavior:'smooth',block:'start'}),0)};
   useEffect(()=>{
     const onNotification=()=>{setNotifications(v=>[{id:'n-'+Date.now(),title:'إشعار جديد',body:'لديك إشعار جديد في صفحة الأخصائي.',time:'الآن',read:false},...v]);setUnreadNotifications(v=>{const next=v+1;localStorage.setItem('sb1_unread_notifications',String(next));return next});setBellAnimating(true);window.setTimeout(()=>setBellAnimating(false),15000)};
     const onStorage=(e:StorageEvent)=>{if(e.key==='sb1_unread_notifications'){const next=Number(e.newValue||'0');if(next>unreadNotifications){setBellAnimating(true);window.setTimeout(()=>setBellAnimating(false),15000)}setUnreadNotifications(next)}};
@@ -386,7 +386,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
                 </button>
                 <div className="flex items-center justify-center gap-2"><button title="مشاركة صفحة SB1" onClick={shareProfile} className="px-6 py-2.5 rounded-xl border border-teal-200 text-teal-700 bg-teal-50 font-semibold text-sm flex items-center justify-center gap-2">
                   <Share2 className="w-4 h-4" /> مشاركة صفحة SB1
-                </button>{canManagePage&&<div className="relative">
+                </button>{canManagePage&&<div className="relative" onMouseLeave={()=>setNotificationOpen(false)}>
   <button title="إشعارات الأخصائي" onClick={()=>setNotificationOpen(v=>!v)} aria-label="الإشعارات" className={`relative grid h-11 w-11 place-items-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-600 transition ${unreadNotifications>0?'text-red-600 border-red-200 bg-red-50':''} ${bellAnimating?'animate-[sb1bell_.5s_ease-in-out_infinite]':''}`}><Bell className="h-5 w-5"/>{unreadNotifications>0&&<span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-extrabold text-white">{unreadNotifications}</span>}</button>
   {notificationOpen&&<div className="absolute left-0 top-12 z-[160] w-80 max-w-[80vw] overflow-hidden rounded-2xl border bg-white text-right shadow-xl">
     <div className="flex items-center justify-between border-b px-4 py-3"><b>الإشعارات</b><button onClick={()=>{setNotifications(v=>v.map(n=>({...n,read:true})));setUnreadNotifications(0);localStorage.setItem('sb1_unread_notifications','0')}} className="text-[11px] font-bold text-teal-700">قراءة الكل</button></div>
@@ -406,11 +406,11 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         <div className="my-3 border-b-2 border-black" aria-hidden="true" />
 
         <div className="mb-5 min-h-[58px] w-full"><div ref={profileTabsRef} id="profile-tabs" className={`${profileNavPinned ? "fixed inset-x-0 top-0 z-50" : "relative z-50"} w-full overflow-hidden border bg-white shadow-sm`}><div className="mx-auto max-w-6xl px-3 sm:px-5 lg:px-8"><div className="xl:ps-[17rem]"><div className="grid w-full grid-cols-8" dir={lang==='ar'?'rtl':'ltr'}>
-          {tabs.map((tab,i)=>{const Icon=tab.icon;const colors=['text-teal-600','text-rose-500','text-indigo-500','text-amber-500','text-sky-500','text-violet-500','text-emerald-500','text-blue-600'];return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key)}} className={`min-w-0 border-e px-0 py-1 text-[9px] font-bold leading-3 transition active:bg-slate-200 ${activeTab===tab.key?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`} title={tab.label}>
+          {tabs.map((tab,i)=>{const Icon=tab.icon;const colors=['text-teal-600','text-rose-500','text-indigo-500','text-amber-500','text-sky-500','text-violet-500','text-emerald-500','text-blue-600'];return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key);setNotificationOpen(false);setTimeout(()=>document.getElementById('profile-content')?.scrollIntoView({behavior:'smooth',block:'start'}),0)}} className={`min-w-0 border-e px-0 py-1 text-[9px] font-bold leading-3 transition active:bg-slate-200 ${activeTab===tab.key?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`} title={tab.label}>
               <span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Icon className={`h-3 w-3 ${colors[i]}`}/><span className="break-words">{tab.label}</span></span>
             </button>})}
           </div></div></div></div></div>
-        <div className="mb-3">{mainSection === 'home' && activeTab === 'home' && <StoryBar pageId={id} canManage={canManagePage} pageAvatar={profileAvatar} />} {mainSection === 'home' && activeTab === 'portfolio' && <StoryBar pageId={id} canManage={canManagePage} pageAvatar={profileAvatar} ownOnly />}</div>
+        <div id="profile-content" className="mb-3">{mainSection === 'home' && activeTab === 'home' && <StoryBar pageId={id} canManage={canManagePage} pageAvatar={profileAvatar} />} {mainSection === 'home' && activeTab === 'portfolio' && <StoryBar pageId={id} canManage={canManagePage} pageAvatar={profileAvatar} ownOnly />}</div>
         {mainSection === 'home' && showFollowers && (
           <section id="followers-list" className="mb-5 rounded-xl border bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">المتابعون</h2><p className="mt-1 text-xs text-slate-500">مرتبة أبجدياً، مع تمييز المتاحين الآن.</p></div><button onClick={()=>setShowFollowers(false)} className="rounded-lg border px-3 py-1 text-xs font-bold">إغلاق</button></div>
