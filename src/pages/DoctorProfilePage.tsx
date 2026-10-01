@@ -57,6 +57,9 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<Tab>('home');
+  const [profileNavPinned, setProfileNavPinned] = useState(false);
+  const profileNavPinY = useRef<number | null>(null);
+  const profileTabsRef = useRef<HTMLDivElement | null>(null);
   const [mainSection, setMainSection] = useState<MainSection>('home');
   const [loading, setLoading] = useState(true);
   const [imgError, setImgError] = useState(false);
@@ -272,6 +275,23 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const workMins=workMinutes%60;
   const workUrgent=workCountdown<=50*60000;
   const workRed=workCountdown<=60*60000;
+  useEffect(()=>{
+    const measure=()=>{
+      const el=profileTabsRef.current;
+      if(!el) return;
+      profileNavPinY.current=el.getBoundingClientRect().top+window.scrollY;
+      setProfileNavPinned(window.scrollY>=profileNavPinY.current);
+    };
+    const onScroll=()=>{
+      if(profileNavPinY.current===null) measure();
+      else setProfileNavPinned(window.scrollY>=profileNavPinY.current);
+    };
+    const timer=window.setTimeout(measure,50);
+    window.addEventListener('scroll',onScroll,{passive:true});
+    window.addEventListener('resize',measure);
+    return()=>{window.clearTimeout(timer);window.removeEventListener('scroll',onScroll);window.removeEventListener('resize',measure)};
+  },[]);
+
   const tabs: { key: Tab; label: string; icon: typeof FileText }[] = [
     { key:'home', label:lang==='ar'?'الرئيسية':'Home', icon:Home },
     { key:'sessions', label:lang==='ar'?'جلساتي':'My Sessions', icon:Video },
@@ -291,7 +311,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         </button>
 
         <div className="relative" dir="rtl">
-        <aside className="sticky top-[4.5rem] start-4 z-40 hidden max-h-[calc(100vh-5.5rem)] w-[15rem] self-start overflow-y-auto border-s-slate-900 bg-white ps-4 pe-1 shadow-sm xl:block" aria-label="قائمة SB1 الرئيسية">
+        <aside className={`${profileNavPinned ? "fixed top-0 end-4" : "absolute top-0 start-4"} z-[60] hidden max-h-[calc(100vh-1rem)] w-[15rem] overflow-y-auto border-s-slate-900 bg-white ps-4 pe-1 shadow-sm xl:block`} aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
             {canSeePrivate&&<button onClick={()=>selectMain('wallet')} className="flex w-full items-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white shadow-sm active:bg-slate-900"><Wallet className="h-4 w-4 text-amber-300"/>الحساب والمحفظة</button>}
             {canManagePage&&<button onClick={()=>selectMain('clone')} className="flex w-full items-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-extrabold text-emerald-800 shadow-sm active:bg-emerald-200"><Copy className="h-4 w-4 text-emerald-700"/>الاستنساخ</button>}
@@ -370,13 +390,12 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         </div>
         <div className="my-3 border-b-2 border-black" aria-hidden="true" />
 
-        <div id="profile-tabs" className="sticky top-0 z-50 mb-5 w-full overflow-hidden rounded-xl border bg-white shadow-sm">
+        <div className="mb-5 min-h-[58px] w-full"><div ref={profileTabsRef} id="profile-tabs" className={`${profileNavPinned ? "fixed inset-x-0 top-0 z-50" : "relative z-50"} w-full overflow-hidden border bg-white shadow-sm`}><div className="mx-auto max-w-6xl px-3 sm:px-5 lg:px-8"><div className="xl:ps-[17rem]"><div className="grid w-full grid-cols-7" dir={lang==='ar'?'rtl':'ltr'}>
           <div className="grid w-full grid-cols-7" dir={lang==='ar'?'rtl':'ltr'}>
             {tabs.map((tab,i)=>{const Icon=tab.icon;const colors=['text-teal-600','text-rose-500','text-indigo-500','text-amber-500','text-sky-500','text-violet-500','text-emerald-500'];return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key)}} className={`min-w-0 border-e px-1 py-2 text-[11px] font-bold leading-4 transition active:bg-slate-200 ${activeTab===tab.key?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`}>
               <span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Icon className={`h-4 w-4 ${colors[i]}`}/><span className="break-words">{tab.label}</span></span>
             </button>})}
-          </div>
-        </div>
+          </div></div></div></div>
         <div className="mb-3"><StoryBar pageId={id} canManage={canManagePage} /></div>
         {mainSection === 'work' && canSeePrivate && (
           <section className="mb-5 rounded-xl border bg-white p-5 shadow-sm">
