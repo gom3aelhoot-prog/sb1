@@ -167,7 +167,7 @@ export default function ProfilePage(){
             {active==='courses'&&<CoursesNotice role={role}/>}
             {active==='certificates'&&<PublicNotice title="شهاداتي" text="الشهادات الظاهرة للعامة تعرض كبيانات/إنجازات، بينما فتح المستند الأصلي يبقى لصاحب الحساب حسب الصلاحية."/>}
             {active==='videos'&&<PrivateNotice title="فيديوهاتي" text="هذا القسم خاص بصاحب الحساب."/>}
-            {active==='products'&&<LinkedActivity role={role} activity={activity}/>}
+            {active==='products'&&<LinkedActivity role={role} activity={activity}/>}\n            {active==='wallet'&&<PrivateNotice title="الحساب والمحفظة" text="بيانات الحساب والمحفظة خاصة بصاحب الحساب والمخولين فقط."/>}\n            {active==='clone'&&<PrivateNotice title="الاستنساخ" text="إدارة الصفحات المستنسخة خاصة بالمالك/الأدوار المصرح لها فقط."/>}
             {active==='services'&&<LinkedActivity role={role} activity={activity}/>}
           </div>
         </main>
