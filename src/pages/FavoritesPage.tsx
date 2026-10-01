@@ -4,6 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import { supabase, type Favorite } from '@/lib/supabase';
 import { getWishlist } from '@/lib/commerce';
 import { getSaved, type VaultItem } from '@/lib/socialVault';
+import { useRouter } from '@/lib/router';
 
 const itemIcons: Record<string, typeof Heart> = {
   doctor: Stethoscope, article: FileText, video: Video, product: Pill, test: Calculator,
@@ -20,6 +21,7 @@ const labels: Record<string,string> = {
 
 export default function FavoritesPage() {
   const { t } = useI18n();
+  const { navigate } = useRouter();
   const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
@@ -52,7 +54,7 @@ export default function FavoritesPage() {
         {tabs.map(tab=><button key={tab.key} onClick={()=>setActiveTab(tab.key)} title={tab.label} className={`rounded-xl px-3 py-3 text-xs font-bold transition active:bg-slate-200 ${activeTab===tab.key?'bg-teal-700 text-white shadow-sm':'border bg-white text-slate-600 hover:bg-slate-50'}`}>{tab.label}</button>)}
       </div>
       {loading?<p className="py-10 text-center text-slate-500">{t('common.loading')}</p>:
-      filtered.length===0?<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{Array.from({length:3},(_,i)=>({id:'demo-fav-'+activeTab+'-'+i,item_type:activeTab==='all'?'article':activeTab,title:(labels[activeTab]||'محتوى مفضل')+' تجريبي '+(i+1),body:'محتوى تجريبي لعرض طريقة حفظ وعرض هذا القسم.',author:'SB1',image_url:i===0?'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=80':undefined})).map((fav:any)=>{const Icon=itemIcons[fav.item_type]||Heart;return <article key={fav.id} className="overflow-hidden rounded-xl border bg-white shadow-sm">{fav.image_url&&<img src={fav.image_url} alt="" className="h-36 w-full object-cover"/>}<div className="p-4"><div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-xl bg-teal-50"><Icon className="h-5 w-5 text-teal-700"/></div><div><b className="block text-sm">{fav.title}</b><span className="text-[11px] text-slate-400">{labels[fav.item_type]||fav.item_type}</span></div></div><p className="mt-3 text-xs leading-6 text-slate-600">{fav.body}</p><button onClick={()=>{toggleSaved({id:fav.id,kind:(fav.item_type as any)||'post',title:fav.title,body:fav.body,author:fav.author,created_at:new Date().toISOString()});load()}} className="mt-3 rounded-lg bg-teal-50 px-3 py-2 text-xs font-bold text-teal-700"><Bookmark className="inline h-4 w-4 me-1"/>إضافة إلى مفضلتي</button></div></article>})}</div>:
+      filtered.length===0?<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{Array.from({length:3},(_,i)=>({id:'demo-fav-'+activeTab+'-'+i,item_type:activeTab==='all'?'article':activeTab,title:(labels[activeTab]||'محتوى مفضل')+' تجريبي '+(i+1),body:'محتوى تجريبي لعرض طريقة حفظ وعرض هذا القسم.',author:'SB1',image_url:i===0?'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=80':undefined})).map((fav:any)=>{const Icon=itemIcons[fav.item_type]||Heart;return <article key={fav.id} onClick={()=>{const target=fav.url||({doctor:'/doctors/',article:'/articles/',video:'/videos',reel:'/media',course:'/courses/',session:'/specialist-sessions',facility:'/facilities/'} as any)[fav.item_type] ? ((fav.url||'').startsWith('http')?fav.url:((fav.url||({doctor:'/doctors/',article:'/articles/',course:'/courses/',facility:'/facilities/'} as any)[fav.item_type]||'/')+(fav.item_id||''))) : '';if(target){if(target.startsWith('http'))window.location.href=target;else navigate(target)}}} className="cursor-pointer overflow-hidden rounded-xl border bg-white shadow-sm">{fav.image_url&&<img src={fav.image_url} alt="" className="h-36 w-full object-cover"/>}<div className="p-4"><div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-xl bg-teal-50"><Icon className="h-5 w-5 text-teal-700"/></div><div><b className="block text-sm">{fav.title}</b><span className="text-[11px] text-slate-400">{labels[fav.item_type]||fav.item_type}</span></div></div><p className="mt-3 text-xs leading-6 text-slate-600">{fav.body}</p><button onClick={()=>{toggleSaved({id:fav.id,kind:(fav.item_type as any)||'post',title:fav.title,body:fav.body,author:fav.author,created_at:new Date().toISOString()});load()}} className="mt-3 rounded-lg bg-teal-50 px-3 py-2 text-xs font-bold text-teal-700"><Bookmark className="inline h-4 w-4 me-1"/>إضافة إلى مفضلتي</button></div></article>})}</div>:
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((fav:any)=>{
           const Icon=itemIcons[fav.item_type]||Heart;
