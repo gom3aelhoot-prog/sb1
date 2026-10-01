@@ -25,7 +25,7 @@ function StoryBar({pageId,canManage,pageAvatar,ownOnly=false}:{pageId:string;can
   const demo=['د. ليان','د. أحمد','مركز الحياة','سارة','محمد'];
   const demoImages=['https://randomuser.me/api/portraits/women/44.jpg','https://randomuser.me/api/portraits/men/32.jpg','https://randomuser.me/api/portraits/women/68.jpg','https://randomuser.me/api/portraits/men/75.jpg','https://randomuser.me/api/portraits/women/65.jpg'];
   const demoVideo='https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
-  const visible=[...(ownOnly?stories.filter(s=>s.own):stories.filter(s=>new Date(s.expiresAt)>new Date())),...(ownOnly?[]:demo.map((name,i)=>({id:'story-demo-'+i,name,text:['معلومة جديدة','جلسة تعليمية','سؤال وجواب','فيديو جديد','تسجيل جديد'][i],mediaUrl:i===1||i===4?demoVideo:demoImages[i],mediaKind:i===1||i===4?'video':'image',expiresAt:new Date(Date.now()+86400000).toISOString()} as S)))];
+  const visible=[...(ownOnly?stories.filter(s=>s.own):stories.filter(s=>new Date(s.expiresAt)>new Date())),...(ownOnly?[]:demo.map((name,i)=>({id:'story-demo-'+i,name,text:['معلومة جديدة','جلسة تعليمية','سؤال وجواب','فيديو جديد','تسجيل جديد'][i],mediaUrl:i===1||i===4?demoVideo:demoImages[i],mediaKind:i===1||i===4?'video':'image',authorPhoto:demoImages[i],expiresAt:new Date(Date.now()+86400000).toISOString()} as S)))];
   const [storyViews,setStoryViews]=useState<Record<string,number>>({});
   const storyHoverTimers=useRef<Record<string,number>>({});
   const storyHover=(storyId:string,videoEl?:HTMLVideoElement)=>{if(videoEl)videoEl.play().catch(()=>{});if(storyHoverTimers.current[storyId])return;storyHoverTimers.current[storyId]=window.setTimeout(()=>{setStoryViews(v=>({...v,[storyId]:(v[storyId]||0)+1}));delete storyHoverTimers.current[storyId]},1000)};
@@ -347,9 +347,11 @@ export default function DoctorProfilePage({ id }: { id: string }) {
               {showFollowers&&<div className="mt-3 space-y-1 border-t pt-2">{followers.map(f=><button key={f.id} onClick={()=>navigate('/doctors/'+f.id)} className="flex w-full items-center gap-2 rounded-lg p-2 text-right text-xs font-bold hover:bg-slate-50 active:bg-slate-100"><img src={'https://api.dicebear.com/9.x/personas/svg?seed='+encodeURIComponent(f.id)} alt={f.name} className="h-7 w-7 rounded-full object-cover"/>{f.name}</button>)}</div>}
             </div>
             <div className="mt-3 rounded-xl border bg-white p-3 text-center shadow-sm">
+              {canSeePrivate&&<>
               <p className="mb-2 text-xs font-extrabold text-slate-700">QR الصفحة</p>
               <img src={'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent((import.meta.env.VITE_PUBLIC_SITE_URL||window.location.origin).replace(/\/$/,'')+'/doctors/'+id)} alt="QR" className="mx-auto h-36 w-36 rounded-lg"/>
               <p className="mt-2 text-[10px] text-slate-400">ظاهر دائماً تحت المتابعين</p>
+              </>}
             </div>
           </div>
         </aside>
@@ -404,8 +406,8 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         <div className="my-3 border-b-2 border-black" aria-hidden="true" />
 
         <div className="mb-5 min-h-[58px] w-full"><div ref={profileTabsRef} id="profile-tabs" className={`${profileNavPinned ? "fixed inset-x-0 top-0 z-50" : "relative z-50"} w-full overflow-hidden border bg-white shadow-sm`}><div className="mx-auto max-w-6xl px-3 sm:px-5 lg:px-8"><div className="xl:ps-[17rem]"><div className="grid w-full grid-cols-8" dir={lang==='ar'?'rtl':'ltr'}>
-          {tabs.map((tab,i)=>{const Icon=tab.icon;const colors=['text-teal-600','text-rose-500','text-indigo-500','text-amber-500','text-sky-500','text-violet-500','text-emerald-500','text-blue-600'];return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key)}} className={`min-w-0 border-e px-1 py-2 text-[11px] font-bold leading-4 transition active:bg-slate-200 ${activeTab===tab.key?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`}>
-              <span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Icon className={`h-4 w-4 ${colors[i]}`}/><span className="break-words">{tab.label}</span></span>
+          {tabs.map((tab,i)=>{const Icon=tab.icon;const colors=['text-teal-600','text-rose-500','text-indigo-500','text-amber-500','text-sky-500','text-violet-500','text-emerald-500','text-blue-600'];return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key)}} className={`min-w-0 border-e px-0.5 py-1.5 text-[10px] font-bold leading-3 transition active:bg-slate-200 ${activeTab===tab.key?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`} title={tab.label}>
+              <span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Icon className={`h-3.5 w-3.5 ${colors[i]}`}/><span className="break-words">{tab.label}</span></span>
             </button>})}
           </div></div></div></div></div>
         <div className="mb-3">{mainSection === 'home' && activeTab === 'home' && <StoryBar pageId={id} canManage={canManagePage} pageAvatar={profileAvatar} />} {mainSection === 'home' && activeTab === 'portfolio' && <StoryBar pageId={id} canManage={canManagePage} pageAvatar={profileAvatar} ownOnly />}</div>
