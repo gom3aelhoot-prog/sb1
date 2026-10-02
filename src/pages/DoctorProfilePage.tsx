@@ -320,7 +320,8 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     { key:'diary', label:lang==='ar'?'مفكرتي':'My Diary', icon:CalendarDaysIcon },
   ];
 
-  const visibleTabs=tabs.filter(tab=>canSeePrivate||tab.key!=='certificates'||publicSettings.showCertificates!==false);
+  const publicTabSetting:Record<string,string>={certificates:'showCertificates',courses:'showCourses',articles:'showArticles',videos:'showVideos',recordings:'showRecordings',portfolio:'showPosts',diary:'showDiary'};
+  const visibleTabs=tabs.filter(tab=>canSeePrivate||publicTabSetting[tab.key]===undefined||(publicSettings as any)[publicTabSetting[tab.key]]!==false);
 
   return (
     <div className="min-h-screen pt-2 pb-16"><style>{`@keyframes sb1bell{0%,100%{transform:rotate(0)}25%{transform:rotate(10deg)}75%{transform:rotate(-10deg)}}@keyframes sb1pulse{0%,100%{transform:scale(1);filter:hue-rotate(0deg)}50%{transform:scale(1.18);filter:hue-rotate(260deg)}}`}</style>
