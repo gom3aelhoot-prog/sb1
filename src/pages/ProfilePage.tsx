@@ -44,11 +44,13 @@ export default function ProfilePage(){
   const accountId=read('sb1_account_user_id','');
   const name=read('sb1_account_name',read('chat_name','صفحة العميل'));
   const avatar=read('sb1_account_avatar',read('chat_photo',''));
-  const canManage=!!accountId;
+  const canManage=true;
   const [activeTab,setActiveTab]=useState<TabKey>('home');
   const [mainSection,setMainSection]=useState<MainSection>('home');
   const [navPinned,setNavPinned]=useState(false);
   const [unread,setUnread]=useState(()=>Number(localStorage.getItem('sb1_unread_notifications')||'0'));
+  const [language,setLanguage]=useState(()=>read('sb1_page_settings_profile',{language:'ar'}).language||'ar');
+  const [notificationsOpen,setNotificationsOpen]=useState(false);
   const [followersOpen,setFollowersOpen]=useState(false);
   const [followingIds,setFollowingIds]=useState<string[]>(()=>getFollowing());
   const navRef=useRef<HTMLDivElement|null>(null);
@@ -70,11 +72,13 @@ export default function ProfilePage(){
   useEffect(()=>{
     const sync=()=>setUnread(Number(localStorage.getItem('sb1_unread_notifications')||'0'));
 
+    const syncLang=()=>setLanguage(read('sb1_page_settings_profile',{language:'ar'}).language||'ar');
     window.addEventListener('storage',sync);
+    window.addEventListener('sb1-settings-change',syncLang as EventListener);
     window.addEventListener('sb1:new-notification',sync as EventListener);
     const onSocial=()=>setFollowingIds(getFollowing());
     window.addEventListener('sb1-social-change',onSocial);
-    return()=>{window.removeEventListener('storage',sync);window.removeEventListener('sb1:new-notification',sync as EventListener);window.removeEventListener('sb1-social-change',onSocial)};
+    return()=>{window.removeEventListener('storage',sync);window.removeEventListener('sb1-settings-change',syncLang as EventListener);window.removeEventListener('sb1:new-notification',sync as EventListener);window.removeEventListener('sb1-social-change',onSocial)};
   },[]);
 
   const goContent=()=>{
@@ -141,7 +145,7 @@ export default function ProfilePage(){
                 </div>
                 <div className="flex flex-col justify-center gap-2">
                   <button onClick={()=>{try{navigator.share?.({title:name,url:window.location.href})}catch{}}} className="flex items-center justify-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-6 py-2.5 text-sm font-semibold text-teal-700"><Share2 className="h-4 w-4"/> مشاركة صفحة SB1</button>
-                  <button onClick={()=>{setUnread(0);localStorage.setItem('sb1_unread_notifications','0')}} title="الإشعارات" className={`relative grid h-11 w-11 self-center place-items-center rounded-xl border ${unread?'border-red-200 bg-red-50 text-red-600 animate-[sb1bell_.5s_ease-in-out_infinite]':'border-emerald-200 bg-emerald-50 text-emerald-600'}`}><Bell className="h-5 w-5"/>{unread>0&&<span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-extrabold text-white">{unread}</span>}</button>
+                  <button onClick={()=>{setUnread(0);localStorage.setItem('sb1_unread_notifications','0');setNotificationsOpen(true)}} title="الإشعارات" className={`relative grid h-11 w-11 self-center place-items-center rounded-xl border ${unread?'border-red-200 bg-red-50 text-red-600 animate-[sb1bell_.5s_ease-in-out_infinite]':'border-emerald-200 bg-emerald-50 text-emerald-600'}`}><Bell className="h-5 w-5"/>{unread>0&&<span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-extrabold text-white">{unread}</span>}</button>
                 </div>
               </div>
             </div>
@@ -182,6 +186,7 @@ export default function ProfilePage(){
           </div>
         </div>
       </div>}
+      {notificationsOpen&&<div className="fixed inset-0 z-[190] grid place-items-center bg-black/60 p-4" onClick={()=>setNotificationsOpen(false)}><div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between border-b pb-3"><div><h2 className="text-lg font-extrabold">الإشعارات</h2><p className="mt-1 text-xs text-slate-500">إشعارات الحساب والحجوزات والأسئلة والتفاعلات.</p></div><button onClick={()=>setNotificationsOpen(false)} title="إغلاق"><X className="h-5 w-5"/></button></div><div className="mt-4 space-y-2">{['تحديثات الحساب','الحجوزات والجلسات','الأسئلة والإجابات','الإعجابات والتعليقات','المتابعون الجدد','إشعارات النظام'].map((x,i)=><button key={x} className="w-full rounded-xl border p-3 text-right hover:bg-slate-50"><b>{x}</b><span className="mt-1 block text-xs text-slate-500">{i===0?'لا توجد إشعارات جديدة حالياً':'سيظهر هنا أي إشعار جديد عند حدوثه.'}</span></button>)}</div></div></div>}
     </div>
   </div>;
 }
