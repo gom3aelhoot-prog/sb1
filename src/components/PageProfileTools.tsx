@@ -340,6 +340,9 @@ export default function PageProfileTools({
   return <div dir="rtl" className="mt-4 space-y-4">
     {show('home') && (<section id="fb-home" className="grid min-w-0 grid-cols-1 gap-4 overflow-hidden">
       <div className="space-y-4">
+        {/* ترتيب الرئيسية: شريط Reels -> منشئ المنشورات -> 3 منشورات -> Reels دوري */}
+        <ReelStrip stripId="fb-reels"/>
+
         {/* Facebook-style composer */}
         {canManage&&<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <button onClick={()=>setComposer(true)} className="flex w-full items-center gap-3 text-right">
@@ -353,8 +356,6 @@ export default function PageProfileTools({
           </div>
         </div>}
 
-        {/* ترتيب الرئيسية: شريط Reels -> منشئ المنشورات -> 3 منشورات -> Reels دوري */}
-        <ReelStrip stripId="fb-reels"/>
 
         <div id="fb-posts" className="space-y-4">
           {publicFeed.map((post,i)=>{
