@@ -8,6 +8,7 @@
     { "path": "/api/marketing/weekly-newsletter", "schedule": "0 9 * * 1" }
   ],
   "rewrites": [
+    { "source": "/api/social-search", "destination": "/api/social-search.ts" },
     { "source": "/api/youtube-search", "destination": "/api/marketing/publish" },
     { "source": "/:path*", "destination": "/index.html" }
   ]
