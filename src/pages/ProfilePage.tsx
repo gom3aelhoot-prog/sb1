@@ -85,6 +85,8 @@ export default function ProfilePage(){
             {active==='phone'&&<PageProfileTools canManage={manage} pageId={accountId||'client-profile'} pageName={name} pageAvatar={avatar||undefined} focusSection="phone"/>}
             {active==='settings'&&<PageProfileTools canManage={manage} pageId={accountId||'client-profile'} pageName={name} pageAvatar={avatar||undefined} focusSection="settings"/>}
             {active==='courses'&&<Notice title="دوراتي" text="الدورات التي اشترك بها العميل والدورات المكتملة تظهر هنا، مع بقاء الاشتراك والدفع مرتبطين بأقسام SB1 الفعلية."/>}
+            {active==='wallet'&&manage&&<Notice title="الحساب والمحفظة" text="الرصيد والمعاملات والمدفوعات الخاصة بالحساب تظهر هنا لصاحب الحساب فقط."/>}
+            {active==='appointments'&&manage&&<Notice title="جدول أعمالي" text="مواعيد العميل والحجوزات والجلسات القادمة تظهر هنا لصاحب الحساب."/>}
           </div>
         </main>
 
@@ -101,7 +103,5 @@ export default function ProfilePage(){
       </div>
     </div>
 
-    {active==='wallet'&&manage&&<div className="sr-only">الحساب والمحفظة</div>}
-    {active==='appointments'&&manage&&<div className="sr-only">جدول أعمالي</div>}
   </div>;
 }
