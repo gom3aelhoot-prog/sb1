@@ -390,7 +390,11 @@ export default function PageProfileTools({
       const x=await fetchJson('/api/social-search?provider=google_images&q='+encodeURIComponent(q));
       setGoogleImageResults(x.items||[]);
       setGoogleImageSearched(true);
-    }catch(e){setNotice(e instanceof Error?e.message:'تعذر البحث في Google Images');}
+    }catch(e){
+      setGoogleImageResults([]);
+      setGoogleImageSearched(true);
+      setNotice('');
+    }
   };
   useEffect(()=>{
     if(!socialSearch.trim()) return;
