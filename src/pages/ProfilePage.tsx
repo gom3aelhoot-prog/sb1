@@ -83,7 +83,7 @@ export default function ProfilePage(){
     return()=>{window.removeEventListener('storage',sync);window.removeEventListener('sb1-settings-change',syncLang as EventListener);window.removeEventListener('sb1:new-notification',sync as EventListener);window.removeEventListener('sb1-social-change',onSocial)};
   },[]);
 
-  const labels=language==='en'?{home:'Home',favorites:'Favorites',albums:'Albums',social:'Social platforms',phone:'Phone & QR',settings:'Settings',followers:'Followers',wallet:'Account & Wallet',work:'My schedule'}:language==='de'?{home:'Startseite',favorites:'Favoriten',albums:'Alben',social:'Soziale Plattformen',phone:'Telefon & QR',settings:'Einstellungen',followers:'Follower',wallet:'Konto & Wallet',work:'Mein Zeitplan'}:language==='ru'?{home:'Главная',favorites:'Избранное',albums:'Альбомы',social:'Соцсети',phone:'Телефон и QR',settings:'Настройки',followers:'Подписчики',wallet:'Аккаунт и кошелёк',work:'Мой график'}:{home:'الرئيسية',favorites:labels.favorites,albums:labels.albums,social:labels.social,phone:labels.phone,settings:labels.settings,followers:'المتابعون',wallet:labels.wallet,work:labels.work};
+  const labels=language==='en'?{home:'Home',favorites:'Favorites',albums:'Albums',social:'Social platforms',phone:'Phone & QR',settings:'Settings',followers:'Followers',wallet:'Account & Wallet',work:'My schedule'}:language==='de'?{home:'Startseite',favorites:'Favoriten',albums:'Alben',social:'Soziale Plattformen',phone:'Telefon & QR',settings:'Einstellungen',followers:'Follower',wallet:'Konto & Wallet',work:'Mein Zeitplan'}:language==='ru'?{home:'Главная',favorites:'Избранное',albums:'Альбомы',social:'Соцсети',phone:'Телефон и QR',settings:'Настройки',followers:'Подписчики',wallet:'Аккаунт и кошелёк',work:'Мой график'}:{home:'الرئيسية',favorites:'مفضلتي',albums:'الألبومات',social:'منصات التواصل',phone:'الهاتف وQR',settings:'الإعدادات',followers:'المتابعون',wallet:'الحساب والمحفظة',work:'جدول أعمالي'};
   const goContent=()=>{
     requestAnimationFrame(()=>document.getElementById('profile-content')?.scrollIntoView({behavior:'smooth',block:'start'}));
   };
@@ -100,7 +100,7 @@ export default function ProfilePage(){
   const qrBase=(typeof window!=='undefined'?(import.meta.env.VITE_PUBLIC_SITE_URL||window.location.origin):'');
   const qrUrl=qrBase.replace(/\/$/,'')+'/profile';
 
-  return <div dir="rtl" className="min-h-screen pt-2 pb-16">
+  return <div lang={language} dir={language==='ar'?'rtl':'ltr'} className="min-h-screen pt-2 pb-16">
     <style>{'@keyframes sb1bell{0%,100%{transform:rotate(0)}25%{transform:rotate(10deg)}75%{transform:rotate(-10deg)}}'}</style>
     <div className="mx-auto max-w-6xl px-3 sm:px-5 lg:px-8">
       <div className="relative">
