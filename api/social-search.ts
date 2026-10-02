@@ -13,6 +13,16 @@ export default async function handler(req:any,res:any){
       if(!r.ok) return res.status(r.status).json({error:d?.error?.message||'YouTube API error'});
       return res.status(200).json({items:(d.items||[]).map((x:any)=>({id:x.id?.videoId||x.id?.channelId||x.id?.playlistId,title:x.snippet?.title||'',description:x.snippet?.description||'',channelTitle:x.snippet?.channelTitle||'',publishedAt:x.snippet?.publishedAt||'',thumbnail:x.snippet?.thumbnails?.medium?.url||x.snippet?.thumbnails?.default?.url||'',kind:x.id?.kind||''}))});
     }
+    if(provider==='google_images'){
+      const key=process.env.GOOGLE_CSE_API_KEY||process.env.GOOGLE_API_KEY;
+      const cx=process.env.GOOGLE_CSE_ID||process.env.GOOGLE_SEARCH_ENGINE_ID;
+      if(!key||!cx)return res.status(503).json({error:'GOOGLE_CSE_API_KEY and GOOGLE_CSE_ID are not configured'});
+      const u=new URL('https://www.googleapis.com/customsearch/v1');
+      u.searchParams.set('key',key);u.searchParams.set('cx',cx);u.searchParams.set('q',q);u.searchParams.set('searchType','image');u.searchParams.set('num','10');u.searchParams.set('safe','active');
+      const r=await fetch(u);const d=await r.json();
+      if(!r.ok)return res.status(r.status).json({error:d?.error?.message||'Google Images API error'});
+      return res.status(200).json({items:(d.items||[]).map((x:any,i:number)=>({id:x.cacheId||String(i)+'-'+x.link,title:x.title||'',snippet:x.snippet||'',image:x.link||'',thumbnail:x.image?.thumbnailLink||x.link||'',source:x.displayLink||'',sourceUrl:x.image?.contextLink||x.link||'',width:x.image?.width||0,height:x.image?.height||0}))});
+    }
     if(provider==='pinterest'){
       const token=process.env.PINTEREST_ACCESS_TOKEN, endpoint=process.env.PINTEREST_SEARCH_URL;
       if(!token||!endpoint) return res.status(503).json({error:'Pinterest API is not configured'});
