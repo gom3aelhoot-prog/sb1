@@ -185,7 +185,7 @@ export default function PageProfileTools({
   const stream=useRef<MediaStream|null>(null);
   const chunks=useRef<Blob[]>([]);
 
-  useEffect(()=>{document.querySelectorAll<HTMLButtonElement>('button').forEach((b)=>{if(!b.title){const label=(b.getAttribute('aria-label')||b.textContent||'').replace(/\\s+/g,' ').trim();if(label)b.title=label.slice(0,120)}})},[]);
+  useEffect(()=>{document.querySelectorAll<HTMLElement>('button,a,[role="button"]').forEach((b)=>{if(!b.title){const label=(b.getAttribute('aria-label')||b.getAttribute('data-tooltip')||b.textContent||'').replace(/\\s+/g,' ').trim();if(label)b.title=label.slice(0,120)}})},[]);
   useEffect(()=>write('sb1_fb_posts_'+pageId,feed),[feed,pageId]);
   useEffect(()=>write('sb1_fb_liked_'+pageId,likedIds),[likedIds,pageId]);
   useEffect(()=>()=>Object.values(hoverTimers.current).forEach(t=>window.clearTimeout(t)),[]);
