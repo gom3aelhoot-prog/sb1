@@ -414,6 +414,7 @@ export default function PageProfileTools({
         </div>}
 
         <div className="rounded-xl border bg-white p-3"><ReelStrip stripId="fb-reels"/></div>
+        <div className="rounded-xl border bg-white p-3"><ReelStrip stripId="fb-reels"/></div>
         <div id="fb-posts" className="space-y-4">
           {publicFeed.map((post,i)=>{
             const n=i+1;
