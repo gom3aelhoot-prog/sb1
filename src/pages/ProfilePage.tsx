@@ -4,7 +4,7 @@ import PageProfileTools from '@/components/PageProfileTools';
 import ProfessionalSocialHub from '@/components/ProfessionalSocialHub';
 import FavoritesPage from '@/pages/FavoritesPage';
 
-type TabKey='home'|'sessions'|'articles'|'questions'|'recordings'|'courses'|'certificates'|'posts';
+type TabKey='home'|'sessions'|'articles'|'questions'|'videos'|'recordings'|'courses'|'certificates'|'posts';
 type MainSection='home'|'favorites'|'albums'|'social'|'phone'|'settings'|'clone'|'wallet'|'work';
 
 const read=(key:string,fallback='')=>typeof window==='undefined'?fallback:localStorage.getItem(key)||fallback;
@@ -14,9 +14,11 @@ const clientTabs:{key:TabKey;label:string;icon:any}[]=[
   {key:'sessions',label:'جلساتي',icon:Video},
   {key:'articles',label:'مقالتي',icon:BookOpen},
   {key:'questions',label:'الأسئلة',icon:MessageCircle},
+  {key:'videos',label:'فيديوهاتي',icon:Video},
   {key:'recordings',label:'تسجيلاتي',icon:Video},
   {key:'courses',label:'الدورات والكورسات',icon:GraduationCap},
   {key:'certificates',label:'شهاداتي',icon:Award},
+  {key:'posts',label:'منشوراتي',icon:FileText},
 ];
 
 const demoFollowers=[
@@ -31,6 +33,7 @@ function ClientTabContent({tab}:{tab:TabKey}){
   if(tab==='sessions') return <section className="card p-5"><div className="flex items-center justify-between gap-3"><div><h2 className="text-xl font-extrabold">جلساتي</h2><p className="mt-1 text-xs text-slate-500">جلسات العميل ومواعيده المحجوزة والسابقة.</p></div><CalendarDays className="text-teal-700"/></div><div className="mt-5 grid gap-3 md:grid-cols-2"><div className="rounded-xl border bg-slate-50 p-4"><b>الجلسات القادمة</b><p className="mt-2 text-sm text-slate-500">ستظهر هنا المواعيد التي حجزتها.</p></div><div className="rounded-xl border bg-slate-50 p-4"><b>الجلسات السابقة</b><p className="mt-2 text-sm text-slate-500">سجل الجلسات الخاصة بالحساب.</p></div></div></section>;
   if(tab==='articles') return <section className="card p-5"><h2 className="text-xl font-extrabold">مقالتي</h2><p className="mt-2 text-sm text-slate-500">المقالات التي يتابعها أو يحفظها العميل.</p></section>;
   if(tab==='questions') return <section className="card p-5"><h2 className="text-xl font-extrabold">الأسئلة</h2><p className="mt-2 text-sm text-slate-500">أسئلة العميل وإجاباته ومتابعاته.</p></section>;
+  if(tab==='videos') return <section className="card p-5"><h2 className="text-xl font-extrabold">فيديوهاتي</h2><p className="mt-2 text-sm text-slate-500">الفيديوهات التي اشتراها هذا الحساب فقط. المحتوى المدفوع لا يُفتح للعامة.</p></section>;
   if(tab==='recordings') return <section className="card p-5"><h2 className="text-xl font-extrabold">تسجيلاتي</h2><p className="mt-2 text-sm text-slate-500">التسجيلات التي حفظها العميل أو شاركها.</p></section>;
   if(tab==='courses') return <section className="card p-5"><h2 className="text-xl font-extrabold">الدورات والكورسات</h2><p className="mt-2 text-sm text-slate-500">الدورات التي التحق بها العميل.</p></section>;
   if(tab==='certificates') return <section className="card p-5"><h2 className="text-xl font-extrabold">شهاداتي</h2><p className="mt-2 text-sm text-slate-500">الشهادات والإنجازات الخاصة بالعميل.</p></section>;
@@ -145,7 +148,7 @@ export default function ProfilePage(){
             <div className={`${navPinned?'fixed inset-x-0 top-0 z-50':'relative z-50'} w-full overflow-hidden border bg-white shadow-sm`}>
               <div className="mx-auto max-w-6xl px-3 sm:px-5 lg:px-8">
                 <div className="xl:ps-[17rem]">
-                  <div className="grid w-full grid-cols-8">
+                  <div className="grid w-full grid-cols-9">
                     {clientTabs.map((tab,i)=>{const Icon=tab.icon;return <button key={tab.key} onClick={()=>selectTab(tab.key)} className={`min-w-0 border-e px-0 py-1 text-[9px] font-bold leading-3 transition active:bg-slate-200 ${activeTab===tab.key&&mainSection==='home'?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`} title={tab.label}><span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Icon className="h-3 w-3 text-teal-600"/><span className="break-words">{tab.label}</span></span></button>})}
                   </div>
                 </div>
