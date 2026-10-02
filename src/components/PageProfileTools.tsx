@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 type MediaKind = 'post' | 'image' | 'video' | 'reel' | 'audio' | 'article';
-type StoryItem = { id:string; name:string; text:string; mediaUrl?:string; mediaKind?:'image'|'video'|'gif'|'sticker'; audioUrl?:string; audioStart?:number; mediaStart?:number; mediaEnd?:number; filter?:string; authorPhoto?:string; textStyle?:{color:string;fontSize:string;fontWeight:string}; createdAt:string; expiresAt:string; own?:boolean };
+type StoryItem = { id:string; name:string; text:string; mediaUrl?:string; mediaKind?:'image'|'video'|'gif'|'sticker'; audioUrl?:string; audioStart?:number; audioEnd?:number; mediaStart?:number; mediaEnd?:number; filter?:string; authorPhoto?:string; textStyle?:{color:string;fontSize:string;fontWeight:string}; createdAt:string; expiresAt:string; own?:boolean };
 type FeedItem = {
   id:string; kind:MediaKind; text:string; mediaUrl?:string; mediaName?:string;
   createdAt:string; likes:number; views?:number; comments:{id:string;name:string;photo?:string;body:string}[];
