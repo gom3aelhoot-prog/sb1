@@ -53,6 +53,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const canManagePage = isAccountOwner || isModerator;
   const canClonePage = canManagePage && (actualRole === 'owner' || (actualRole === 'specialist' && !!doctor?.name?.includes('جمال')));
   const canSeePrivate = canManagePage;
+  const publicSettings=(()=>{try{return JSON.parse(localStorage.getItem('sb1_page_settings_'+id)||'{}')}catch{return {}}})();
   const { t, specialtyName, lang } = useI18n();
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -318,6 +319,8 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     { key:'portfolio', label:lang==='ar'?'منشوراتي':'My Posts', icon:FileText },
     { key:'diary', label:lang==='ar'?'مفكرتي':'My Diary', icon:CalendarDaysIcon },
   ];
+
+  const visibleTabs=tabs.filter(tab=>canSeePrivate||tab.key!=='certificates'||publicSettings.showCertificates!==false);
 
   return (
     <div className="min-h-screen pt-2 pb-16"><style>{`@keyframes sb1bell{0%,100%{transform:rotate(0)}25%{transform:rotate(10deg)}75%{transform:rotate(-10deg)}}@keyframes sb1pulse{0%,100%{transform:scale(1);filter:hue-rotate(0deg)}50%{transform:scale(1.18);filter:hue-rotate(260deg)}}`}</style>
