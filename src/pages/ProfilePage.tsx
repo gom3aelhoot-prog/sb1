@@ -172,9 +172,9 @@ export default function ProfilePage(){
             {mainSection==='home'&&activeTab==='home'&&<PageProfileTools canManage={canManage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="home"/>}
             {mainSection==='home'&&activeTab!=='home'&&activeTab!=='posts'&&<ClientTabContent tab={activeTab}/>}
             {mainSection==='favorites'&&<FavoritesPage/>}
-            {mainSection==='albums'&&<PageProfileTools canManage={canManage} pageId={accountId} pageName={name} pageAvatar={avatar||undefined} focusSection="albums"/>}
+            {mainSection==='albums'&&<PageProfileTools canManage={canManage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="albums"/>}
             {mainSection==='social'&&<PageProfileTools canManage={canManage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="social"/>}
-            {mainSection==='phone'&&<PageProfileTools canManage={true} pageId={accountId||'profile'} pageName={name} pageAvatar={avatar||undefined} focusSection="phone"/>}
+            {mainSection==='phone'&&<PageProfileTools canManage={true} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="phone"/>}
             {mainSection==='settings'&&<PageProfileTools canManage={true} pageId={accountId||'profile'} pageName={name} pageAvatar={avatar||undefined} focusSection="settings"/>}
             {mainSection==='wallet'&&<section className="card p-5"><div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">الحساب والمحفظة</h2><p className="mt-1 text-sm text-slate-500">الرصيد والنقاط وحركة الحساب.</p></div><Coins className="text-amber-500"/></div></section>}
             {mainSection==='work'&&<section className="card p-5"><div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">جدول أعمالي</h2><p className="mt-1 text-sm text-slate-500">الجلسات والمواعيد والحجوزات الخاصة بالعميل.</p></div><CalendarClock className="text-indigo-600"/></div></section>}
