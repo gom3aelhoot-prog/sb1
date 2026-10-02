@@ -67,7 +67,7 @@ export default function ProfilePage(){
     window.addEventListener('scroll',onScroll,{passive:true});
     window.addEventListener('resize',measure);
     return()=>{window.clearTimeout(timer);window.removeEventListener('scroll',onScroll);window.removeEventListener('resize',measure)};
-  },[accountId,language]);
+  },[]);
 
   useEffect(()=>{
     const sync=()=>setUnread(Number(localStorage.getItem('sb1_unread_notifications')||'0'));
@@ -81,7 +81,7 @@ export default function ProfilePage(){
     const onSocial=()=>setFollowingIds(getFollowing());
     window.addEventListener('sb1-social-change',onSocial);
     return()=>{window.removeEventListener('storage',sync);window.removeEventListener('sb1-settings-change',syncLang as EventListener);window.removeEventListener('sb1:new-notification',sync as EventListener);window.removeEventListener('sb1-social-change',onSocial)};
-  },[]);
+  },[accountId,language]);
 
   const labels=language==='en'?{home:'Home',favorites:'Favorites',albums:'Albums',social:'Social platforms',phone:'Phone & QR',settings:'Settings',followers:'Followers',wallet:'Account & Wallet',work:'My schedule'}:language==='de'?{home:'Startseite',favorites:'Favoriten',albums:'Alben',social:'Soziale Plattformen',phone:'Telefon & QR',settings:'Einstellungen',followers:'Follower',wallet:'Konto & Wallet',work:'Mein Zeitplan'}:language==='ru'?{home:'Главная',favorites:'Избранное',albums:'Альбомы',social:'Соцсети',phone:'Телефон и QR',settings:'Настройки',followers:'Подписчики',wallet:'Аккаунт и кошелёк',work:'Мой график'}:{home:'الرئيسية',favorites:'مفضلتي',albums:'الألبومات',social:'منصات التواصل',phone:'الهاتف وQR',settings:'الإعدادات',followers:'المتابعون',wallet:'الحساب والمحفظة',work:'جدول أعمالي'};
   const goContent=()=>{
