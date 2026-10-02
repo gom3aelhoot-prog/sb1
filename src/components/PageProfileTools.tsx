@@ -128,6 +128,8 @@ export default function PageProfileTools({
   const [storyMediaSource,setStoryMediaSource]=useState<'library'|'favorites'|'albums'>('library');
 
   const [composer,setComposer]=useState(false);
+  const [postGeneratorTopic,setPostGeneratorTopic]=useState('');
+  const [postGenerating,setPostGenerating]=useState(false);
   const [postText,setPostText]=useState('');
   const [postKind,setPostKind]=useState<MediaKind>('post');
   const [postFile,setPostFile]=useState<File|null>(null);
@@ -241,6 +243,8 @@ export default function PageProfileTools({
     if(!story.own)return;
     setStories(v=>v.filter(x=>x.id!==story.id));setStoryViewer(null);setNotice('تم حذف القصة.');
   };
+
+  const generatePostDraft=async()=>{const topic=postGeneratorTopic.trim();if(!topic){setNotice('اكتب موضوع المنشور أولاً.');return}setPostGenerating(true);try{const r=await fetch('/api/marketing/publish',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'generate',topic,language:pageSettings.language||'ar'})});const x=await r.json();if(r.ok&&x.text){setPostText(x.text);setNotice('تم توليد مسودة المنشور ويمكنك تعديلها قبل النشر.')}else throw new Error(x.error||'تعذر توليد المنشور')}catch{const local=pageSettings.language==='en'?'New update about '+topic+'. Here is a concise educational post for the SB1 community. What do you think?':pageSettings.language==='de'?'Neuer Beitrag zum Thema '+topic+'. Eine kurze informative Veröffentlichung für die SB1-Community. Was denken Sie?':pageSettings.language==='ru'?'Новая публикация о теме «'+topic+'». Краткий информационный текст для сообщества SB1. Что вы думаете?':'منشور جديد حول '+topic+'. هذه مسودة تثقيفية مختصرة لمجتمع SB1. ما رأيك؟';setPostText(local);setNotice('تم إنشاء مسودة محلية؛ يمكنك تعديلها قبل النشر.')}finally{setPostGenerating(false)}};
 
   const publish=()=>{
     if(!postText.trim()&&!postUrl&&!recordUrl&&!selectedMedia){setNotice('اكتب نصاً أو اختر صورة/فيديو أو محتوى من المكتبة أو سجّل صوتاً.');return}
@@ -409,13 +413,10 @@ export default function PageProfileTools({
           </div>
         </div>}
 
-        <div className="rounded-xl border bg-white p-3"><ReelStrip stripId="fb-reels"/></div>
-
         <div id="fb-posts" className="space-y-4">
           {publicFeed.map((post,i)=>{
             const n=i+1;
-            const showReel=[3,20,30,40].includes(n) || (n>50 && (n-50)%50===0);
-            const showStories=n===50 || (n>50 && (n-50)%200===0);
+            const showStories=false;
             return <div key={post.id}>
               <article onMouseEnter={()=>startHoverView(post.id)} onMouseLeave={()=>stopHoverView(post.id)} className="mx-auto max-w-3xl overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm">
                 <div className="p-3">
@@ -442,6 +443,7 @@ export default function PageProfileTools({
             </div>
           })}
         </div>
+        <div className="mt-5 rounded-xl border bg-white p-3"><ReelStrip stripId="fb-reels"/></div>
       </div>
 
       
@@ -518,7 +520,8 @@ export default function PageProfileTools({
         {settingsSection==='content'&&<div className="space-y-3">{[['allowStories','السماح بالقصص'],['autoPlayMedia','تشغيل الوسائط عند المرور']].map(([k,l])=><label key={k} className="flex items-center justify-between rounded-xl bg-white p-4 text-sm font-bold"><span>{l}</span><input type="checkbox" checked={!!(pageSettings as any)[k]} onChange={e=>setPageSettings((s:any)=>({...s,[k]:e.target.checked}))} className="h-5 w-5"/></label>)}</div>}
         {settingsSection==='notifications'&&<div className="space-y-3">{[['notifyBookings','إشعارات الحجوزات'],['notifyQuestions','إشعارات الأسئلة'],['notifyLikes','إشعارات الإعجابات'],['notifyMessages','إشعارات الرسائل'],['notifyFollowers','إشعارات المتابعين'],['notifySystem','إشعارات النظام']].map(([k,l])=><label key={k} className="flex items-center justify-between rounded-xl bg-white p-4 text-sm font-bold"><span>{l}</span><input type="checkbox" checked={!!(pageSettings as any)[k]} onChange={e=>setPageSettings((s:any)=>({...s,[k]:e.target.checked}))} className="h-5 w-5"/></label>)}</div>}
         {settingsSection==='media'&&<div className="grid gap-3 md:grid-cols-2"><div className="rounded-xl bg-white p-4"><b>التشغيل عند المرور</b><p className="mt-1 text-xs text-slate-500">الفيديو والريلز والقصة يبدأ بعد الوقوف لمدة ثانية.</p><button onClick={()=>setPageSettings((s:any)=>({...s,autoPlayMedia:!s.autoPlayMedia}))} className="mt-3 rounded-lg bg-teal-50 px-3 py-2 text-xs font-bold text-teal-700">{pageSettings.autoPlayMedia?'مفعل':'متوقف'}</button></div><div className="rounded-xl bg-white p-4"><b>الملفات</b><p className="mt-1 text-xs text-slate-500">رفع الصور والفيديو والصوت والملفات داخل الألبومات.</p><span className="mt-3 inline-block rounded-lg bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">متاح</span></div></div>}
-        {settingsSection==='security'&&<div className="space-y-3"><div className="rounded-xl bg-white p-4"><b>الخصوصية والحماية</b><p className="mt-1 text-xs text-slate-500">يمكنك التحكم في ظهور المحتوى العام، وحماية المحتوى الخاص، وإدارة صلاحيات المالك والمشرف.</p></div><div className="rounded-xl bg-white p-4"><b>المحتوى الخاص</b><p className="mt-1 text-xs text-slate-500">المحتوى المدفوع أو الخاص لا يظهر للعامة إلا وفق صلاحيات المشاهدة والشراء.</p></div><button onClick={()=>{localStorage.setItem('sb1_page_settings_'+pageId,JSON.stringify(pageSettings));setNotice('تم حفظ إعدادات الصفحة.')}} className="rounded-xl bg-teal-700 px-5 py-3 font-bold text-white">حفظ الإعدادات</button></div>}
+        {settingsSection==='security'&&<div className="space-y-3"><div className="rounded-xl bg-white p-4"><b>الخصوصية والحماية</b><p className="mt-1 text-xs text-slate-500">يمكنك التحكم في ظهور المحتوى العام، وحماية المحتوى الخاص، وإدارة صلاحيات المالك والمشرف.</p></div><div className="rounded-xl bg-white p-4"><b>المحتوى الخاص</b><p className="mt-1 text-xs text-slate-500">المحتوى المدفوع أو الخاص لا يظهر للعامة إلا وفق صلاحيات المشاهدة والشراء.</p></div></div>}
+        <button onClick={()=>{localStorage.setItem('sb1_page_settings_'+pageId,JSON.stringify(pageSettings));window.dispatchEvent(new Event('sb1-settings-change'));setNotice('تم حفظ إعدادات الصفحة.')}} className="mt-4 rounded-xl bg-teal-700 px-5 py-3 font-bold text-white">حفظ الإعدادات</button>
       </div>
     </section>)}
 
