@@ -14,14 +14,17 @@ export default async function handler(req:any,res:any){
       return res.status(200).json({items:(d.items||[]).map((x:any)=>({id:x.id?.videoId||x.id?.channelId||x.id?.playlistId,title:x.snippet?.title||'',description:x.snippet?.description||'',channelTitle:x.snippet?.channelTitle||'',publishedAt:x.snippet?.publishedAt||'',thumbnail:x.snippet?.thumbnails?.medium?.url||x.snippet?.thumbnails?.default?.url||'',kind:x.id?.kind||''}))});
     }
     if(provider==='google_images'){
-      const key=process.env.GOOGLE_CSE_API_KEY||process.env.GOOGLE_API_KEY;
-      const cx=process.env.GOOGLE_CSE_ID||process.env.GOOGLE_SEARCH_ENGINE_ID;
-      if(!key||!cx)return res.status(503).json({error:'GOOGLE_CSE_API_KEY and GOOGLE_CSE_ID are not configured'});
-      const u=new URL('https://www.googleapis.com/customsearch/v1');
-      u.searchParams.set('key',key);u.searchParams.set('cx',cx);u.searchParams.set('q',q);u.searchParams.set('searchType','image');u.searchParams.set('num','10');u.searchParams.set('safe','active');
-      const r=await fetch(u);const d=await r.json();
-      if(!r.ok)return res.status(r.status).json({error:d?.error?.message||'Google Images API error'});
-      return res.status(200).json({items:(d.items||[]).map((x:any,i:number)=>({id:x.cacheId||String(i)+'-'+x.link,title:x.title||'',snippet:x.snippet||'',image:x.link||'',thumbnail:x.image?.thumbnailLink||x.link||'',source:x.displayLink||'',sourceUrl:x.image?.contextLink||x.link||'',width:x.image?.width||0,height:x.image?.height||0}))});
+      // Use Google's public Images results page server-side so SB1 does not require
+      // the deprecated/limited Custom Search JSON API for image browsing.
+      const u=new URL('https://www.google.com/search');
+      u.searchParams.set('tbm','isch');u.searchParams.set('safe','active');u.searchParams.set('q',q);
+      const r=await fetch(u,{headers:{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/138 Safari/537.36','Accept-Language':'en-US,en;q=0.9'}});
+      const html=await r.text();
+      if(!r.ok)return res.status(r.status).json({error:'Google Images returned an error'});
+      const thumbs=[...html.matchAll(/https?:\\/\\/encrypted-tbn0\\.gstatic\\.com\\/images[^"'\\\\ ]+/g)].map(m=>m[0].replace(/\\\\u003d/g,'='));
+      const unique=[...new Set(thumbs)].slice(0,24);
+      const items=unique.map((image:string,i:number)=>({id:'google-'+i+'-'+Buffer.from(image).toString('base64').slice(0,10),title:q+' — صورة '+(i+1),snippet:'Google Images',image,thumbnail:image,source:'Google Images',sourceUrl:'https://www.google.com/search?tbm=isch&q='+encodeURIComponent(q),width:0,height:0}));
+      return res.status(200).json({items});
     }
     if(provider==='pinterest'){
       const token=process.env.PINTEREST_ACCESS_TOKEN, endpoint=process.env.PINTEREST_SEARCH_URL;
