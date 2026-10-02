@@ -17,7 +17,6 @@ const clientTabs:{key:TabKey;label:string;icon:any}[]=[
   {key:'recordings',label:'تسجيلاتي',icon:Video},
   {key:'courses',label:'الدورات والكورسات',icon:GraduationCap},
   {key:'certificates',label:'شهاداتي',icon:Award},
-  {key:'posts',label:'منشوراتي',icon:FileText},
 ];
 
 const demoFollowers=[
@@ -83,7 +82,8 @@ export default function ProfilePage(){
   const button=(section:MainSection,label:string,Icon:any,cls='')=>
     <button onClick={()=>selectMain(section)} className={'flex w-full items-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold shadow-sm active:brightness-95 '+cls}><Icon className="h-4 w-4"/>{label}</button>;
 
-  const qrUrl=(typeof window!=='undefined'?(import.meta.env.VITE_PUBLIC_SITE_URL||window.location.origin):'') .replace(/\/$/,'')+'/profile';
+  const qrBase=(typeof window!=='undefined'?(import.meta.env.VITE_PUBLIC_SITE_URL||window.location.origin):'');
+  const qrUrl=qrBase.replace(/\/$/,'')+'/profile';
 
   return <div dir="rtl" className="min-h-screen pt-2 pb-16">
     <style>{'@keyframes sb1bell{0%,100%{transform:rotate(0)}25%{transform:rotate(10deg)}75%{transform:rotate(-10deg)}}'}</style>
@@ -92,7 +92,6 @@ export default function ProfilePage(){
         <aside className={`${navPinned?'fixed top-0 start-4':'absolute top-0 start-4'} z-[60] hidden max-h-[calc(100vh-1rem)] w-[15rem] overflow-y-auto border-s border-slate-300 bg-white ps-4 pe-1 shadow-sm xl:block`} aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
             {button('wallet','الحساب والمحفظة',Wallet,'bg-black text-white')}
-            {button('clone','الاستنساخ',Copy,'bg-emerald-100 text-emerald-800')}
             {button('work','جدول أعمالي',CalendarClock,'border border-slate-200 bg-white text-slate-800')}
             <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
               {button('home','الرئيسية',Home,'rounded-none border-b text-slate-700')}
@@ -156,14 +155,12 @@ export default function ProfilePage(){
 
           <div id="profile-content" className="mb-5">
             {mainSection==='home'&&activeTab==='home'&&<PageProfileTools canManage={canManage} pageId={accountId} pageName={name} pageAvatar={avatar||undefined} focusSection="home"/>}
-            {mainSection==='home'&&activeTab==='posts'&&<PageProfileTools canManage={canManage} pageId={accountId} pageName={name} pageAvatar={avatar||undefined} focusSection="home" onlyOwn/>}
             {mainSection==='home'&&activeTab!=='home'&&activeTab!=='posts'&&<ClientTabContent tab={activeTab}/>}
             {mainSection==='favorites'&&<FavoritesPage/>}
             {mainSection==='albums'&&<PageProfileTools canManage={canManage} pageId={accountId} pageName={name} pageAvatar={avatar||undefined} focusSection="albums"/>}
             {mainSection==='social'&&<ProfessionalSocialHub/>}
             {mainSection==='phone'&&<PageProfileTools canManage={canManage} pageId={accountId} pageName={name} pageAvatar={avatar||undefined} focusSection="phone"/>}
             {mainSection==='settings'&&<PageProfileTools canManage={canManage} pageId={accountId} pageName={name} pageAvatar={avatar||undefined} focusSection="settings"/>}
-            {mainSection==='clone'&&<PageProfileTools canManage={canManage} pageId={accountId} pageName={name} pageAvatar={avatar||undefined} focusSection="clone"/>}
             {mainSection==='wallet'&&<section className="card p-5"><div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">الحساب والمحفظة</h2><p className="mt-1 text-sm text-slate-500">الرصيد والنقاط وحركة الحساب.</p></div><Coins className="text-amber-500"/></div></section>}
             {mainSection==='work'&&<section className="card p-5"><div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">جدول أعمالي</h2><p className="mt-1 text-sm text-slate-500">الجلسات والمواعيد والحجوزات الخاصة بالعميل.</p></div><CalendarClock className="text-indigo-600"/></div></section>}
           </div>
