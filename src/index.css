@@ -79,4 +79,19 @@
   }
 }
 
+
+
+/* SB1: clear visual feedback for every clickable button */
+button:not(:disabled) {
+  transition: filter 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+}
+button:not(:disabled):focus {
+  filter: brightness(.90) saturate(1.20);
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, .18);
+}
+button:not(:disabled):active {
+  filter: brightness(.84) saturate(1.25);
+  transform: translateY(1px) scale(.985);
+}
+
 html,body,#root{max-width:100%;overflow-x:hidden;} @media (min-width:1024px){body{min-width:0;}}
