@@ -117,7 +117,7 @@ export default function PageProfileTools({
   const [storyTextSize,setStoryTextSize]=useState('24px');
   const [audioLibrary,setAudioLibrary]=useState<any[]>(()=>read('sb1_audio_library',[{id:'demo-audio-1',name:'موسيقى هادئة',url:'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=relaxing-ambient-11327.mp3'},{id:'demo-audio-2',name:'إيقاع خفيف',url:'https://cdn.pixabay.com/download/audio/2022/10/25/audio_946e9f9e1b.mp3?filename=positive-vibes-121744.mp3'}]));
   type LibraryItem={id:string;name:string;url:string;kind:'image'|'video'|'audio'|'gif'|'sticker';source?:string;createdAt:string;thumbnail?:string};
-  const [mediaLibrary,setMediaLibrary]=useState<LibraryItem[]>(()=>read('sb1_media_library_'+pageId,[]));
+  const [mediaLibrary,setMediaLibrary]=useState<LibraryItem[]>(()=>read('sb1_media_library_'+pageId,[{id:'demo-lib-img-1',name:'صورة طبية تجريبية',url:demoPostImages[0],kind:'image',source:'SB1',createdAt:new Date().toISOString()},{id:'demo-lib-img-2',name:'صورة تجريبية ثانية',url:demoPostImages[1],kind:'image',source:'SB1',createdAt:new Date().toISOString()},{id:'demo-lib-video-1',name:'فيديو تجريبي',url:demoVideoUrl,kind:'video',source:'SB1',createdAt:new Date().toISOString()},{id:'demo-lib-audio-1',name:'موسيقى هادئة',url:'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=relaxing-ambient-11327.mp3',kind:'audio',source:'SB1',createdAt:new Date().toISOString()}]));
   const [composerPanel,setComposerPanel]=useState<'media'|'emoji'|'gif'|'sticker'>('media');
   const [mediaSource,setMediaSource]=useState<'library'|'favorites'|'albums'>('library');
   const [selectedMedia,setSelectedMedia]=useState<LibraryItem|null>(null);
