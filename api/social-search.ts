@@ -17,13 +17,28 @@ export default async function handler(req:any,res:any){
       // Use Google's public Images results page server-side so SB1 does not require
       // the deprecated/limited Custom Search JSON API for image browsing.
       const u=new URL('https://www.google.com/search');
-      u.searchParams.set('tbm','isch');u.searchParams.set('safe','active');u.searchParams.set('q',q);
-      const r=await fetch(u,{headers:{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/138 Safari/537.36','Accept-Language':'en-US,en;q=0.9'}});
+      u.searchParams.set('tbm','isch');u.searchParams.set('udm','2');u.searchParams.set('safe','active');
+      u.searchParams.set('hl','en');u.searchParams.set('gl','us');u.searchParams.set('q',q);
+      const r=await fetch(u,{headers:{
+        'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+        'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language':'en-US,en;q=0.9',
+        'Accept-Encoding':'gzip, deflate, br'
+      }});
       const html=await r.text();
       if(!r.ok)return res.status(r.status).json({error:'Google Images returned an error'});
-      const thumbs=[...html.matchAll(/https?:\\/\\/encrypted-tbn0\\.gstatic\\.com\\/images[^"'\\\\ ]+/g)].map(m=>m[0].replace(/\\\\u003d/g,'='));
-      const unique=[...new Set(thumbs)].slice(0,24);
-      const items=unique.map((image:string,i:number)=>({id:'google-'+i+'-'+Buffer.from(image).toString('base64').slice(0,10),title:q+' — صورة '+(i+1),snippet:'Google Images',image,thumbnail:image,source:'Google Images',sourceUrl:'https://www.google.com/search?tbm=isch&q='+encodeURIComponent(q),width:0,height:0}));
+      // Google changes its HTML frequently. Collect thumbnail URLs from both
+      // escaped JSON and normal HTML attributes instead of relying on one shape.
+      const normalized=html
+        .replace(/\\u003d/gi,'=').replace(/\\u0026/gi,'&')
+        .replace(/\\\\u003d/gi,'=').replace(/\\\\u0026/gi,'&')
+        .replace(/&amp;/gi,'&');
+      const raw=[
+        ...[...normalized.matchAll(/https?:\\/\\/encrypted-tbn[0-9a-z-]+\\.gstatic\\.com\\/images[^"'\\\\\\s<>]+/gi)].map(m=>m[0]),
+        ...[...normalized.matchAll(/(?:src|data-src)=["'](https?:\\/\\/encrypted-tbn[0-9a-z-]+\\.gstatic\\.com\\/images[^"'<>]+)["']/gi)].map(m=>m[1])
+      ];
+      const unique=[...new Set(raw.map((x:string)=>x.replace(/[),]+$/,'').trim()))].slice(0,24);
+      const items=unique.map((image:string,i:number)=>({id:'google-'+i+'-'+Buffer.from(image).toString('base64').slice(0,10),title:q+' — صورة '+(i+1),snippet:'Google Images',image,thumbnail:image,source:'Google Images',sourceUrl:'https://www.google.com/search?tbm=isch&udm=2&q='+encodeURIComponent(q),width:0,height:0}));
       return res.status(200).json({items});
     }
     if(provider==='pinterest'){
