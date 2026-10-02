@@ -72,5 +72,5 @@ export default async function handler(req:any,res:any){
       return res.status(200).json({items:rows.map((x:any)=>({id:x.id||x.url,title:x.title||x.name||'',description:x.description||x.snippet||'',thumbnail:x.thumbnail||'',url:x.url||x.link||''}))});
     }
     return res.status(400).json({error:'Unsupported provider'});
-  }catch(e){return res.status(500).json({error:'Search request failed'})}
+  }catch(e){return res.status(500).json({items:[],error:e instanceof Error?e.message:'Search request failed'})}
 }
