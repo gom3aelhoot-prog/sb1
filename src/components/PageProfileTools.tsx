@@ -345,6 +345,15 @@ export default function PageProfileTools({
     setSocialEmbedded(url);
     if(!favorites.includes(url))setFavorites(v=>[url,...v]);
   };
+  const fetchJson=async(url:string)=>{
+    const r=await fetch(url);
+    const text=await r.text();
+    let x:any=null;
+    try{x=text?JSON.parse(text):null;}catch{throw new Error('الخادم أعاد استجابة غير صالحة.');}
+    if(!r.ok) throw new Error(x?.error||'تعذر تنفيذ البحث.');
+    return x;
+  };
+
   const searchSocial=async()=>{
     const q=socialSearch.trim();
     const provider=socialProvider;
@@ -353,7 +362,7 @@ export default function PageProfileTools({
       if(/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//i.test(q)){
         const m=q.match(/(?:v=|youtu\.be\/|embed\/)([\\w-]{6,})/);if(m){setYoutubeResults([{id:m[1],title:'YouTube video',thumbnail:'',channelTitle:''}]);setSocialEmbedded('YouTube');return;}
       }
-      try{const r=await fetch('/api/youtube-search?q='+encodeURIComponent(q)+'&type=video');const x=await r.json();if(!r.ok)throw new Error(x.error||'YouTube API error');setYoutubeResults(x.items||[]);setSocialEmbedded('YouTube');}catch(e){setNotice(e instanceof Error?e.message:'تعذر البحث في YouTube');}
+      try{const x=await fetchJson('/api/youtube-search?q='+encodeURIComponent(q)+'&type=video');setYoutubeResults(x.items||[]);setSocialEmbedded('YouTube');}catch(e){setNotice(e instanceof Error?e.message:'تعذر البحث في YouTube');}
       return;
     }
     if(provider==='Google Images'){
@@ -364,9 +373,7 @@ export default function PageProfileTools({
     if(provider==='Pinterest'||provider==='Rutube'||provider==='OK'||provider==='Yandex Search'){
       const apiProvider=provider==='Yandex Search'?'yandex':provider.toLowerCase();
       try{
-        const r=await fetch('/api/social-search?provider='+encodeURIComponent(apiProvider)+'&q='+encodeURIComponent(q));
-        const x=await r.json();
-        if(!r.ok) throw new Error(x.error||'تعذر البحث في '+provider);
+        const x=await fetchJson('/api/social-search?provider='+encodeURIComponent(apiProvider)+'&q='+encodeURIComponent(q));
         setExternalResults(x.items||[]);
         setSocialEmbedded(provider);
       }catch(e){setNotice(e instanceof Error?e.message:'تعذر البحث في '+provider);}
@@ -378,13 +385,18 @@ export default function PageProfileTools({
 
   const searchGoogleImages=async(q:string)=>{
     try{
-      const r=await fetch('/api/social-search?provider=google_images&q='+encodeURIComponent(q));
-      const x=await r.json();
-      if(!r.ok) throw new Error(x.error||'تعذر البحث في Google Images');
+      const x=await fetchJson('/api/social-search?provider=google_images&q='+encodeURIComponent(q));
       setGoogleImageResults(x.items||[]);
       setGoogleImageSearched(true);
     }catch(e){setNotice(e instanceof Error?e.message:'تعذر البحث في Google Images');}
   };
+  useEffect(()=>{
+    if(!socialSearch.trim()) return;
+    if(socialProvider==='Google Images' && googleImageSearched) searchGoogleImages(socialSearch.trim());
+    else if(socialProvider==='YouTube' && youtubeResults.length) searchSocial();
+    else if(['Pinterest','Rutube','OK','Yandex Search'].includes(socialProvider) && externalResults.length) searchSocial();
+  },[socialProvider]);
+
   const favoriteExternal=(item:any,kind:'image'|'video'|'post'='image')=>{
     const url=item.image||item.thumbnail||item.url||item.embedUrl||'';
     if(!url){setNotice('لا يوجد محتوى صالح للحفظ.');return;}
