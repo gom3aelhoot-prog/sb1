@@ -106,15 +106,15 @@ export default function ProfilePage(){
       <div className="relative">
         <aside className={`${navPinned?'fixed top-0 start-4':'absolute top-0 start-4'} z-[60] hidden max-h-[calc(100vh-1rem)] w-[15rem] overflow-y-auto border-s border-slate-300 bg-white ps-4 pe-1 shadow-sm xl:block`} aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
-            {button('wallet','الحساب والمحفظة',Wallet,'bg-black text-white')}
-            {button('work','جدول أعمالي',CalendarClock,'border border-slate-200 bg-white text-slate-800')}
+            {button('wallet',labels.wallet,Wallet,'bg-black text-white')}
+            {button('work',labels.work,CalendarClock,'border border-slate-200 bg-white text-slate-800')}
             <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
-              {button('home','الرئيسية',Home,'rounded-none border-b text-slate-700')}
-              {button('favorites','مفضلتي',Heart,'rounded-none border-b text-slate-700')}
-              {button('albums','الألبومات',Library,'rounded-none border-b text-slate-700')}
-              {button('social','منصات التواصل',ExternalLink,'rounded-none border-b text-slate-700')}
-              {button('phone','الهاتف وQR',Smartphone,'rounded-none border-b text-slate-700')}
-              {button('settings','الإعدادات',Settings,'rounded-none text-slate-700')}
+              {button('home',labels.home,Home,'rounded-none border-b text-slate-700')}
+              {button('favorites',labels.favorites,Heart,'rounded-none border-b text-slate-700')}
+              {button('albums',labels.albums,Library,'rounded-none border-b text-slate-700')}
+              {button('social',labels.social,ExternalLink,'rounded-none border-b text-slate-700')}
+              {button('phone',labels.phone,Smartphone,'rounded-none border-b text-slate-700')}
+              {button('settings',labels.settings,Settings,'rounded-none text-slate-700')}
             </div>
             <button type="button" onClick={()=>setFollowersOpen(true)} className="w-full rounded-xl border bg-white p-3 text-right shadow-sm hover:bg-slate-50 active:bg-slate-100">
               <div className="mb-2 flex items-center justify-between"><b className="text-sm"> {labels.followers} </b><span className="text-xs text-teal-700">{demoFollowers.length} · عرض الكل</span></div>
