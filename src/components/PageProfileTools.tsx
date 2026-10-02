@@ -352,6 +352,7 @@ export default function PageProfileTools({
       </div>
     </div>
     <div ref={el=>{scrollerRefs.current['stories-top']=el}} className="flex gap-3 overflow-x-auto pb-1 scroll-smooth">
+      {canManage&&<button onClick={()=>setStoryComposer(true)} className="relative min-w-[92px] h-36 overflow-hidden rounded-xl bg-teal-700 text-white"><div className="absolute inset-0 grid place-items-center"><Plus className="h-8 w-8"/></div><span className="absolute bottom-2 right-2 left-2 text-center text-[10px] font-bold">إضافة قصة</span></button>}
       {activeStories.map(s=><button key={s.id} onClick={()=>setStoryViewer(s)} className="relative min-w-[92px] h-36 overflow-hidden rounded-xl bg-slate-900 text-right text-white">
         {s.mediaUrl ? (s.mediaKind==='video'?<video src={s.mediaUrl} muted playsInline className="absolute inset-0 h-full w-full object-cover" onMouseEnter={e=>{e.currentTarget.play().catch(()=>{});startHoverView(s.id,e.currentTarget)}} onMouseLeave={e=>stopHoverView(s.id,e.currentTarget)}/>:<img src={s.mediaUrl} alt="" className="absolute inset-0 h-full w-full object-cover"/>) : <div className="absolute inset-0 grid place-items-center p-3 text-center text-sm font-bold">{s.text}</div>}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"/>
