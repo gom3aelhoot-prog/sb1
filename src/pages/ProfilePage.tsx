@@ -8,6 +8,7 @@ type TabKey='home'|'sessions'|'articles'|'questions'|'videos'|'recordings'|'cour
 type MainSection='home'|'favorites'|'albums'|'social'|'phone'|'settings'|'clone'|'wallet'|'work';
 
 const read=(key:string,fallback='')=>typeof window==='undefined'?fallback:localStorage.getItem(key)||fallback;
+const readJson=<T,>(key:string,fallback:T):T=>{try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch{return fallback}};
 
 const clientTabs:{key:TabKey;label:string;icon:any}[]=[
   {key:'home',label:'الرئيسية',icon:Home},
@@ -49,7 +50,7 @@ export default function ProfilePage(){
   const [mainSection,setMainSection]=useState<MainSection>('home');
   const [navPinned,setNavPinned]=useState(false);
   const [unread,setUnread]=useState(()=>Number(localStorage.getItem('sb1_unread_notifications')||'0'));
-  const [language,setLanguage]=useState(()=>read('sb1_page_settings_profile',{language:'ar'}).language||'ar');
+  const [language,setLanguage]=useState(()=>readJson('sb1_page_settings_profile',{language:'ar'}).language||'ar');
   const [notificationsOpen,setNotificationsOpen]=useState(false);
   const [followersOpen,setFollowersOpen]=useState(false);
   const [followingIds,setFollowingIds]=useState<string[]>(()=>getFollowing());
@@ -72,7 +73,7 @@ export default function ProfilePage(){
   useEffect(()=>{
     const sync=()=>setUnread(Number(localStorage.getItem('sb1_unread_notifications')||'0'));
 
-    const syncLang=()=>setLanguage(read('sb1_page_settings_profile',{language:'ar'}).language||'ar');
+    const syncLang=()=>setLanguage(readJson('sb1_page_settings_profile',{language:'ar'}).language||'ar');
     window.addEventListener('storage',sync);
     window.addEventListener('sb1-settings-change',syncLang as EventListener);
     window.addEventListener('sb1:new-notification',sync as EventListener);
@@ -116,7 +117,7 @@ export default function ProfilePage(){
             <button type="button" onClick={()=>setFollowersOpen(true)} className="w-full rounded-xl border bg-white p-3 text-right shadow-sm hover:bg-slate-50 active:bg-slate-100">
               <div className="mb-2 flex items-center justify-between"><b className="text-sm">المتابعون</b><span className="text-xs text-teal-700">{demoFollowers.length} · عرض الكل</span></div>
               <div className="flex flex-wrap gap-2">
-                {demoFollowers.map(([n,p])=><span key={n} title={n} className="h-9 w-9 overflow-hidden rounded-full ring-2 ring-white shadow"><img src={p} alt={n} className="h-full w-full object-cover"/></span>)}
+                {demoFollowers.map(([n,p])=><a key={n} href={'/profile?user='+encodeURIComponent(n)} title={'فتح صفحة '+n} className="h-9 w-9 overflow-hidden rounded-full ring-2 ring-white shadow transition hover:scale-110"><img src={p} alt={n} className="h-full w-full object-cover"/></a>)}
               </div>
             </button>
             <div className="rounded-xl border bg-white p-3 text-center shadow-sm">
@@ -182,7 +183,7 @@ export default function ProfilePage(){
         <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl" onClick={e=>e.stopPropagation()} dir="rtl">
           <div className="flex items-center justify-between border-b pb-3"><div><h2 className="text-lg font-extrabold">المتابعون</h2><p className="mt-1 text-xs text-slate-500">يمكنك متابعة أو إلغاء متابعة الحسابات من هنا.</p></div><button onClick={()=>setFollowersOpen(false)} aria-label="إغلاق"><X className="h-5 w-5"/></button></div>
           <div className="mt-4 max-h-[60vh] space-y-2 overflow-y-auto">
-            {demoFollowers.map(([n,p])=>{const followerId='demo-follower-'+n;const followed=followingIds.includes(followerId)||isFollowing(followerId);return <div key={followerId} className="flex items-center gap-3 rounded-xl border p-3"><img src={p} alt={n} className="h-11 w-11 rounded-full object-cover"/><div className="min-w-0 flex-1"><b className="block truncate">{n}</b><span className="text-[11px] text-slate-500">متابع على SB1</span></div><button onClick={()=>{const next=toggleFollowing(followerId);setFollowingIds(next)}} className={'rounded-xl px-4 py-2 text-xs font-extrabold '+(followed?'border bg-white text-slate-700':'bg-teal-700 text-white')}>{followed?'متابَع':'متابعة'}</button></div>})}
+            {demoFollowers.map(([n,p])=>{const followerId='demo-follower-'+n;const followed=followingIds.includes(followerId)||isFollowing(followerId);return <div key={followerId} className="flex items-center gap-3 rounded-xl border p-3"><a href={'/profile?user='+encodeURIComponent(n)} title={'فتح صفحة '+n} className="shrink-0"><img src={p} alt={n} className="h-11 w-11 rounded-full object-cover"/></a><div className="min-w-0 flex-1"><a href={'/profile?user='+encodeURIComponent(n)} className="block truncate font-bold hover:text-teal-700">{n}</a><span className="text-[11px] text-slate-500">متابع على SB1</span></div><button onClick={()=>{const next=toggleFollowing(followerId);setFollowingIds(next)}} className={'rounded-xl px-4 py-2 text-xs font-extrabold '+(followed?'border bg-white text-slate-700':'bg-teal-700 text-white')}>{followed?'متابَع':'متابعة'}</button></div>})}
           </div>
         </div>
       </div>}
