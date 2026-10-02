@@ -30,7 +30,7 @@ export default function ProfessionalCreateStudio({pageId,pageName,pageAvatar}:{p
    if(!text.trim()&&!url){setNotice('أضف نصاً أو صورة أو فيديو أولاً.');return}
    if(mode==='story'){
      const old=read<any[]>('sb1_fb_stories_'+pageId,[]);
-     const item={id:uid(),name:'قصتي',text:text.trim(),mediaUrl:url||undefined,mediaKind:mediaType==='video'?'video':'image',audioUrl:music?.url,audioStart,musicStart,createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+86400000),own:true,authorPhoto:pageAvatar,textStyle:{color:font,fontSize:size+'px',fontWeight:'800'},filter};
+     const item={id:uid(),name:'قصتي',text:text.trim(),mediaUrl:url||undefined,mediaKind:mediaType==='video'?'video':'image',audioUrl:music?.url,audioStart:musicStart,musicStart,createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+86400000),own:true,authorPhoto:pageAvatar,textStyle:{color:font,fontSize:size+'px',fontWeight:'800'},filter};
      write('sb1_fb_stories_'+pageId,[item,...old]);
    }else{
      const old=read<any[]>('sb1_fb_posts_'+pageId,[]);
