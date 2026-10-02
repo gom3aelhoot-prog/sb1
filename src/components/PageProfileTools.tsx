@@ -396,7 +396,7 @@ export default function PageProfileTools({
   return <div dir="rtl" className="mt-4 space-y-4">
     {show('home') && (<section id="fb-home" className="grid min-w-0 grid-cols-1 gap-4 overflow-hidden">
       <div className="space-y-4">
-        {/* ترتيب الرئيسية: القصص أولاً ثم Reels ثم نافذة النشر والمنشورات */}
+        {/* ترتيب الرئيسية: القصص ثم إنشاء المنشور ثم شريط Reels واحد ثم الـFeed */}
         {!hideStories&&<StoryStrip/>}
 
         {/* Facebook-style composer */}
@@ -413,6 +413,7 @@ export default function PageProfileTools({
           </div>
         </div>}
 
+        <div className="rounded-xl border bg-white p-3"><ReelStrip stripId="fb-reels"/></div>
         <div id="fb-posts" className="space-y-4">
           {publicFeed.map((post,i)=>{
             const n=i+1;
@@ -443,7 +444,6 @@ export default function PageProfileTools({
             </div>
           })}
         </div>
-        <div className="mt-5 rounded-xl border bg-white p-3"><ReelStrip stripId="fb-reels"/></div>
       </div>
 
       
