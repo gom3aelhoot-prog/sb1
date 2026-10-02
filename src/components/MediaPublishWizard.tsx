@@ -1,4 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
+import type {ChangeEvent} from 'react';
 import {X,Upload,Search,Play,Pause,Mic,ChevronLeft,ChevronRight,SlidersHorizontal,Image as ImageIcon} from 'lucide-react';
 import {supabase} from '@/lib/supabase';
 
@@ -45,7 +46,7 @@ export default function MediaPublishWizard({open,onClose,onPublish,initialMedia,
  const searchStickers=()=>search('sticker',stickerQuery,setStickers,()=>{});
  useEffect(()=>{if(open&&step===1&&!imageQuery){searchImages()}},[open,step,imageQuery]);
  useEffect(()=>{if(open&&step===3&&!audioQuery){searchAudio()}},[open,step,audioQuery]);
- const chooseFile=async(e:React.ChangeEvent<HTMLInputElement>,kind:'media'|'audio'|'gif'|'sticker')=>{const f=e.target.files?.[0];if(!f)return;const a=await uploadAsset(f,pageId);if(kind==='audio')setAudio(a);else if(kind==='media')setMedia(v=>mode==='image'||mode==='reel'?[...v,a].slice(0,12):[a]);else if(kind==='gif')setGifs(v=>[a,...v]);else setStickers(v=>[a,...v])};
+ const chooseFile=async(e:ChangeEvent<HTMLInputElement>,kind:'media'|'audio'|'gif'|'sticker')=>{const f=e.target.files?.[0];if(!f)return;const a=await uploadAsset(f,pageId);if(kind==='audio')setAudio(a);else if(kind==='media')setMedia(v=>mode==='image'||mode==='reel'?[...v,a].slice(0,12):[a]);else if(kind==='gif')setGifs(v=>[a,...v]);else setStickers(v=>[a,...v])};
  const startRecord=async()=>{try{const s=await navigator.mediaDevices.getUserMedia({audio:true});const mime=MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':'audio/ogg';const r=new MediaRecorder(s,{mimeType:mime});chunks.current=[];r.ondataavailable=e=>e.data.size&&chunks.current.push(e.data);r.onstop=()=>{const aUrl=URL.createObjectURL(new Blob(chunks.current,{type:mime}));setRecorded({id:'record-'+Date.now(),name:'تسجيل صوتي',url:aUrl,kind:'audio',source:'الميكروفون'});s.getTracks().forEach(t=>t.stop())};recorder.current=r;r.start();setRecording(true)}catch{}};
  const stopRecord=()=>{recorder.current?.stop();setRecording(false)};
  const next=()=>{if(step===1&&mode==='post'&&!text.trim()&&!media.length)return;if(step===1&&mode==='story'&&duration>=20)return;if(step===1&&mode==='reel'&&duration>0&&(duration<20||duration>=180))return;if(step===3&&audio){const max=audioLimit===Infinity?audio.duration||180:audioLimit;if(audioEnd>max)setAudioEnd(max);if(audioStart>max)setAudioStart(0)}setStep(s=>Math.min(5,s+1))};
