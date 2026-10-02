@@ -340,30 +340,6 @@ export default function PageProfileTools({
   return <div dir="rtl" className="mt-4 space-y-4">
     {show('home') && (<section id="fb-home" className="grid min-w-0 grid-cols-1 gap-4 overflow-hidden">
       <div className="space-y-4">
-        {!hideStories&&(
-          <div className="bg-transparent p-0">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="sr-only">القصص</h2>
-              <button title="إنشاء قصة جديدة" onClick={()=>setStoryComposer(true)} className="rounded-full bg-teal-50 p-2 text-teal-700" aria-label="إنشاء قصة"><Plus className="h-4 w-4"/></button>
-            </div>
-            <div className="flex gap-3 overflow-x-auto pb-1">
-              <button onClick={()=>setStoryComposer(true)} className="min-w-[104px] overflow-hidden rounded-xl bg-slate-50">
-                <div className="grid h-28 place-items-center bg-gradient-to-br from-teal-600 to-teal-800 text-white"><Plus className="h-8 w-8"/></div>
-                <div className="p-2 text-center text-xs font-bold">قصتك</div>
-              </button>
-              {activeStories.map(s=><button key={s.id} onClick={()=>setStoryViewer(s)} className="min-w-[104px] overflow-hidden rounded-xl bg-white text-right">
-                <div className="relative grid h-28 place-items-center overflow-hidden bg-slate-900 text-white">
-                  {s.mediaUrl ? (s.mediaKind==='video'
-                    ? <video src={s.mediaUrl} muted playsInline className="h-full w-full object-cover" onMouseEnter={e=>startHoverView(s.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(s.id,e.currentTarget)}/>
-                    : <img src={s.mediaUrl} className="h-full w-full object-cover" alt="" onMouseEnter={()=>startHoverView(s.id)} onMouseLeave={()=>stopHoverView(s.id)}/>)
-                    : <span className="p-3 text-xs font-bold">{s.text}</span>}
-                  <span className="absolute top-2 right-2 h-7 w-7 overflow-hidden rounded-full border-2 border-white shadow"><img src={s.authorPhoto||pageAvatar} alt="" className="h-full w-full object-cover"/></span><span className="absolute bottom-2 right-2 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-slate-800">{s.name}</span>
-                </div>
-              </button>)}
-            </div>
-          </div>
-        )}
-
         {/* Facebook-style composer */}
         {canManage&&<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <button onClick={()=>setComposer(true)} className="flex w-full items-center gap-3 text-right">
@@ -379,18 +355,6 @@ export default function PageProfileTools({
 
         {/* ترتيب الرئيسية: شريط Reels -> منشئ المنشورات -> 3 منشورات -> Reels دوري */}
         <ReelStrip stripId="fb-reels"/>
-
-        {canManage&&<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <button onClick={()=>setComposer(true)} className="flex w-full items-center gap-3 text-right">
-            {pageAvatar?<img src={pageAvatar} alt={pageName} className="h-11 w-11 shrink-0 rounded-full object-cover"/>:<div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-teal-100 font-extrabold text-teal-700">{pageName.charAt(0)}</div>}
-            <div className="flex-1 rounded-full bg-slate-100 px-4 py-3 text-sm text-slate-500">بم تفكر؟ اكتب منشوراً أو أضف صورة أو فيديو أو Reel...</div>
-          </button>
-          <div className="mt-3 grid grid-cols-3 border-t pt-3 text-sm font-bold text-slate-600">
-            <button onClick={()=>{setPostKind('image');setComposer(true)}} className="rounded-lg py-2 hover:bg-slate-50"><ImageIcon className="inline text-teal-600"/> صورة</button>
-            <button onClick={()=>{setPostKind('video');setComposer(true)}} className="rounded-lg py-2 hover:bg-slate-50"><Video className="inline text-teal-600"/> فيديو</button>
-            <button onClick={()=>{setPostKind('reel');setComposer(true)}} className="rounded-lg py-2 hover:bg-slate-50"><Video className="inline text-teal-600"/> Reel</button>
-          </div>
-        </div>}
 
         <div id="fb-posts" className="space-y-4">
           {publicFeed.map((post,i)=>{
