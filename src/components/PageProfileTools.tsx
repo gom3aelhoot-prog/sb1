@@ -58,6 +58,10 @@ function GoogleImagesSearch({query,results,onSearch,onOpen,onFavorite,onAlbum,on
     return <div className="bg-white p-3">
     <div className="mb-3 flex items-center justify-between"><div><b className="text-sm">Google Images</b><p className="text-[11px] text-slate-500">اضغط على أي صورة لفتحها ومعاينتها وحفظها أو إضافتها إلى ألبوم.</p></div></div>
     {!query.trim()&&<div className="rounded-xl border border-dashed p-8 text-center text-xs text-slate-500">اكتب البحث في خانة البحث الرئيسية ثم اضغط «بحث».</div>}
+    {query.trim() && googleImageSearched && results.length===0 && <div className="overflow-hidden rounded-xl border bg-slate-50">
+      <div className="border-b bg-white px-3 py-2 text-xs text-slate-600">تعذر استخراج الصور من Google على الخادم، لذلك نعرض نتائج Google Images مباشرة داخل SB1.</div>
+      <iframe title="Google Images" src={"https://www.google.com/search?igu=1&tbm=isch&udm=2&safe=active&q="+encodeURIComponent(query)} className="h-[70vh] w-full border-0" />
+    </div>}
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
       {results.map((item:any)=><article key={item.id} className="overflow-hidden rounded-xl border bg-white shadow-sm">
         <button onClick={()=>onOpen(item)} className="block w-full text-right">
@@ -177,6 +181,7 @@ export default function PageProfileTools({
   const [socialEmbedded,setSocialEmbedded]=useState<string|null>(null);
   const [youtubeResults,setYoutubeResults]=useState<any[]>([]);
   const [googleImageResults,setGoogleImageResults]=useState<any[]>([]);
+  const [googleImageSearched,setGoogleImageSearched]=useState(false);
   const [externalResults,setExternalResults]=useState<any[]>([]);
   const [googleImageViewer,setGoogleImageViewer]=useState<any|null>(null);
   const [externalViewer,setExternalViewer]=useState<any|null>(null);
@@ -377,6 +382,7 @@ export default function PageProfileTools({
       const x=await r.json();
       if(!r.ok) throw new Error(x.error||'تعذر البحث في Google Images');
       setGoogleImageResults(x.items||[]);
+      setGoogleImageSearched(true);
     }catch(e){setNotice(e instanceof Error?e.message:'تعذر البحث في Google Images');}
   };
   const favoriteExternal=(item:any,kind:'image'|'video'|'post'='image')=>{
