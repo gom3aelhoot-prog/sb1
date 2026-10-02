@@ -445,13 +445,17 @@ export default function PageProfileTools({
     setNotice('اختر الألبوم وسيظهر المحتوى فيه مباشرة.');
   };
   const publishExternalToComposer=(item:any,kind:'reel'|'video'|'image'|'post'|'story')=>{
-    const url=item.url||item.image||item.thumbnail||item.embedUrl||'';if(!url&&!item.embedUrl){setNotice('لا يوجد محتوى صالح للنشر.');return;}
+    const url=item.url||item.image||item.thumbnail||item.embedUrl||'';
+    if(!url&&!item.embedUrl){setNotice('لا يوجد محتوى صالح للنشر.');return}
     const mediaKind=(item.resourceType==='video'||item.kind==='video'||item.type==='video'||kind==='reel'||kind==='video')?'video':'image';
-    if(kind==='story'){setStorySelectedMedia({id:'external-'+(item.id||url),name:item.title||socialProvider,url,kind:mediaKind,source:item.source||socialProvider,createdAt:new Date().toISOString(),thumbnail:item.thumbnail||item.image,embedUrl:item.embedUrl});setStoryComposer(true);setExternalViewer(null);return;}
-    setPostText(item.title||'');setSelectedMedia({id:'external-'+(item.id||url),name:item.title||socialProvider,url,kind:mediaKind,source:item.source||socialProvider,createdAt:new Date().toISOString(),thumbnail:item.thumbnail||item.image,embedUrl:item.embedUrl} as any);
-    setPostKind(kind==='reel'?'reel':kind==='video'?'video':'image');setComposer(true);setExternalViewer(null);
-    setNotice(kind==='post'?'تم فتح نافذة المنشور مع الفيديو.':kind==='reel'?'تم فتح نافذة نشر Reel مع الفيديو.':'تم فتح نافذة النشر مع الفيديو. يمكنك تعديل النص والإعدادات قبل النشر.');
+    if(kind==='story'){setStorySelectedMedia({id:'external-'+(item.id||url),name:item.title||socialProvider,url,kind:mediaKind,source:item.source||socialProvider,createdAt:new Date().toISOString(),thumbnail:item.thumbnail||item.image,embedUrl:item.embedUrl});setStoryComposer(true);setExternalViewer(null);return}
+    const mode=mediaKind==='video'?(kind==='reel'?'reel':'video'):'image';
+    setPostText(mediaKind==='image'?'':item.title||'');setVideoTitle(item.title||'');setVideoDescription(item.description||item.snippet||'');
+    setSelectedMedia({id:'external-'+(item.id||url),name:item.title||socialProvider,url,kind:mediaKind,source:item.source||socialProvider,createdAt:new Date().toISOString(),thumbnail:item.thumbnail||item.image,embedUrl:item.embedUrl} as any);
+    setPostKind(mode as MediaKind);setPublishMode(mode);setPublishTarget(mode==='reel'?'reel':'video');setVideoDuration(Number(item.duration||0));setComposer(true);setExternalViewer(null);
+    setNotice('تم فتح نافذة إعدادات النشر الكاملة.');
   };
+
   const permissionGroups=[
     {title:'الحساب والهوية',items:[['profile_view','عرض الملف الشخصي'],['profile_edit','تعديل بيانات الصفحة'],['profile_media','إدارة صورة وغلاف الصفحة'],['profile_settings','إعدادات الصفحة'],['verification','التحقق والوثائق والعقود']]},
     {title:'المحتوى والنشر',items:[['posts_view','عرض المنشورات'],['posts_create','إنشاء المنشورات'],['posts_edit','تعديل المنشورات'],['posts_delete','حذف المنشورات'],['stories_create','إنشاء القصص'],['stories_delete','حذف القصص'],['reels_create','إنشاء Reels'],['reels_manage','إدارة Reels'],['albums_manage','إدارة الألبومات'],['media_upload','رفع الصور والفيديو والصوت والتسجيلات']]},
