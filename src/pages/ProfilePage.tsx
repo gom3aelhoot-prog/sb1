@@ -58,6 +58,8 @@ export default function ProfilePage(){
   const navRef=useRef<HTMLDivElement|null>(null);
   const pinY=useRef<number|null>(null);
 
+  useEffect(()=>{document.querySelectorAll<HTMLButtonElement>('button').forEach((b)=>{if(!b.title){const label=(b.getAttribute('aria-label')||b.textContent||'').replace(/\\s+/g,' ').trim();if(label)b.title=label.slice(0,120)}})},[mainSection,activeTab,language]);
+
   useEffect(()=>{
     const measure=()=>{
       const el=navRef.current;if(!el)return;
