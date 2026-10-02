@@ -54,6 +54,29 @@ const demoPostImages = [
 const demoVideoUrl='https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
 const demoReelUrl='https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4';
 
+function GoogleImagesSearch({query,onClose}:{query:string;onClose:()=>void}) {
+  useEffect(()=>{
+    const w=window as any;
+    const existing=document.getElementById('sb1-google-cse-script');
+    if(!existing){
+      const s=document.createElement('script');
+      s.id='sb1-google-cse-script';
+      s.async=true;
+      s.src='https://cse.google.com/cse.js?cx=304413a90b5b045af';
+      document.body.appendChild(s);
+    } else if(w.google?.search?.cse?.element){
+      try{w.google.search.cse.element.getElement('sb1-google-images').execute(query||'');}catch{}
+    }
+  },[query]);
+  return <div className="bg-white p-4">
+    <div className="mb-3 flex items-center justify-between gap-2">
+      <div><b className="text-sm">صور Google داخل SB1</b><p className="text-[11px] text-slate-500">البحث يعمل مباشرة عبر Google بدون الحاجة إلى Custom Search JSON API.</p></div>
+      <button onClick={onClose} title="إغلاق"><X/></button>
+    </div>
+    <div className="gcse-searchresults-only" data-gname="sb1-google-images" data-enableImageSearch="true" data-defaultToImageSearch="true" data-queryParameterName="q"></div>
+  </div>;
+}
+
 export default function PageProfileTools({
   canManage=false, pageId='current', pageName='SB1', pageAvatar,
   seedPosts=[], hideStories=false, focusSection='home', onlyOwn=false
@@ -328,7 +351,7 @@ export default function PageProfileTools({
       return;
     }
     if(provider==='Google Images'){
-      try{const r=await fetch('/api/social-search?provider=google_images&q='+encodeURIComponent(q));const x=await r.json();if(!r.ok)throw new Error(x.error||'Google Images API error');setGoogleImageResults(x.items||[]);setSocialEmbedded('Google Images');}catch(e){setNotice(e instanceof Error?e.message:'تعذر البحث في صور Google');}
+      setSocialEmbedded('Google Images');
       return;
     }
     if(provider==='Pinterest'){setSocialEmbedded('Pinterest');setSocialUrl('https://www.pinterest.com/search/pins/?q='+encodeURIComponent(q));return;}
@@ -477,24 +500,8 @@ export default function PageProfileTools({
       {socialEmbedded&&<div className="mt-4 overflow-hidden rounded-2xl border bg-slate-100">
         <div className="flex items-center justify-between border-b bg-white px-3 py-2"><b>{socialEmbedded}</b><div className="flex gap-2"><button onClick={()=>{toggleSaved({id:'social-'+socialEmbedded+'-'+socialSearch,kind:'video',title:socialSearch||socialEmbedded,body:'محتوى من منصة خارجية',url:socialSearch,created_at:new Date().toISOString()});setNotice('تمت الإضافة إلى مفضلتي.')}} title="إضافة إلى مفضلتي" className="rounded-lg bg-teal-50 px-3 py-2 text-xs font-bold text-teal-700"><Bookmark className="inline h-4 w-4 ml-1"/>مفضلتي</button><button onClick={()=>{setNotice('تمت إضافة المحتوى إلى الألبوم المحدد من قسم الألبومات.')}} title="إضافة إلى ألبوم" className="rounded-lg bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-700"><Album className="inline h-4 w-4 ml-1"/>ألبوم</button><button onClick={()=>{setNotice('تم تجهيز المحتوى للنشر المباشر في صفحة SB1.')}} title="نشر مباشر" className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700"><Send className="inline h-4 w-4 ml-1"/>نشر</button><button onClick={()=>setSocialEmbedded(null)} title="إغلاق"><X/></button></div></div>
         {socialEmbedded==='Pinterest' ? <div className="min-h-[520px] bg-white p-4"><p className="mb-3 text-xs text-slate-500">نتائج بحث Pinterest داخل مساحة SB1.</p><iframe title="Pinterest Search" src={socialUrl||'https://www.pinterest.com/search/'} className="h-[620px] w-full border-0"/><a href={socialUrl} target="_blank" rel="noreferrer" className="mt-2 block rounded-xl bg-teal-50 p-3 text-center text-xs font-bold text-teal-700">فتح نتائج Pinterest إذا منعت المنصة العرض داخل SB1</a></div> :
-         socialEmbedded==='Google Images' ? <div className="bg-white p-4">
-          <div className="mb-3 flex items-center justify-between gap-2"><div><b className="text-sm">صور Google داخل SB1</b><p className="text-[11px] text-slate-500">يمكن معاينة الصورة، حفظها في مفضلتي، أو نشرها كصورة داخل SB1.</p></div><button onClick={()=>setSocialEmbedded(null)} title="إغلاق"><X/></button></div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {googleImageResults.map((item:any)=><article key={item.id} className="overflow-hidden rounded-xl border bg-white">
-              <button onClick={()=>setGoogleImageViewer(item)} className="block w-full text-right">
-                <div className="aspect-square overflow-hidden bg-slate-100"><img src={item.image} alt={item.title||''} className="h-full w-full object-cover" loading="lazy"/></div>
-                <div className="p-2"><b className="line-clamp-2 text-xs">{item.title||'صورة'}</b><span className="mt-1 block truncate text-[10px] text-slate-400">{item.source||''}</span></div>
-              </button>
-              <div className="grid grid-cols-3 border-t text-[10px] font-bold">
-                <button onClick={()=>{toggleSaved({id:'google-image-'+item.id,kind:'image',title:item.title||'صورة Google',body:item.snippet||'',author:item.source||'',url:item.sourceUrl||item.image,image_url:item.image,created_at:new Date().toISOString()});setNotice('تم حفظ الصورة في مفضلتي.')}} className="p-2 hover:bg-teal-50">مفضلتي</button>
-                <button onClick={()=>publishExternal(item,'image')} className="border-x p-2 text-emerald-700 hover:bg-emerald-50">نشر</button>
-                <button onClick={()=>setGoogleImageViewer(item)} className="p-2 text-teal-700 hover:bg-teal-50">عرض</button>
-              </div>
-            </article>)}
-          </div>
-          {!googleImageResults.length&&<div className="rounded-xl border border-dashed p-10 text-center text-sm text-slate-500">اكتب بحثاً لعرض صور Google هنا.</div>}
-        </div> :
-         socialEmbedded==='Google Search' ? <div className="bg-white p-4"><iframe title="Google Search" src={socialUrl||'https://www.google.com/search?igu=1'} className="h-[720px] w-full border-0"/><a href={socialUrl} target="_blank" rel="noreferrer" className="mt-2 block text-center text-xs font-bold text-teal-700">فتح النتائج إذا منعت Google العرض داخل SB1</a></div> :
+         socialEmbedded==='Google Images' ? <GoogleImagesSearch query={socialSearch} onClose={()=>setSocialEmbedded(null)} /> :
+socialEmbedded==='Google Search' ? <div className="bg-white p-4"><iframe title="Google Search" src={socialUrl||'https://www.google.com/search?igu=1'} className="h-[720px] w-full border-0"/><a href={socialUrl} target="_blank" rel="noreferrer" className="mt-2 block text-center text-xs font-bold text-teal-700">فتح النتائج إذا منعت Google العرض داخل SB1</a></div> :
          socialEmbedded==='Yandex Search' ? <div className="bg-white p-4"><iframe title="Yandex Search" src={socialUrl||'https://yandex.com/search/'} className="h-[720px] w-full border-0"/><a href={socialUrl} target="_blank" rel="noreferrer" className="mt-2 block text-center text-xs font-bold text-teal-700">فتح نتائج Yandex إذا منعت المنصة العرض داخل SB1</a></div> :
          socialEmbedded==='YouTube' ? <div className="bg-white p-4"><p className="mb-3 text-xs text-slate-500">بحث YouTube يعمل عبر YouTube Data API v3 باستخدام المفتاح الموجود في Vercel Environment Variables.</p><input value={socialSearch} onChange={e=>setSocialSearch(e.target.value)} className="w-full rounded-xl border p-3" placeholder="ابحث في YouTube أو ألصق رابط فيديو"/><button onClick={()=>searchSocial()} className="mt-2 rounded-xl bg-teal-700 px-4 py-2 text-sm font-bold text-white">بحث</button>{youtubeResults.length>0&&<div className="mt-4 space-y-3">{youtubeResults.map((item:any)=><article key={item.id} className="overflow-hidden rounded-xl border bg-slate-50"><div className="grid gap-3 p-3 md:grid-cols-[180px_1fr]"><img src={item.thumbnail} alt="" className="h-28 w-full rounded-lg object-cover bg-slate-900"/><div className="min-w-0"><b className="line-clamp-2 text-sm">{item.title}</b><p className="mt-1 text-[11px] text-slate-500">{item.channelTitle}</p><div className="mt-2 flex flex-wrap gap-1"><button onClick={()=>{setSocialEmbedded(item.embedUrl);}} className="rounded-lg bg-slate-900 px-2 py-1 text-[10px] font-bold text-white">معاينة</button><button onClick={()=>{toggleSaved({id:'youtube-'+item.id,kind:'video',title:item.title,body:item.description,url:item.url,embed_url:item.embedUrl,thumbnail:item.thumbnail,created_at:new Date().toISOString()});setNotice('تمت الإضافة إلى مفضلتي.')}} className="rounded-lg bg-teal-50 px-2 py-1 text-[10px] font-bold text-teal-700">مفضلتي</button><button onClick={()=>publishExternal(item,'reel')} className="rounded-lg bg-emerald-600 px-2 py-1 text-[10px] font-bold text-white">نشر Reel</button><button onClick={()=>publishExternal(item,'video')} className="rounded-lg bg-blue-600 px-2 py-1 text-[10px] font-bold text-white">منشور فيديو</button><button onClick={()=>publishExternal(item,'story')} className="rounded-lg bg-amber-500 px-2 py-1 text-[10px] font-bold text-white">قصة</button></div></div></div></article>)}</div>}{/^https:\/\/www\.youtube\.com\/embed\//.test(socialEmbedded)&&<div className="mt-4"><iframe title="YouTube" src={socialEmbedded} className="h-[520px] w-full border-0 bg-black"/><div className="mt-2 flex flex-wrap gap-2"><button onClick={()=>{const idm=socialEmbedded.split('/').pop();if(idm)publishExternal({id:idm,title:'YouTube video',embedUrl:socialEmbedded,url:'https://www.youtube.com/watch?v='+idm,resourceType:'video'},'reel')}} className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white">نشر كـ Reel</button><button onClick={()=>{const idm=socialEmbedded.split('/').pop();if(idm)publishExternal({id:idm,title:'YouTube video',embedUrl:socialEmbedded,url:'https://www.youtube.com/watch?v='+idm,resourceType:'video'},'video')}} className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white">نشر فيديو</button></div></div>}</div> :
          socialEmbedded==='Rutube' ? <div className="bg-white p-4"><input value={socialSearch} onChange={e=>setSocialSearch(e.target.value)} className="w-full rounded-xl border p-3" placeholder="رابط Rutube أو معرف الفيديو"/><button onClick={()=>{const m=socialSearch.match(/(?:video|play)\/(?:embed\/)?([\w-]+)/i);if(m)setSocialEmbedded('https://rutube.ru/play/embed/'+m[1])}} className="mt-2 rounded-xl bg-teal-700 px-4 py-2 text-sm font-bold text-white">فتح</button>{socialEmbedded.startsWith('https://rutube.ru/')&&<iframe title="Rutube" src={socialEmbedded} className="mt-4 h-[520px] w-full border-0 bg-black"/>}</div> :
