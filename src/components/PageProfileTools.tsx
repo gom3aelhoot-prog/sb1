@@ -56,7 +56,10 @@ const demoReelUrl='https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_
 
 function GoogleImagesSearch({query,onClose}:{query:string;onClose:()=>void}) {
   useEffect(()=>{
-    const w=window as any;
+    const run=()=>{
+      const w=window as any;
+      try{w.google?.search?.cse?.element?.getElement('sb1-google-images')?.execute(query||'');}catch{}
+    };
     const existing=document.getElementById('sb1-google-cse-script');
     if(!existing){
       const s=document.createElement('script');
@@ -64,9 +67,11 @@ function GoogleImagesSearch({query,onClose}:{query:string;onClose:()=>void}) {
       s.async=true;
       s.src='https://cse.google.com/cse.js?cx=304413a90b5b045af';
       document.body.appendChild(s);
-    } else if(w.google?.search?.cse?.element){
-      try{w.google.search.cse.element.getElement('sb1-google-images').execute(query||'');}catch{}
     }
+    const timer=window.setInterval(run,500);
+    const stop=window.setTimeout(()=>window.clearInterval(timer),6000);
+    run();
+    return()=>{window.clearInterval(timer);window.clearTimeout(stop);};
   },[query]);
   return <div className="bg-white p-4">
     <div className="mb-3 flex items-center justify-between gap-2">
