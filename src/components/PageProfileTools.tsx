@@ -54,6 +54,7 @@ const demoPostImages = [
 const demoVideoUrl='https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
 const demoReelUrl='https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4';
 
+
 function GoogleImagesSearch({query,results,googleImageSearched,onSearch,onOpen,onFavorite,onAlbum,onPublish}:{query:string;results:any[];googleImageSearched:boolean;onSearch:(q:string)=>void;onOpen:(item:any)=>void;onFavorite:(item:any)=>void;onAlbum:(item:any)=>void;onPublish:(item:any)=>void}) {
     return <div className="bg-white p-3">
     <div className="mb-3 flex items-center justify-between"><div><b className="text-sm">Google Images</b><p className="text-[11px] text-slate-500">اضغط على أي صورة لفتحها ومعاينتها وحفظها أو إضافتها إلى ألبوم.</p></div></div>
