@@ -14,31 +14,52 @@ export default async function handler(req:any,res:any){
       return res.status(200).json({items:(d.items||[]).map((x:any)=>({id:x.id?.videoId||x.id?.channelId||x.id?.playlistId,title:x.snippet?.title||'',description:x.snippet?.description||'',channelTitle:x.snippet?.channelTitle||'',publishedAt:x.snippet?.publishedAt||'',thumbnail:x.snippet?.thumbnails?.medium?.url||x.snippet?.thumbnails?.default?.url||'',kind:x.id?.kind||''}))});
     }
     if(provider==='google_images'){
-      // Use Google's public Images results page server-side so SB1 does not require
-      // the deprecated/limited Custom Search JSON API for image browsing.
       const u=new URL('https://www.google.com/search');
-      u.searchParams.set('tbm','isch');u.searchParams.set('udm','2');u.searchParams.set('safe','active');
-      u.searchParams.set('hl','en');u.searchParams.set('gl','us');u.searchParams.set('q',q);
+      u.searchParams.set('q',q);
+      u.searchParams.set('tbm','isch');
+      u.searchParams.set('udm','2');
+      u.searchParams.set('safe','active');
+      u.searchParams.set('hl','en');
+      u.searchParams.set('gl','us');
+      u.searchParams.set('num','24');
       const r=await fetch(u,{headers:{
         'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
         'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
         'Accept-Language':'en-US,en;q=0.9',
-        'Accept-Encoding':'gzip, deflate, br'
+        'Accept-Encoding':'gzip, deflate'
       }});
       const html=await r.text();
       if(!r.ok)return res.status(r.status).json({error:'Google Images returned an error'});
-      // Google changes its HTML frequently. Collect thumbnail URLs from both
-      // escaped JSON and normal HTML attributes instead of relying on one shape.
       const normalized=html
         .replace(/\\u003d/gi,'=').replace(/\\u0026/gi,'&')
         .replace(/\\\\u003d/gi,'=').replace(/\\\\u0026/gi,'&')
-        .replace(/&amp;/gi,'&');
-      const raw=[
-        ...[...normalized.matchAll(/https?:\\/\\/encrypted-tbn[0-9a-z-]+\\.gstatic\\.com\\/images[^"'\\\\\\s<>]+/gi)].map(m=>m[0]),
-        ...[...normalized.matchAll(/(?:src|data-src)=["'](https?:\\/\\/encrypted-tbn[0-9a-z-]+\\.gstatic\\.com\\/images[^"'<>]+)["']/gi)].map(m=>m[1])
-      ];
-      const unique=[...new Set(raw.map((x:string)=>x.replace(/[),]+$/,'').trim()))].slice(0,24);
-      const items=unique.map((image:string,i:number)=>({id:'google-'+i+'-'+Buffer.from(image).toString('base64').slice(0,10),title:q+' — صورة '+(i+1),snippet:'Google Images',image,thumbnail:image,source:'Google Images',sourceUrl:'https://www.google.com/search?tbm=isch&udm=2&q='+encodeURIComponent(q),width:0,height:0}));
+        .replace(/&amp;/gi,'&')
+        .replace(/\\x3d/gi,'=').replace(/\\x26/gi,'&');
+      const urls:string[]=[];
+      const add=(x:string)=>{
+        const v=x.replace(/\\u003d/gi,'=').replace(/\\u0026/gi,'&').replace(/\\x3d/gi,'=').replace(/\\x26/gi,'&').trim();
+        if(/^https?:\\/\\//i.test(v)) urls.push(v);
+      };
+      for(const m of normalized.matchAll(/https?:\\/\\/encrypted-tbn[0-9a-z-]+\\.gstatic\\.com\\/images[^"'\\\\\\s<>]+/gi)) add(m[0]);
+      for(const m of normalized.matchAll(/(?:src|data-src)=["'](https?:\\/\\/encrypted-tbn[0-9a-z-]+\\.gstatic\\.com\\/images[^"'<>]+)["']/gi)) add(m[1]);
+      for(const m of normalized.matchAll(/\\["(]((?:https?:\\/\\/)[^"'\\\\\\s<>]+\\.(?:jpg|jpeg|png|webp|gif)(?:\\?[^"'\\\\\\s<>]*)?)[")]/gi)) add(m[1]);
+      for(const m of normalized.matchAll(/"https?:\\/\\/[^"]+"/g)){
+        const v=m[0].slice(1,-1);
+        if(/\\.(?:jpg|jpeg|png|webp|gif)(?:\\?|$)/i.test(v)) add(v);
+      }
+      const unique=[...new Set(urls.map(x=>x.replace(/[),]+$/,'').trim()))].filter(x=>!x.includes('google.com/search')).slice(0,24);
+      const items=unique.map((image:string,i:number)=>({
+        id:'google-'+i+'-'+Buffer.from(image).toString('base64').slice(0,10),
+        title:q+' — صورة '+(i+1),
+        snippet:'Google Images',
+        image,thumbnail:image,
+        source:'Google Images',
+        sourceUrl:'https://www.google.com/search?tbm=isch&udm=2&q='+encodeURIComponent(q),
+        width:0,height:0
+      }));
+      if(items.length===0){
+        return res.status(502).json({items:[],error:'Google Images did not return image results. Google may be requiring browser verification.'});
+      }
       return res.status(200).json({items});
     }
     if(provider==='pinterest'){
