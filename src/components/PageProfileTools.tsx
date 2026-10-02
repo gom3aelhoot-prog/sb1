@@ -478,7 +478,23 @@ export default function PageProfileTools({
 
     {show('phone') && (<section id="fb-phone" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">الهاتف وQR</h2><p className="text-xs text-slate-500">الرقم خاص بالحساب.</p></div><QrCode className="text-teal-700"/></div>
-      {canManage&&<div className="grid gap-5 md:grid-cols-2"><div><label className="text-sm font-bold">رقم الهاتف</label><input value={phone} onChange={e=>setPhone(e.target.value)} className="mt-2 w-full rounded-xl border p-3" placeholder="+49 ..."/><div className="mt-2 flex gap-2"><button onClick={()=>{localStorage.setItem('sb1_private_phone',phone);setNotice('تم حفظ رقم الهاتف.')}} className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white active:bg-teal-800">حفظ</button><button onClick={()=>{if(!phone.trim()){setNotice('اكتب رقم الهاتف أولاً.');return}localStorage.setItem('sb1_private_phone',phone);localStorage.setItem('sb1_phone_linked','true');setPhoneLinked(true);setNotice('تم ربط الهاتف بهذا الحساب.')}} className="rounded-lg border px-4 py-2 text-sm font-bold active:bg-slate-200">{phoneLinked?'الهاتف مربوط':'ربط الهاتف'}</button></div><div className="mt-3 rounded-xl bg-slate-50 p-3 text-xs">رمز الربط: <b>{pairCode}</b></div></div><div className="grid place-items-center rounded-xl bg-slate-50 p-4"><img src={'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(window.location.origin+'/doctors/'+pageId+'?pair='+pairCode)} alt="QR" className="h-44 w-44"/><span className="mt-2 text-xs">QR لفتح الصفحة وربط الهاتف</span></div></div>}
+      {canManage&&<div className="grid gap-5 md:grid-cols-2">
+  <div>
+    <label className="text-sm font-bold">رقم الهاتف</label>
+    <input value={phone} onChange={e=>setPhone(e.target.value)} className="mt-2 w-full rounded-xl border p-3" placeholder="+49 ..."/>
+    <div className="mt-2 flex flex-wrap gap-2">
+      <button onClick={()=>{const value=phone.trim();if(!value){setNotice('اكتب رقم الهاتف أولاً.');return}localStorage.setItem('sb1_private_phone',value);setPhone(value);setNotice('تم حفظ رقم الهاتف على هذا الحساب.')}} className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white active:bg-teal-800">حفظ الرقم</button>
+      <button onClick={()=>{const value=phone.trim();if(!value){setNotice('اكتب رقم الهاتف أولاً.');return}localStorage.setItem('sb1_private_phone',value);localStorage.setItem('sb1_phone_linked','true');localStorage.setItem('sb1_phone_linked_at',new Date().toISOString());setPhoneLinked(true);setNotice('تم ربط الهاتف بهذا الحساب.')}} className="rounded-lg border px-4 py-2 text-sm font-bold active:bg-slate-200">{phoneLinked?'الهاتف مربوط ✓':'ربط الهاتف'}</button>
+      <button onClick={()=>{navigator.clipboard?.writeText(pairCode);setNotice('تم نسخ رمز الربط.')}} className="rounded-lg border px-4 py-2 text-sm font-bold active:bg-slate-200">نسخ رمز الربط</button>
+    </div>
+    <div className="mt-3 rounded-xl bg-slate-50 p-3 text-xs">رمز الربط: <b className="tracking-widest">{pairCode}</b><span className="mt-1 block text-slate-500">استخدم الرمز مع QR لربط الهاتف بهذا الحساب.</span></div>
+  </div>
+  <div className="grid place-items-center rounded-xl bg-slate-50 p-4">
+    <img src={'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data='+encodeURIComponent((typeof window!=='undefined'?window.location.href.split('?')[0]:'' )+'?pair='+pairCode)} alt="QR ربط الهاتف" className="h-48 w-48 rounded-xl bg-white p-2"/>
+    <span className="mt-2 text-xs text-center">QR حقيقي يفتح صفحة الحساب الحالية مع رمز الربط.</span>
+    <button onClick={()=>{try{navigator.share?.({title:'SB1',text:'رمز ربط الهاتف',url:(typeof window!=='undefined'?window.location.href.split('?')[0]:'')+'?pair='+pairCode});setNotice('تم فتح مشاركة QR.')}catch{setNotice('يمكنك مسح QR بالكاميرا لمتابعة الربط.')}}} className="mt-2 rounded-lg bg-teal-50 px-3 py-2 text-xs font-bold text-teal-700">مشاركة رابط QR</button>
+  </div>
+</div>}
     </section>) }
 
     {canManage&&show('clone')&&(<section id="fb-clone" className="rounded-xl border bg-white p-5 shadow-sm">
