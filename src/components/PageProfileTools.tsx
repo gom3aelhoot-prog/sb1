@@ -55,70 +55,37 @@ const demoVideoUrl='https://interactive-examples.mdn.mozilla.net/media/cc0-video
 const demoReelUrl='https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4';
 
 function GoogleImagesSearch({query,onClose,results,onResults,onOpen,onFavorite,onAlbum,onPublish}:{query:string;onClose:()=>void;results:any[];onResults:(items:any[])=>void;onOpen:(item:any)=>void;onFavorite:(item:any)=>void;onAlbum:(item:any)=>void;onPublish:(item:any)=>void}) {
+  const [loading,setLoading]=useState(false);
   useEffect(()=>{
-    const w=window as any;
-    w.__gcse=w.__gcse||{};
-    w.__gcse.parsetags='explicit';
-    w.__gcse.searchCallbacks=w.__gcse.searchCallbacks||{};
-    w.__gcse.searchCallbacks.image=w.__gcse.searchCallbacks.image||{};
-    if(!w.__gcse.searchCallbacks.image.ready){
-      w.__gcse.searchCallbacks.image.ready=(gname:string,q:string,_promos:any[],items:any[])=>{
-        if(gname!=='sb1-google-images')return;
-        const normalized=(items||[]).map((r:any,i:number)=>({
-          id:'google-image-'+i+'-'+Math.random().toString(36).slice(2,7),
-          title:r.titleNoFormatting||r.title||'صورة Google',
-          image:r.image?.url||r.thumbnailImage?.url||'',
-          thumbnail:r.thumbnailImage?.url||r.image?.url||'',
-          sourceUrl:r.contextUrl||r.url||'',
-          source:r.visibleUrl||'',
-          snippet:r.contentNoFormatting||r.content||''
-        })).filter((x:any)=>x.image);
-        window.dispatchEvent(new CustomEvent('sb1-google-image-results',{detail:normalized}));
-        return true;
-      };
-    }
-    const onGoogleResults=(event:Event)=>{
-      const detail=(event as CustomEvent<any[]>).detail||[];
-      onResults(detail);
-    };
-    window.addEventListener('sb1-google-image-results',onGoogleResults);
-    const render=()=>{
-      const host=document.getElementById('sb1-google-images-results');
-      const api=w.google?.search?.cse?.element;
-      if(!host||!api)return false;
-      host.innerHTML='';
-      api.render({div:host,tag:'searchresults-only',gname:'sb1-google-images',attributes:{
-        enableImageSearch:true,defaultToImageSearch:true,disableWebSearch:true,
-        imageSearchLayout:'classic',imageSearchResultSetSize:'large',autoSearchOnLoad:false,
-        linkTarget:'_self'
-      }});
-      const element=api.getElement('sb1-google-images');
-      if(element&&query.trim())element.execute(query.trim());
-      return Boolean(element);
-    };
-    const existing=document.getElementById('sb1-google-cse-script');
-    if(!existing){
-      const script=document.createElement('script');
-      script.id='sb1-google-cse-script';
-      script.async=true;
-      script.src='https://cse.google.com/cse.js?cx=304413a90b5b045af';
-      document.body.appendChild(script);
-      const wait=window.setInterval(()=>{if(render())window.clearInterval(wait)},150);
-      window.setTimeout(()=>window.clearInterval(wait),8000);
-    }else{
-      window.setTimeout(render,0);
-    }
-    return()=>window.removeEventListener('sb1-google-image-results',onGoogleResults);
+    let cancelled=false;
+    const q=query.trim();
+    if(!q){onResults([]);return;}
+    setLoading(true);
+    fetch('/api/social-search?provider=google_images&q='+encodeURIComponent(q))
+      .then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d?.error||'تعذر البحث في Google Images');return d;})
+      .then(d=>{if(!cancelled)onResults(Array.isArray(d.items)?d.items:[]);})
+      .catch(e=>{if(!cancelled){onResults([]);window.dispatchEvent(new CustomEvent('sb1-social-search-error',{detail:e instanceof Error?e.message:'تعذر البحث في Google Images'}));}})
+      .finally(()=>{if(!cancelled)setLoading(false);});
+    return()=>{cancelled=true;};
   },[query,onResults]);
+
+  useEffect(()=>{
+    const onError=(event:Event)=>{
+      const message=(event as CustomEvent<string>).detail;
+      if(message)window.dispatchEvent(new CustomEvent('sb1-notice',{detail:message}));
+    };
+    window.addEventListener('sb1-social-search-error',onError);
+    return()=>window.removeEventListener('sb1-social-search-error',onError);
+  },[]);
 
   return <div className="bg-white p-4">
     <div className="mb-3 flex items-center justify-between gap-2">
-      <div><b className="text-sm">صور Google داخل SB1</b><p className="text-[11px] text-slate-500">نتائج الصور تظهر داخل SB1، والضغط على الصورة يفتحها هنا بدلاً من الانتقال إلى الموقع الخارجي.</p></div>
+      <div><b className="text-sm">صور Google داخل SB1</b><p className="text-[11px] text-slate-500">نتائج الصور تظهر داخل SB1 مع المفضلة والألبومات والنشر.</p></div>
       <button onClick={onClose} title="إغلاق"><X/></button>
     </div>
-    <div id="sb1-google-images-results" className="hidden" aria-hidden="true"></div>
-    {!query.trim()&&<div className="py-8 text-center text-sm text-slate-400">اكتب كلمة البحث في خانة البحث أعلى القسم ثم اضغط بحث.</div>}
-    {query.trim()&&<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+    {!query.trim()&&<div className="py-8 text-center text-sm text-slate-400">اكتب كلمة البحث في خانة البحث ثم اضغط بحث.</div>}
+    {query.trim()&&loading&&<div className="py-8 text-center text-sm text-slate-400">جارٍ البحث في Google Images…</div>}
+    {query.trim()&&!loading&&<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
       {results.map((item:any)=><article key={item.id} className="overflow-hidden rounded-xl border bg-white shadow-sm">
         <button type="button" onClick={()=>onOpen(item)} className="block w-full bg-slate-100" title="عرض الصورة داخل SB1">
           <img src={item.thumbnail||item.image} alt={item.title||''} className="h-44 w-full object-cover" loading="lazy"/>
@@ -134,7 +101,7 @@ function GoogleImagesSearch({query,onClose,results,onResults,onOpen,onFavorite,o
         </div>
       </article>)}
     </div>}
-    {query.trim()&&results.length===0&&<div className="py-8 text-center text-sm text-slate-400">جارٍ جلب الصور من Google…</div>}
+    {query.trim()&&!loading&&results.length===0&&<div className="py-8 text-center text-sm text-slate-400">لم تظهر نتائج. إذا كان مفتاح Google غير مفعّل، سيظهر السبب في إشعار SB1.</div>}
   </div>;
 }
 
@@ -235,6 +202,7 @@ export default function PageProfileTools({
   const [phoneLinked,setPhoneLinked]=useState(()=>localStorage.getItem('sb1_phone_linked')==='true');
   const [pairCode]=useState(()=>read('sb1_pair_code_'+pageId,String(Math.floor(100000+Math.random()*900000))));
   const [socialSearch,setSocialSearch]=useState('');
+  const [socialProvider,setSocialProvider]=useState('YouTube');
   const [socialUrl,setSocialUrl]=useState('');
   const [socialOpen,setSocialOpen]=useState<string[]>([]);
   const [socialEmbedded,setSocialEmbedded]=useState<string|null>(null);
@@ -402,7 +370,7 @@ export default function PageProfileTools({
   };
   const searchSocial=async()=>{
     const q=socialSearch.trim();
-    const provider=(document.getElementById('sb1-social-provider') as HTMLSelectElement|null)?.value||'YouTube';
+    const provider=socialProvider;
     if(!q){setNotice(provider==='Pinterest'?'ألصق رابط Pin هنا.':'اكتب كلمة البحث أو رابط المحتوى.');return;}
     if(provider==='YouTube'){
       if(/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//i.test(q)){
@@ -557,8 +525,8 @@ export default function PageProfileTools({
 
     {show('social') && (<section id="fb-social" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">منصات التواصل والمتصفح</h2><p className="text-xs text-slate-500">نستخدم فقط طرق العرض التي تسمح بها المنصة. يمكن حفظ المحتوى أو نشره أو إضافته إلى ألبوم.</p></div><ExternalLink className="text-teal-700"/></div>
-      <div className="grid gap-2 md:grid-cols-[180px_1fr_auto]"><select id="sb1-social-provider" className="rounded-xl border p-3 text-sm font-bold"><option>YouTube</option><option>Rutube</option><option>Pinterest</option><option>OK</option><option>Google Images</option><option>Google Search</option><option>Yandex Search</option></select><input value={socialSearch} onChange={e=>setSocialSearch(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchSocial()} className="rounded-xl border p-3" placeholder="ابحث داخل المنصة..."/><button onClick={searchSocial} className="rounded-xl bg-teal-700 px-4 text-white" title="بحث"><Search/></button></div>
-      <div className="mt-3 flex flex-wrap gap-2">{[['YouTube','YouTube'],['Rutube','Rutube'],['Pinterest','Pinterest'],['OK','OK'],['Google Images','Google Images'],['Google Search','Google'],['Yandex Search','Yandex']].map(([n,l])=><button key={n} onClick={()=>{setSocialSearch('');setSocialEmbedded(n)}} title={'فتح '+l+' داخل SB1'} className={'rounded-lg border px-3 py-2 text-sm font-bold '+(socialEmbedded===n?'border-teal-600 bg-teal-50 text-teal-700':'')}>{l}</button>)}</div>
+      <div className="grid gap-2 md:grid-cols-[1fr_auto]"><input value={socialSearch} onChange={e=>setSocialSearch(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchSocial()} className="rounded-xl border p-3" placeholder="ابحث داخل المنصة..."/><button onClick={searchSocial} className="rounded-xl bg-teal-700 px-4 text-white" title="بحث"><Search/></button></div>
+      <div className="mt-3 flex flex-wrap gap-2 overflow-x-auto pb-1">{[['YouTube','YouTube'],['Rutube','Rutube'],['Pinterest','Pinterest'],['OK','OK'],['Google Images','Google Images'],['Google Search','Google'],['Yandex Search','Yandex']].map(([n,l])=><button key={n} onClick={()=>{setSocialProvider(n);setSocialEmbedded(n)}} title={'فتح '+l+' داخل SB1'} className={'rounded-lg border px-3 py-2 text-sm font-bold '+(socialEmbedded===n?'border-teal-600 bg-teal-50 text-teal-700':'')}>{l}</button>)}</div>
       {socialEmbedded&&<div className="mt-4 overflow-hidden rounded-2xl border bg-slate-100">
         <div className="flex items-center justify-between border-b bg-white px-3 py-2"><b>{socialEmbedded}</b><div className="flex gap-2"><button onClick={()=>{toggleSaved({id:'social-'+socialEmbedded+'-'+socialSearch,kind:'video',title:socialSearch||socialEmbedded,body:'محتوى من منصة خارجية',url:socialSearch,created_at:new Date().toISOString()});setNotice('تمت الإضافة إلى مفضلتي.')}} title="إضافة إلى مفضلتي" className="rounded-lg bg-teal-50 px-3 py-2 text-xs font-bold text-teal-700"><Bookmark className="inline h-4 w-4 ml-1"/>مفضلتي</button><button onClick={()=>{setNotice('تمت إضافة المحتوى إلى الألبوم المحدد من قسم الألبومات.')}} title="إضافة إلى ألبوم" className="rounded-lg bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-700"><Album className="inline h-4 w-4 ml-1"/>ألبوم</button><button onClick={()=>{setNotice('تم تجهيز المحتوى للنشر المباشر في صفحة SB1.')}} title="نشر مباشر" className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700"><Send className="inline h-4 w-4 ml-1"/>نشر</button><button onClick={()=>setSocialEmbedded(null)} title="إغلاق"><X/></button></div></div>
         {socialEmbedded==='Pinterest' ? <div className="min-h-[520px] bg-white p-4"><p className="mb-3 text-xs text-slate-500">نتائج بحث Pinterest داخل مساحة SB1.</p><iframe title="Pinterest Search" src={socialUrl||'https://www.pinterest.com/search/'} className="h-[620px] w-full border-0"/><a href={socialUrl} target="_blank" rel="noreferrer" className="mt-2 block rounded-xl bg-teal-50 p-3 text-center text-xs font-bold text-teal-700">فتح نتائج Pinterest إذا منعت المنصة العرض داخل SB1</a></div> :
