@@ -11,7 +11,7 @@ const read=(key:string,fallback='')=>typeof window==='undefined'?fallback:localS
 const readJson=<T,>(key:string,fallback:T):T=>{try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch{return fallback}};
 
 const clientTabs:{key:TabKey;label:string;icon:any}[]=[
-  {key:'home',label:'الرئيسية',icon:Home},
+  {key:'home',label:labels.home,icon:Home},
   {key:'sessions',label:'جلساتي',icon:Video},
   {key:'articles',label:'مقالتي',icon:BookOpen},
   {key:'questions',label:'الأسئلة',icon:MessageCircle},
@@ -43,7 +43,8 @@ function ClientTabContent({tab}:{tab:TabKey}){
 
 export default function ProfilePage(){
   const accountId=read('sb1_account_user_id','');
-  const name=read('sb1_account_name',read('chat_name','صفحة العميل'));
+  const profileUser=typeof window!=='undefined'?new URLSearchParams(window.location.search).get('user')||'':'';
+  const name=profileUser||read('sb1_account_name',read('chat_name','صفحة العميل'));
   const avatar=read('sb1_account_avatar',read('chat_photo',''));
   const canManage=true;
   const [activeTab,setActiveTab]=useState<TabKey>('home');
@@ -82,6 +83,7 @@ export default function ProfilePage(){
     return()=>{window.removeEventListener('storage',sync);window.removeEventListener('sb1-settings-change',syncLang as EventListener);window.removeEventListener('sb1:new-notification',sync as EventListener);window.removeEventListener('sb1-social-change',onSocial)};
   },[]);
 
+  const labels=language==='en'?{home:'Home',favorites:'Favorites',albums:'Albums',social:'Social platforms',phone:'Phone & QR',settings:'Settings',followers:'Followers',wallet:'Account & Wallet',work:'My schedule'}:language==='de'?{home:'Startseite',favorites:'Favoriten',albums:'Alben',social:'Soziale Plattformen',phone:'Telefon & QR',settings:'Einstellungen',followers:'Follower',wallet:'Konto & Wallet',work:'Mein Zeitplan'}:language==='ru'?{home:'Главная',favorites:'Избранное',albums:'Альбомы',social:'Соцсети',phone:'Телефон и QR',settings:'Настройки',followers:'Подписчики',wallet:'Аккаунт и кошелёк',work:'Мой график'}:{home:'الرئيسية',favorites:labels.favorites,albums:labels.albums,social:labels.social,phone:labels.phone,settings:labels.settings,followers:'المتابعون',wallet:labels.wallet,work:labels.work};
   const goContent=()=>{
     requestAnimationFrame(()=>document.getElementById('profile-content')?.scrollIntoView({behavior:'smooth',block:'start'}));
   };
@@ -115,7 +117,7 @@ export default function ProfilePage(){
               {button('settings','الإعدادات',Settings,'rounded-none text-slate-700')}
             </div>
             <button type="button" onClick={()=>setFollowersOpen(true)} className="w-full rounded-xl border bg-white p-3 text-right shadow-sm hover:bg-slate-50 active:bg-slate-100">
-              <div className="mb-2 flex items-center justify-between"><b className="text-sm">المتابعون</b><span className="text-xs text-teal-700">{demoFollowers.length} · عرض الكل</span></div>
+              <div className="mb-2 flex items-center justify-between"><b className="text-sm"> {labels.followers} </b><span className="text-xs text-teal-700">{demoFollowers.length} · عرض الكل</span></div>
               <div className="flex flex-wrap gap-2">
                 {demoFollowers.map(([n,p])=><a key={n} href={'/profile?user='+encodeURIComponent(n)} title={'فتح صفحة '+n} className="h-9 w-9 overflow-hidden rounded-full ring-2 ring-white shadow transition hover:scale-110"><img src={p} alt={n} className="h-full w-full object-cover"/></a>)}
               </div>
