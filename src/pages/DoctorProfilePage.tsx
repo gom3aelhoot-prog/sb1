@@ -12,7 +12,7 @@ import { getDoctorAvailability } from '@/lib/appointmentConfig';
 import { virtualDoctorsForSpecialty, virtualQuestionsForSpecialty, virtualArticlesForSpecialty, virtualAudioForSpecialty, virtualVideosForSpecialty, virtualCoursesForSpecialty } from '@/lib/catalog';
 import { toggleSaved, isSaved, toggleLiked, isLiked, archiveItem, addComment, toggleFollowing, isFollowing as isFollowingVault, getSaved } from '@/lib/socialVault';
 
-type Tab = 'home' | 'sessions' | 'articles' | 'questions' | 'recordings' | 'courses' | 'certificates' | 'portfolio';
+type Tab = 'home' | 'sessions' | 'articles' | 'questions' | 'videos' | 'recordings' | 'courses' | 'certificates' | 'portfolio' | 'diary';
 type MainSection = 'home' | 'favorites' | 'albums' | 'social' | 'phone' | 'settings' | 'clone' | 'wallet' | 'work';
 
 
@@ -311,10 +311,12 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     { key:'sessions', label:lang==='ar'?'جلساتي':'My Sessions', icon:Video },
     { key:'articles', label:lang==='ar'?'مقالتي':'My Articles', icon:BookOpen },
     { key:'questions', label:lang==='ar'?'الأسئلة':'Questions', icon:MessageCircle },
+    { key:'videos', label:lang==='ar'?'فيديوهاتي':'My Videos', icon:Video },
     { key:'recordings', label:lang==='ar'?'تسجيلاتي':'My Recordings', icon:Video },
     { key:'courses', label:lang==='ar'?'الدورات والكورسات':'Courses', icon:GraduationCap },
     { key:'certificates', label:lang==='ar'?'شهاداتي':'My Certificates', icon:Award },
     { key:'portfolio', label:lang==='ar'?'منشوراتي':'My Posts', icon:FileText },
+    { key:'diary', label:lang==='ar'?'مفكرتي':'My Diary', icon:CalendarDaysIcon },
   ];
 
   return (
@@ -408,12 +410,12 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         </div>
         <div className="my-3 border-b-2 border-black" aria-hidden="true" />
 
-        <div className="mb-5 min-h-[58px] w-full"><div ref={profileTabsRef} id="profile-tabs" className={`${profileNavPinned ? "fixed inset-x-0 top-0 z-50" : "relative z-50"} w-full overflow-hidden border bg-white shadow-sm`}><div className="mx-auto max-w-6xl px-3 sm:px-5 lg:px-8"><div className="xl:ps-[17rem]"><div className="grid w-full grid-cols-8" dir={lang==='ar'?'rtl':'ltr'}>
+        <div className="mb-5 min-h-[58px] w-full"><div ref={profileTabsRef} id="profile-tabs" className={`${profileNavPinned ? "fixed inset-x-0 top-0 z-50" : "relative z-50"} w-full overflow-hidden border bg-white shadow-sm`}><div className="mx-auto max-w-6xl px-3 sm:px-5 lg:px-8"><div className="xl:ps-[17rem]"><div className="grid w-full grid-cols-10" dir={lang==='ar'?'rtl':'ltr'}>
           {tabs.map((tab,i)=>{const Icon=tab.icon;const colors=['text-teal-600','text-rose-500','text-indigo-500','text-amber-500','text-sky-500','text-violet-500','text-emerald-500','text-blue-600'];return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key);setNotificationOpen(false);setTimeout(()=>document.getElementById('profile-content')?.scrollIntoView({behavior:'smooth',block:'start'}),0)}} className={`min-w-0 border-e px-0 py-1 text-[9px] font-bold leading-3 transition active:bg-slate-200 ${activeTab===tab.key?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`} title={tab.label}>
               <span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Icon className={`h-3 w-3 ${colors[i]}`}/><span className="break-words">{tab.label}</span></span>
             </button>})}
           </div></div></div></div></div>
-        <div id="profile-content" className="mb-3">{mainSection === 'home' && activeTab === 'home' && <StoryBar pageId={id} canManage={canManagePage} pageAvatar={profileAvatar} />} {mainSection === 'home' && activeTab === 'portfolio' && <StoryBar pageId={id} canManage={canManagePage} pageAvatar={profileAvatar} ownOnly />}</div>
+        <div id="profile-content" className="mb-3"></div>
         {mainSection === 'home' && showFollowers && (
           <section id="followers-list" className="mb-5 rounded-xl border bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">المتابعون</h2><p className="mt-1 text-xs text-slate-500">مرتبة أبجدياً، مع تمييز المتاحين الآن.</p></div><button onClick={()=>setShowFollowers(false)} className="rounded-lg border px-3 py-1 text-xs font-bold">إغلاق</button></div>
@@ -469,7 +471,7 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         {walletLedger&&<div className="fixed inset-0 z-[220] grid place-items-center bg-black/60 p-4" onClick={()=>setWalletLedger(null)}><div className="w-full max-w-2xl max-h-[80vh] overflow-hidden rounded-2xl bg-white" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between border-b p-4"><b>{walletLedgerTitle}</b><button onClick={()=>setWalletLedger(null)}><X/></button></div><div className="max-h-[68vh] overflow-y-auto p-4 space-y-2">{walletLedger.length?walletLedger.map((x:any,i)=><div key={x.id||i} className="rounded-xl border bg-slate-50 p-3"><div className="flex items-center justify-between gap-3"><b>{x.reason}</b><strong>{x.value} {x.currency}</strong></div><div className="mt-1 text-xs text-slate-500">{x.source} · {x.created_at?new Date(x.created_at).toLocaleString():''}</div>{x.severity&&<div className="mt-1 text-xs text-red-600">العقوبة: {x.severity} · النقاط: {Math.abs(x.points||0)}</div>}</div>):<p className="py-10 text-center text-slate-500">لا توجد عمليات مسجلة لهذا النوع في النظام.</p>}</div></div></div>}
         {mainSection === 'favorites' && <FavoritesPage />}
         {mainSection === 'home' && activeTab === 'home' && (
-          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} hideStories focusSection="home" />
+          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="home" />
         )}
         {mainSection === 'albums' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="albums" />}
         {mainSection === 'social' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="social" />}
@@ -493,12 +495,20 @@ export default function DoctorProfilePage({ id }: { id: string }) {
             </div>
           </div>
         )}
+        {mainSection === 'home' && activeTab === 'videos' && (
+          <div className="card p-5"><h2 className="text-xl font-extrabold mb-4">فيديوهاتي</h2><div className="grid gap-4 md:grid-cols-2">{posts.filter((p:any)=>p.video_url||p.post_type==='video'||p.post_type==='reel').map((p:any)=>{const paid=Number((p as any).price||0)>0||localStorage.getItem('sb1_paid_'+p.id)==='1';const open=!paid||localStorage.getItem('sb1_paid_'+p.id)==='1';return <div key={p.id} className="rounded-xl border overflow-hidden bg-white">{p.video_url&&<video src={p.video_url} controls={open} className={'w-full aspect-video bg-black '+(!open?'opacity-50':'')}/>}<div className="p-4"><b>{p.body||'فيديو'}</b>{paid&&!open&&<p className="mt-2 text-xs font-bold text-amber-700">محتوى مدفوع — لا يمكن فتحه إلا بعد الشراء.</p>}</div></div>})}</div>{!posts.some((p:any)=>p.video_url||p.post_type==='video'||p.post_type==='reel')&&<p className="text-slate-500">لا توجد فيديوهات منشورة بعد.</p>}</div>
+        )}
+
         {mainSection === 'home' && activeTab === 'recordings' && (
           <div className="card p-5"><h2 className="text-xl font-extrabold mb-4">تسجيلاتي</h2>{audios.length ? <div className="space-y-3">{audios.map(a=><div key={a.id} className="rounded-xl border p-4"><div className="flex items-center justify-between gap-3"><div><b>{a.title}</b><p className="mt-1 text-xs text-slate-500">{a.description}</p></div><Bookmark className="h-4 w-4 text-teal-700"/></div><audio src={a.audio_url} controls className="mt-3 w-full"/><button onClick={()=>toggleSaved({id:a.id,kind:'recording',title:a.title,body:a.description,author:doctor.name,url:a.audio_url,created_at:a.created_at})} className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs font-bold active:bg-slate-200">حفظ في مفضلتي</button></div>)}</div> : <p className="text-slate-500">لا توجد تسجيلات منشورة بعد.</p>}</div>
         )}
         {mainSection === 'home' && activeTab === 'portfolio' && (
           <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="home" onlyOwn hideStories />
         )}
+        {mainSection === 'home' && activeTab === 'diary' && (
+          <div className="card p-5"><h2 className="text-xl font-extrabold mb-4">مفكرتي</h2><div className="space-y-3">{visibleDiary.map((s:any)=><article key={s.id} className="rounded-xl border bg-slate-50 p-4"><b>{s.title||'ملاحظة'}</b><p className="mt-2 text-sm text-slate-600 whitespace-pre-wrap">{s.body}</p><p className="mt-2 text-[10px] text-slate-400">{new Date(s.created_at).toLocaleString('ar')}</p></article>)}</div></div>
+        )}
+
         {mainSection === 'home' && activeTab === 'certificates' && (
           <div className="card p-5"><h2 className="text-xl font-extrabold mb-4">شهاداتي</h2><div className="grid gap-3 md:grid-cols-2"><div className="rounded-xl border p-4"><Award className="text-teal-700"/><b className="mt-2 block">شهادات الاعتماد والإنجاز</b><p className="mt-1 text-sm text-slate-500">تظهر هنا الشهادات المرتبطة بصفحة الأخصائي.</p></div></div></div>
         )}
