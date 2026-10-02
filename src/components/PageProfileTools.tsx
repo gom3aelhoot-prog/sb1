@@ -55,8 +55,7 @@ const demoVideoUrl='https://interactive-examples.mdn.mozilla.net/media/cc0-video
 const demoReelUrl='https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4';
 
 function GoogleImagesSearch({query,results,onSearch,onOpen,onFavorite,onAlbum,onPublish}:{query:string;results:any[];onSearch:(q:string)=>void;onOpen:(item:any)=>void;onFavorite:(item:any)=>void;onAlbum:(item:any)=>void;onPublish:(item:any)=>void}) {
-  useEffect(()=>{ if(query.trim()) onSearch(query.trim()); },[query]);
-  return <div className="bg-white p-3">
+    return <div className="bg-white p-3">
     <div className="mb-3 flex items-center justify-between"><div><b className="text-sm">Google Images</b><p className="text-[11px] text-slate-500">اضغط على أي صورة لفتحها ومعاينتها وحفظها أو إضافتها إلى ألبوم.</p></div></div>
     {!query.trim()&&<div className="rounded-xl border border-dashed p-8 text-center text-xs text-slate-500">اكتب البحث في خانة البحث الرئيسية ثم اضغط «بحث».</div>}
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -354,6 +353,7 @@ export default function PageProfileTools({
     }
     if(provider==='Google Images'){
       setSocialEmbedded('Google Images');
+      await searchGoogleImages(q);
       return;
     }
     if(provider==='Pinterest'||provider==='Rutube'||provider==='OK'||provider==='Yandex Search'){
