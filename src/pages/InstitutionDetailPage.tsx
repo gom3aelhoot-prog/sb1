@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Calendar, CheckCircle2, Clock, MapPin, Phone, Star, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Calendar, CheckCircle2, Clock, MapPin, Phone, Star, ShoppingBag, Video, FileText, AudioLines, Library, Home } from 'lucide-react';
 import { useRouter, getPathOnly, parseQuery } from '@/lib/router';
 import { demoClinics, demoFacilities, demoLabs, demoProducts, demoRadiology } from '@/lib/demoData';
 import { supabase } from '@/lib/supabase';
@@ -7,6 +7,7 @@ import { virtualFacilities, languageCountry, countriesForLanguage } from '@/lib/
 import { useI18n } from '@/lib/i18n';
 import { clientPrice, clientDiscountLabel } from '@/lib/pricing';
 import { recordCampaignEvent } from '@/lib/cityNotificationAds';
+import PageProfileTools from '@/components/PageProfileTools';
 
 type Kind = 'clinic'|'lab'|'radiology'|'facility';
 
@@ -23,6 +24,10 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
   const [patientPhone, setPatientPhone] = useState('');
   const [review, setReview] = useState('');
   const [liked, setLiked] = useState(false);
+  const [activeProfileTab,setActiveProfileTab]=useState<'home'|'services'|'videos'|'recordings'|'posts'|'albums'>('home');
+  const accountId=typeof window!=='undefined'?localStorage.getItem('sb1_account_user_id'):null;
+  const accountRole=typeof window!=='undefined'?localStorage.getItem('sb1_account_role'):null;
+  const canManage=accountId===id||accountRole==='owner'||accountRole==='moderator';
 
   useEffect(() => {
     const table = kind==='clinic' ? 'clinics' : kind==='lab' ? 'lab_centers' : kind==='radiology' ? 'radiology_centers' : 'additional_facilities';
@@ -89,6 +94,13 @@ export default function InstitutionDetailPage({ kind }: { kind: Kind }) {
             <div className="mt-4 space-y-2 text-sm text-gray-600"><p className="flex gap-2"><MapPin className="h-4 w-4 text-teal-600"/>{address}</p>{phone && <p className="flex gap-2"><Phone className="h-4 w-4 text-teal-600"/>{phone}</p>}<p className="flex gap-2"><Clock className="h-4 w-4 text-teal-600"/>09:00 — 21:00 يومياً</p></div>
           </div>
         </div>
+
+        <div className="border-t border-b bg-white shadow-sm"><div className="grid grid-cols-6">{([['home','الرئيسية',Home],['services','خدماتي',FileText],['videos','فيديوهاتي',Video],['recordings','تسجيلاتي',AudioLines],['posts','منشوراتي',FileText],['albums','ألبوماتي',Library]] as any[]).map(([k,l,I])=><button key={k} onClick={()=>setActiveProfileTab(k)} className={'border-e px-2 py-3 text-xs font-bold '+(activeProfileTab===k?'bg-teal-50 text-teal-800':'text-slate-600')}><I className="mx-auto mb-1 h-4 w-4"/>{l}</button>)}</div></div>
+        {activeProfileTab==='home'&&<PageProfileTools canManage={canManage} pageId={id} pageName={name} pageAvatar={image||undefined} focusSection="home"/>}
+        {activeProfileTab==='videos'&&<PageProfileTools canManage={canManage} pageId={id} pageName={name} pageAvatar={image||undefined} focusSection="home" onlyOwn/>}
+        {activeProfileTab==='recordings'&&<PageProfileTools canManage={canManage} pageId={id} pageName={name} pageAvatar={image||undefined} focusSection="home" onlyOwn/>}
+        {activeProfileTab==='posts'&&<PageProfileTools canManage={canManage} pageId={id} pageName={name} pageAvatar={image||undefined} focusSection="home" onlyOwn/>}
+        {activeProfileTab==='albums'&&<PageProfileTools canManage={canManage} pageId={id} pageName={name} pageAvatar={image||undefined} focusSection="albums"/>}
 
         <div className="grid gap-6 border-t border-gray-100 p-7 lg:grid-cols-3">
           <section className="rounded-2xl bg-gray-50 p-5"><h2 className="font-bold text-gray-800">الخدمات</h2><p className="mt-3 text-sm leading-7 text-gray-600">{services || 'خدمات المؤسسة تظهر هنا بالتفصيل ويمكن للمالك تعديلها من لوحة التحكم.'}</p></section>
