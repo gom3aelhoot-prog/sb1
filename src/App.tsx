@@ -49,6 +49,7 @@ import ClinicsPage from '@/pages/ClinicsPage';
 import RadiologyPage from '@/pages/RadiologyPage';
 import LabsPage from '@/pages/LabsPage';
 import PolicyPage from '@/pages/PolicyPage';
+import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage';
 import TestsPage from '@/pages/TestsPage';
 import JobsPage from '@/pages/JobsPage';
 import ReferralPage from '@/pages/ReferralPage';
@@ -208,6 +209,7 @@ function PlatformRoute() {
   if (route === '/radiology') return <FacilitiesPage initialCategory="radiology" />;
   if (route === '/labs') return <FacilitiesPage initialCategory="lab" />;
   if (route === '/policy') return <PolicyPage />;
+  if (route === '/privacy-policy') return <PrivacyPolicyPage />;
   if (route === '/tests') return <TestsPage />;
   if (route === '/facilities') return <FacilitiesPage />;
   if (route === '/jobs') return <JobsPage />;
