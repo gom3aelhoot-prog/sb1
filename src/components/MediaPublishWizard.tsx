@@ -1,5 +1,5 @@
-import {useEffect,useMemo,useRef,useState} from 'react';
-import {X,Upload,Search,Play,Pause,Mic,Volume2,VolumeX,ChevronLeft,ChevronRight,SlidersHorizontal,Smile,Sticker,Film,Image as ImageIcon,Music2} from 'lucide-react';
+import {useEffect,useRef,useState} from 'react';
+import {X,Upload,Search,Play,Pause,Mic,ChevronLeft,ChevronRight,SlidersHorizontal,Image as ImageIcon} from 'lucide-react';
 import {supabase} from '@/lib/supabase';
 
 type Mode='post'|'image'|'video'|'reel'|'story';
@@ -26,7 +26,7 @@ async function uploadAsset(file:File,pageId:string):Promise<Asset>{let url='';tr
 export default function MediaPublishWizard({open,onClose,onPublish,initialMedia,pageId='current'}:{open:boolean;onClose:()=>void;onPublish:(p:Payload)=>void;initialMedia?:Asset;pageId?:string}){
  const [step,setStep]=useState(1),[mode,setMode]=useState<Mode>(initialMedia?.kind==='video'?'video':initialMedia?.kind==='image'?'image':'post');
  const [media,setMedia]=useState<Asset[]>(initialMedia?[initialMedia]:[]),[title,setTitle]=useState(''),[text,setText]=useState(''),[description,setDescription]=useState('');
- const [muted,setMuted]=useState(false),[audio,setAudio]=useState<Asset|null>(null),[audioQuery,setAudioQuery]=useState(''),[audioItems,setAudioItems]=useState<Asset[]>([]),[audioLoading,setAudioLoading]=useState(false);
+ const [muted,setMuted]=useState(false),[audio,setAudio]=useState<Asset|null>(null),[audioQuery,setAudioQuery]=useState(''),[audioItems,setAudioItems]=useState<Asset[]>([]);
  const [audioStart,setAudioStart]=useState(0),[audioEnd,setAudioEnd]=useState(0),[playingAudio,setPlayingAudio]=useState(false),[audioRef]=useState(()=>({el:null as HTMLAudioElement|null}));
  const [imageQuery,setImageQuery]=useState(''),[images,setImages]=useState<Asset[]>([]),[imageLoading,setImageLoading]=useState(false);
  const [gifQuery,setGifQuery]=useState(''),[gifs,setGifs]=useState<Asset[]>([]),[stickerQuery,setStickerQuery]=useState(''),[stickers,setStickers]=useState<Asset[]>([]);
@@ -34,14 +34,13 @@ export default function MediaPublishWizard({open,onClose,onPublish,initialMedia,
  const recorder=useRef<MediaRecorder|null>(null),chunks=useRef<Blob[]>([]);
 
  useEffect(()=>{if(!open)return;setStep(1);if(initialMedia){setMedia([initialMedia]);setMode(initialMedia.kind==='video'?'video':initialMedia.kind==='image'?'image':'post')}},[open,initialMedia]);
- const currentVideo=media.find(x=>x.kind==='video'),currentImage=media.find(x=>x.kind==='image');
+ const currentVideo=media.find(x=>x.kind==='video');
  const duration=currentVideo?.duration||0;
  const audioLimit=mode==='story'?20:mode==='reel'?180:(duration||Infinity);
- const target=duration<20?'story':duration<180?'reel':'video';
  const allowed=mode==='video'||mode==='reel'||mode==='story';
  const search=async(kind:string,q:string,setter:(x:Asset[])=>void,setLoading:(x:boolean)=>void)=>{setLoading(true);try{const r=await fetch('/api/media-library?kind='+kind+'&q='+encodeURIComponent(q));const x=await r.json();setter(x.items||[])}catch{}finally{setLoading(false)}};
  const searchImages=()=>search('images',imageQuery, setImages,setImageLoading);
- const searchAudio=()=>search('audio',audioQuery,setAudioItems,setAudioLoading);
+ const searchAudio=()=>search('audio',audioQuery,setAudioItems,()=>{});
  const searchGifs=()=>search('gif',gifQuery,setGifs,()=>{});
  const searchStickers=()=>search('sticker',stickerQuery,setStickers,()=>{});
  useEffect(()=>{if(open&&step===1&&!imageQuery){searchImages()}},[open,step,imageQuery]);
