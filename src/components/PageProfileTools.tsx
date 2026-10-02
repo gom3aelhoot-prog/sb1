@@ -62,7 +62,7 @@ export default function PageProfileTools({
   pageId?:string;
   pageName?:string;
   pageAvatar?:string;
-  seedPosts?:Array<{id:string;body:string;image_url?:string|null;video_url?:string|null;post_type?:string;created_at:string;likes_count?:number}>;
+  seedPosts?:Array<{id:string;body:string;image_url?:string|null;video_url?:string|null;post_type?:string;created_at:string;likes_count?:number;is_paid?:boolean;price?:number}>;
   hideStories?:boolean;
   focusSection?:'home'|'reels'|'albums'|'medical'|'social'|'phone'|'clone'|'settings';
   onlyOwn?:boolean;
@@ -86,7 +86,7 @@ export default function PageProfileTools({
     const seeded = seedPosts.map(p=>({
       id:p.id, kind:(p.video_url ? (p.post_type==='reel'?'reel':'video') : p.image_url ? 'image':'post') as MediaKind,
       text:p.body, mediaUrl:p.video_url||p.image_url||undefined, createdAt:p.created_at,
-      likes:p.likes_count||0, views:120, comments:[], public:true, demo:false, author:pageName, authorPhoto:pageAvatar
+      likes:p.likes_count||0, views:120, comments:[], public:true, demo:false, author:pageName, authorPhoto:pageAvatar, isPaid:Boolean((p as any).is_paid||Number((p as any).price||0)>0), purchased:localStorage.getItem('sb1_paid_'+p.id)==='1'
     }));
     const demo = Array.from({length:120},(_,i)=>{
       const kind=(i%4===0?'reel':i%5===0?'video':i%3===0?'image':'post') as MediaKind;
@@ -199,6 +199,7 @@ export default function PageProfileTools({
   useEffect(()=>()=>stream.current?.getTracks().forEach(t=>t.stop()),[]);
 
   const publicFeed=feed.filter(p=>p.public&&(!onlyOwn||p.author===pageName));
+  const canOpenPost=(p:FeedItem)=>!p.isPaid||p.purchased||localStorage.getItem('sb1_paid_'+p.id)==='1';
   const reels=publicFeed.filter(p=>p.kind==='reel');
   const activeStories=useMemo(()=>[
     ...stories.filter(s=>new Date(s.expiresAt)>new Date()),
@@ -420,10 +421,11 @@ export default function PageProfileTools({
                     <div className="flex-1"><b className="text-sm">{post.author}</b><div className="text-xs text-slate-400">{new Date(post.createdAt).toLocaleString()}</div></div>
                   </div>
                   <div className="mt-3 rounded-xl px-3 py-4 whitespace-pre-wrap leading-7 text-sm" style={post.style||{}}>{post.text}</div>
-                  {post.mediaUrl&&post.kind==='image'&&<img src={post.mediaUrl} alt="" className="mx-auto mt-3 max-h-[280px] w-full max-w-xl rounded-xl object-contain" onMouseEnter={()=>startHoverView(post.id)} onMouseLeave={()=>stopHoverView(post.id)}/>}
-                  {post.mediaUrl&&(post.kind==='video'||post.kind==='reel')&&<video src={post.mediaUrl} controls muted={postMuted} playsInline loop={post.kind==='reel'} preload="metadata" className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl bg-black object-contain" style={post.style?.filter?{filter:post.style.filter}:undefined} onMouseEnter={e=>startHoverView(post.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(post.id,e.currentTarget)}/>}
-                  {post.mediaUrl&&post.kind==='audio'&&<audio src={post.mediaUrl} controls className="mt-3 w-full"/>}
+                  {post.mediaUrl&&post.kind==='image'&&canOpenPost(post)&&<img src={post.mediaUrl} alt="" className="mx-auto mt-3 max-h-[280px] w-full max-w-xl rounded-xl object-contain" onMouseEnter={()=>startHoverView(post.id)} onMouseLeave={()=>stopHoverView(post.id)}/>}
+                  {post.mediaUrl&&(post.kind==='video'||post.kind==='reel')&&canOpenPost(post)&&<video src={post.mediaUrl} controls muted={postMuted} playsInline loop={post.kind==='reel'} preload="metadata" className="mx-auto mt-3 max-h-[320px] w-full max-w-2xl rounded-xl bg-black object-contain" style={post.style?.filter?{filter:post.style.filter}:undefined} onMouseEnter={e=>startHoverView(post.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(post.id,e.currentTarget)}/>}
+                  {post.mediaUrl&&post.kind==='audio'&&canOpenPost(post)&&<audio src={post.mediaUrl} controls className="mt-3 w-full"/>}
                 </div>
+                {post.isPaid&&!canOpenPost(post)&&<div className="mx-3 mb-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-bold text-amber-800">🔒 محتوى مدفوع — يظهر عنوانه للعامة، ولا يمكن فتحه إلا بعد الشراء.</div>}
                 <div className="flex items-center border-t border-teal-900 bg-teal-800 px-2 py-2 text-sm text-white">
                   <button onClick={()=>{if(canManage)setLikesViewer(post);else like(post.id)}} className={'flex-1 rounded-lg py-2 transition '+(likedIds.includes(post.id)?'text-red-300':'text-white hover:bg-teal-700')}><Heart className="inline h-4 w-4 ml-1" fill={likedIds.includes(post.id)?'currentColor':'none'}/> {post.likes}</button>
                   <button onClick={()=>setOpenComments(post.id)} className="flex-1 rounded-lg py-2 hover:bg-teal-700" aria-label="التعليقات">{post.authorPhoto?<img src={post.authorPhoto} alt="" className="inline-block h-5 w-5 rounded-full object-cover align-middle ml-1"/>:<MessageCircle className="inline h-4 w-4 ml-1"/>}<MessageCircle className="inline h-4 w-4 ml-1"/> {post.comments.length}</button>
