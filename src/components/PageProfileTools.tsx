@@ -176,6 +176,7 @@ export default function PageProfileTools({
   const [pairCode]=useState(()=>read('sb1_pair_code_'+pageId,String(Math.floor(100000+Math.random()*900000))));
   const [socialSearch,setSocialSearch]=useState('');
   const [socialProvider,setSocialProvider]=useState('YouTube');
+  const [hasSocialSearch,setHasSocialSearch]=useState(false);
   const [socialUrl,setSocialUrl]=useState('');
   const [socialOpen,setSocialOpen]=useState<string[]>([]);
   const [socialEmbedded,setSocialEmbedded]=useState<string|null>(null);
@@ -358,6 +359,7 @@ export default function PageProfileTools({
     const q=socialSearch.trim();
     const provider=socialProvider;
     if(!q){setNotice(provider==='Pinterest'?'ألصق رابط Pin هنا.':'اكتب كلمة البحث أو رابط المحتوى.');return;}
+    setHasSocialSearch(true);
     if(provider==='YouTube'){
       if(/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//i.test(q)){
         const m=q.match(/(?:v=|youtu\.be\/|embed\/)([\\w-]{6,})/);if(m){setYoutubeResults([{id:m[1],title:'YouTube video',thumbnail:'',channelTitle:''}]);setSocialEmbedded('YouTube');return;}
@@ -392,10 +394,9 @@ export default function PageProfileTools({
   };
   useEffect(()=>{
     if(!socialSearch.trim()) return;
-    if(socialProvider==='Google Images' && googleImageSearched) searchGoogleImages(socialSearch.trim());
-    else if(socialProvider==='YouTube' && youtubeResults.length) searchSocial();
-    else if(['Pinterest','Rutube','OK','Yandex Search'].includes(socialProvider) && externalResults.length) searchSocial();
-  },[socialProvider]);
+    if(!hasSocialSearch) return;
+    searchSocial();
+  },[socialProvider,hasSocialSearch]);
 
   const favoriteExternal=(item:any,kind:'image'|'video'|'post'='image')=>{
     const url=item.image||item.thumbnail||item.url||item.embedUrl||'';
