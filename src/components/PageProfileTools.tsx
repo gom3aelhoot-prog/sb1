@@ -359,11 +359,11 @@ export default function PageProfileTools({
   const stopRecord=()=>{recorder.current?.stop();setRecording(false)};
 
   const like=(postId:string)=>{
-    if(likedIds.includes(postId)) return;
+    const alreadyLiked=likedIds.includes(postId);
     const name=localStorage.getItem('chat_name')||'مستخدم SB1';
     const photo=localStorage.getItem('chat_photo')||pageAvatar;
-    setLikedIds(v=>[...v,postId]);
-    setFeed(v=>v.map(p=>p.id===postId?{...p,likes:p.likes+1,likedBy:[...(p.likedBy||[]),{name,photo}]}:p));
+    setLikedIds(v=>alreadyLiked?v.filter(id=>id!==postId):[...v,postId]);
+    setFeed(v=>v.map(p=>p.id===postId?{...p,likes:Math.max(0,p.likes+(alreadyLiked?-1:1)),likedBy:[...(p.likedBy||[]),{name,photo}]}:p));
   };
   const startHoverView=(itemId:string,video?:HTMLVideoElement|null)=>{
     if(video) video.play().catch(()=>{});
@@ -596,7 +596,7 @@ export default function PageProfileTools({
                 </div>
                 {post.isPaid&&!canOpenPost(post)&&<div className="mx-3 mb-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-bold text-amber-800">🔒 محتوى مدفوع — يظهر عنوانه للعامة، ولا يمكن فتحه إلا بعد الشراء.</div>}
                 <div className="flex items-center border-t border-teal-900 bg-teal-800 px-2 py-2 text-sm text-white">
-                  <button onClick={()=>{if(canManage)setLikesViewer(post);else like(post.id)}} className={'flex-1 rounded-lg py-2 transition '+(likedIds.includes(post.id)?'text-red-300':'text-white hover:bg-teal-700')}><Heart className="inline h-4 w-4 ml-1" fill={likedIds.includes(post.id)?'currentColor':'none'}/> {post.likes}</button>
+                  <button onClick={()=>like(post.id)} className={'flex-1 rounded-lg py-2 transition '+(likedIds.includes(post.id)?'text-red-300':'text-white hover:bg-teal-700')}><Heart className="inline h-4 w-4 ml-1" fill={likedIds.includes(post.id)?'currentColor':'none'}/> {post.likes}</button>
                   <button onClick={()=>setOpenComments(post.id)} className="flex-1 rounded-lg py-2 hover:bg-teal-700" aria-label="التعليقات">{post.authorPhoto?<img src={post.authorPhoto} alt="" className="inline-block h-5 w-5 rounded-full object-cover align-middle ml-1"/>:<MessageCircle className="inline h-4 w-4 ml-1"/>}<MessageCircle className="inline h-4 w-4 ml-1"/> {post.comments.length}</button>
                   <span className="flex items-center gap-1 px-2 text-xs font-bold text-white"><Eye className="h-4 w-4"/>{post.views||0}</span>
                   <button onClick={()=>openShare(post.text)} className="flex-1 rounded-lg py-2 hover:bg-teal-700 active:bg-teal-900"><Share2 className="inline h-4 w-4 ml-1"/> مشاركة</button>
