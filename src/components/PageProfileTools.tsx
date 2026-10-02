@@ -176,7 +176,7 @@ export default function PageProfileTools({
   const [settingsOpen,setSettingsOpen]=useState(false);
   const [settingsSection,setSettingsSection]=useState('account');
   const [pageSettings,setPageSettings]=useState(()=>read('sb1_page_settings_'+pageId,{public:true,allowStories:true,allowComments:true,allowMessages:true,showFollowers:true,showCertificates:true,showCourses:true,showArticles:true,showVideos:true,showRecordings:true,showPosts:true,showDiary:true,notifyBookings:true,notifyQuestions:true,notifyLikes:true,notifyMessages:true,notifyFollowers:true,notifySystem:true,autoPlayMedia:true,language:'ar'}));
-  useEffect(()=>write('sb1_page_settings_'+pageId,pageSettings),[pageSettings,pageId]);
+  useEffect(()=>{write('sb1_page_settings_'+pageId,pageSettings);window.dispatchEvent(new Event('sb1-settings-change'))},[pageSettings,pageId]);
   const [recording,setRecording]=useState(false);
   const [recordUrl,setRecordUrl]=useState('');
   const recorder=useRef<MediaRecorder|null>(null);
