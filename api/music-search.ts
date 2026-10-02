@@ -1,6 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-export default async function handler(req:VercelRequest,res:VercelResponse){
+export default async function handler(req:any,res:any){
   const q=String(req.query.q||'').trim();
   if(!q)return res.status(400).json({items:[],error:'Missing q'});
   const key=process.env.PIXABAY_API_KEY;
