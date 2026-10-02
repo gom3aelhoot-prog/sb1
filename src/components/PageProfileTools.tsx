@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { toggleSaved } from '@/lib/socialVault';
+import { toggleSaved, getSaved } from '@/lib/socialVault';
 import { supabase } from '@/lib/supabase';
 import {
   Album, AudioLines, BookOpen, CheckCircle2, ExternalLink, FileVideo, Gift, Heart,
   Image as ImageIcon, Library, MessageCircle, Mic, Plus, QrCode, Search, Send, Eye,
-  Settings, Share2, Trash2, Upload, Video, X, Wand2, Bookmark
+  Settings, Share2, Trash2, Upload, Video, X, Wand2, Bookmark, Smile, Sticker, Film
 } from 'lucide-react';
 
 type MediaKind = 'post' | 'image' | 'video' | 'reel' | 'audio' | 'article';
-type StoryItem = { id:string; name:string; text:string; mediaUrl?:string; mediaKind?:'image'|'video'; audioUrl?:string; audioStart?:number; filter?:string; authorPhoto?:string; textStyle?:{color:string;fontSize:string;fontWeight:string}; createdAt:string; expiresAt:string; own?:boolean };
+type StoryItem = { id:string; name:string; text:string; mediaUrl?:string; mediaKind?:'image'|'video'|'gif'|'sticker'; audioUrl?:string; audioStart?:number; mediaStart?:number; mediaEnd?:number; filter?:string; authorPhoto?:string; textStyle?:{color:string;fontSize:string;fontWeight:string}; createdAt:string; expiresAt:string; own?:boolean };
 type FeedItem = {
   id:string; kind:MediaKind; text:string; mediaUrl?:string; mediaName?:string;
   createdAt:string; likes:number; views?:number; comments:{id:string;name:string;photo?:string;body:string}[];
   public:boolean; demo?:boolean; author:string;
   style?:{background:string;color:string;fontSize:string;fontWeight:string;filter?:string};
-  authorPhoto?:string;
+  authorPhoto?:string; mediaStart?:number; mediaEnd?:number; isPaid?:boolean; purchased?:boolean;
   likedBy?:{name:string;photo?:string}[];
 };
 
@@ -116,6 +116,16 @@ export default function PageProfileTools({
   const [storyTextColor,setStoryTextColor]=useState('#ffffff');
   const [storyTextSize,setStoryTextSize]=useState('24px');
   const [audioLibrary,setAudioLibrary]=useState<any[]>(()=>read('sb1_audio_library',[{id:'demo-audio-1',name:'موسيقى هادئة',url:'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=relaxing-ambient-11327.mp3'},{id:'demo-audio-2',name:'إيقاع خفيف',url:'https://cdn.pixabay.com/download/audio/2022/10/25/audio_946e9f9e1b.mp3?filename=positive-vibes-121744.mp3'}]));
+  type LibraryItem={id:string;name:string;url:string;kind:'image'|'video'|'audio'|'gif'|'sticker';source?:string;createdAt:string;thumbnail?:string};
+  const [mediaLibrary,setMediaLibrary]=useState<LibraryItem[]>(()=>read('sb1_media_library_'+pageId,[]));
+  const [composerPanel,setComposerPanel]=useState<'media'|'emoji'|'gif'|'sticker'>('media');
+  const [mediaSource,setMediaSource]=useState<'library'|'favorites'|'albums'>('library');
+  const [selectedMedia,setSelectedMedia]=useState<LibraryItem|null>(null);
+  const [mediaStart,setMediaStart]=useState(0); const [mediaEnd,setMediaEnd]=useState(0);
+  const [storySelectedMedia,setStorySelectedMedia]=useState<LibraryItem|null>(null);
+  const [storyMediaStart,setStoryMediaStart]=useState(0); const [storyMediaEnd,setStoryMediaEnd]=useState(0);
+  const [storyComposerPanel,setStoryComposerPanel]=useState<'media'|'emoji'|'gif'|'sticker'>('media');
+  const [storyMediaSource,setStoryMediaSource]=useState<'library'|'favorites'|'albums'>('library');
 
   const [composer,setComposer]=useState(false);
   const [postText,setPostText]=useState('');
@@ -178,6 +188,8 @@ export default function PageProfileTools({
   useEffect(()=>()=>Object.values(hoverTimers.current).forEach(t=>window.clearTimeout(t)),[]);
   useEffect(()=>write('sb1_fb_stories_'+pageId,stories),[stories,pageId]);
   useEffect(()=>write('sb1_audio_library',audioLibrary),[audioLibrary]);
+  useEffect(()=>write('sb1_media_library_'+pageId,mediaLibrary),[mediaLibrary,pageId]);
+  useEffect(()=>{(async()=>{try{const r=await supabase.from('sb1_media_library').select('*').eq('page_id',pageId).order('created_at',{ascending:false}).limit(100);if(!r.error&&r.data?.length)setMediaLibrary(r.data.map((x:any)=>({id:x.id,name:x.name,url:x.url,kind:x.kind,source:x.source,createdAt:x.created_at,thumbnail:x.thumbnail_url})));}catch{}})()},[pageId]);
   useEffect(()=>write('sb1_fb_social_favorites',favorites),[favorites]);
   useEffect(()=>write('sb1_fb_albums_'+pageId,albums),[albums,pageId]);
   useEffect(()=>write('sb1_fb_clones',clones),[clones]);
@@ -201,10 +213,27 @@ export default function PageProfileTools({
 
   const jump=(target:string)=>{setActive(target);document.getElementById('fb-'+target)?.scrollIntoView({behavior:'smooth',block:'start'})};
 
+  const savedMedia=()=>getSaved().filter((x:any)=>x.url||x.image_url).map((x:any)=>({id:'fav-'+x.id,name:x.title||x.author||'مفضلتي',url:x.url||x.image_url,kind:(x.kind==='audio'||x.kind==='recording')?'audio':(x.kind==='video'||x.kind==='reel')?'video':'image',source:'مفضلتي',createdAt:x.created_at||new Date().toISOString()} as LibraryItem));
+  const albumMedia=()=>albums.flatMap((a:any)=>((a.items||[]) as any[]).map(x=>({id:'album-'+x.id,name:x.mediaName||x.text||a.name,url:x.mediaUrl,kind:x.kind==='audio'?'audio':(x.kind==='video'||x.kind==='reel')?'video':'image',source:'ألبوماتي',createdAt:x.createdAt||new Date().toISOString()} as LibraryItem))).filter(x=>x.url);
+  const sourceMedia=()=>mediaSource==='favorites'?savedMedia():mediaSource==='albums'?albumMedia():mediaLibrary;
+  const storySourceMedia=()=>storyMediaSource==='favorites'?savedMedia():storyMediaSource==='albums'?albumMedia():mediaLibrary;
+  const addMediaFile=async(file:File,forStory=false)=>{
+    const kind=file.type==='image/gif'?'gif':file.type.startsWith('image/')?'image':file.type.startsWith('video/')?'video':file.type.startsWith('audio/')?'audio':'sticker'; let url='';
+    try{const path=(pageId||'page')+'/library/'+Date.now()+'-'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');const up=await supabase.storage.from('specialist-content').upload(path,file,{upsert:false,contentType:file.type||undefined});if(!up.error)url=supabase.storage.from('specialist-content').getPublicUrl(path).data.publicUrl;}catch{}
+    if(!url){if(file.size>8*1024*1024){setNotice('الملف كبير جداً للمكتبة المحلية.');return}url=await fileAsDataUrl(file);}
+    const item:LibraryItem={id:id(),name:file.name,url,kind,source:'الجهاز',createdAt:new Date().toISOString()};setMediaLibrary(v=>[item,...v]);try{await supabase.from('sb1_media_library').insert({id:item.id,page_id:pageId,name:item.name,url:item.url,kind:item.kind,source:item.source,created_at:item.createdAt});}catch{}
+    if(forStory){setStorySelectedMedia(item);setStoryMediaStart(0);setStoryMediaEnd(0);}else{setSelectedMedia(item);setMediaStart(0);setMediaEnd(0);}
+  };
+  const chooseMedia=(m:LibraryItem,forStory=false)=>{if(forStory){setStorySelectedMedia(m);setStoryMediaStart(0);setStoryMediaEnd(0)}else{setSelectedMedia(m);setMediaStart(0);setMediaEnd(0)}};
+  const mediaButtons=(forStory=false)=>{const list=forStory?storySourceMedia():sourceMedia();const selected=forStory?storySelectedMedia:selectedMedia;return <div className="mt-2 grid max-h-44 grid-cols-3 gap-2 overflow-y-auto sm:grid-cols-4">{list.map(m=><button key={m.id} onClick={()=>chooseMedia(m,forStory)} className={'overflow-hidden rounded-xl border p-1 text-right '+(selected?.id===m.id?'border-teal-600 ring-2 ring-teal-100':'bg-white')}><div className="aspect-square overflow-hidden rounded-lg bg-slate-950">{m.kind==='video'?<video src={m.url} muted playsInline className="h-full w-full object-cover"/>:m.kind==='audio'?<div className="grid h-full place-items-center text-teal-700"><AudioLines className="h-8 w-8"/></div>:<img src={m.url} alt="" className="h-full w-full object-cover"/></div><span className="block truncate px-1 py-1 text-[10px] font-bold">{m.name}</span></button>)}{!list.length&&<div className="col-span-full rounded-xl border border-dashed p-5 text-center text-xs text-slate-400">لا يوجد محتوى هنا بعد.</div>}</div>};
+  const previewSelected=(m:LibraryItem|null,start:number,end:number)=>{if(!m)return null;const onTime=(e:any)=>{if(end>start&&e.currentTarget.currentTime>=end)e.currentTarget.currentTime=start;};return <div className="mt-3 overflow-hidden rounded-xl border bg-slate-950">{m.kind==='audio'?<audio src={m.url} controls className="w-full" onTimeUpdate={onTime}/>:m.kind==='video'?<video src={m.url} controls playsInline className="mx-auto max-h-64 w-full object-contain" onTimeUpdate={onTime}/>:<img src={m.url} alt="" className="mx-auto max-h-64 w-full object-contain"/>}<div className="bg-white px-3 py-2 text-[10px] font-bold text-slate-500">يمكن رؤية المحتوى كاملاً وسماع الجزء المحدد قبل النشر.</div></div>};
+  const addTextEmoji=(e:string,forStory=false)=>forStory?setStoryText(v=>v+e):setPostText(v=>v+e);
+  const stickerSet=['❤️','👍','😂','😍','👏','🔥','😊','🎉','✨','⭐','🌸','🩺','🧠','💚','💙','🥰','😎','🤍','🙌','🎈','🌟','💫','😄','😉','🥳','🤗','🙏','💡','📌','🎁'];
+  const gifSet=mediaLibrary.filter(x=>x.kind==='gif'||x.kind==='sticker').slice(0,12);
   const createStory=()=>{
-    if(!storyText.trim()&&!storyUrl){setNotice('أضف نصاً أو صورة أو فيديو للقصة.');return}
-    const item:StoryItem={id:id(),name:'قصتي',text:storyText.trim(),mediaUrl:storyUrl||undefined,mediaKind:storyVideo?'video':'image',audioUrl:storyAudioUrl||undefined,audioStart:storyAudioStart,authorPhoto:pageAvatar,filter:storyFilter,textStyle:{color:storyTextColor,fontSize:storyTextSize,fontWeight:'800'},createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+86400000),own:true};
-    setStories(v=>[item,...v]);setStoryText('');setStoryFile(null);setStoryAudioUrl('');setStoryAudioStart(0);setStoryFilter('none');setStoryComposer(false);setNotice('تم نشر قصتك.');setStoryViewer(item);
+    const chosen=storySelectedMedia;if(!storyText.trim()&&!storyUrl&&!chosen){setNotice('أضف نصاً أو صورة أو فيديو أو اختر محتوى من المكتبة.');return}
+    const item:StoryItem={id:id(),name:'قصتي',text:storyText.trim(),mediaUrl:chosen?.url||storyUrl||undefined,mediaKind:(chosen?.kind==='video'?'video':chosen?.kind==='gif'?'gif':chosen?.kind==='sticker'?'sticker':'image') as any,audioUrl:chosen?.kind==='audio'?chosen.url:(storyAudioUrl||undefined),audioStart:chosen?.kind==='audio'?storyMediaStart:storyAudioStart,mediaStart:storyMediaStart,mediaEnd:storyMediaEnd||undefined,authorPhoto:pageAvatar,filter:storyFilter,textStyle:{color:storyTextColor,fontSize:storyTextSize,fontWeight:'800'},createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+86400000),own:true};
+    setStories(v=>[item,...v]);setStoryText('');setStoryFile(null);setStoryAudioUrl('');setStoryAudioStart(0);setStorySelectedMedia(null);setStoryMediaStart(0);setStoryMediaEnd(0);setStoryFilter('none');setStoryComposer(false);setNotice('تم نشر قصتك.');setStoryViewer(item);
   };
   const deleteStory=(story:StoryItem)=>{
     if(!story.own)return;
@@ -212,9 +241,9 @@ export default function PageProfileTools({
   };
 
   const publish=()=>{
-    if(!postText.trim()&&!postUrl&&!recordUrl){setNotice('اكتب نصاً أو اختر صورة/فيديو أو سجّل صوتاً.');return}
-    const item:FeedItem={id:id(),kind:recordUrl?'audio':postKind,text:postText.trim()||'منشور جديد',mediaUrl:recordUrl||postUrl,mediaName:postFile?.name,createdAt:new Date().toISOString(),likes:0,likedBy:[],comments:[],public:true,author:pageName,authorPhoto:pageAvatar,style:{background:postBackground,color:postFontColor,fontSize:postFontSize,fontWeight:postFontWeight,filter:postFilter}};
-    setFeed(v=>[item,...v]);setPostText('');setPostFile(null);setRecordUrl('');setComposer(false);setNotice('تم نشر المحتوى في الرئيسية.');
+    if(!postText.trim()&&!postUrl&&!recordUrl&&!selectedMedia){setNotice('اكتب نصاً أو اختر صورة/فيديو أو محتوى من المكتبة أو سجّل صوتاً.');return}
+    const media=selectedMedia;const item:FeedItem={id:id(),kind:recordUrl?'audio':(media?.kind==='audio'?'audio':media?.kind==='video'&&postKind==='reel'?'reel':postKind),text:postText.trim()||'منشور جديد',mediaUrl:recordUrl||media?.url||postUrl,mediaName:postFile?.name||media?.name,createdAt:new Date().toISOString(),likes:0,likedBy:[],comments:[],public:true,author:pageName,authorPhoto:pageAvatar,mediaStart:mediaStart||undefined,mediaEnd:mediaEnd||undefined,style:{background:postBackground,color:postFontColor,fontSize:postFontSize,fontWeight:postFontWeight,filter:postFilter}};
+    setFeed(v=>[item,...v]);setPostText('');setPostFile(null);setRecordUrl('');setSelectedMedia(null);setMediaStart(0);setMediaEnd(0);setComposer(false);setNotice('تم نشر المحتوى في الرئيسية.');
   };
 
   const startRecord=async()=>{
@@ -360,7 +389,6 @@ export default function PageProfileTools({
       <div className="space-y-4">
         {/* ترتيب الرئيسية: القصص أولاً ثم Reels ثم نافذة النشر والمنشورات */}
         {!hideStories&&<StoryStrip/>}
-        <ReelStrip stripId="fb-reels"/>
 
         {/* Facebook-style composer */}
         {canManage&&<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -376,6 +404,7 @@ export default function PageProfileTools({
           </div>
         </div>}
 
+        <ReelStrip stripId="fb-reels"/>
 
         <div id="fb-posts" className="space-y-4">
           {publicFeed.map((post,i)=>{
