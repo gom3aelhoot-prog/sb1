@@ -16,6 +16,9 @@ type FeedItem = {
   style?:{background:string;color:string;fontSize:string;fontWeight:string;filter?:string};
   authorPhoto?:string; mediaStart?:number; mediaEnd?:number; isPaid?:boolean; purchased?:boolean;
   likedBy?:{name:string;photo?:string}[];
+  videoSettings?:{title?:string;description?:string;muted?:boolean;duration?:number;target?:'story'|'reel'|'video';music?:any};
+  music?:any;
+  imageSequence?:string[];
 };
 
 const read = <T,>(key:string, fallback:T):T => {
@@ -274,7 +277,7 @@ export default function PageProfileTools({
     const item:LibraryItem={id:id(),name:file.name,url,kind,source:'الجهاز',createdAt:new Date().toISOString()};setMediaLibrary(v=>[item,...v]);try{await supabase.from('sb1_media_library').insert({id:item.id,page_id:pageId,name:item.name,url:item.url,kind:item.kind,source:item.source,created_at:item.createdAt});}catch{}
     if(forStory){setStorySelectedMedia(item);setStoryMediaStart(0);setStoryMediaEnd(0);}else{setSelectedMedia(item);setMediaStart(0);setMediaEnd(0);}
   };
-  const chooseMedia=(m:LibraryItem,forStory=false)=>{if(forStory){setStorySelectedMedia(m);setStoryMediaStart(0);setStoryMediaEnd(0)}else{setSelectedMedia(m);setMediaStart(0);setMediaEnd(0)}};
+  const chooseMedia=async(m:LibraryItem,forStory=false)=>{if(forStory){setStorySelectedMedia(m);setStoryMediaStart(0);setStoryMediaEnd(0);return}setSelectedMedia(m);setMediaStart(0);setMediaEnd(0);if(m.kind==='video'){const d=await getMediaDuration(m.url);setVideoDuration(d);setPublishTarget(d>0&&d<20?'story':d>=20&&d<180?'reel':'video');setPublishMode('video');setPostKind('video');}else if(m.kind==='image'){setVideoDuration(0);setPublishMode('image');setPostKind('image');}};
   const mediaButtons=(forStory=false)=>{    const list=forStory?storySourceMedia():sourceMedia();    const selected=forStory?storySelectedMedia:selectedMedia;    return (      <div className="mt-2 grid max-h-44 grid-cols-3 gap-2 overflow-y-auto sm:grid-cols-4">        {list.map((m)=>{          const active=selected?.id===m.id;          return (            <button key={m.id} type="button" onClick={()=>chooseMedia(m,forStory)} className={`overflow-hidden rounded-xl border p-1 text-right ${active?"border-teal-600 ring-2 ring-teal-100":"bg-white"}`}>              <div className="aspect-square overflow-hidden rounded-lg bg-slate-950">                {m.kind==="video" ? <video src={m.url} muted playsInline className="h-full w-full object-cover" /> : m.kind==="audio" ? <div className="grid h-full place-items-center text-teal-700"><AudioLines className="h-8 w-8" /></div> : <img src={m.url} alt="" className="h-full w-full object-cover" />}              </div>              <span className="block truncate px-1 py-1 text-[10px] font-bold">{m.name}</span>            </button>          );        })}        {!list.length && <div className="col-span-full rounded-xl border border-dashed p-5 text-center text-xs text-slate-400">لا يوجد محتوى هنا بعد.</div>}      </div>    );  };
   const previewSelected=(m:LibraryItem|null,start:number,end:number)=>{if(!m)return null;const onTime=(e:any)=>{if(end>start&&e.currentTarget.currentTime>=end)e.currentTarget.currentTime=start;};return <div className="mt-3 overflow-hidden rounded-xl border bg-slate-950">{m.embedUrl?<iframe title="معاينة الفيديو" src={m.embedUrl} className="h-[320px] w-full border-0 bg-black" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen/>:m.kind==='audio'?<audio src={m.url} controls className="w-full" onTimeUpdate={onTime}/>:m.kind==='video'?<video src={m.url} controls playsInline className="mx-auto max-h-64 w-full object-contain" onTimeUpdate={onTime}/>:<img src={m.url} alt="" className="mx-auto max-h-64 w-full object-contain"/>}<div className="bg-white px-3 py-2 text-[10px] font-bold text-slate-500">يمكن رؤية المحتوى كاملاً وسماع الجزء المحدد قبل النشر.</div></div>};
   const addTextEmoji=(e:string,forStory=false)=>forStory?setStoryText(v=>v+e):setPostText(v=>v+e);
@@ -296,13 +299,50 @@ export default function PageProfileTools({
   const searchMusic=async()=>{const q=musicQuery.trim();if(!q){setNotice('اكتب اسم الأغنية أو كلمة مثل حزين أو فرح.');return}setMusicLoading(true);try{const r=await fetch('/api/music-search?q='+encodeURIComponent(q));const x=await r.json();setMusicResults(x.items||[])}catch{setNotice('تعذر البحث في مكتبة الموسيقى.')}finally{setMusicLoading(false)}};
   const choosePublishMode=(mode:'video'|'image'|'reel'|'story'|'post')=>{setPublishMode(mode);setPostKind(mode==='video'?'video':mode==='reel'?'reel':mode==='image'?'image':'post')};
   const publish=async()=>{
-    const media=selectedMedia;const sourceUrl=recordUrl||media?.url||postUrl||'';if(!postText.trim()&&!videoTitle.trim()&&!sourceUrl&&!selectedImages.length){setNotice('أضف محتوى قبل النشر.');return}
-    const mode=publishMode==='smart'?(media?.kind==='video'?'video':media?.kind==='image'?'image':postKind):publishMode;const videoLike=media?.kind==='video'||mode==='video'||mode==='reel';const duration=videoDuration||((sourceUrl&&videoLike)?await getMediaDuration(sourceUrl):0);
-    if(videoLike&&duration>0){if(duration<20&&publishTarget!=='story'){setPublishTarget('story');setNotice('هذا الفيديو أقل من 20 ثانية؛ نوع النشر المتاح هو قصة.');return}if(duration>=180&&publishTarget!=='video'){setPublishTarget('video');setNotice('الفيديو الأطول من 3 دقائق يُنشر كفيديو.');return}if(duration>=20&&duration<180&&publishTarget==='story'){setNotice('الفيديو من 20 ثانية إلى أقل من 3 دقائق متاح كـ Reel أو فيديو، وليس قصة.');return}}
-    const finalKind=videoLike?(publishTarget==='story'?'video':publishTarget):mode;const finalMedia=selectedImages.length>1?selectedImages.map(x=>x.url).join('|'):sourceUrl;
-    const item:FeedItem={id:id(),kind:finalKind as MediaKind,text:(videoLike?videoTitle:postText).trim()||'منشور جديد',mediaUrl:finalMedia,embedUrl:media?.embedUrl,mediaName:postFile?.name||media?.name,createdAt:new Date().toISOString(),likes:0,likedBy:[],comments:[],public:true,author:pageName,authorPhoto:pageAvatar,mediaStart:mediaStart||undefined,mediaEnd:mediaEnd||undefined,style:{background:postBackground,color:postFontColor,fontSize:postFontSize,fontWeight:postFontWeight,filter:postFilter}};
-    (item as any).videoSettings=videoLike?{title:videoTitle,description:videoDescription,muted:videoMuted,duration,target:publishTarget,music:selectedMusic?.name||null}:undefined;(item as any).music=selectedMusic||undefined;(item as any).imageSequence=selectedImages.length>1?selectedImages.map(x=>x.url):undefined;
-    setFeed(v=>[item,...v]);setPostText('');setVideoTitle('');setVideoDescription('');setPostFile(null);setRecordUrl('');setSelectedMedia(null);setSelectedImages([]);setSelectedMusic(null);setComposer(false);setNotice('✓ تم نشر المحتوى بالإعدادات المحددة.');
+    const media=selectedMedia;
+    const sourceUrl=recordUrl||media?.url||postUrl||'';
+    if(!postText.trim()&&!videoTitle.trim()&&!sourceUrl&&!selectedImages.length){setNotice('أضف محتوى قبل النشر.');return}
+    const mode=publishMode==='smart'?(media?.kind==='video'?'video':media?.kind==='image'?'image':postKind):publishMode;
+    const videoLike=media?.kind==='video'||mode==='video'||mode==='reel';
+    const duration=videoDuration||((sourceUrl&&videoLike)?await getMediaDuration(sourceUrl):0);
+
+    let target=publishTarget;
+    if(videoLike&&duration>0){
+      if(duration<20) target='story';
+      else if(duration<180 && target==='story') target='reel';
+      else if(duration>=180) target='video';
+    }
+
+    if(videoLike && target==='story'){
+      const story:StoryItem={
+        id:id(),name:'قصتي',text:videoTitle.trim()||postText.trim()||'قصة فيديو',
+        mediaUrl:sourceUrl||undefined,mediaKind:'video',authorPhoto:pageAvatar,
+        createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+86400000),own:true
+      };
+      setStories(v=>[story,...v]);
+      setStoryViewer(story);
+      setNotice('✓ تم نشر الفيديو كقصة لأن مدته أقل من 20 ثانية.');
+      setPostText('');setVideoTitle('');setVideoDescription('');setPostFile(null);setRecordUrl('');setSelectedMedia(null);setSelectedMusic(null);setComposer(false);
+      return;
+    }
+
+    const finalKind=videoLike?target:mode;
+    const finalMedia=selectedImages.length>1?selectedImages.map(x=>x.url).join('|'):sourceUrl;
+    const item:FeedItem={
+      id:id(),kind:finalKind as MediaKind,
+      text:(videoLike?videoTitle:postText).trim()||'منشور جديد',
+      mediaUrl:finalMedia,embedUrl:media?.embedUrl,mediaName:postFile?.name||media?.name,
+      createdAt:new Date().toISOString(),likes:0,likedBy:[],comments:[],public:true,
+      author:pageName,authorPhoto:pageAvatar,mediaStart:mediaStart||undefined,mediaEnd:mediaEnd||undefined,
+      style:{background:postBackground,color:postFontColor,fontSize:postFontSize,fontWeight:postFontWeight,filter:postFilter},
+      videoSettings:videoLike?{title:videoTitle,description:videoDescription,muted:videoMuted,duration,target,music:selectedMusic||null}:undefined,
+      music:selectedMusic||undefined,
+      imageSequence:selectedImages.length>1?selectedImages.map(x=>x.url):undefined
+    };
+    setFeed(v=>[item,...v]);
+    setPostText('');setVideoTitle('');setVideoDescription('');setPostFile(null);setRecordUrl('');
+    setSelectedMedia(null);setSelectedImages([]);setSelectedMusic(null);setVideoDuration(0);setPublishTarget('video');
+    setComposer(false);setNotice('✓ تم نشر المحتوى بالإعدادات المحددة.');
   };
 
   const publishExternal=(item:any,kind:'reel'|'video'|'image'|'audio'|'post'|'story')=>{const url=item.url||item.image||item.thumbnail||item.embedUrl||'';if(!url&&!item.embedUrl){setNotice('لا يوجد رابط صالح لهذا المحتوى.');return;}if(kind==='story'){setStorySelectedMedia({id:'external-'+(item.id||url),name:item.title||'محتوى خارجي',url,kind:item.resourceType==='video'||item.kind==='video'||item.type==='video'?'video':'image',source:item.source||socialProvider,createdAt:new Date().toISOString(),thumbnail:item.thumbnail,embedUrl:item.embedUrl});setStoryComposer(true);setExternalViewer(null);return;}publishExternalToComposer(item,kind);};
