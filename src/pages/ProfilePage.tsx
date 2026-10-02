@@ -3,6 +3,7 @@ import { Award, BookOpen, CalendarClock, CalendarDays, Copy, ExternalLink, FileT
 import PageProfileTools from '@/components/PageProfileTools';
 import FavoritesPage from '@/pages/FavoritesPage';
 import { getFollowing, isFollowing, toggleFollowing } from '@/lib/socialVault';
+import { loadGlobalNotifications, loadPrivateNotifications, markPrivateRead, type NotificationItem } from '@/lib/notifications';
 
 type TabKey='home'|'sessions'|'articles'|'questions'|'videos'|'recordings'|'courses'|'certificates'|'posts';
 type MainSection='home'|'favorites'|'albums'|'social'|'phone'|'settings'|'clone'|'wallet'|'work';
@@ -10,16 +11,8 @@ type MainSection='home'|'favorites'|'albums'|'social'|'phone'|'settings'|'clone'
 const read=(key:string,fallback='')=>typeof window==='undefined'?fallback:localStorage.getItem(key)||fallback;
 const readJson=<T,>(key:string,fallback:T):T=>{try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch{return fallback}};
 
-const clientTabs:{key:TabKey;label:string;icon:any}[]=[
-  {key:'home',label:labels.home,icon:Home},
-  {key:'sessions',label:'جلساتي',icon:Video},
-  {key:'articles',label:'مقالتي',icon:BookOpen},
-  {key:'questions',label:'الأسئلة',icon:MessageCircle},
-  {key:'videos',label:'فيديوهاتي',icon:Video},
-  {key:'recordings',label:'تسجيلاتي',icon:Video},
-  {key:'courses',label:'الدورات والكورسات',icon:GraduationCap},
-  {key:'certificates',label:'شهاداتي',icon:Award},
-  {key:'posts',label:'منشوراتي',icon:FileText},
+const clientTabs:{key:TabKey;icon:any}[]=[
+  {key:'home',icon:Home},{key:'sessions',icon:Video},{key:'articles',icon:BookOpen},{key:'questions',icon:MessageCircle},{key:'videos',icon:Video},{key:'recordings',icon:Video},{key:'courses',icon:GraduationCap},{key:'certificates',icon:Award},{key:'posts',icon:FileText},
 ];
 
 const demoFollowers=[
@@ -45,7 +38,9 @@ export default function ProfilePage(){
   const accountId=read('sb1_account_user_id','');
   const profileUser=typeof window!=='undefined'?new URLSearchParams(window.location.search).get('user')||'':'';
   const name=profileUser||read('sb1_account_name',read('chat_name','صفحة العميل'));
-  const avatar=read('sb1_account_avatar',read('chat_photo',''));
+  const followerDirectory:Record<string,string>={'د. ليان':'https://randomuser.me/api/portraits/women/44.jpg','د. أحمد':'https://randomuser.me/api/portraits/men/32.jpg','سارة':'https://randomuser.me/api/portraits/women/68.jpg','محمد':'https://randomuser.me/api/portraits/men/75.jpg','مركز الحياة':'https://randomuser.me/api/portraits/women/65.jpg'};
+  const avatar=profileUser?followerDirectory[profileUser]||'':read('sb1_account_avatar',read('chat_photo',''));
+  const effectiveProfileId=profileUser?'profile-user-'+encodeURIComponent(profileUser):(accountId||'profile');
   const canManage=true;
   const [activeTab,setActiveTab]=useState<TabKey>('home');
   const [mainSection,setMainSection]=useState<MainSection>('home');
@@ -53,6 +48,7 @@ export default function ProfilePage(){
   const [unread,setUnread]=useState(()=>Number(localStorage.getItem('sb1_unread_notifications')||'0'));
   const [language,setLanguage]=useState(()=>readJson('sb1_page_settings_profile',{language:'ar'}).language||'ar');
   const [notificationsOpen,setNotificationsOpen]=useState(false);
+  const [notifications,setNotifications]=useState<NotificationItem[]>([]);
   const [followersOpen,setFollowersOpen]=useState(false);
   const [followingIds,setFollowingIds]=useState<string[]>(()=>getFollowing());
   const navRef=useRef<HTMLDivElement|null>(null);
@@ -71,12 +67,14 @@ export default function ProfilePage(){
     window.addEventListener('scroll',onScroll,{passive:true});
     window.addEventListener('resize',measure);
     return()=>{window.clearTimeout(timer);window.removeEventListener('scroll',onScroll);window.removeEventListener('resize',measure)};
-  },[]);
+  },[accountId,language]);
 
   useEffect(()=>{
     const sync=()=>setUnread(Number(localStorage.getItem('sb1_unread_notifications')||'0'));
 
     const syncLang=()=>setLanguage(readJson('sb1_page_settings_profile',{language:'ar'}).language||'ar');
+    const loadNotes=async()=>{const uid=accountId||'profile';const [g,p]=await Promise.all([loadGlobalNotifications(language),loadPrivateNotifications(language,uid)]);setNotifications([...p,...g].sort((a,b)=>new Date(b.created_at).getTime()-new Date(a.created_at).getTime()).slice(0,30));};
+    loadNotes();
     window.addEventListener('storage',sync);
     window.addEventListener('sb1-settings-change',syncLang as EventListener);
     window.addEventListener('sb1:new-notification',sync as EventListener);
@@ -163,7 +161,7 @@ export default function ProfilePage(){
               <div className="mx-auto max-w-6xl px-3 sm:px-5 lg:px-8">
                 <div className="xl:ps-[17rem]">
                   <div className="grid w-full grid-cols-9">
-                    {clientTabs.map((tab,i)=>{const Icon=tab.icon;return <button key={tab.key} onClick={()=>selectTab(tab.key)} className={`min-w-0 border-e px-0 py-1 text-[9px] font-bold leading-3 transition active:bg-slate-200 ${activeTab===tab.key&&mainSection==='home'?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`} title={tab.label}><span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Icon className="h-3 w-3 text-teal-600"/><span className="break-words">{tab.label}</span></span></button>})}
+                    {clientTabs.map(tab=>{const Icon=tab.icon;const tabLabel=tab.key==='home'?labels.home:tab.key==='sessions'?'جلساتي':tab.key==='articles'?'مقالتي':tab.key==='questions'?'الأسئلة':tab.key==='videos'?'فيديوهاتي':tab.key==='recordings'?'تسجيلاتي':tab.key==='courses'?'الدورات والكورسات':tab.key==='certificates'?'شهاداتي':'منشوراتي';return <button key={tab.key} onClick={()=>selectTab(tab.key)} className={`min-w-0 border-e px-0 py-1 text-[9px] font-bold leading-3 transition active:bg-slate-200 ${activeTab===tab.key&&mainSection==='home'?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`} title={tabLabel}><span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Icon className="h-3 w-3 text-teal-600"/><span className="break-words">{tabLabel}</span></span></button>})}
                   </div>
                 </div>
               </div>
@@ -171,11 +169,11 @@ export default function ProfilePage(){
           </div>
 
           <div id="profile-content" className="mb-5">
-            {mainSection==='home'&&activeTab==='home'&&<PageProfileTools canManage={canManage} pageId={accountId} pageName={name} pageAvatar={avatar||undefined} focusSection="home"/>}
+            {mainSection==='home'&&activeTab==='home'&&<PageProfileTools canManage={canManage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="home"/>}
             {mainSection==='home'&&activeTab!=='home'&&activeTab!=='posts'&&<ClientTabContent tab={activeTab}/>}
             {mainSection==='favorites'&&<FavoritesPage/>}
             {mainSection==='albums'&&<PageProfileTools canManage={canManage} pageId={accountId} pageName={name} pageAvatar={avatar||undefined} focusSection="albums"/>}
-            {mainSection==='social'&&<PageProfileTools canManage={canManage} pageId={accountId||'profile'} pageName={name} pageAvatar={avatar||undefined} focusSection="social"/>}
+            {mainSection==='social'&&<PageProfileTools canManage={canManage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="social"/>}
             {mainSection==='phone'&&<PageProfileTools canManage={true} pageId={accountId||'profile'} pageName={name} pageAvatar={avatar||undefined} focusSection="phone"/>}
             {mainSection==='settings'&&<PageProfileTools canManage={true} pageId={accountId||'profile'} pageName={name} pageAvatar={avatar||undefined} focusSection="settings"/>}
             {mainSection==='wallet'&&<section className="card p-5"><div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">الحساب والمحفظة</h2><p className="mt-1 text-sm text-slate-500">الرصيد والنقاط وحركة الحساب.</p></div><Coins className="text-amber-500"/></div></section>}
@@ -191,7 +189,7 @@ export default function ProfilePage(){
           </div>
         </div>
       </div>}
-      {notificationsOpen&&<div className="fixed inset-0 z-[190] grid place-items-center bg-black/60 p-4" onClick={()=>setNotificationsOpen(false)}><div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between border-b pb-3"><div><h2 className="text-lg font-extrabold">الإشعارات</h2><p className="mt-1 text-xs text-slate-500">إشعارات الحساب والحجوزات والأسئلة والتفاعلات.</p></div><button onClick={()=>setNotificationsOpen(false)} title="إغلاق"><X className="h-5 w-5"/></button></div><div className="mt-4 space-y-2">{['تحديثات الحساب','الحجوزات والجلسات','الأسئلة والإجابات','الإعجابات والتعليقات','المتابعون الجدد','إشعارات النظام'].map((x,i)=><button key={x} className="w-full rounded-xl border p-3 text-right hover:bg-slate-50"><b>{x}</b><span className="mt-1 block text-xs text-slate-500">{i===0?'لا توجد إشعارات جديدة حالياً':'سيظهر هنا أي إشعار جديد عند حدوثه.'}</span></button>)}</div></div></div>}
+      {notificationsOpen&&<div className="fixed inset-0 z-[190] grid place-items-center bg-black/60 p-4" onClick={()=>setNotificationsOpen(false)}><div className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between border-b pb-3"><div><h2 className="text-lg font-extrabold">الإشعارات</h2><p className="mt-1 text-xs text-slate-500">إشعارات الحساب والحجوزات والأسئلة والتفاعلات.</p></div><button onClick={()=>setNotificationsOpen(false)} title="إغلاق"><X className="h-5 w-5"/></button></div><div className="mt-4 space-y-2">{notifications.map(n=><button key={n.id} onClick={async()=>{if(n.user_id)await markPrivateRead(n.id,n.user_id);if(n.href)window.location.href=n.href}} className={'w-full rounded-xl border p-3 text-right hover:bg-slate-50 '+(!n.read?'bg-teal-50':'')}><b>{n.title}</b><span className="mt-1 block text-xs text-slate-500">{n.body}</span><span className="mt-1 block text-[10px] text-slate-400">{new Date(n.created_at).toLocaleString()}</span></button>)}{!notifications.length&&<div className="py-8 text-center text-sm text-slate-400">لا توجد إشعارات.</div>}</div></div></div>}
     </div>
   </div>;
 }
