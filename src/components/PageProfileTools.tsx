@@ -314,6 +314,24 @@ export default function PageProfileTools({
 
   const scrollerRefs=useRef<Record<string,HTMLDivElement|null>>({});
   const scrollStrip=(key:string,direction:number)=>{scrollerRefs.current[key]?.scrollBy({left:direction*420,behavior:'smooth'});};
+  const StoryStrip=()=> <div className="bg-transparent p-0">
+    <div className="mb-2 flex items-center justify-between">
+      <span className="text-xs font-bold text-teal-700">القصص</span>
+      <div className="flex gap-1" dir="ltr">
+        <button title="تحريك القصص لليسار" onClick={()=>scrollStrip('stories-top',-1)} className="grid h-8 w-8 place-items-center rounded-full border bg-white text-teal-700 shadow-sm active:bg-teal-50">‹</button>
+        <button title="تحريك القصص لليمين" onClick={()=>scrollStrip('stories-top',1)} className="grid h-8 w-8 place-items-center rounded-full border bg-white text-teal-700 shadow-sm active:bg-teal-50">›</button>
+      </div>
+    </div>
+    <div ref={el=>{scrollerRefs.current['stories-top']=el}} className="flex gap-3 overflow-x-auto pb-1 scroll-smooth">
+      {activeStories.map(s=><button key={s.id} onClick={()=>setStoryViewer(s)} className="relative min-w-[92px] h-36 overflow-hidden rounded-xl bg-slate-900 text-right text-white">
+        {s.mediaUrl ? (s.mediaKind==='video'?<video src={s.mediaUrl} muted playsInline className="absolute inset-0 h-full w-full object-cover" onMouseEnter={e=>{e.currentTarget.play().catch(()=>{});startHoverView(s.id,e.currentTarget)}} onMouseLeave={e=>stopHoverView(s.id,e.currentTarget)}/>:<img src={s.mediaUrl} alt="" className="absolute inset-0 h-full w-full object-cover"/>) : <div className="absolute inset-0 grid place-items-center p-3 text-center text-sm font-bold">{s.text}</div>}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"/>
+        <span className="absolute bottom-2 right-2 left-2 truncate text-[10px] font-bold">{s.name}</span>
+        <span className="absolute top-2 right-2 h-8 w-8 overflow-hidden rounded-full border-2 border-white"><img src={s.authorPhoto||pageAvatar||demoPeopleImages[0]} alt="" className="h-full w-full object-cover"/></span>
+      </button>)}
+    </div>
+  </div>;
+
   const ReelStrip=({stripId='reels-inline'}:{stripId?:string})=><div id={stripId} className="bg-transparent p-0">
     <div className="mb-2 flex items-center justify-between">
       <span className="text-xs font-bold text-teal-700">Reels</span>
@@ -340,7 +358,8 @@ export default function PageProfileTools({
   return <div dir="rtl" className="mt-4 space-y-4">
     {show('home') && (<section id="fb-home" className="grid min-w-0 grid-cols-1 gap-4 overflow-hidden">
       <div className="space-y-4">
-        {/* ترتيب الرئيسية: شريط Reels -> منشئ المنشورات -> 3 منشورات -> Reels دوري */}
+        {/* ترتيب الرئيسية: القصص أولاً ثم Reels ثم نافذة النشر والمنشورات */}
+        {!hideStories&&<StoryStrip/>}
         <ReelStrip stripId="fb-reels"/>
 
         {/* Facebook-style composer */}
