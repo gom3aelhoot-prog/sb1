@@ -353,6 +353,7 @@ export default function PageProfileTools({
             <button onClick={()=>{setPostKind('image');setComposer(true)}} className="rounded-lg py-2 hover:bg-slate-50"><ImageIcon className="inline text-teal-600"/> صورة</button>
             <button onClick={()=>{setPostKind('video');setComposer(true)}} className="rounded-lg py-2 hover:bg-slate-50"><Video className="inline text-teal-600"/> فيديو</button>
             <button onClick={()=>{setPostKind('reel');setComposer(true)}} className="rounded-lg py-2 hover:bg-slate-50"><Video className="inline text-teal-600"/> Reel</button>
+            <button onClick={()=>setStoryComposer(true)} className="rounded-lg py-2 hover:bg-slate-50"><ImageIcon className="inline text-teal-600"/> قصة</button>
           </div>
         </div>}
 
