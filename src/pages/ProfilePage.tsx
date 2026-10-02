@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Award, BookOpen, CalendarClock, CalendarDays, Copy, ExternalLink, FileText, GraduationCap, Heart, Home, Library, MessageCircle, Phone, Settings, Share2, Smartphone, Video, Wallet, Bell, Bookmark, X, Coins } from 'lucide-react';
 import PageProfileTools from '@/components/PageProfileTools';
-import ProfessionalSocialHub from '@/components/ProfessionalSocialHub';
 import FavoritesPage from '@/pages/FavoritesPage';
+import { getFollowing, isFollowing, toggleFollowing } from '@/lib/socialVault';
 
 type TabKey='home'|'sessions'|'articles'|'questions'|'videos'|'recordings'|'courses'|'certificates'|'posts';
 type MainSection='home'|'favorites'|'albums'|'social'|'phone'|'settings'|'clone'|'wallet'|'work';
@@ -49,6 +49,8 @@ export default function ProfilePage(){
   const [mainSection,setMainSection]=useState<MainSection>('home');
   const [navPinned,setNavPinned]=useState(false);
   const [unread,setUnread]=useState(()=>Number(localStorage.getItem('sb1_unread_notifications')||'0'));
+  const [followersOpen,setFollowersOpen]=useState(false);
+  const [followingIds,setFollowingIds]=useState<string[]>(()=>getFollowing());
   const navRef=useRef<HTMLDivElement|null>(null);
   const pinY=useRef<number|null>(null);
 
@@ -67,9 +69,12 @@ export default function ProfilePage(){
 
   useEffect(()=>{
     const sync=()=>setUnread(Number(localStorage.getItem('sb1_unread_notifications')||'0'));
+
     window.addEventListener('storage',sync);
     window.addEventListener('sb1:new-notification',sync as EventListener);
-    return()=>{window.removeEventListener('storage',sync);window.removeEventListener('sb1:new-notification',sync as EventListener)};
+    const onSocial=()=>setFollowingIds(getFollowing());
+    window.addEventListener('sb1-social-change',onSocial);
+    return()=>{window.removeEventListener('storage',sync);window.removeEventListener('sb1:new-notification',sync as EventListener);window.removeEventListener('sb1-social-change',onSocial)};
   },[]);
 
   const goContent=()=>{
@@ -104,12 +109,12 @@ export default function ProfilePage(){
               {button('phone','الهاتف وQR',Smartphone,'rounded-none border-b text-slate-700')}
               {button('settings','الإعدادات',Settings,'rounded-none text-slate-700')}
             </div>
-            <div className="rounded-xl border bg-white p-3 shadow-sm">
-              <div className="mb-2 flex items-center justify-between"><b className="text-sm">المتابعون</b><span className="text-xs text-slate-400">{demoFollowers.length}</span></div>
+            <button type="button" onClick={()=>setFollowersOpen(true)} className="w-full rounded-xl border bg-white p-3 text-right shadow-sm hover:bg-slate-50 active:bg-slate-100">
+              <div className="mb-2 flex items-center justify-between"><b className="text-sm">المتابعون</b><span className="text-xs text-teal-700">{demoFollowers.length} · عرض الكل</span></div>
               <div className="flex flex-wrap gap-2">
                 {demoFollowers.map(([n,p])=><span key={n} title={n} className="h-9 w-9 overflow-hidden rounded-full ring-2 ring-white shadow"><img src={p} alt={n} className="h-full w-full object-cover"/></span>)}
               </div>
-            </div>
+            </button>
             <div className="rounded-xl border bg-white p-3 text-center shadow-sm">
               <p className="mb-2 text-xs font-extrabold text-slate-700">QR الصفحة</p>
               <img src={'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent(qrUrl)} alt="QR" className="mx-auto h-36 w-36 rounded-lg"/>
@@ -161,14 +166,22 @@ export default function ProfilePage(){
             {mainSection==='home'&&activeTab!=='home'&&activeTab!=='posts'&&<ClientTabContent tab={activeTab}/>}
             {mainSection==='favorites'&&<FavoritesPage/>}
             {mainSection==='albums'&&<PageProfileTools canManage={canManage} clientMode pageId={accountId} pageName={name} pageAvatar={avatar||undefined} focusSection="albums"/>}
-            {mainSection==='social'&&<ProfessionalSocialHub/>}
-            {mainSection==='phone'&&<PageProfileTools canManage={canManage} clientMode pageId={accountId} pageName={name} pageAvatar={avatar||undefined} focusSection="phone"/>}
-            {mainSection==='settings'&&<section className="card p-5"><h2 className="text-lg font-extrabold">إعدادات حسابي</h2><div className="mt-4 grid gap-3 md:grid-cols-2"><div className="rounded-xl border bg-slate-50 p-4"><b>الحساب</b><p className="mt-1 text-xs text-slate-500">إعدادات الاسم والصورة والخصوصية الخاصة بالعميل.</p></div><div className="rounded-xl border bg-slate-50 p-4"><b>الإشعارات</b><p className="mt-1 text-xs text-slate-500">إدارة إشعارات الحساب والحجوزات والأسئلة.</p></div></div></section>}
+            {mainSection==='social'&&<PageProfileTools canManage={canManage} clientMode pageId={accountId||'profile'} pageName={name} pageAvatar={avatar||undefined} focusSection="social"/>}
+            {mainSection==='phone'&&<PageProfileTools canManage={canManage} clientMode pageId={accountId||'profile'} pageName={name} pageAvatar={avatar||undefined} focusSection="phone"/>}
+            {mainSection==='settings'&&<PageProfileTools canManage={canManage} clientMode pageId={accountId||'profile'} pageName={name} pageAvatar={avatar||undefined} focusSection="settings"/>}
             {mainSection==='wallet'&&<section className="card p-5"><div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">الحساب والمحفظة</h2><p className="mt-1 text-sm text-slate-500">الرصيد والنقاط وحركة الحساب.</p></div><Coins className="text-amber-500"/></div></section>}
             {mainSection==='work'&&<section className="card p-5"><div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">جدول أعمالي</h2><p className="mt-1 text-sm text-slate-500">الجلسات والمواعيد والحجوزات الخاصة بالعميل.</p></div><CalendarClock className="text-indigo-600"/></div></section>}
           </div>
         </div>
       </div>
+      {followersOpen&&<div className="fixed inset-0 z-[180] grid place-items-center bg-black/60 p-4" onClick={()=>setFollowersOpen(false)}>
+        <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl" onClick={e=>e.stopPropagation()} dir="rtl">
+          <div className="flex items-center justify-between border-b pb-3"><div><h2 className="text-lg font-extrabold">المتابعون</h2><p className="mt-1 text-xs text-slate-500">يمكنك متابعة أو إلغاء متابعة الحسابات من هنا.</p></div><button onClick={()=>setFollowersOpen(false)} aria-label="إغلاق"><X className="h-5 w-5"/></button></div>
+          <div className="mt-4 max-h-[60vh] space-y-2 overflow-y-auto">
+            {demoFollowers.map(([n,p])=>{const followerId='demo-follower-'+n;const followed=followingIds.includes(followerId)||isFollowing(followerId);return <div key={followerId} className="flex items-center gap-3 rounded-xl border p-3"><img src={p} alt={n} className="h-11 w-11 rounded-full object-cover"/><div className="min-w-0 flex-1"><b className="block truncate">{n}</b><span className="text-[11px] text-slate-500">متابع على SB1</span></div><button onClick={()=>{const next=toggleFollowing(followerId);setFollowingIds(next)}} className={'rounded-xl px-4 py-2 text-xs font-extrabold '+(followed?'border bg-white text-slate-700':'bg-teal-700 text-white')}>{followed?'متابَع':'متابعة'}</button></div>})}
+          </div>
+        </div>
+      </div>}
     </div>
   </div>;
 }
