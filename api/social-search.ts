@@ -6,7 +6,7 @@ export default async function handler(req:any,res:any){
   try{
     if(provider==='google-images'){
       const apiKey=process.env.SERPER_API_KEY;
-      if(!apiKey)return res.status(503).json({error:'SERPER_API_KEY is not configured'});
+      if(!apiKey)return res.status(200).json({searchUrl:'https://www.google.com/search?tbm=isch&q='+encodeURIComponent(q),images:[],notice:'SERPER_API_KEY is not configured; using public Google Images search.'});
       const gl=String(req.query?.gl||'us').slice(0,8);
       const hl=String(req.query?.hl||'en').slice(0,8);
       const num=Math.min(Math.max(Number(req.query?.num||20),1),100);
