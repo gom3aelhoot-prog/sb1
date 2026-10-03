@@ -39,7 +39,7 @@ export default function MediaPublishWizard({open,onClose,onPublish,initialMedia,
  const duration=currentVideo?.duration||0;
  const audioLimit=mode==='story'?20:mode==='reel'?180:(duration||Infinity);
  const allowed=mode==='video'||mode==='reel'||mode==='story';
- const search=async(kind:string,q:string,setter:(x:Asset[])=>void,setLoading:(x:boolean)=>void)=>{setLoading(true);try{const r=await fetch('/api/media-library?kind='+kind+'&q='+encodeURIComponent(q));const x=await r.json();setter(x.items||[])}catch{}finally{setLoading(false)}};
+ const search=async(kind:string,q:string,setter:(x:Asset[])=>void,setLoading:(x:boolean)=>void)=>{setLoading(true);try{const mapped=kind==='audio'?'music':kind;let query=supabase.from('sb1_creator_library').select('id,name,url,thumbnail_url,kind,source,metadata').eq('page_id','sb1').eq('kind',mapped).limit(200);if(q.trim())query=query.or(`name.ilike.%${q.trim()}%,source.ilike.%${q.trim()}%`);const {data,error}=await query;if(error)throw error;setter((data||[]).map((x:any)=>({id:x.id,name:x.name,url:x.url,thumbnail:x.thumbnail_url,kind:mapped==='music'?'audio':mapped,source:x.source,embedUrl:x.metadata?.embedUrl})));}catch{setter([])}finally{setLoading(false)}};
  const searchImages=()=>search('images',imageQuery, setImages,setImageLoading);
  const searchAudio=()=>search('audio',audioQuery,setAudioItems,()=>{});
  const searchGifs=()=>search('gif',gifQuery,setGifs,()=>{});
