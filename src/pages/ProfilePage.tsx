@@ -107,6 +107,7 @@ export default function ProfilePage(){
         <aside className={`${navPinned?'fixed top-0 start-4':'absolute top-0 start-4'} z-[60] hidden max-h-[calc(100vh-1rem)] w-[15rem] overflow-y-auto border-s border-slate-300 bg-white ps-4 pe-1 shadow-sm xl:block`} aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
             {button('wallet',labels.wallet,Wallet,'bg-black text-white')}
+            {button('clone','Clone',Wand2,'bg-lime-100 text-slate-800 border border-lime-200')}
             {button('work',labels.work,CalendarClock,'border border-slate-200 bg-white text-slate-800')}
             <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
               {button('home',labels.home,Home,'rounded-none border-b text-slate-700')}
@@ -176,6 +177,7 @@ export default function ProfilePage(){
             {mainSection==='social'&&<PageProfileTools canManage={canManage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="social"/>}
             {mainSection==='phone'&&<PageProfileTools canManage={true} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="phone"/>}
             {mainSection==='settings'&&<PageProfileTools canManage={true} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="settings"/>}
+            {mainSection==='clone'&&<PageProfileTools canManage={true} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="clone"/>}
             {mainSection==='wallet'&&<section className="card p-5"><div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">الحساب والمحفظة</h2><p className="mt-1 text-sm text-slate-500">الرصيد والنقاط وحركة الحساب.</p></div><Coins className="text-amber-500"/></div></section>}
             {mainSection==='work'&&<section className="card p-5"><div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">جدول أعمالي</h2><p className="mt-1 text-sm text-slate-500">الجلسات والمواعيد والحجوزات الخاصة بالعميل.</p></div><CalendarClock className="text-indigo-600"/></div></section>}
           </div>
