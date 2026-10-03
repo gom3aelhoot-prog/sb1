@@ -27,7 +27,7 @@ export default async function handler(req:any,res:any){
       }
       if(provider==='audio'){const r=await fetch('https://api.openverse.org/v1/audio/?q='+encodeURIComponent(q)+'&page_size=40');if(!r.ok)throw new Error('Audio search unavailable');const x=await r.json();return res.status(200).json({items:(x.results||[]).map((i:any)=>({id:i.id||i.foreign_landing_url,title:i.title||q,url:i.url,thumbnail:i.thumbnail||'',source:i.creator||i.provider||'Openverse',kind:'audio',duration:Number(i.duration||0)}))});}
       if(provider==='gif'){
-        const key=process.env.GIPHY_API_KEY||process.env.GIPHY_KEY;
+        const key=process.env.GIPHY_API_KEY||process.env.GIPHY_KEY||'dc6zaTOxFJmzC';
         if(!key)throw new Error('GIPHY_API_KEY is not configured for GIF search.');
         const r=await fetch('https://api.giphy.com/v1/gifs/search?api_key='+encodeURIComponent(key)+'&q='+encodeURIComponent(q||'trending')+'&limit=50&rating=pg-13');const x=await r.json();if(!r.ok)throw new Error(x?.meta?.msg||'GIPHY search failed');
         return res.status(200).json({items:(x.data||[]).map((i:any)=>({id:i.id,name:i.title||'GIF',url:i.images?.original?.url||i.images?.fixed_height?.url,thumbnail:i.images?.fixed_width_small?.url||i.images?.fixed_height_small?.url,kind:'gif',source:'GIPHY'}))});
