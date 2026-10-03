@@ -17,7 +17,7 @@ type FeedItem = {
   style?:{background:string;color:string;fontSize:string;fontWeight:string;filter?:string};
   authorPhoto?:string; mediaStart?:number; mediaEnd?:number; isPaid?:boolean; purchased?:boolean;
   likedBy?:{name:string;photo?:string}[];
-  videoSettings?:{title?:string;description?:string;muted?:boolean;duration?:number;target?:'story'|'reel'|'video';music?:any}; scheduledAt?:string;
+  videoSettings?:{title?:string;description?:string;muted?:boolean;duration?:number;target?:'story'|'reel'|'video';music?:any;transitions?:string[]}; scheduledAt?:string;
   music?:any;
   imageSequence?:string[];
 };
@@ -367,7 +367,7 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
     }
     const urls=(p.media||[]).filter((x:any)=>x.kind==='image').map((x:any)=>x.url);
     const scheduledAt=p.scheduledAt||'';
-    const item:FeedItem={id:id(),kind:finalMode,text:(p.text||'').trim()||(!p.title?'منشور جديد':''),title:(p.title||'').trim()||undefined,mediaUrl:urls.length>1?urls.join('|'):rawUrl||embedUrl,embedUrl,mediaName:first?.name,createdAt:scheduledAt||new Date().toISOString(),likes:0,likedBy:[],comments:[],public:true,author:pageName,authorPhoto:pageAvatar,mediaStart:p.audioStart,mediaEnd:p.audioEnd,scheduledAt:scheduledAt||undefined,style:{background:p.background,color:p.textColor,fontSize:String(p.textSize),fontWeight:'700',filter:p.filter},videoSettings:video?{title:p.title,description:p.description,muted:p.muted,duration,target:finalMode as any,music:p.audio||null}:undefined,music:p.audio||undefined,imageSequence:urls.length>1?urls:undefined};
+    const item:FeedItem={id:id(),kind:finalMode,text:(p.text||'').trim()||(!p.title?'منشور جديد':''),title:(p.title||'').trim()||undefined,mediaUrl:urls.length>1?urls.join('|'):rawUrl||embedUrl,embedUrl,mediaName:first?.name,createdAt:scheduledAt||new Date().toISOString(),likes:0,likedBy:[],comments:[],public:true,author:pageName,authorPhoto:pageAvatar,mediaStart:p.audioStart,mediaEnd:p.audioEnd,scheduledAt:scheduledAt||undefined,style:{background:p.background,color:p.textColor,fontSize:String(p.textSize),fontWeight:'700',filter:p.filter},videoSettings:video?{title:p.title,description:p.description,muted:p.muted,duration,target:finalMode as any,music:p.audio||null,transitions:p.transitions||[]}:undefined,music:p.audio||undefined,imageSequence:urls.length>1?urls:undefined};
     if(scheduledAt&&new Date(scheduledAt).getTime()>Date.now()){
       const queued=read<any[]>('sb1_scheduled_posts_'+pageId,[]); write('sb1_scheduled_posts_'+pageId,[item,...queued]);
       try{await supabase.from('sb1_scheduled_posts').insert({page_id:pageId,post_type:finalMode,body:item.text,media_url:item.mediaUrl||null,metadata:{embedUrl:item.embedUrl||null,style:item.style||null,videoSettings:item.videoSettings||null},scheduled_at:new Date(scheduledAt).toISOString()})}catch{}
