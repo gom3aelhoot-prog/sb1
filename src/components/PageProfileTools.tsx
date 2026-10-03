@@ -17,7 +17,7 @@ type FeedItem = {
   style?:{background:string;color:string;fontSize:string;fontWeight:string;filter?:string};
   authorPhoto?:string; mediaStart?:number; mediaEnd?:number; isPaid?:boolean; purchased?:boolean;
   likedBy?:{name:string;photo?:string}[];
-  videoSettings?:{title?:string;description?:string;muted?:boolean;duration?:number;target?:'story'|'reel'|'video';music?:any};
+  videoSettings?:{title?:string;description?:string;muted?:boolean;duration?:number;target?:'story'|'reel'|'video';music?:any}; scheduledAt?:string;
   music?:any;
   imageSequence?:string[];
 };
@@ -364,8 +364,14 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
       setStories(v=>[story,...v]);setStoryViewer(story);setNotice('✓ تم نشر القصة بالإعدادات المحددة.');setComposer(false);setWizardInitialMedia(null);return;
     }
     const urls=(p.media||[]).filter((x:any)=>x.kind==='image').map((x:any)=>x.url);
-    const item:FeedItem={id:id(),kind:finalMode,text:(p.title||p.text||'منشور جديد').trim(),mediaUrl:urls.length>1?urls.join('|'):rawUrl||embedUrl,embedUrl,mediaName:first?.name,createdAt:new Date().toISOString(),likes:0,likedBy:[],comments:[],public:true,author:pageName,authorPhoto:pageAvatar,mediaStart:p.audioStart,mediaEnd:p.audioEnd,style:{background:p.background,color:p.textColor,fontSize:String(p.textSize),fontWeight:'700',filter:p.filter},videoSettings:video?{title:p.title,description:p.description,muted:p.muted,duration,target:finalMode as any,music:p.audio||null}:undefined,music:p.audio||undefined,imageSequence:urls.length>1?urls:undefined};
-    setFeed(v=>[item,...v]);setNotice('✓ تم النشر بنجاح بعد اكتمال جميع المراحل.');setComposer(false);setWizardInitialMedia(null);
+    const scheduledAt=p.scheduledAt||'';
+    const item:FeedItem={id:id(),kind:finalMode,text:(p.title||p.text||'منشور جديد').trim(),mediaUrl:urls.length>1?urls.join('|'):rawUrl||embedUrl,embedUrl,mediaName:first?.name,createdAt:scheduledAt||new Date().toISOString(),likes:0,likedBy:[],comments:[],public:true,author:pageName,authorPhoto:pageAvatar,mediaStart:p.audioStart,mediaEnd:p.audioEnd,scheduledAt:scheduledAt||undefined,style:{background:p.background,color:p.textColor,fontSize:String(p.textSize),fontWeight:'700',filter:p.filter},videoSettings:video?{title:p.title,description:p.description,muted:p.muted,duration,target:finalMode as any,music:p.audio||null}:undefined,music:p.audio||undefined,imageSequence:urls.length>1?urls:undefined};
+    if(scheduledAt&&new Date(scheduledAt).getTime()>Date.now()){
+      const queued=read<any[]>('sb1_scheduled_posts_'+pageId,[]); write('sb1_scheduled_posts_'+pageId,[item,...queued]);
+      try{await supabase.from('sb1_scheduled_posts').insert({page_id:pageId,post_type:finalMode,body:item.text,media_url:item.mediaUrl||null,metadata:{embedUrl:item.embedUrl||null,style:item.style||null,videoSettings:item.videoSettings||null},scheduled_at:new Date(scheduledAt).toISOString()})}catch{}
+      setNotice('✓ تمت جدولة المحتوى للموعد المحدد.');
+    }else{setFeed(v=>[item,...v]);setNotice('✓ تم النشر بنجاح بعد اكتمال جميع المراحل.');}
+    setComposer(false);setWizardInitialMedia(null);
   };
 
   const publishExternal=(item:any,kind:'reel'|'video'|'image'|'audio'|'post'|'story')=>{const url=item.url||item.image||item.thumbnail||item.embedUrl||'';if(!url&&!item.embedUrl){setNotice('لا يوجد رابط صالح لهذا المحتوى.');return;}if(kind==='story'){setStorySelectedMedia({id:'external-'+(item.id||url),name:item.title||'محتوى خارجي',url,kind:item.resourceType==='video'||item.kind==='video'||item.type==='video'?'video':'image',source:item.source||socialProvider,createdAt:new Date().toISOString(),thumbnail:item.thumbnail,embedUrl:item.embedUrl});setStoryComposer(true);setExternalViewer(null);return;}publishExternalToComposer(item,kind);};
@@ -629,8 +635,8 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
                     <div className="flex-1"><b className="text-sm">{post.author}</b><div className="text-xs text-slate-400">{new Date(post.createdAt).toLocaleString()}</div></div>
                   </div>
                   <div className="mt-3 rounded-xl px-3 py-4 whitespace-pre-wrap leading-7 text-sm" style={post.style||{}}>{post.text}</div>
-                  {post.mediaUrl&&post.kind==='image'&&canOpenPost(post)&&<>{(post as any).imageSequence?.length>1?<div className="flex gap-2 overflow-x-auto">{(post as any).imageSequence.map((u:string,i:number)=><img key={i} src={u} alt="" className="max-h-[280px] w-[82%] shrink-0 rounded-xl object-contain"/>)}</div>:<img src={post.mediaUrl} alt="" className="mx-auto mt-3 max-h-[280px] w-full max-w-xl rounded-xl object-contain"/>}</>}
-                  {post.mediaUrl&&(post.kind==='video'||post.kind==='reel')&&canOpenPost(post)&&<>{post.embedUrl?<iframe title="الفيديو المنشور" src={post.embedUrl} className="mx-auto mt-3 aspect-video h-auto min-h-[270px] w-full max-w-2xl rounded-xl bg-black" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen/>:<video key={post.mediaUrl} src={post.mediaUrl} controls muted={Boolean((post as any).videoSettings?.muted)} playsInline loop={post.kind==='reel'} preload="auto" className="mx-auto mt-3 aspect-video max-h-[420px] w-full max-w-2xl rounded-xl bg-black object-contain" onError={()=>setNotice('تعذر تشغيل ملف الفيديو. تأكد أن الملف محفوظ بصيغة MP4/WebM صالحة.')}/>}</>}
+                  {post.mediaUrl&&post.kind==='image'&&canOpenPost(post)&&<>{(post as any).imageSequence?.length>1?<div className="flex gap-2 overflow-x-auto">{(post as any).imageSequence.map((u:string,i:number)=><img key={i} src={u} alt="" className="max-h-[280px] w-[82%] shrink-0 rounded-xl object-contain"/>)}</div>:<img src={post.mediaUrl} alt="" className="mx-auto mt-3 aspect-[4/5] h-[520px] w-full max-w-xl rounded-xl object-contain bg-slate-50"/>}</>}
+                  {post.mediaUrl&&(post.kind==='video'||post.kind==='reel')&&canOpenPost(post)&&<>{post.embedUrl?<iframe title="الفيديو المنشور" src={post.embedUrl} className="mx-auto mt-3 aspect-[4/5] h-auto min-h-[320px] w-full max-w-2xl rounded-xl bg-black object-contain" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen/>:<video key={post.mediaUrl} src={post.mediaUrl} controls muted={Boolean((post as any).videoSettings?.muted)} playsInline loop={post.kind==='reel'} preload="auto" className="mx-auto mt-3 aspect-[4/5] max-h-[560px] w-full max-w-2xl rounded-xl bg-black object-contain" onError={()=>setNotice('تعذر تشغيل ملف الفيديو. تأكد أن الملف محفوظ بصيغة MP4/WebM صالحة.')}/>}</>}
                   {post.mediaUrl&&post.kind==='audio'&&canOpenPost(post)&&<audio src={post.mediaUrl} controls className="mt-3 w-full"/>}
                 </div>
                 {post.isPaid&&!canOpenPost(post)&&<div className="mx-3 mb-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-bold text-amber-800">🔒 محتوى مدفوع — يظهر عنوانه للعامة، ولا يمكن فتحه إلا بعد الشراء.</div>}
