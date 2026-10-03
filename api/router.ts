@@ -8,29 +8,28 @@ export default async function handler(req:any,res:any){
     if(path.endsWith('/youtube-search')){
       if(!q.trim())return res.status(200).json({items:[]});
       const key=process.env.YOUTUBE_API_KEY;
-      if(key){
-        const r=await fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=24&videoSyndicated=true&q='+encodeURIComponent(q)+'&key='+encodeURIComponent(key));const x=await r.json();
-        if(!r.ok)throw new Error(x?.error?.message||'YouTube server returned an invalid response');
-        return res.status(200).json({items:(x.items||[]).map((i:any)=>({id:i.id?.videoId,title:i.snippet?.title||'',description:i.snippet?.description||'',channelTitle:i.snippet?.channelTitle||'',thumbnail:i.snippet?.thumbnails?.high?.url||i.snippet?.thumbnails?.medium?.url||'',url:'https://www.youtube.com/watch?v='+i.id?.videoId,embedUrl:'https://www.youtube-nocookie.com/embed/'+i.id?.videoId}))});
-      }
-      const base=process.env.PIPED_API_URL||'https://pipedapi.kavin.rocks';const r=await fetch(base+'/search?q='+encodeURIComponent(q)+'&filter=videos');if(!r.ok)throw new Error('YouTube search is temporarily unavailable.');const x=await r.json();
-      return res.status(200).json({items:(x.items||[]).slice(0,24).map((i:any)=>{const id=(String(i.url||'').match(/v=([^&]+)/)||[])[1]||String(i.url||'').split('v=').pop();return{id,title:i.title||'',description:i.description||'',channelTitle:i.uploaderName||i.uploader||'',thumbnail:i.thumbnail||'',url:'https://www.youtube.com/watch?v='+id,embedUrl:'https://www.youtube-nocookie.com/embed/'+id}})});
+      if(key){const r=await fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=24&videoSyndicated=true&q='+encodeURIComponent(q)+'&key='+encodeURIComponent(key));const x=await r.json();if(!r.ok)throw new Error(x?.error?.message||'YouTube server returned an invalid response');return res.status(200).json({items:(x.items||[]).map((i:any)=>({id:i.id?.videoId,title:i.snippet?.title||'',description:i.snippet?.description||'',channelTitle:i.snippet?.channelTitle||'',thumbnail:i.snippet?.thumbnails?.high?.url||i.snippet?.thumbnails?.medium?.url||'',url:'https://www.youtube.com/watch?v='+i.id?.videoId,embedUrl:'https://www.youtube-nocookie.com/embed/'+i.id?.videoId}))});}
+      const base=process.env.PIPED_API_URL||'https://pipedapi.kavin.rocks';const r=await fetch(base+'/search?q='+encodeURIComponent(q)+'&filter=videos');if(!r.ok)throw new Error('YouTube search is temporarily unavailable.');const x=await r.json();return res.status(200).json({items:(x.items||[]).slice(0,24).map((i:any)=>{const id=(String(i.url||'').match(/v=([^&]+)/)||[])[1]||String(i.url||'').split('v=').pop();return{id,title:i.title||'',description:i.description||'',channelTitle:i.uploaderName||i.uploader||'',thumbnail:i.thumbnail||'',url:'https://www.youtube.com/watch?v='+id,embedUrl:'https://www.youtube-nocookie.com/embed/'+id}})});
     }
     if(path.endsWith('/social-search')){
       const provider=url.searchParams.get('provider')||'';
       if(provider==='google_images'){
         const serper=process.env.SERPER_API_KEY||process.env.SERPER_KEY;
-        if(serper){
-          const r=await fetch('https://google.serper.dev/images',{method:'POST',headers:{'X-API-KEY':serper,'Content-Type':'application/json'},body:JSON.stringify({q,num:40,safe:'active'})});const x=await r.json();
-          if(!r.ok)throw new Error(x?.message||'Serper Google Images returned an invalid response');
-          return res.status(200).json({items:(x.images||[]).map((i:any)=>({id:i.imageUrl||i.link,title:i.title||q,image:i.imageUrl||i.thumbnailUrl,thumbnail:i.thumbnailUrl||i.imageUrl,url:i.link||i.imageUrl,source:i.source||'Google Images'}))});
-        }
-        const r=await fetch('https://api.openverse.org/v1/images/?q='+encodeURIComponent(q)+'&page_size=40');if(!r.ok)throw new Error('Google Images search unavailable: configure SERPER_API_KEY.');const x=await r.json();
-        return res.status(200).json({items:(x.results||[]).map((i:any)=>({id:i.id||i.foreign_landing_url,image:i.thumbnail||i.url,thumbnail:i.thumbnail||i.url,title:i.title||q,source:i.creator||i.provider||'Openverse',url:i.foreign_landing_url||i.url}))});
+        if(serper){const r=await fetch('https://google.serper.dev/images',{method:'POST',headers:{'X-API-KEY':serper,'Content-Type':'application/json'},body:JSON.stringify({q,num:40,safe:'active'})});const x=await r.json();if(!r.ok)throw new Error(x?.message||'Serper Google Images returned an invalid response');return res.status(200).json({items:(x.images||[]).map((i:any)=>({id:i.imageUrl||i.link,title:i.title||q,image:i.imageUrl||i.thumbnailUrl,thumbnail:i.thumbnailUrl||i.imageUrl,url:i.link||i.imageUrl,source:i.source||'Google Images'}))});}
+        const r=await fetch('https://api.openverse.org/v1/images/?q='+encodeURIComponent(q)+'&page_size=40');if(!r.ok)throw new Error('Google Images search unavailable: configure SERPER_API_KEY.');const x=await r.json();return res.status(200).json({items:(x.results||[]).map((i:any)=>({id:i.id||i.foreign_landing_url,image:i.thumbnail||i.url,thumbnail:i.thumbnail||i.url,title:i.title||q,source:i.creator||i.provider||'Openverse',url:i.foreign_landing_url||i.url}))});
       }
-      if(provider==='audio'){
-        const r=await fetch('https://api.openverse.org/v1/audio/?q='+encodeURIComponent(q)+'&page_size=40');if(!r.ok)throw new Error('Audio search unavailable');const x=await r.json();
-        return res.status(200).json({items:(x.results||[]).map((i:any)=>({id:i.id||i.foreign_landing_url,title:i.title||q,url:i.url,thumbnail:i.thumbnail||'',source:i.creator||i.provider||'Openverse',kind:'audio',duration:Number(i.duration||0)}))});
+      if(provider==='audio'){const r=await fetch('https://api.openverse.org/v1/audio/?q='+encodeURIComponent(q)+'&page_size=40');if(!r.ok)throw new Error('Audio search unavailable');const x=await r.json();return res.status(200).json({items:(x.results||[]).map((i:any)=>({id:i.id||i.foreign_landing_url,title:i.title||q,url:i.url,thumbnail:i.thumbnail||'',source:i.creator||i.provider||'Openverse',kind:'audio',duration:Number(i.duration||0)}))});}
+      if(provider==='gif'){
+        const key=process.env.GIPHY_API_KEY||process.env.GIPHY_KEY;
+        if(!key)throw new Error('GIPHY_API_KEY is not configured for GIF search.');
+        const r=await fetch('https://api.giphy.com/v1/gifs/search?api_key='+encodeURIComponent(key)+'&q='+encodeURIComponent(q||'trending')+'&limit=50&rating=pg-13');const x=await r.json();if(!r.ok)throw new Error(x?.meta?.msg||'GIPHY search failed');
+        return res.status(200).json({items:(x.data||[]).map((i:any)=>({id:i.id,name:i.title||'GIF',url:i.images?.original?.url||i.images?.fixed_height?.url,thumbnail:i.images?.fixed_width_small?.url||i.images?.fixed_height_small?.url,kind:'gif',source:'GIPHY'}))});
+      }
+      if(provider==='sticker'){
+        const key=process.env.GIPHY_API_KEY||process.env.GIPHY_KEY;
+        if(!key)throw new Error('GIPHY_API_KEY is not configured for Sticker search.');
+        const r=await fetch('https://api.giphy.com/v1/stickers/search?api_key='+encodeURIComponent(key)+'&q='+encodeURIComponent(q||'stickers')+'&limit=50&rating=pg-13');const x=await r.json();if(!r.ok)throw new Error(x?.meta?.msg||'GIPHY sticker search failed');
+        return res.status(200).json({items:(x.data||[]).map((i:any)=>({id:i.id,name:i.title||'Sticker',url:i.images?.original?.url||i.images?.fixed_height?.url,thumbnail:i.images?.fixed_width_small?.url||i.images?.fixed_height_small?.url,kind:'sticker',source:'GIPHY'}))});
       }
       return res.status(200).json({items:[]});
     }
