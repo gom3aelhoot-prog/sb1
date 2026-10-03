@@ -33,6 +33,27 @@ export default async function handler(req:any,res:any){
       }
       return res.status(200).json({items:[]});
     }
+    if(path.endsWith('/library-sync')){
+      const kind=url.searchParams.get('kind')||'image'; const pageId=url.searchParams.get('page_id')||'sb1';
+      const sb=process.env.SUPABASE_URL||process.env.VITE_SUPABASE_URL; const service=process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if(!sb||!service) return res.status(503).json({error:'Supabase service role is not configured.'});
+      const headers={'apikey':service,'Authorization':'Bearer '+service,'Content-Type':'application/json','Prefer':'return=minimal'};
+      const rows:any[]=[];
+      if(kind==='image'||kind==='audio'){
+        const endpoint=kind==='image'?'https://api.openverse.org/v1/images/':'https://api.openverse.org/v1/audio/';
+        const pages=Array.from({length:20},(_,i)=>i+1);
+        const responses=await Promise.all(pages.map(p=>fetch(endpoint+'?q='+encodeURIComponent(q|| (kind==='image'?'nature':'music'))+'&page_size=100&page='+p)));
+        for(const rr of responses){if(!rr.ok)continue;const x=await rr.json();for(const i of (x.results||[])){const u=i.url||i.thumbnail;if(!u)continue;rows.push({page_id:pageId,kind:kind==='audio'?'music':'image',name:i.title|| (kind==='image'?'صورة':'موسيقى'),url:u,thumbnail_url:i.thumbnail||null,source:i.creator||i.provider||'Openverse',tags:[kind,'openverse'],metadata:{duration:Number(i.duration||0)}});}}
+      }else if(kind==='gif'||kind==='sticker'){
+        const key=process.env.GIPHY_API_KEY||process.env.GIPHY_KEY;if(!key)throw new Error('GIPHY_API_KEY is not configured.');
+        const endpoint=kind==='gif'?'gifs':'stickers';const offsets=Array.from({length:40},(_,i)=>i*50);
+        const responses=await Promise.all(offsets.map(offset=>fetch('https://api.giphy.com/v1/'+endpoint+'/search?api_key='+encodeURIComponent(key)+'&q='+encodeURIComponent(q||kind)+'&limit=50&offset='+offset+'&rating=pg-13')));
+        for(const rr of responses){if(!rr.ok)continue;const x=await rr.json();for(const i of (x.data||[])){const u=i.images?.original?.url||i.images?.fixed_height?.url;if(!u)continue;rows.push({page_id:pageId,kind,name:i.title||kind,url:u,thumbnail_url:i.images?.fixed_width_small?.url||null,source:'GIPHY',tags:[kind,'giphy'],metadata:{}});}}
+      }else return res.status(400).json({error:'Unsupported library kind'});
+      const unique=Array.from(new Map(rows.map(x=>[x.url,x])).values()).slice(0,2000);
+      for(let i=0;i<unique.length;i+=100){const batch=unique.slice(i,i+100);await fetch(sb+'/rest/v1/sb1_creator_library',{method:'POST',headers,body:JSON.stringify(batch)});}
+      return res.status(200).json({ok:true,kind,count:unique.length});
+    }
     if(path.endsWith('/media-library'))return res.status(200).json({items:[]});
     if(path.endsWith('/music-search'))return res.status(200).json({items:[]});
     if(path.endsWith('/wallet')||path.endsWith('/marketing'))return res.status(200).json({status:'ready'});
