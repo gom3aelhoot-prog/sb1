@@ -41,7 +41,10 @@ export default function ProfilePage(){
   const followerDirectory:Record<string,string>={'د. ليان':'https://randomuser.me/api/portraits/women/44.jpg','د. أحمد':'https://randomuser.me/api/portraits/men/32.jpg','سارة':'https://randomuser.me/api/portraits/women/68.jpg','محمد':'https://randomuser.me/api/portraits/men/75.jpg','مركز الحياة':'https://randomuser.me/api/portraits/women/65.jpg'};
   const avatar=profileUser?followerDirectory[profileUser]||'':read('sb1_account_avatar',read('chat_photo',''));
   const effectiveProfileId=profileUser?'profile-user-'+encodeURIComponent(profileUser):(accountId||'profile');
-  const canManage=true;
+  const accountRole=read('sb1_account_role','');
+  const isPageOwner=read('sb1_is_page_owner','')==='true' || accountRole==='owner';
+  const canManage=isPageOwner;
+  const canClone=isPageOwner || (accountRole==='specialist' && name.includes('جمال'));
   const [activeTab,setActiveTab]=useState<TabKey>('home');
   const [mainSection,setMainSection]=useState<MainSection>('home');
   const [navPinned,setNavPinned]=useState(false);
@@ -107,7 +110,7 @@ export default function ProfilePage(){
         <aside className={`${navPinned?'fixed top-0 start-4':'absolute top-0 start-4'} z-[60] hidden max-h-[calc(100vh-1rem)] w-[15rem] overflow-y-auto border-s border-slate-300 bg-white ps-4 pe-1 shadow-sm xl:block`} aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
             {button('wallet',labels.wallet,Wallet,'bg-black text-white')}
-            {button('clone','Clone',Wand2,'bg-lime-100 text-slate-800 border border-lime-200')}
+            {canClone&&button('clone','Clone',Wand2,'bg-lime-100 text-slate-800 border border-lime-200')}
             {button('work',labels.work,CalendarClock,'border border-slate-200 bg-white text-slate-800')}
             <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
               {button('home',labels.home,Home,'rounded-none border-b text-slate-700')}
@@ -160,7 +163,7 @@ export default function ProfilePage(){
           <div className="mb-5 min-h-[58px] w-full" ref={navRef}>
             <div className={`${navPinned?'fixed inset-x-0 top-0 z-50':'relative z-50'} w-full overflow-hidden border bg-white shadow-sm`}>
               <div className="mx-auto max-w-6xl px-3 sm:px-5 lg:px-8">
-                <div className="xl:ps-[17rem]">
+                <div className="xl:ms-[17rem]">
                   <div className="grid w-full grid-cols-9">
                     {clientTabs.map(tab=>{const Icon=tab.icon;const tabLabel=tab.key==='home'?labels.home:tab.key==='sessions'?'جلساتي':tab.key==='articles'?'مقالتي':tab.key==='questions'?'الأسئلة':tab.key==='videos'?'فيديوهاتي':tab.key==='recordings'?'تسجيلاتي':tab.key==='courses'?'الدورات والكورسات':tab.key==='certificates'?'شهاداتي':'منشوراتي';return <button key={tab.key} onClick={()=>selectTab(tab.key)} className={`min-w-0 border-e px-0 py-1 text-[9px] font-bold leading-3 transition active:bg-slate-200 ${activeTab===tab.key&&mainSection==='home'?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`} title={tabLabel}><span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Icon className={["text-teal-600","text-blue-600","text-amber-600","text-violet-600","text-red-500","text-pink-600","text-indigo-600","text-yellow-500","text-emerald-600"][clientTabs.findIndex(x=>x.key===tab.key)]+" h-4 w-4"} strokeWidth={2.4}/><span className="break-words">{tabLabel}</span></span></button>})}
                   </div>
@@ -177,7 +180,7 @@ export default function ProfilePage(){
             {mainSection==='social'&&<PageProfileTools canManage={canManage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="social"/>}
             {mainSection==='phone'&&<PageProfileTools canManage={true} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="phone"/>}
             {mainSection==='settings'&&<PageProfileTools canManage={true} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="settings"/>}
-            {mainSection==='clone'&&<PageProfileTools canManage={true} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="clone"/>}
+            {mainSection==='clone'&&canClone&&<PageProfileTools canManage={true} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="clone"/>}
             {mainSection==='wallet'&&<section className="card p-5"><div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">الحساب والمحفظة</h2><p className="mt-1 text-sm text-slate-500">الرصيد والنقاط وحركة الحساب.</p></div><Coins className="text-amber-500"/></div></section>}
             {mainSection==='work'&&<section className="card p-5"><div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">جدول أعمالي</h2><p className="mt-1 text-sm text-slate-500">الجلسات والمواعيد والحجوزات الخاصة بالعميل.</p></div><CalendarClock className="text-indigo-600"/></div></section>}
           </div>
