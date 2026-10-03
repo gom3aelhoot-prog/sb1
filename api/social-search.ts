@@ -4,6 +4,17 @@ export default async function handler(req:any,res:any){
   const q=String(req.query?.q||'').trim();
   if(!q) return res.status(400).json({error:'q is required'});
   try{
+    if(provider==='google-images'){
+      const apiKey=process.env.SERPER_API_KEY;
+      if(!apiKey)return res.status(503).json({error:'SERPER_API_KEY is not configured'});
+      const gl=String(req.query?.gl||'us').slice(0,8);
+      const hl=String(req.query?.hl||'en').slice(0,8);
+      const num=Math.min(Math.max(Number(req.query?.num||20),1),100);
+      const r=await fetch('https://google.serper.dev/images',{method:'POST',headers:{'X-API-KEY':apiKey,'Content-Type':'application/json'},body:JSON.stringify({q,gl,hl,num})});
+      const d=await r.json();
+      if(!r.ok)return res.status(r.status).json({error:d?.message||d?.error||'Serper image search failed'});
+      return res.status(200).json({searchParameters:d.searchParameters,images:Array.isArray(d.images)?d.images:[]});
+    }
     if(provider==='youtube'){
       const key=process.env.YOUTUBE_API_KEY;
       if(!key) return res.status(503).json({error:'YOUTUBE_API_KEY is not configured'});
