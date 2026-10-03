@@ -51,11 +51,11 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const isAccountOwner = !previewRole && !!accountUserId && accountUserId === id;
   const isModerator = !previewRole && actualRole === 'moderator';
   const canManagePage = isAccountOwner || isModerator;
-  const canClonePage = canManagePage && (actualRole === 'owner' || (actualRole === 'specialist' && !!doctor?.name?.includes('جمال')));
   const canSeePrivate = canManagePage;
   const publicSettings=(()=>{try{return JSON.parse(localStorage.getItem('sb1_page_settings_'+id)||'{}')}catch{return {}}})();
   const { t, specialtyName, lang } = useI18n();
   const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const canClonePage = canManagePage && (actualRole === 'owner' || (actualRole === 'specialist' && !!doctor?.name?.includes('جمال')));
   const [questions, setQuestions] = useState<Question[]>([]);
   const [posts, setPosts] = useState<SpecialistPost[]>([]);
   const [diary, setDiary] = useState<{ id: string; title: string | null; body: string; created_at: string }[]>([]);
