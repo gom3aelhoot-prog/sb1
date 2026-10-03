@@ -205,17 +205,6 @@ export function Header() {
 
             {mobileSection === 'main' && (
               <div className="p-4 space-y-1">
-                {/* Search */}
-                <div className="relative mb-4">
-                  <input
-                    type="text"
-                    placeholder={t.nav.search}
-                    onKeyDown={(e)=>{if(e.key==='Enter'){const v=e.currentTarget.value.trim();window.location.href='/search'+(v?'?q='+encodeURIComponent(v):'');setMobileOpen(false);}}}
-                    className="w-full rounded-xl border border-neutral-200 bg-neutral-50 py-3 ps-10 pe-4 text-sm placeholder:text-neutral-400 focus:border-primary-400 focus:bg-white focus:outline-none"
-                  />
-                  <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-                </div>
-
                 {/* Nav links */}
                 {navItems.map((item) => (
                   <a
