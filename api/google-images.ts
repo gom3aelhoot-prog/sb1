@@ -1,6 +1,16 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+type QueryValue = string | string[] | undefined;
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+interface RequestLike {
+  method?: string;
+  query: Record<string, QueryValue>;
+}
+
+interface ResponseLike {
+  status(code: number): ResponseLike;
+  json(body: unknown): unknown;
+}
+
+export default async function handler(req: RequestLike, res: ResponseLike) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
   const apiKey = process.env.SERPER_API_KEY;
