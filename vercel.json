@@ -5,13 +5,63 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "crons": [
-    { "path": "/api/marketing/weekly-newsletter", "schedule": "0 9 * * 1" }
+    {
+      "path": "/api/marketing/weekly-newsletter",
+      "schedule": "0 9 * * 1"
+    }
   ],
   "rewrites": [
-    { "source": "/api/youtube-search", "destination": "/api/marketing/publish" },
-    { "source": "/api/google-images", "destination": "/api/social-search?provider=google-images" },
-    { "source": "/api/health", "destination": "/api/monitor" },
-    { "source": "/api/wallet-confirm", "destination": "/api/wallet-checkout?action=confirm" },
-    { "source": "/:path*", "destination": "/index.html" }
+    {
+      "source": "/api/youtube-search",
+      "destination": "/api/marketing?route=publish"
+    },
+    {
+      "source": "/api/google-images",
+      "destination": "/api/social-search?provider=google-images"
+    },
+    {
+      "source": "/api/health",
+      "destination": "/api/monitor"
+    },
+    {
+      "source": "/api/create-checkout",
+      "destination": "/api/payments?route=create"
+    },
+    {
+      "source": "/api/wallet-checkout",
+      "destination": "/api/payments?route=wallet"
+    },
+    {
+      "source": "/api/wallet-confirm",
+      "destination": "/api/payments?route=confirm"
+    },
+    {
+      "source": "/api/moderate-content",
+      "destination": "/api/admin?route=moderate"
+    },
+    {
+      "source": "/api/owner-provision-account",
+      "destination": "/api/admin?route=owner"
+    },
+    {
+      "source": "/api/affiliate/record-sale",
+      "destination": "/api/admin?route=affiliate"
+    },
+    {
+      "source": "/api/pinterest/callback",
+      "destination": "/api/admin?route=pinterest"
+    },
+    {
+      "source": "/api/marketing/publish",
+      "destination": "/api/marketing?route=publish"
+    },
+    {
+      "source": "/api/marketing/weekly-newsletter",
+      "destination": "/api/marketing?route=newsletter"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
+    }
   ]
 }
