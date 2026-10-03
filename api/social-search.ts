@@ -17,12 +17,28 @@ export default async function handler(req:any,res:any){
     }
     if(provider==='youtube'){
       const key=process.env.YOUTUBE_API_KEY;
-      if(!key) return res.status(503).json({error:'YOUTUBE_API_KEY is not configured'});
-      const u=new URL('https://www.googleapis.com/youtube/v3/search');
-      u.searchParams.set('part','snippet');u.searchParams.set('q',q);u.searchParams.set('type',String(req.query?.type||'video'));u.searchParams.set('maxResults','12');u.searchParams.set('key',key);
-      const r=await fetch(u);const d=await r.json();
-      if(!r.ok) return res.status(r.status).json({error:d?.error?.message||'YouTube API error'});
-      return res.status(200).json({items:(d.items||[]).map((x:any)=>({id:x.id?.videoId||x.id?.channelId||x.id?.playlistId,title:x.snippet?.title||'',description:x.snippet?.description||'',channelTitle:x.snippet?.channelTitle||'',publishedAt:x.snippet?.publishedAt||'',thumbnail:x.snippet?.thumbnails?.medium?.url||x.snippet?.thumbnails?.default?.url||'',kind:x.id?.kind||''}))});
+      if(key){
+        const u=new URL('https://www.googleapis.com/youtube/v3/search');
+        u.searchParams.set('part','snippet');u.searchParams.set('q',q);u.searchParams.set('type',String(req.query?.type||'video'));u.searchParams.set('maxResults','12');u.searchParams.set('key',key);
+        const r=await fetch(u);const d=await r.json();
+        if(r.ok) return res.status(200).json({items:(d.items||[]).map((x:any)=>({id:x.id?.videoId||x.id?.channelId||x.id?.playlistId,title:x.snippet?.title||'',description:x.snippet?.description||'',channelTitle:x.snippet?.channelTitle||'',publishedAt:x.snippet?.publishedAt||'',thumbnail:x.snippet?.thumbnails?.medium?.url||x.snippet?.thumbnails?.default?.url||'',kind:x.id?.kind||'',url:x.id?.videoId?'https://www.youtube.com/watch?v='+x.id.videoId:'',embedUrl:x.id?.videoId?'https://www.youtube.com/embed/'+x.id.videoId:''}))});
+      }
+      // Fallback: YouTube's public results page, so SB1 does not fail when the optional Data API key is absent.
+      const html=await (await fetch('https://www.youtube.com/results?search_query='+encodeURIComponent(q),{headers:{'User-Agent':'Mozilla/5.0'}})).text();
+      const marker='var ytInitialData = ';
+      const start=html.indexOf(marker);
+      if(start<0) return res.status(200).json({items:[],searchUrl:'https://www.youtube.com/results?search_query='+encodeURIComponent(q),notice:'YouTube Data API key is not configured; use the public YouTube results.'});
+      const end=html.indexOf(';</script>',start);
+      const raw=end>start?html.slice(start+marker.length,end):'';
+      let data:any=null; try{data=JSON.parse(raw)}catch{}
+      const items:any[]=[];
+      const walk=(node:any)=>{if(!node||items.length>=12)return;if(Array.isArray(node)){for(const x of node)walk(x);return}if(typeof node!=='object')return;
+        const r=node.videoRenderer;
+        if(r?.videoId&&!items.some(x=>x.id===r.videoId)) items.push({id:r.videoId,title:(r.title?.runs||[]).map((x:any)=>x.text).join(''),description:'',channelTitle:(r.ownerText?.runs||[]).map((x:any)=>x.text).join(''),publishedAt:'',thumbnail:r.thumbnail?.thumbnails?.slice(-1)[0]?.url||'',kind:'youtube#video',url:'https://www.youtube.com/watch?v='+r.videoId,embedUrl:'https://www.youtube.com/embed/'+r.videoId});
+        for(const k of Object.keys(node))walk(node[k]);
+      };
+      walk(data);
+      return res.status(200).json({items,searchUrl:'https://www.youtube.com/results?search_query='+encodeURIComponent(q)});
     }
     if(provider==='pinterest'){
       const token=process.env.PINTEREST_ACCESS_TOKEN, endpoint=process.env.PINTEREST_SEARCH_URL;
