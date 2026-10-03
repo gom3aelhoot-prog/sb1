@@ -186,6 +186,7 @@ export default function PageProfileTools({
   const hoverTimers=useRef<Record<string,number>>({});
   const viewedOnce=useRef<Set<string>>(new Set());
   const [openComments,setOpenComments]=useState<string|null>(null);
+  const [expandedPosts,setExpandedPosts]=useState<string[]>([]);
   const [notice,setNotice]=useState('');
   const [active,setActive]=useState('home');
   const [share,setShare]=useState<{title:string;url:string}|null>(null);
@@ -637,17 +638,17 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
             return <div key={post.id}>
               {breakBefore==='reels'&&<div className="my-4 rounded-xl border bg-white p-3"><ReelStrip stripId={"fb-reels-"+n}/></div>}
               {breakBefore==='stories'&&<div className="my-4 rounded-xl border bg-white p-3"><StoryStrip/></div>}
-              <article onMouseEnter={()=>startHoverView(post.id)} onMouseLeave={()=>stopHoverView(post.id)} className="mx-auto h-[720px] max-w-3xl overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm flex flex-col">
+              <article onMouseEnter={()=>startHoverView(post.id)} onMouseLeave={()=>stopHoverView(post.id)} className={'mx-auto '+(expandedPosts.includes(post.id)?'max-w-3xl':'h-[720px] max-w-3xl')+' overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm flex flex-col'}>
                 <div className="min-h-0 flex-1 overflow-hidden p-3">
                   <div className="flex items-center gap-3">
                     {post.authorPhoto?<img src={post.authorPhoto} alt={post.author} className="h-10 w-10 rounded-full object-cover"/>:<div className="grid h-10 w-10 place-items-center rounded-full bg-teal-100 font-extrabold text-teal-700">{post.author.charAt(0)}</div>}
                     <div className="flex-1"><b className="text-sm">{post.author}</b><div className="text-xs text-slate-400">{new Date(post.createdAt).toLocaleString()}</div></div>
                   </div>
-                  <div className="mt-3 max-h-32 overflow-hidden rounded-xl px-3 py-4 whitespace-pre-wrap leading-7 text-sm" style={post.style||{}}>{post.title&&<div className="mb-2 text-lg font-black leading-6">{post.title}</div>}{post.text&&<div>{post.text}</div>}</div>
+                  <div className={'mt-3 '+(expandedPosts.includes(post.id)?'':'max-h-32 overflow-hidden ')+'rounded-xl px-3 py-4 whitespace-pre-wrap leading-7 text-sm'} style={post.style||{}}>{post.title&&<div className="mb-2 text-lg font-black leading-6">{post.title}</div>}{post.text&&<div>{post.text}</div>}</div>
                   {post.mediaUrl&&post.kind==='image'&&canOpenPost(post)&&<>{(post as any).imageSequence?.length>1?<div className="flex max-h-[320px] gap-2 overflow-x-auto">{(post as any).imageSequence.map((u:string,i:number)=><img key={i} src={u} alt="" className="max-h-[280px] w-[82%] shrink-0 rounded-xl object-contain"/>)}</div>:<img src={post.mediaUrl} alt="" className="mx-auto mt-3 h-[320px] w-full max-w-xl rounded-xl object-contain bg-slate-50"/>}</>}
                   {post.mediaUrl&&(post.kind==='video'||post.kind==='reel')&&canOpenPost(post)&&<>{post.embedUrl?<iframe title="الفيديو المنشور" src={post.embedUrl} className="mx-auto mt-3 h-[320px] w-full max-w-2xl rounded-xl bg-black object-contain" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen/>:<video key={post.mediaUrl} src={post.mediaUrl} controls muted={Boolean((post as any).videoSettings?.muted)} playsInline loop={post.kind==='reel'} preload="auto" className="mx-auto mt-3 h-[320px] w-full max-w-2xl rounded-xl bg-black object-contain" onError={()=>setNotice('تعذر تشغيل ملف الفيديو. تأكد أن الملف محفوظ بصيغة MP4/WebM صالحة.')}/>}</>}
                   {post.mediaUrl&&post.kind==='audio'&&canOpenPost(post)&&<audio src={post.mediaUrl} controls className="mt-3 w-full"/>}
-                <div className="mt-2 flex justify-end"><button onClick={()=>setExternalViewer({id:post.id,title:post.title||post.text||'المنشور',source:post.author,image:post.mediaUrl,url:post.mediaUrl,embedUrl:post.embedUrl})} className="rounded-lg px-3 py-1 text-xs font-bold text-teal-700 hover:bg-teal-50">عرض المزيد ↗</button></div></div>
+                <div className="mt-2 flex justify-end"><button onClick={()=>setExpandedPosts(v=>v.includes(post.id)?v.filter(x=>x!==post.id):[...v,post.id])} className="rounded-lg px-3 py-1 text-xs font-bold text-teal-700 hover:bg-teal-50">{expandedPosts.includes(post.id)?'عرض أقل':'عرض المزيد'} ↗</button></div></div>
                 {post.isPaid&&!canOpenPost(post)&&<div className="mx-3 mb-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-bold text-amber-800">🔒 محتوى مدفوع — يظهر عنوانه للعامة، ولا يمكن فتحه إلا بعد الشراء.</div>}
                 <div className="flex items-center border-t border-teal-900 bg-teal-800 px-2 py-2 text-sm text-white">
                   <button onClick={()=>like(post.id)} className={'flex-1 rounded-lg py-2 transition '+(likedIds.includes(post.id)?'text-red-300':'text-white hover:bg-teal-700')}><Heart className="inline h-4 w-4 ml-1" fill={likedIds.includes(post.id)?'currentColor':'none'}/> {post.likes}</button>
