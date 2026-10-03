@@ -4,7 +4,6 @@
   "buildCommand":"npm run build",
   "outputDirectory":"dist",
   "installCommand":"npm install",
-  "crons":[{"path":"/api/router?job=publish-scheduled","schedule":"0 * * * *"}],
   "rewrites":[
     {"source":"/api/social-search","destination":"/api/router"},
     {"source":"/api/music-search","destination":"/api/router"},
