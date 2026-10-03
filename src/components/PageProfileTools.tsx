@@ -249,12 +249,13 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
   useEffect(()=>write('sb1_fb_social_favorites',favorites),[favorites]);
   useEffect(()=>write('sb1_fb_albums_'+pageId,albums),[albums,pageId]);
   useEffect(()=>write('sb1_fb_clones',clones),[clones]);
+  useEffect(()=>{const publishDue=()=>{const queued=read<any[]>('sb1_scheduled_posts_'+pageId,[]);if(!queued.length)return;const now=Date.now();const due=queued.filter((p:any)=>p.scheduledAt&&new Date(p.scheduledAt).getTime()<=now);if(!due.length)return;const dueIds=new Set(due.map((p:any)=>p.id));setFeed(v=>[...due.map((p:any)=>({...p,scheduledAt:undefined,createdAt:new Date().toISOString()})),...v.filter((p:any)=>!dueIds.has(p.id))]);write('sb1_scheduled_posts_'+pageId,queued.filter((p:any)=>!dueIds.has(p.id)));setNotice('✓ تم نشر المحتوى المجدول في موعده.');};publishDue();const t=window.setInterval(publishDue,10000);return()=>window.clearInterval(t)},[pageId]);
   useEffect(()=>{if(socialEmbedded!=='Pinterest')return;const id='sb1-pinterest-widget';if(document.getElementById(id))return;const s=document.createElement('script');s.id=id;s.async=true;s.defer=true;s.src='https://assets.pinterest.com/js/pinit.js';document.body.appendChild(s);return()=>{}},[socialEmbedded]);
   useEffect(()=>{if(postFile){const u=URL.createObjectURL(postFile);setPostUrl(u)}else setPostUrl('')},[postFile]);
   useEffect(()=>{if(storyFile){const u=URL.createObjectURL(storyFile);setStoryUrl(u)}else setStoryUrl('')},[storyFile]);
   useEffect(()=>()=>stream.current?.getTracks().forEach(t=>t.stop()),[]);
 
-  const publicFeed=feed.filter(p=>p.public&&(!onlyOwn||p.author===pageName));
+  const publicFeed=feed.filter(p=>p.public&&(!p.scheduledAt||new Date(p.scheduledAt).getTime()<=Date.now())&&(!onlyOwn||p.author===pageName));
   const canOpenPost=(p:FeedItem)=>!p.isPaid||p.purchased||localStorage.getItem('sb1_paid_'+p.id)==='1';
   const reels=publicFeed.filter(p=>p.kind==='reel');
   const activeStories=useMemo(()=>[
