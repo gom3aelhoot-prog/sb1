@@ -33,14 +33,14 @@ export default async function handler(req:any,res:any){
         return res.status(200).json({items:(x.data||[]).map((i:any)=>({id:i.id,name:i.title||'GIF',url:i.images?.original?.url||i.images?.fixed_height?.url,thumbnail:i.images?.fixed_width_small?.url||i.images?.fixed_height_small?.url,kind:'gif',source:'GIPHY'}))});
       }
       if(provider==='sticker'){
-        const key=process.env.GIPHY_API_KEY||process.env.GIPHY_KEY;
+        const key=process.env.GIPHY_API_KEY||process.env.GIPHY_KEY||'dc6zaTOxFJmzC';
         if(!key)throw new Error('GIPHY_API_KEY is not configured for Sticker search.');
         const r=await fetch('https://api.giphy.com/v1/stickers/search?api_key='+encodeURIComponent(key)+'&q='+encodeURIComponent(q||'stickers')+'&limit=50&rating=pg-13');const x=await r.json();if(!r.ok)throw new Error(x?.meta?.msg||'GIPHY sticker search failed');
         return res.status(200).json({items:(x.data||[]).map((i:any)=>({id:i.id,name:i.title||'Sticker',url:i.images?.original?.url||i.images?.fixed_height?.url,thumbnail:i.images?.fixed_width_small?.url||i.images?.fixed_height_small?.url,kind:'sticker',source:'GIPHY'}))});
       }
       return res.status(200).json({items:[]});
     }
-    if(path.endsWith('/library-sync')){
+    if(path.endsWith('/library-sync')||job==='library-sync'){
       const kind=url.searchParams.get('kind')||'image'; const pageId=url.searchParams.get('page_id')||'sb1';
       const sb=process.env.SUPABASE_URL||process.env.VITE_SUPABASE_URL; const service=process.env.SUPABASE_SERVICE_ROLE_KEY;
       if(!sb||!service) return res.status(503).json({error:'Supabase service role is not configured.'});
