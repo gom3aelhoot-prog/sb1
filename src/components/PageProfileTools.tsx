@@ -95,6 +95,7 @@ export default function PageProfileTools({
   hideStories?:boolean;
   focusSection?:'home'|'reels'|'albums'|'medical'|'social'|'phone'|'clone'|'settings';
   onlyOwn?:boolean;
+  canClonePage?:boolean;
 }) {
   const show=(section:string)=>focusSection===section;
   const initial = useMemo<FeedItem[]>(() => {
@@ -117,7 +118,7 @@ export default function PageProfileTools({
       text:p.body, mediaUrl:p.video_url||p.image_url||undefined, createdAt:p.created_at,
       likes:p.likes_count||0, views:120, comments:[], public:true, demo:false, author:pageName, authorPhoto:pageAvatar, isPaid:Boolean((p as any).is_paid||Number((p as any).price||0)>0), purchased:localStorage.getItem('sb1_paid_'+p.id)==='1'
     }));
-    const demo = Array.from({length:120},(_,i)=>{
+    const demo = Array.from({length:500},(_,i)=>{
       const kind=(i%4===0?'reel':i%5===0?'video':i%3===0?'image':'post') as MediaKind;
       return {
         id:'demo-'+i, kind,
@@ -581,6 +582,17 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
       {albums.filter(a=>a.public).map(a=><button key={a.id+'-'+stripId} onClick={()=>setAlbumViewer(a)} className="min-w-[118px] overflow-hidden rounded-xl border-2 border-indigo-400 bg-indigo-950 text-white text-right"><div className="relative aspect-[3/4] max-h-40 overflow-hidden">{a.items?.[0]?.mediaUrl&&a.items?.[0]?.kind==='image'?<img src={a.items[0].mediaUrl} alt="" className="absolute inset-0 h-full w-full object-cover"/>:<div className="absolute inset-0 grid place-items-center text-3xl">📁</div>}<span className="absolute top-2 right-2 h-7 w-7 overflow-hidden rounded-full border-2 border-white"><img src={pageAvatar} alt="" className="h-full w-full object-cover"/></span><span className="absolute bottom-2 right-2 rounded bg-black/70 px-2 py-1 text-[10px] font-bold">ألبوم · {a.name}</span></div></button>)}
     </div>
   </div>;
+  const feedBreakBefore=(n:number):'reels'|'stories'|null=>{
+    const fixed:Record<number,'reels'|'stories'>={4:'reels',24:'reels',27:'stories',47:'reels',50:'stories',100:'reels',103:'stories',153:'reels',156:'reels',159:'reels'};
+    if(fixed[n]) return fixed[n];
+    if(n>=209){
+      const d=n-209;
+      if(d%53===0) return 'reels';
+      if(d%53===3) return 'stories';
+    }
+    return null;
+  };
+
   const sectionButton=(key:string,label:string,Icon:any)=>
     <button key={key} onClick={()=>jump(key)} className={'shrink-0 rounded-lg px-3 py-2 text-sm font-bold transition active:bg-slate-200 '+(active===key?'bg-teal-700 text-white':'text-slate-700 hover:bg-teal-50')}>{Icon&&<Icon className="inline h-4 w-4 ml-1"/>}{label}</button>;
 
@@ -604,12 +616,13 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
           </div>
         </div>}
 
-        <div className="rounded-xl border bg-white p-3"><ReelStrip stripId="fb-reels"/></div>
         <div id="fb-posts" className="space-y-4">
           {publicFeed.map((post,i)=>{
             const n=i+1;
-            const showStories=false;
+            const breakBefore=feedBreakBefore(n);
             return <div key={post.id}>
+              {breakBefore==='reels'&&<div className="my-4 rounded-xl border bg-white p-3"><ReelStrip stripId={"fb-reels-"+n}/></div>}
+              {breakBefore==='stories'&&<div className="my-4 rounded-xl border bg-white p-3"><StoryStrip/></div>}
               <article onMouseEnter={()=>startHoverView(post.id)} onMouseLeave={()=>stopHoverView(post.id)} className="mx-auto max-w-3xl overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm">
                 <div className="p-3">
                   <div className="flex items-center gap-3">
@@ -631,9 +644,18 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
                   <button onClick={()=>setAlbumPicker(post)} className="rounded-lg px-3 py-2 text-white hover:bg-teal-700 active:bg-teal-900" aria-label="إضافة إلى ألبوم"><Album className="inline h-4 w-4"/></button>
                 </div>
               </article>
-                            {showStories&&<div className="my-2 border-y-2 border-black py-2"><div className="text-xs font-bold text-teal-700 mb-2">القصص</div><div className="flex gap-3 overflow-x-auto pb-1">{activeStories.map(s=><button key={s.id+'-mid'} onClick={()=>setStoryViewer(s)} className="min-w-[104px] overflow-hidden rounded-xl bg-white"><div className="h-28 overflow-hidden bg-slate-900">{s.mediaUrl?(s.mediaKind==='video'?<video src={s.mediaUrl} muted playsInline className="h-full w-full object-cover" onMouseEnter={e=>startHoverView(s.id,e.currentTarget)} onMouseLeave={e=>stopHoverView(s.id,e.currentTarget)}/>:<img src={s.mediaUrl} alt="" className="h-full w-full object-cover" onMouseEnter={()=>startHoverView(s.id)} onMouseLeave={()=>stopHoverView(s.id)}/>):<span className="p-3 text-xs font-bold">{s.text}</span>}</div></button>)}</div></div>}
-            </div>
+                          </div>
           })}
+          {publicFeed.length>0&&(()=>{
+            const endBreak=feedBreakBefore(publicFeed.length+1);
+            return <>
+              {endBreak==='reels'&&<div className="my-4 rounded-xl border bg-white p-3"><ReelStrip stripId={"fb-reels-end-"+publicFeed.length}/></div>}
+              {endBreak==='stories'&&<div className="my-4 rounded-xl border bg-white p-3"><StoryStrip/></div>}
+            </>;
+          })()}
+        </div>
+        <div className="flex justify-center py-8">
+          <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} className="rounded-xl border border-teal-200 bg-teal-50 px-6 py-3 text-sm font-extrabold text-teal-700 shadow-sm hover:bg-teal-100">↑ الانتقال إلى أعلى الصفحة</button>
         </div>
       </div>
 
@@ -698,7 +720,7 @@ socialEmbedded==='Google Search' ? <div className="bg-white p-4"><iframe title="
 </div>}
     </section>) }
 
-    {canManage&&show('clone')&&(<section id="fb-clone" className="rounded-xl border bg-white p-5 shadow-sm">
+    {canClonePage&&show('clone')&&(<section id="fb-clone" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">Clone / Gift</h2><p className="text-xs text-slate-500">ينسخ نوع الحساب والعدد فقط، ثم يمكن تغيير الاسم والصلاحيات.</p></div><Wand2 className="text-teal-700"/></div>
       <div className="grid gap-3 md:grid-cols-4"><select value={cloneType} onChange={e=>setCloneType(e.target.value)} className="rounded-xl border p-3"><option value="client">عميل</option><option value="institution">مؤسسة</option><option value="specialist">أخصائي</option><option value="delivery_worker">عامل توصيل</option><option value="service">خدمات أخرى</option><option value="admin">إداري</option></select><input type="number" min={1} max={50} value={cloneCount} onChange={e=>setCloneCount(Number(e.target.value))} className="rounded-xl border p-3"/><input value={cloneName} onChange={e=>setCloneName(e.target.value)} className="rounded-xl border p-3" placeholder="اسم الصفحة"/><input type="date" value={cloneExpiry} onChange={e=>setCloneExpiry(e.target.value)} className="rounded-xl border p-3"/></div>
       <div className="mt-4 rounded-xl border bg-slate-50 p-4"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><b>صلاحيات الصفحة المستنسخة — اختر فقط ما تسمح به</b><div className="flex gap-2"><button onClick={()=>setClonePermissions(allPermissionKeys)} className="rounded-lg bg-teal-700 px-3 py-1 text-xs font-bold text-white">تفعيل الكل</button><button onClick={()=>setClonePermissions([])} className="rounded-lg bg-white px-3 py-1 text-xs font-bold">إلغاء الكل</button></div></div>
