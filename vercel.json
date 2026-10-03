@@ -1,35 +1,17 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "vite",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "installCommand": "npm install",
-  "crons": [
-    {
-      "path": "/api/marketing/weekly-newsletter",
-      "schedule": "0 9 * * 1"
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/social-search",
-      "destination": "/api/social-search.ts"
-    },
-    {
-      "source": "/api/music-search",
-      "destination": "/api/music-search.ts"
-    },
-    {
-      "source": "/api/media-library",
-      "destination": "/api/media-library.ts"
-    },
-    {
-      "source": "/api/youtube-search",
-      "destination": "/api/marketing/publish"
-    },
-    {
-      "source": "/:path*",
-      "destination": "/index.html"
-    }
+  "$schema":"https://openapi.vercel.sh/vercel.json",
+  "framework":"vite",
+  "buildCommand":"npm run build",
+  "outputDirectory":"dist",
+  "installCommand":"npm install",
+  "crons":[{"path":"/api/router?job=publish-scheduled","schedule":"0 * * * *"}],
+  "rewrites":[
+    {"source":"/api/social-search","destination":"/api/router"},
+    {"source":"/api/music-search","destination":"/api/router"},
+    {"source":"/api/media-library","destination":"/api/router"},
+    {"source":"/api/youtube-search","destination":"/api/router"},
+    {"source":"/api/health","destination":"/api/router"},
+    {"source":"/api/monitor","destination":"/api/router"},
+    {"source":"/:path*","destination":"/index.html"}
   ]
 }
