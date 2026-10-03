@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Award, BookOpen, CalendarClock, CalendarDays, Copy, ExternalLink, FileText, GraduationCap, Heart, Home, Library, MessageCircle, Phone, Settings, Share2, Smartphone, Video, Wallet, Bell, Bookmark, X, Coins } from 'lucide-react';
+import { Award, BookOpen, CalendarClock, CalendarDays, Copy, ExternalLink, FileText, GraduationCap, Heart, Home, Library, MessageCircle, Phone, Settings, Share2, Smartphone, Video, Wallet, Bell, Bookmark, X, Coins, Wand2 } from 'lucide-react';
 import PageProfileTools from '@/components/PageProfileTools';
 import FavoritesPage from '@/pages/FavoritesPage';
 import { getFollowing, isFollowing, toggleFollowing } from '@/lib/socialVault';
