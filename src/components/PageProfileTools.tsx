@@ -335,6 +335,7 @@ export default function PageProfileTools({
     if(provider==='Pinterest'){setSocialEmbedded('Pinterest');setSocialUrl('https://www.pinterest.com/search/pins/?q='+encodeURIComponent(q));return;}
     if(provider==='Yandex Search'){setSocialEmbedded('Yandex Search');setSocialUrl('https://yandex.com/search/?text='+encodeURIComponent(q));return;}
     if(provider==='OK'){setSocialEmbedded('OK');setSocialUrl('https://ok.ru/search/content?st.query='+encodeURIComponent(q));return;}
+    if(provider==='Rutube'){setSocialEmbedded('Rutube');setSocialUrl('https://rutube.ru/search/?query='+encodeURIComponent(q));return;}
     if(provider==='Google Search'){setSocialEmbedded(provider);setSocialUrl('https://www.google.com/search?igu=1&q='+encodeURIComponent(q));return;}
     setSocialEmbedded(provider);
   };
