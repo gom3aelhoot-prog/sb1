@@ -49,8 +49,10 @@ export default function DoctorProfilePage({ id }: { id: string }) {
   const accountUserId = typeof window !== 'undefined' ? localStorage.getItem('sb1_account_user_id') : null;
   const pageOwnerId = typeof window !== 'undefined' ? localStorage.getItem('sb1_page_owner_id') : null;
   const isAccountOwner = !previewRole && !!accountUserId && accountUserId === id;
+  const isStoredPageOwner = !previewRole && !!pageOwnerId && pageOwnerId === id;
+  const isOwnerRole = !previewRole && (actualRole === 'owner' || role === 'owner');
   const isModerator = !previewRole && actualRole === 'moderator';
-  const canManagePage = isAccountOwner || isModerator;
+  const canManagePage = isAccountOwner || isStoredPageOwner || isOwnerRole || isModerator;
   const canSeePrivate = canManagePage;
   const publicSettings=(()=>{try{return JSON.parse(localStorage.getItem('sb1_page_settings_'+id)||'{}')}catch{return {}}})();
   const { t, specialtyName, lang } = useI18n();
