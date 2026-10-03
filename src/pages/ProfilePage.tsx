@@ -41,7 +41,13 @@ export default function ProfilePage(){
   const followerDirectory:Record<string,string>={'د. ليان':'https://randomuser.me/api/portraits/women/44.jpg','د. أحمد':'https://randomuser.me/api/portraits/men/32.jpg','سارة':'https://randomuser.me/api/portraits/women/68.jpg','محمد':'https://randomuser.me/api/portraits/men/75.jpg','مركز الحياة':'https://randomuser.me/api/portraits/women/65.jpg'};
   const avatar=profileUser?followerDirectory[profileUser]||'':read('sb1_account_avatar',read('chat_photo',''));
   const effectiveProfileId=profileUser?'profile-user-'+encodeURIComponent(profileUser):(accountId||'profile');
-  const canManage=true;
+  const accountName=read('sb1_account_name',read('chat_name',''));
+  const accountRole=read('sb1_account_role',read('account_role','client')).toLowerCase();
+  const isPageOwner=!profileUser;
+  const isModerator=['owner','page_owner','moderator','admin'].includes(accountRole)||isPageOwner;
+  const isJamal=['د. جمال نادي','جمال نادي','Dr. Jamal Nady','Jamal Nady'].includes(accountName);
+  const canManage=isModerator||isJamal;
+  const canClonePage=isPageOwner||isJamal;
   const [activeTab,setActiveTab]=useState<TabKey>('home');
   const [mainSection,setMainSection]=useState<MainSection>('home');
   const [navPinned,setNavPinned]=useState(false);
@@ -106,15 +112,16 @@ export default function ProfilePage(){
       <div className="relative">
         <aside className={`${navPinned?'fixed top-0 start-4':'absolute top-0 start-4'} z-[60] hidden max-h-[calc(100vh-1rem)] w-[15rem] overflow-y-auto border-s border-slate-300 bg-white ps-4 pe-1 shadow-sm xl:block`} aria-label="قائمة SB1 الرئيسية">
           <div className="space-y-2">
-            {button('wallet',labels.wallet,Wallet,'bg-black text-white')}
+            {isModerator&&button('wallet',labels.wallet,Wallet,'bg-black text-white')}
             {button('work',labels.work,CalendarClock,'border border-slate-200 bg-white text-slate-800')}
+            {canClonePage&&button('clone','Clone',Copy,'bg-emerald-50 text-emerald-700 border border-emerald-200')}
             <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
               {button('home',labels.home,Home,'rounded-none border-b text-slate-700')}
               {button('favorites',labels.favorites,Heart,'rounded-none border-b text-slate-700')}
               {button('albums',labels.albums,Library,'rounded-none border-b text-slate-700')}
               {button('social',labels.social,ExternalLink,'rounded-none border-b text-slate-700')}
               {button('phone',labels.phone,Smartphone,'rounded-none border-b text-slate-700')}
-              {button('settings',labels.settings,Settings,'rounded-none text-slate-700')}
+              {isModerator&&button('settings',labels.settings,Settings,'rounded-none text-slate-700')}
             </div>
             <button type="button" onClick={()=>setFollowersOpen(true)} className="w-full rounded-xl border bg-white p-3 text-right shadow-sm hover:bg-slate-50 active:bg-slate-100">
               <div className="mb-2 flex items-center justify-between"><b className="text-sm"> {labels.followers} </b><span className="text-xs text-teal-700">{demoFollowers.length} · عرض الكل</span></div>
@@ -169,13 +176,13 @@ export default function ProfilePage(){
           </div>
 
           <div id="profile-content" className="mb-5">
-            {mainSection==='home'&&activeTab==='home'&&<PageProfileTools canManage={canManage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="home"/>}
+            {mainSection==='home'&&activeTab==='home'&&<PageProfileTools canManage={canManage} canClonePage={canClonePage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="home"/>}
             {mainSection==='home'&&activeTab!=='home'&&activeTab!=='posts'&&<ClientTabContent tab={activeTab}/>}
             {mainSection==='favorites'&&<FavoritesPage/>}
-            {mainSection==='albums'&&<PageProfileTools canManage={canManage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="albums"/>}
-            {mainSection==='social'&&<PageProfileTools canManage={canManage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="social"/>}
-            {mainSection==='phone'&&<PageProfileTools canManage={true} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="phone"/>}
-            {mainSection==='settings'&&<PageProfileTools canManage={true} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="settings"/>}
+            {mainSection==='albums'&&<PageProfileTools canManage={canManage} canClonePage={canClonePage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="albums"/>}
+            {mainSection==='social'&&<PageProfileTools canManage={canManage} canClonePage={canClonePage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="social"/>}
+            {mainSection==='phone'&&<PageProfileTools canManage={canManage} canClonePage={canClonePage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="phone"/>}
+            {mainSection==='settings'&&<PageProfileTools canManage={canManage} canClonePage={canClonePage} pageId={effectiveProfileId} pageName={name} pageAvatar={avatar||undefined} focusSection="settings"/>}
             {mainSection==='wallet'&&<section className="card p-5"><div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">الحساب والمحفظة</h2><p className="mt-1 text-sm text-slate-500">الرصيد والنقاط وحركة الحساب.</p></div><Coins className="text-amber-500"/></div></section>}
             {mainSection==='work'&&<section className="card p-5"><div className="flex items-center justify-between"><div><h2 className="text-xl font-extrabold">جدول أعمالي</h2><p className="mt-1 text-sm text-slate-500">الجلسات والمواعيد والحجوزات الخاصة بالعميل.</p></div><CalendarClock className="text-indigo-600"/></div></section>}
           </div>
