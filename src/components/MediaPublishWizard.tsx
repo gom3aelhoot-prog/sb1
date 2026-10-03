@@ -28,6 +28,9 @@ export default function MediaPublishWizard({open,onClose,onPublish,initialMedia,
    setLibraryKind(kind);setLibraryQuery(q);setLibraryLoading(true);
    if(kind==='emoji'){setLibrary([]);setLibraryLoading(false);return}
    try{
+     if(!q.trim() && kind!=='emoji'){
+       try{await fetch('/api/library-sync?kind='+encodeURIComponent(kind)+'&page_id='+encodeURIComponent(pageId));}catch{}
+     }
      if((kind==='image'||kind==='audio')&&q.trim()){
        const provider=kind==='image'?'google_images':'audio';const r=await fetch('/api/social-search?provider='+provider+'&q='+encodeURIComponent(q));const x=await r.json();
        if(!r.ok)throw new Error(x.error||'تعذر البحث');
