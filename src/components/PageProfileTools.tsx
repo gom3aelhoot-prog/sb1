@@ -9,9 +9,9 @@ import {
 } from 'lucide-react';
 
 type MediaKind = 'post' | 'image' | 'video' | 'reel' | 'audio' | 'article';
-type StoryItem = { id:string; name:string; text:string; mediaUrl?:string; mediaKind?:'image'|'video'|'gif'|'sticker'; audioUrl?:string; audioStart?:number; audioEnd?:number; mediaStart?:number; mediaEnd?:number; filter?:string; authorPhoto?:string; textStyle?:{color:string;fontSize:string;fontWeight:string}; createdAt:string; expiresAt:string; own?:boolean };
+type StoryItem = { id:string; name:string; text:string; imageSequence?:string[]; mediaUrl?:string; mediaKind?:'image'|'video'|'gif'|'sticker'; audioUrl?:string; audioStart?:number; audioEnd?:number; mediaStart?:number; mediaEnd?:number; filter?:string; authorPhoto?:string; textStyle?:{color:string;fontSize:string;fontWeight:string}; createdAt:string; expiresAt:string; own?:boolean };
 type FeedItem = {
-  id:string; kind:MediaKind; text:string; mediaUrl?:string; mediaName?:string;
+  id:string; kind:MediaKind; text:string; title?:string; mediaUrl?:string; mediaName?:string;
   createdAt:string; likes:number; views?:number; comments:{id:string;name:string;photo?:string;body:string}[];
   public:boolean; demo?:boolean; author:string; embedUrl?:string;
   style?:{background:string;color:string;fontSize:string;fontWeight:string;filter?:string};
@@ -135,6 +135,7 @@ export default function PageProfileTools({
   const [feed,setFeed]=useState<FeedItem[]>(initial);
   const [stories,setStories]=useState<StoryItem[]>(()=>read('sb1_fb_stories_'+pageId,[]));
   const [storyViewer,setStoryViewer]=useState<StoryItem|null>(null);
+  const [storyViewerIndex,setStoryViewerIndex]=useState(0);
   const [storyComposer,setStoryComposer]=useState(false);
   const [storyText,setStoryText]=useState('');
   const [storyFile,setStoryFile]=useState<File|null>(null);
@@ -361,12 +362,12 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
     if(video){finalMode=duration>180?'video':(p.mode==='reel'||p.mode==='story'||p.mode==='video'?p.mode:'video');}
     if(finalMode==='story'){
       if(video&&duration>20){setNotice('لا يمكن نشر هذا الفيديو كقصة لأن مدته 20 ثانية أو أكثر.');return}
-      const story:StoryItem={id:id(),name:'قصتي',text:p.text||'',mediaUrl:rawUrl||undefined,mediaKind:video?'video':'image',authorPhoto:pageAvatar,createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+86400000),own:true,audioUrl:p.audio?.url,audioStart:p.audioStart,audioEnd:p.audioEnd,filter:p.filter,textStyle:{color:p.textColor,fontSize:String(p.textSize),fontWeight:'700'}};
+      const story:StoryItem={id:id(),name:'قصتي',text:p.text||'',imageSequence:(p.media||[]).filter((x:any)=>x.kind==='image').map((x:any)=>x.url),mediaUrl:rawUrl||undefined,mediaKind:video?'video':'image',authorPhoto:pageAvatar,createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+86400000),own:true,audioUrl:p.audio?.url,audioStart:p.audioStart,audioEnd:p.audioEnd,filter:p.filter,textStyle:{color:p.textColor,fontSize:String(p.textSize),fontWeight:'700'}};
       setStories(v=>[story,...v]);setStoryViewer(story);setNotice('✓ تم نشر القصة بالإعدادات المحددة.');setComposer(false);setWizardInitialMedia(null);return;
     }
     const urls=(p.media||[]).filter((x:any)=>x.kind==='image').map((x:any)=>x.url);
     const scheduledAt=p.scheduledAt||'';
-    const item:FeedItem={id:id(),kind:finalMode,text:(p.title||p.text||'منشور جديد').trim(),mediaUrl:urls.length>1?urls.join('|'):rawUrl||embedUrl,embedUrl,mediaName:first?.name,createdAt:scheduledAt||new Date().toISOString(),likes:0,likedBy:[],comments:[],public:true,author:pageName,authorPhoto:pageAvatar,mediaStart:p.audioStart,mediaEnd:p.audioEnd,scheduledAt:scheduledAt||undefined,style:{background:p.background,color:p.textColor,fontSize:String(p.textSize),fontWeight:'700',filter:p.filter},videoSettings:video?{title:p.title,description:p.description,muted:p.muted,duration,target:finalMode as any,music:p.audio||null}:undefined,music:p.audio||undefined,imageSequence:urls.length>1?urls:undefined};
+    const item:FeedItem={id:id(),kind:finalMode,text:(p.text||'').trim()||(!p.title?'منشور جديد':''),title:(p.title||'').trim()||undefined,mediaUrl:urls.length>1?urls.join('|'):rawUrl||embedUrl,embedUrl,mediaName:first?.name,createdAt:scheduledAt||new Date().toISOString(),likes:0,likedBy:[],comments:[],public:true,author:pageName,authorPhoto:pageAvatar,mediaStart:p.audioStart,mediaEnd:p.audioEnd,scheduledAt:scheduledAt||undefined,style:{background:p.background,color:p.textColor,fontSize:String(p.textSize),fontWeight:'700',filter:p.filter},videoSettings:video?{title:p.title,description:p.description,muted:p.muted,duration,target:finalMode as any,music:p.audio||null}:undefined,music:p.audio||undefined,imageSequence:urls.length>1?urls:undefined};
     if(scheduledAt&&new Date(scheduledAt).getTime()>Date.now()){
       const queued=read<any[]>('sb1_scheduled_posts_'+pageId,[]); write('sb1_scheduled_posts_'+pageId,[item,...queued]);
       try{await supabase.from('sb1_scheduled_posts').insert({page_id:pageId,post_type:finalMode,body:item.text,media_url:item.mediaUrl||null,metadata:{embedUrl:item.embedUrl||null,style:item.style||null,videoSettings:item.videoSettings||null},scheduled_at:new Date(scheduledAt).toISOString()})}catch{}
@@ -635,7 +636,7 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
                     {post.authorPhoto?<img src={post.authorPhoto} alt={post.author} className="h-10 w-10 rounded-full object-cover"/>:<div className="grid h-10 w-10 place-items-center rounded-full bg-teal-100 font-extrabold text-teal-700">{post.author.charAt(0)}</div>}
                     <div className="flex-1"><b className="text-sm">{post.author}</b><div className="text-xs text-slate-400">{new Date(post.createdAt).toLocaleString()}</div></div>
                   </div>
-                  <div className="mt-3 rounded-xl px-3 py-4 whitespace-pre-wrap leading-7 text-sm" style={post.style||{}}>{post.text}</div>
+                  <div className="mt-3 rounded-xl px-3 py-4 whitespace-pre-wrap leading-7 text-sm" style={post.style||{}}>{post.title&&<div className="mb-2 text-lg font-black leading-6">{post.title}</div>}{post.text&&<div>{post.text}</div>}</div>
                   {post.mediaUrl&&post.kind==='image'&&canOpenPost(post)&&<>{(post as any).imageSequence?.length>1?<div className="flex gap-2 overflow-x-auto">{(post as any).imageSequence.map((u:string,i:number)=><img key={i} src={u} alt="" className="max-h-[280px] w-[82%] shrink-0 rounded-xl object-contain"/>)}</div>:<img src={post.mediaUrl} alt="" className="mx-auto mt-3 aspect-[4/5] h-[520px] w-full max-w-xl rounded-xl object-contain bg-slate-50"/>}</>}
                   {post.mediaUrl&&(post.kind==='video'||post.kind==='reel')&&canOpenPost(post)&&<>{post.embedUrl?<iframe title="الفيديو المنشور" src={post.embedUrl} className="mx-auto mt-3 aspect-[4/5] h-auto min-h-[320px] w-full max-w-2xl rounded-xl bg-black object-contain" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen/>:<video key={post.mediaUrl} src={post.mediaUrl} controls muted={Boolean((post as any).videoSettings?.muted)} playsInline loop={post.kind==='reel'} preload="auto" className="mx-auto mt-3 aspect-[4/5] max-h-[560px] w-full max-w-2xl rounded-xl bg-black object-contain" onError={()=>setNotice('تعذر تشغيل ملف الفيديو. تأكد أن الملف محفوظ بصيغة MP4/WebM صالحة.')}/>}</>}
                   {post.mediaUrl&&post.kind==='audio'&&canOpenPost(post)&&<audio src={post.mediaUrl} controls className="mt-3 w-full"/>}
