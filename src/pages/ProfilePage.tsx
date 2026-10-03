@@ -42,7 +42,7 @@ export default function ProfilePage(){
   const avatar=profileUser?followerDirectory[profileUser]||'':read('sb1_account_avatar',read('chat_photo',''));
   const effectiveProfileId=profileUser?'profile-user-'+encodeURIComponent(profileUser):(accountId||'profile');
   const accountRole=read('sb1_account_role','');
-  const isPageOwner=read('sb1_is_page_owner','')==='true' || accountRole==='owner';
+  const isPageOwner=read('sb1_is_page_owner','')==='true' || accountRole==='owner' || accountRole==='specialist';
   const canManage=isPageOwner;
   const canClone=isPageOwner || (accountRole==='specialist' && name.includes('جمال'));
   const [activeTab,setActiveTab]=useState<TabKey>('home');
