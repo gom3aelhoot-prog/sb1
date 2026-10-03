@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Menu,
   X,
-  Search,
   User,
   HeartPulse,
   LogIn,
@@ -42,7 +41,6 @@ export function Header() {
   const canSeePrivateHeader = role==='owner' || role==='moderator' || localStorage.getItem('sb1_is_page_owner')==='true';
   const isPrivate=(href:string)=>{if(['/dashboard'].includes(href))return ['client','owner'].includes(role);if(href.startsWith('/specialist'))return ['specialist','owner'].includes(role);if(href==='/delivery')return ['institution','delivery_worker','owner'].includes(role);if(href==='/complaints'||href==='/safety')return !['guest'].includes(role);if(href.startsWith('/owner')||href.startsWith('/admin'))return ['owner','moderator'].includes(role);return true};
   const [mobileSection, setMobileSection] = useState<'main' | 'specialties' | 'language'>('main');
-  const searchRef = useRef<HTMLInputElement>(null);
   const [authOpen,setAuthOpen]=useState(false);
   const [authMode,setAuthMode]=useState<'login'|'signup'>('login');
   const [authEmail,setAuthEmail]=useState('');
@@ -132,19 +130,6 @@ export function Header() {
 
             {/* Right actions */}
             <div className="flex items-center gap-2">
-              {/* Search (desktop) */}
-              <div className="hidden xl:flex relative">
-                <input
-                  ref={searchRef}
-                  type="text"
-                  placeholder={t.nav.search}
-                  onKeyDown={(e)=>{if(e.key==='Enter'){const v=e.currentTarget.value.trim();window.location.href='/search'+(v?'?q='+encodeURIComponent(v):'');}}}
-                  onFocus={()=>{}}
-                  className="w-56 rounded-xl border border-neutral-200 bg-neutral-50 py-2.5 ps-10 pe-4 text-sm text-neutral-900 placeholder:text-neutral-400 transition-all focus:border-primary-400 focus:bg-white focus:ring-2 focus:ring-primary-100 focus:outline-none"
-                />
-                <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-              </div>
-
               <LanguageSwitcher />
 
               {canSeePrivateHeader && <a href="/wallet" className="hidden sm:flex items-center gap-1.5 rounded-xl border border-teal-100 bg-teal-50 px-3 py-2 text-sm font-bold text-teal-700 hover:bg-teal-100" title="المحفظة">
@@ -183,15 +168,6 @@ export function Header() {
                 <Menu className="h-5 w-5" />
               </button>
             </div>
-          </div>
-        </div>
-        <div className="hidden lg:block border-t border-neutral-100">
-          <div className="container-x grid grid-cols-[repeat(11,minmax(0,1fr))] gap-1 py-1.5">
-            {platformSections.slice(0,11).map((item) => (
-              <a key={item.href} href={item.href} className="min-w-0 rounded-lg px-1 py-2 text-center text-[11px] font-bold leading-tight text-neutral-600 hover:bg-primary-50 hover:text-primary-700 transition-colors">
-                {item.label}
-              </a>
-            ))}
           </div>
         </div>
       </header>
