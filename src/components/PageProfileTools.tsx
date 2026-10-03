@@ -150,6 +150,7 @@ export default function PageProfileTools({
   const [phone,setPhone]=useState(()=>localStorage.getItem('sb1_private_phone')||'');
   const [phoneLinked,setPhoneLinked]=useState(()=>localStorage.getItem('sb1_phone_linked')==='true');
   const [pairCode]=useState(()=>read('sb1_pair_code_'+pageId,String(Math.floor(100000+Math.random()*900000))));
+  const [socialProvider,setSocialProvider]=useState('YouTube');
   const [socialSearch,setSocialSearch]=useState('');
   const [socialUrl,setSocialUrl]=useState('');
   const [socialOpen,setSocialOpen]=useState<string[]>([]);
@@ -318,7 +319,7 @@ export default function PageProfileTools({
   };
   const searchSocial=async()=>{
     const q=socialSearch.trim();
-    const provider=(document.getElementById('sb1-social-provider') as HTMLSelectElement|null)?.value||'YouTube';
+    const provider=socialProvider;
     if(!q){setNotice(provider==='Pinterest'?'ألصق رابط Pin هنا.':'اكتب كلمة البحث أو رابط المحتوى.');return;}
     if(provider==='YouTube'){
       if(/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//i.test(q)){
@@ -469,8 +470,8 @@ export default function PageProfileTools({
 
     {show('social') && (<section id="fb-social" className="rounded-xl border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-extrabold">منصات التواصل والمتصفح</h2><p className="text-xs text-slate-500">نستخدم فقط طرق العرض التي تسمح بها المنصة. يمكن حفظ المحتوى أو نشره أو إضافته إلى ألبوم.</p></div><ExternalLink className="text-teal-700"/></div>
-      <div className="grid gap-2 md:grid-cols-[180px_1fr_auto]"><select id="sb1-social-provider" className="rounded-xl border p-3 text-sm font-bold"><option>YouTube</option><option>Rutube</option><option>Pinterest</option><option>OK</option><option>Google Search</option><option>Yandex Search</option></select><input value={socialSearch} onChange={e=>setSocialSearch(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchSocial()} className="rounded-xl border p-3" placeholder="ابحث داخل المنصة..."/><button onClick={searchSocial} className="rounded-xl bg-teal-700 px-4 text-white" title="بحث"><Search/></button></div>
-      <div className="mt-3 flex flex-wrap gap-2">{[['YouTube','YouTube'],['Rutube','Rutube'],['Pinterest','Pinterest'],['OK','OK'],['Google Search','Google'],['Google Images','Google Images'],['Yandex Search','Yandex']].map(([n,l])=><button key={n} onClick={()=>{setSocialSearch('');setSocialEmbedded(n)}} title={'فتح '+l+' داخل SB1'} className={'rounded-lg border px-3 py-2 text-sm font-bold '+(socialEmbedded===n?'border-teal-600 bg-teal-50 text-teal-700':'')}>{l}</button>)}</div>
+      <div className="grid gap-2 md:grid-cols-[180px_1fr_auto]"><select id="sb1-social-provider" value={socialProvider} onChange={e=>setSocialProvider(e.target.value)} className="rounded-xl border p-3 text-sm font-bold"><option>YouTube</option><option>Rutube</option><option>Pinterest</option><option>OK</option><option>Google Search</option><option>Google Images</option><option>Yandex Search</option></select><input value={socialSearch} onChange={e=>setSocialSearch(e.target.value)} onKeyDown={e=>e.key==='Enter'&&searchSocial()} className="rounded-xl border p-3" placeholder="ابحث داخل المنصة..."/><button onClick={searchSocial} className="rounded-xl bg-teal-700 px-4 text-white" title="بحث"><Search/></button></div>
+      <div className="mt-3 flex flex-wrap gap-2">{[['YouTube','YouTube'],['Rutube','Rutube'],['Pinterest','Pinterest'],['OK','OK'],['Google Search','Google'],['Google Images','Google Images'],['Yandex Search','Yandex']].map(([n,l])=><button key={n} onClick={()=>{setSocialProvider(n);setSocialSearch('');setSocialEmbedded(n)}} title={'فتح '+l+' داخل SB1'} className={'rounded-lg border px-3 py-2 text-sm font-bold '+(socialEmbedded===n?'border-teal-600 bg-teal-50 text-teal-700':'')}>{l}</button>)}</div>
       {socialEmbedded==='Google Images'&&<div className="mt-4 rounded-2xl border bg-white p-4">
         <div className="mb-3 flex items-center justify-between"><b>Google Images</b><span className="text-xs text-slate-400">{googleImageResults.length} صورة</span></div>
         {googleImageResults.length===0?<div className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-400">استخدم البحث أعلاه للعثور على الصور.</div>:<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{googleImageResults.map((x:any,i:number)=><button key={x.imageUrl||i} onClick={()=>setGoogleImageSelected(x)} className="overflow-hidden rounded-xl border bg-white text-right"><img src={x.thumbnailUrl||x.imageUrl} className="aspect-square w-full object-cover" alt=""/><div className="truncate p-2 text-[10px] font-bold">{x.title||'صورة'}</div></button>)}</div>}
