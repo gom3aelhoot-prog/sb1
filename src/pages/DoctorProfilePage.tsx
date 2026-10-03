@@ -319,7 +319,6 @@ export default function DoctorProfilePage({ id }: { id: string }) {
     { key:'courses', label:lang==='ar'?'الدورات والكورسات':'Courses', icon:GraduationCap },
     { key:'certificates', label:lang==='ar'?'شهاداتي':'My Certificates', icon:Award },
     { key:'portfolio', label:lang==='ar'?'منشوراتي':'My Posts', icon:FileText },
-    { key:'diary', label:lang==='ar'?'مفكرتي':'My Diary', icon:CalendarDaysIcon },
   ];
 
   const publicTabSetting:Record<string,string>={certificates:'showCertificates',courses:'showCourses',articles:'showArticles',videos:'showVideos',recordings:'showRecordings',portfolio:'showPosts',diary:'showDiary'};
@@ -365,8 +364,9 @@ export default function DoctorProfilePage({ id }: { id: string }) {
             </div>
           </div>
         </aside>
-        <div className="min-w-0 xl:ps-[17rem]">
-        {/* Profile Header — keep the existing profile design; green cover removed as requested */}
+        <div className="min-w-0 xl:ms-[17rem]">
+        <StoryBar pageId={id} canManage={canManagePage} pageAvatar={profileAvatar} />
+        {/* Profile Header — keep the existing profile design; green cover removed as requested */
         <div className="card mb-2 border-teal-900 bg-teal-700 text-white">
           <div className="px-6 py-5">
             <div className="flex flex-col md:flex-row gap-4 mt-0 pt-4">
@@ -416,10 +416,14 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         </div>
         <div className="my-3 border-b-2 border-black" aria-hidden="true" />
 
-        <div className="mb-5 min-h-[58px] w-full"><div ref={profileTabsRef} id="profile-tabs" className={`${profileNavPinned ? "fixed inset-x-0 top-0 z-50" : "relative z-50"} w-full overflow-hidden border bg-white shadow-sm`}><div className="mx-auto max-w-6xl px-3 sm:px-5 lg:px-8"><div className="xl:ps-[17rem]"><div className="grid w-full grid-cols-10" dir={lang==='ar'?'rtl':'ltr'}>
-          {tabs.map((tab,i)=>{const Icon=tab.icon;const colors=['text-teal-600','text-rose-500','text-indigo-500','text-amber-500','text-sky-500','text-violet-500','text-emerald-500','text-blue-600'];return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key);setNotificationOpen(false);setTimeout(()=>document.getElementById('profile-content')?.scrollIntoView({behavior:'smooth',block:'start'}),0)}} className={`min-w-0 border-e px-0 py-1 text-[9px] font-bold leading-3 transition active:bg-slate-200 ${activeTab===tab.key?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`} title={tab.label}>
+        <div className="mb-5 min-h-[58px] w-full"><div ref={profileTabsRef} id="profile-tabs" className={`${profileNavPinned ? "fixed inset-x-0 top-0 z-50" : "relative z-50"} w-full overflow-hidden border bg-white shadow-sm`}><div className="mx-auto max-w-6xl px-3 sm:px-5 lg:px-8"><div className="xl:ms-[17rem]"><div className="grid w-full grid-cols-10" dir={lang==='ar'?'rtl':'ltr'}>
+          {tabs.map((tab,i)=>{const Icon=tab.icon;const colors=['text-teal-600','text-rose-500','text-indigo-500','text-amber-500','text-sky-500','text-violet-500','text-emerald-500','text-blue-600','text-emerald-600'];return <button key={tab.label+'-'+i} onClick={()=>{setMainSection('home');setActiveTab(tab.key);setNotificationOpen(false);setTimeout(()=>document.getElementById('profile-content')?.scrollIntoView({behavior:'smooth',block:'start'}),0)}} className={`min-w-0 border-e px-0 py-1 text-[9px] font-bold leading-3 transition active:bg-slate-200 ${activeTab===tab.key?'bg-teal-50 text-teal-800':'text-slate-600 hover:bg-slate-50'}`} title={tab.label}>
               <span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Icon className={`h-3 w-3 ${colors[i]}`}/><span className="break-words">{tab.label}</span></span>
             </button>})}
+          <button onClick={()=>{setUnreadNotifications(0);localStorage.setItem('sb1_unread_notifications','0');setNotificationOpen(v=>!v)}} className="relative min-w-0 px-0 py-1 text-[9px] font-bold leading-3 text-slate-600 hover:bg-slate-50" title="الإشعارات">
+            <span className="flex min-w-0 flex-col items-center justify-center gap-0.5 text-center"><Bell className="h-3 w-3 text-red-500"/><span>الإشعارات</span></span>
+            {unreadNotifications>0&&<span className="absolute right-1 top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-red-600 px-1 text-[8px] text-white">{unreadNotifications}</span>}
+          </button>
           </div></div></div></div></div>
         <div id="profile-content" className="mb-3"></div>
         {mainSection === 'home' && showFollowers && (
@@ -477,10 +481,10 @@ export default function DoctorProfilePage({ id }: { id: string }) {
         {walletLedger&&<div className="fixed inset-0 z-[220] grid place-items-center bg-black/60 p-4" onClick={()=>setWalletLedger(null)}><div className="w-full max-w-2xl max-h-[80vh] overflow-hidden rounded-2xl bg-white" onClick={e=>e.stopPropagation()}><div className="flex items-center justify-between border-b p-4"><b>{walletLedgerTitle}</b><button onClick={()=>setWalletLedger(null)}><X/></button></div><div className="max-h-[68vh] overflow-y-auto p-4 space-y-2">{walletLedger.length?walletLedger.map((x:any,i)=><div key={x.id||i} className="rounded-xl border bg-slate-50 p-3"><div className="flex items-center justify-between gap-3"><b>{x.reason}</b><strong>{x.value} {x.currency}</strong></div><div className="mt-1 text-xs text-slate-500">{x.source} · {x.created_at?new Date(x.created_at).toLocaleString():''}</div>{x.severity&&<div className="mt-1 text-xs text-red-600">العقوبة: {x.severity} · النقاط: {Math.abs(x.points||0)}</div>}</div>):<p className="py-10 text-center text-slate-500">لا توجد عمليات مسجلة لهذا النوع في النظام.</p>}</div></div></div>}
         {mainSection === 'favorites' && <FavoritesPage />}
         {mainSection === 'home' && activeTab === 'home' && (
-          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="home" />
+          <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} hideStories focusSection="home" />
         )}
-        {mainSection === 'albums' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="albums" />}
-        {mainSection === 'social' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="social" />}
+        {mainSection === 'albums' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} hideStories focusSection="albums" />}
+        {mainSection === 'social' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} hideStories focusSection="social" />}
         {mainSection === 'phone' && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="phone" />}
         {mainSection === 'settings' && canManagePage && <PageProfileTools canManage={canManagePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="settings" />}
         {mainSection === 'clone' && canClonePage && <PageProfileTools canManage={canClonePage} pageId={id} pageName={doctor.name} pageAvatar={profileAvatar} seedPosts={posts} focusSection="clone" />}
