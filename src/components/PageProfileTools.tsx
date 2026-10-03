@@ -84,7 +84,7 @@ function GoogleImagesSearch({query,results,googleImageSearched,onSearch,onOpen,o
 }
 
 export default function PageProfileTools({
-  canManage=false, pageId='current', pageName='SB1', pageAvatar,
+  canManage=false, canClonePage=false, pageId='current', pageName='SB1', pageAvatar,
   seedPosts=[], hideStories=false, focusSection='home', onlyOwn=false
 }:{
   canManage?:boolean;
