@@ -543,7 +543,7 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
   const makeClones=()=>{if(!clonePermissions.length){setNotice('اختر صلاحية واحدة على الأقل أو اضغط تفعيل الكل.');return}
     const count=Math.min(50,Math.max(1,Number(cloneCount)||1));
     const permissions=[...clonePermissions];
-    const next=Array.from({length:count},(_,i)=>({id:id(),type:cloneType,name:(cloneName.trim()||'صفحة '+cloneType)+(count>1?' '+(i+1):''),pin:String(1000+Math.floor(Math.random()*9000)),password:Math.random().toString(36).slice(2,10),link:window.location.origin+'/clone/'+id(),expires:cloneExpiry,permissions,createdAt:new Date().toISOString()}));
+    const next=Array.from({length:count},(_,i)=>{const cloneId=id();return {id:cloneId,type:cloneType,name:(cloneName.trim()||'صفحة '+cloneType)+(count>1?' '+(i+1):''),pin:String(1000+Math.floor(Math.random()*9000)),password:Math.random().toString(36).slice(2,10),link:window.location.origin+'/clone/'+cloneId,expires:cloneExpiry,permissions,createdAt:new Date().toISOString()};});
     setClones(v=>[...next,...v]);setNotice('تم إنشاء الصفحات المستنسخة بالصلاحيات المحددة.');
   };
 
