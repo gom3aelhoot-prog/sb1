@@ -358,10 +358,10 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
     const embedUrl=first?.embedUrl;
     const duration=Number(first?.duration||videoDuration||0);
     let finalMode=p.mode as MediaKind;
-    if(video){finalMode=duration<20?'story':duration<180?(p.mode==='video'?'video':'reel'):'video'}
+    if(video){finalMode=duration>180?'video':(p.mode==='reel'||p.mode==='story'||p.mode==='video'?p.mode:'video');}
     if(finalMode==='story'){
-      if(video&&duration>=20){setNotice('لا يمكن نشر هذا الفيديو كقصة لأن مدته 20 ثانية أو أكثر.');return}
-      const story:StoryItem={id:id(),name:'قصتي',text:p.title||p.text||'قصة',mediaUrl:rawUrl||undefined,mediaKind:video?'video':'image',authorPhoto:pageAvatar,createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+86400000),own:true,audioUrl:p.audio?.url,audioStart:p.audioStart,audioEnd:p.audioEnd,filter:p.filter,textStyle:{color:p.textColor,fontSize:String(p.textSize),fontWeight:'700'}};
+      if(video&&duration>20){setNotice('لا يمكن نشر هذا الفيديو كقصة لأن مدته 20 ثانية أو أكثر.');return}
+      const story:StoryItem={id:id(),name:'قصتي',text:p.text||'',mediaUrl:rawUrl||undefined,mediaKind:video?'video':'image',authorPhoto:pageAvatar,createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+86400000),own:true,audioUrl:p.audio?.url,audioStart:p.audioStart,audioEnd:p.audioEnd,filter:p.filter,textStyle:{color:p.textColor,fontSize:String(p.textSize),fontWeight:'700'}};
       setStories(v=>[story,...v]);setStoryViewer(story);setNotice('✓ تم نشر القصة بالإعدادات المحددة.');setComposer(false);setWizardInitialMedia(null);return;
     }
     const urls=(p.media||[]).filter((x:any)=>x.kind==='image').map((x:any)=>x.url);
@@ -371,7 +371,7 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
       const queued=read<any[]>('sb1_scheduled_posts_'+pageId,[]); write('sb1_scheduled_posts_'+pageId,[item,...queued]);
       try{await supabase.from('sb1_scheduled_posts').insert({page_id:pageId,post_type:finalMode,body:item.text,media_url:item.mediaUrl||null,metadata:{embedUrl:item.embedUrl||null,style:item.style||null,videoSettings:item.videoSettings||null},scheduled_at:new Date(scheduledAt).toISOString()})}catch{}
       setNotice('✓ تمت جدولة المحتوى للموعد المحدد.');
-    }else{setFeed(v=>[item,...v]);setNotice('✓ تم النشر بنجاح بعد اكتمال جميع المراحل.');}
+    }else{setFeed(v=>[item,...v]);write('sb1_fb_posts_'+pageId,[item,...read<FeedItem[]>('sb1_fb_posts_'+pageId,[])]);setNotice('✓ تم النشر بنجاح بعد اكتمال جميع المراحل.');}
     setComposer(false);setWizardInitialMedia(null);
   };
 
