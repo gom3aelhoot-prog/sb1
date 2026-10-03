@@ -255,6 +255,7 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
 
   const publicFeed=feed.filter(p=>p.public&&(!onlyOwn||p.author===pageName));
   const canOpenPost=(p:FeedItem)=>!p.isPaid||p.purchased||localStorage.getItem('sb1_paid_'+p.id)==='1';
+  const hideStories=false;
   const reels=publicFeed.filter(p=>p.kind==='reel');
   const activeStories=useMemo(()=>[
     ...stories.filter(s=>new Date(s.expiresAt)>new Date()),
