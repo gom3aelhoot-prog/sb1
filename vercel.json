@@ -9,6 +9,7 @@
   ],
   "rewrites": [
     { "source": "/api/youtube-search", "destination": "/api/marketing/publish" },
+    { "source": "/api/google-images", "destination": "/api/social-search?provider=google-images" },
     { "source": "/:path*", "destination": "/index.html" }
   ]
 }
