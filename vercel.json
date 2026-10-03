@@ -10,6 +10,8 @@
   "rewrites": [
     { "source": "/api/youtube-search", "destination": "/api/marketing/publish" },
     { "source": "/api/google-images", "destination": "/api/social-search?provider=google-images" },
+    { "source": "/api/health", "destination": "/api/monitor" },
+    { "source": "/api/wallet-confirm", "destination": "/api/wallet-checkout?action=confirm" },
     { "source": "/:path*", "destination": "/index.html" }
   ]
 }
