@@ -30,21 +30,16 @@ export default function MediaPublishWizard({open,onClose,onPublish,initialMedia,
    setLibraryKind(kind);setLibraryQuery(q);setLibraryLoading(true);
    if(kind==='emoji'){setLibrary([]);setLibraryLoading(false);return}
    try{
-     if((kind==='image'||kind==='audio'||kind==='gif'||kind==='sticker')&&q.trim()){
-       const provider=kind==='image'?(librarySource==='pixabay'?'pixabay_images':'google_images'):kind;const r=await fetch('/api/social-search?provider='+provider+'&q='+encodeURIComponent(q));const x=await r.json();
-       if(!r.ok)throw new Error(x.error||'تعذر البحث');
-       setLibrary((x.items||[]).map((i:any)=>({id:String(i.id),name:i.title||'محتوى',url:i.image||i.url,thumbnail:i.thumbnail||i.image,kind:kind==='audio'?'audio':'image',source:i.source||provider,duration:Number(i.duration||0)})));
-     }else{
-       if(kind==='gif'||kind==='sticker'){
-         const r=await fetch('/api/social-search?provider='+kind+'&q='+encodeURIComponent(q||kind));const x=await r.json();if(!r.ok)throw new Error(x.error||'تعذر البحث');
-         setLibrary((x.items||[]).map((i:any)=>({id:String(i.id),name:i.title||i.name||kind,url:i.url,thumbnail:i.thumbnail||i.url,kind,source:i.source||kind})));return;
-       }
-       const dbKind=kind==='audio'?'music':kind;let query=supabase.from('sb1_creator_library').select('id,name,url,thumbnail_url,kind,source,metadata').eq('page_id','sb1').eq('kind',dbKind).limit(2000);
-       if(q.trim())query=query.or('name.ilike.%'+q+'%,source.ilike.%'+q+'%');
-       const {data,error}=await query;if(error)throw error;
-       setLibrary((data||[]).map((x:any)=>({id:x.id,name:x.name,url:x.url,thumbnail:x.thumbnail_url,kind:kind==='audio'?'audio':kind,source:x.source,duration:Number(x.metadata?.duration||0),embedUrl:x.metadata?.embedUrl})));
-     }
-   }catch{setLibrary([]);setNotice('تعذر تحميل المكتبة. تأكد من اتصال قاعدة البيانات ومصدر المحتوى.')}
+     const term=q.trim()||(kind==='image'?'nature':kind==='audio'?'music':kind);
+     const provider=kind==='image'?(librarySource==='pixabay'?'pixabay_images':'google_images'):kind;
+     const r=await fetch('/api/social-search?provider='+provider+'&q='+encodeURIComponent(term));
+     const x=await r.json();
+     if(!r.ok)throw new Error(x.error||'تعذر البحث');
+     setLibrary((x.items||[]).map((i:any)=>({
+       id:String(i.id),name:i.title||i.name||'محتوى',url:i.image||i.url,thumbnail:i.thumbnail||i.image||i.url,
+       kind:kind==='audio'?'audio':kind,source:i.source||provider,duration:Number(i.duration||0),embedUrl:i.embedUrl
+     })));
+   }catch{setLibrary([]);setNotice('تعذر تحميل المكتبة. حاول البحث بكلمة أخرى أو تحقق من مصدر المحتوى.')}
    finally{setLibraryLoading(false)}
  };
  const choose=(a:Asset)=>{if(a.kind==='audio'){setAudio(a);setAudioStart(0);setAudioEnd(a.duration||0)}else if(a.kind==='image'){setMedia(v=>[...v,a].slice(0,12));}else setMedia(v=>[a,...v.filter(x=>x.kind!==a.kind)].slice(0,12));setLibraryKind(null)};
