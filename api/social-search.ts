@@ -25,12 +25,9 @@ export default async function handler(req:any,res:any){
       return res.status(200).json({items:(d.items||[]).map((x:any)=>({id:x.id?.videoId||x.id?.channelId||x.id?.playlistId,title:x.snippet?.title||'',description:x.snippet?.description||'',channelTitle:x.snippet?.channelTitle||'',publishedAt:x.snippet?.publishedAt||'',thumbnail:x.snippet?.thumbnails?.medium?.url||x.snippet?.thumbnails?.default?.url||'',kind:x.id?.kind||''}))});
     }
     if(provider==='pinterest'){
-      const cookieHeader=String(req.headers?.cookie||'');
-      const cookieMatch=cookieHeader.match(/(?:^|;\\s*)sb1_pinterest_access_token=([^;]+)/);
-      const token=process.env.PINTEREST_ACCESS_TOKEN||((cookieMatch&&decodeURIComponent(cookieMatch[1]))||'');
-      const endpoint=process.env.PINTEREST_SEARCH_URL||'https://api.pinterest.com/v5/search/pins';
-      if(!token) return res.status(401).json({error:'Pinterest is not connected to this account'});
-      const u=new URL(endpoint);u.searchParams.set('query',q);u.searchParams.set('page_size','24');
+      const token=process.env.PINTEREST_ACCESS_TOKEN, endpoint=process.env.PINTEREST_SEARCH_URL;
+      if(!token||!endpoint) return res.status(503).json({error:'Pinterest API is not configured'});
+      const u=new URL(endpoint);u.searchParams.set('q',q);u.searchParams.set('page_size','24');
       const r=await fetch(u,{headers:{Authorization:'Bearer '+token,Accept:'application/json'}});const d=await r.json();
       if(!r.ok) return res.status(r.status).json({error:d?.message||'Pinterest API error'});
       return res.status(200).json({items:(d.items||[]).map((x:any)=>({id:x.id,title:x.title||x.alt_text||'',description:x.description||'',image:x.media?.images?.['1200x']?.url||x.media?.images?.['600x']?.url||x.media?.images?.['400x300']?.url||'',url:x.link||'https://www.pinterest.com/pin/'+x.id+'/',author:x.board_owner?.username||''}))});
