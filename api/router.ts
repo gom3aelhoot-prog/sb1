@@ -18,6 +18,13 @@ export default async function handler(req:any,res:any){
         if(serper){const r=await fetch('https://google.serper.dev/images',{method:'POST',headers:{'X-API-KEY':serper,'Content-Type':'application/json'},body:JSON.stringify({q,num:40,safe:'active'})});const x=await r.json();if(!r.ok)throw new Error(x?.message||'Serper Google Images returned an invalid response');return res.status(200).json({items:(x.images||[]).map((i:any)=>({id:i.imageUrl||i.link,title:i.title||q,image:i.imageUrl||i.thumbnailUrl,thumbnail:i.thumbnailUrl||i.imageUrl,url:i.link||i.imageUrl,source:i.source||'Google Images'}))});}
         const r=await fetch('https://api.openverse.org/v1/images/?q='+encodeURIComponent(q)+'&page_size=40');if(!r.ok)throw new Error('Google Images search unavailable: configure SERPER_API_KEY.');const x=await r.json();return res.status(200).json({items:(x.results||[]).map((i:any)=>({id:i.id||i.foreign_landing_url,image:i.thumbnail||i.url,thumbnail:i.thumbnail||i.url,title:i.title||q,source:i.creator||i.provider||'Openverse',url:i.foreign_landing_url||i.url}))});
       }
+      if(provider==='pixabay_images'){
+        const key=process.env.PIXABAY_API_KEY;
+        if(!key)throw new Error('PIXABAY_API_KEY is not configured.');
+        const r=await fetch('https://pixabay.com/api/?key='+encodeURIComponent(key)+'&q='+encodeURIComponent(q)+'&image_type=all&safesearch=true&per_page=40');
+        const x=await r.json(); if(!r.ok)throw new Error(x?.error||'Pixabay image search failed');
+        return res.status(200).json({items:(x.hits||[]).map((i:any)=>({id:'pixabay-'+i.id,title:i.tags||'Pixabay',image:i.webformatURL||i.largeImageURL,thumbnail:i.previewURL||i.webformatURL,url:i.pageURL,source:'Pixabay',license:'Pixabay Content License'}))});
+      }
       if(provider==='audio'){const r=await fetch('https://api.openverse.org/v1/audio/?q='+encodeURIComponent(q)+'&page_size=40');if(!r.ok)throw new Error('Audio search unavailable');const x=await r.json();return res.status(200).json({items:(x.results||[]).map((i:any)=>({id:i.id||i.foreign_landing_url,title:i.title||q,url:i.url,thumbnail:i.thumbnail||'',source:i.creator||i.provider||'Openverse',kind:'audio',duration:Number(i.duration||0)}))});}
       if(provider==='gif'){
         const key=process.env.GIPHY_API_KEY||process.env.GIPHY_KEY;
