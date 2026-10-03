@@ -42,21 +42,21 @@ export default async function handler(req:any,res:any){
     }
     if(provider==='pinterest'){
       const token=process.env.PINTEREST_ACCESS_TOKEN, endpoint=process.env.PINTEREST_SEARCH_URL;
-      if(!token||!endpoint) return res.status(503).json({error:'Pinterest API is not configured'});
+      if(!token||!endpoint) return res.status(200).json({items:[],searchUrl:'https://www.pinterest.com/search/pins/?q='+encodeURIComponent(q),notice:'Pinterest API is not configured; using the public Pinterest search page.'});
       const u=new URL(endpoint);u.searchParams.set('q',q);u.searchParams.set('page_size','24');
       const r=await fetch(u,{headers:{Authorization:'Bearer '+token,Accept:'application/json'}});const d=await r.json();
       if(!r.ok) return res.status(r.status).json({error:d?.message||'Pinterest API error'});
       return res.status(200).json({items:(d.items||[]).map((x:any)=>({id:x.id,title:x.title||x.alt_text||'',description:x.description||'',image:x.media?.images?.['1200x']?.url||x.media?.images?.['600x']?.url||x.media?.images?.['400x300']?.url||'',url:x.link||'https://www.pinterest.com/pin/'+x.id+'/',author:x.board_owner?.username||''}))});
     }
     if(provider==='rutube'){
-      const endpoint=process.env.RUTUBE_SEARCH_URL;if(!endpoint)return res.status(503).json({error:'Rutube API is not configured'});
+      const endpoint=process.env.RUTUBE_SEARCH_URL;if(!endpoint)return res.status(200).json({items:[],searchUrl:'https://rutube.ru/search/?query='+encodeURIComponent(q),notice:'Rutube API is not configured; using the public Rutube search page.'});
       const u=new URL(endpoint);u.searchParams.set('query',q);u.searchParams.set('limit','24');
       const r=await fetch(u,{headers:{Accept:'application/json'}});const d=await r.json();if(!r.ok)return res.status(r.status).json({error:d?.message||'Rutube API error'});
       const rows=Array.isArray(d)?d:(d.results||d.items||[]);
       return res.status(200).json({items:rows.map((x:any)=>({id:x.id||x.video_id||x.pk,title:x.title||x.name||'',description:x.description||'',thumbnail:x.thumbnail_url||x.thumbnail||x.cover_url||'',url:x.url||x.webpage_url||'',author:x.author?.name||x.author||''}))});
     }
     if(provider==='ok'){
-      const endpoint=process.env.OK_SEARCH_URL;if(!endpoint)return res.status(503).json({error:'OK API is not configured'});
+      const endpoint=process.env.OK_SEARCH_URL;if(!endpoint)return res.status(200).json({items:[],searchUrl:'https://ok.ru/search/content?st.query='+encodeURIComponent(q),notice:'OK API is not configured; using the public OK search page.'});
       const u=new URL(endpoint);u.searchParams.set('query',q);u.searchParams.set('limit','24');
       const r=await fetch(u,{headers:{Accept:'application/json'}});const d=await r.json();if(!r.ok)return res.status(r.status).json({error:d?.error_msg||d?.message||'OK API error'});
       const rows=Array.isArray(d)?d:(d.results||d.items||[]);
@@ -64,7 +64,7 @@ export default async function handler(req:any,res:any){
     }
     if(provider==='yandex'){
       const endpoint=process.env.YANDEX_SEARCH_URL, token=process.env.YANDEX_SEARCH_TOKEN;
-      if(!endpoint||!token)return res.status(503).json({error:'Yandex Search API is not configured'});
+      if(!endpoint||!token)return res.status(200).json({items:[],searchUrl:'https://yandex.com/search/?text='+encodeURIComponent(q),notice:'Yandex API is not configured; using the public Yandex search page.'});
       const u=new URL(endpoint);u.searchParams.set('text',q);u.searchParams.set('limit','24');
       const r=await fetch(u,{headers:{Authorization:'Bearer '+token,Accept:'application/json'}});const d=await r.json();if(!r.ok)return res.status(r.status).json({error:d?.message||'Yandex API error'});
       const rows=d?.results||d?.items||d?.sites||[];
