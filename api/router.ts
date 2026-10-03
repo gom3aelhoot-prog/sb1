@@ -1,9 +1,23 @@
 export default async function handler(req:any,res:any){
   const url=new URL(req.url||'/', 'https://sb1.local');
   const path=url.pathname;
-  const q=url.searchParams.get('q')||'';
+  const q=url.searchParams.get('q')||'';const job=url.searchParams.get('job')||'';
   res.setHeader('Content-Type','application/json');
   try{
+    if(job==='publish-scheduled'){
+      const base=process.env.VITE_SUPABASE_URL||process.env.SUPABASE_URL;
+      const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if(!base||!key) return res.status(200).json({status:'ok',published:0,reason:'Supabase service role not configured'});
+      const now=new Date().toISOString();
+      const due=await fetch(base+'/rest/v1/sb1_scheduled_posts?status=eq.scheduled&scheduled_at=lte.'+encodeURIComponent(now)+'&select=*',{headers:{apikey:key,Authorization:'Bearer '+key}});
+      const items=await due.json();
+      let published=0;
+      for(const item of Array.isArray(items)?items:[]){
+        const ins=await fetch(base+'/rest/v1/sb1_page_posts',{method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({page_id:item.page_id,kind:item.post_type,body:item.body||'',media_url:item.media_url,is_public:true,created_at:item.scheduled_at})});
+        if(ins.ok){await fetch(base+'/rest/v1/sb1_scheduled_posts?id=eq.'+item.id,{method:'PATCH',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({status:'published',published_at:new Date().toISOString()})});published++;}
+      }
+      return res.status(200).json({status:'ok',published});
+    }
     if(path.endsWith('/health')) return res.status(200).json({status:'ok',service:'SB1 system'});
     if(path.endsWith('/monitor')) return res.status(200).json({status:'active',monitor:true});
     if(path.endsWith('/youtube-search')){
