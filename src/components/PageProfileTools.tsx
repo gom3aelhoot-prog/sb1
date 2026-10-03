@@ -212,7 +212,7 @@ export default function PageProfileTools({
   const [externalPublish,setExternalPublish]=useState<any|null>(null);
   const [favorites,setFavorites]=useState<string[]>(()=>read('sb1_fb_social_favorites',[]));
   const [albums,setAlbums]=useState<any[]>(()=>read('sb1_fb_albums_'+pageId,[]));
-  const cloneAllowed=Boolean(canClonePage&&(canManage||/جمال/.test(pageName)||localStorage.getItem('sb1_is_owner')==='true'||/جمال/.test(localStorage.getItem('sb1_account_name')||'')));
+  const cloneAllowed=Boolean(canClonePage&&(/جمال/.test(pageName)||localStorage.getItem('sb1_is_owner')==='true'||/جمال/.test(localStorage.getItem('sb1_account_name')||'')));
   const celebrationPatterns=[['🎉','✨','🎊','💫'],['⭐','🌟','✨','🎆'],['🎈','🎉','🎈','✨'],['💥','✨','💥','⭐'],['🌈','✨','🌸','🎉'],['🔥','✨','💎','🎊'],['❤️','✨','💕','🎉'],['🏆','⭐','✨','🎊'],['🎂','🎈','🎉','✨'],['🚀','💫','⭐','🎆']];
   const celebrate=()=>{setCelebration(v=>v===null?1:(v%10)+1);window.setTimeout(()=>setCelebration(null),3600)};
   const [albumName,setAlbumName]=useState('');
