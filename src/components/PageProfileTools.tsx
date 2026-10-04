@@ -3,7 +3,7 @@ import { toggleSaved, getSaved } from '@/lib/socialVault';
 import MediaPublishWizard from './MediaPublishWizard';
 import { supabase } from '@/lib/supabase';
 import {
-  Album, AudioLines, BookOpen, CheckCircle2, ExternalLink, FileVideo, Gift, Heart,
+  Album, AudioLines, BookOpen, CheckCircle2, ExternalLink, FileVideo, Gift, Heart, Home, CalendarDays, FileText, CircleHelp, Video, Mic2, GraduationCap, Award, LayoutList,
   Image as ImageIcon, Library, MessageCircle, Mic, Plus, QrCode, Search, Send, Eye,
   Settings, Share2, Trash2, Upload, Video, X, Wand2, Bookmark, Smile, Sticker, Film
 } from 'lucide-react';
@@ -600,9 +600,16 @@ const emojis=Array.from(new Set([...emojiBase,...emojiBase.map((e,i)=>e+(i%3===0
   };
 
   const sectionButton=(key:string,label:string,Icon:any)=>
-    <button key={key} onClick={()=>jump(key)} className={'shrink-0 rounded-lg px-3 py-2 text-sm font-bold transition active:bg-slate-200 '+(active===key?'bg-teal-700 text-white':'text-slate-700 hover:bg-teal-50')}>{Icon&&<Icon className="inline h-4 w-4 ml-1"/>}{label}</button>;
+    <button key={key} onClick={()=>jump(key)} className={'flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-extrabold whitespace-nowrap transition '+(active===key?'bg-teal-700 text-white shadow-sm':'text-slate-700 hover:bg-teal-50')}>{Icon&&<Icon className="h-4 w-4"/>}<span>{label}</span></button>;
+  const mainProfileNav=[
+    ['home','الرئيسية',Home],['sessions','جلساتي',CalendarDays],['articles','مقالتي',FileText],['questions','الأسئلة',CircleHelp],
+    ['videos','فيديوهاتي',Video],['recordings','تسجيلاتي',Mic2],['courses','الدورات والكورسات',GraduationCap],['certificates','شهاداتي',Award],['posts','منشوراتي',LayoutList]
+  ];
 
-  return <div dir="rtl" className="mt-4 space-y-4">
+  return <div dir="rtl" className="mt-0 space-y-3">
+    <nav aria-label="القائمة الرئيسية للملف" className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white px-1.5 py-1.5 shadow-sm">
+      <div className="flex min-w-max items-center justify-start gap-1">{mainProfileNav.map(([key,label,Icon])=>sectionButton(key as string,label as string,Icon))}</div>
+    </nav>
     {show('home') && (<section id="fb-home" className="grid min-w-0 grid-cols-1 gap-4 overflow-hidden">
       <div className="space-y-4">
         {/* ترتيب الرئيسية: القصص ثم إنشاء المنشور ثم شريط Reels واحد ثم الـFeed */}
