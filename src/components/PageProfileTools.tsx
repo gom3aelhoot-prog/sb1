@@ -19,7 +19,7 @@ type FeedItem = {
   likedBy?:{name:string;photo?:string}[];
   videoSettings?:{title?:string;description?:string;muted?:boolean;duration?:number;target?:'story'|'reel'|'video';music?:any;transitions?:string[];effects?:string[];audioVolume?:number}; scheduledAt?:string;
   music?:any;
-  imageSequence?:string[]; imageLayout:'grid'|'twoTopRestBottom'|'largeLeftTwoRight'|'largeTopRestBottom'|'oneLargeThreeSmall'|'mosaic'|'firstLargeRestGrid'|'twoLargeRestStrip'|'spotlight'|'collage';
+  imageSequence?:string[]; imageLayout?:'grid'|'twoTopRestBottom'|'largeLeftTwoRight'|'largeTopRestBottom'|'oneLargeThreeSmall'|'mosaic'|'firstLargeRestGrid'|'twoLargeRestStrip'|'spotlight'|'collage';
 };
 
 const read = <T,>(key:string, fallback:T):T => {
