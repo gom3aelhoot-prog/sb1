@@ -1,7 +1,6 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {X,Upload,Search,Play,Pause,Volume2,VolumeX,Image as ImageIcon,Music2,Smile,Sticker,Film,FileText,SlidersHorizontal,CalendarClock,Check,ChevronLeft,ChevronRight,Sparkles,Wand2,Album,Bookmark} from 'lucide-react';
 import {supabase} from '@/lib/supabase';
-import {getSaved} from '@/lib/socialVault';
 
 type Mode='post'|'image'|'video'|'reel'|'story';
 type ImageLayout='grid'|'twoTopRestBottom'|'largeLeftTwoRight'|'largeTopRestBottom'|'oneLargeThreeSmall'|'mosaic'|'firstLargeRestGrid'|'twoLargeRestStrip'|'spotlight'|'collage';
